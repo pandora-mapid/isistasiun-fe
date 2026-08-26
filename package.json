@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "playwright test",
-    "test:style": "playwright test tests/map-style.spec.ts"
+    "test:style": "playwright test tests/map-style.spec.ts",
+    "test:visual": "VISUAL=1 playwright test tests/kamera.visual.spec.ts tests/basemap-compare.visual.spec.ts"
   },
   "dependencies": {
     "maplibre-gl": "^6.6.0",

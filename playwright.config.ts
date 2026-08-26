@@ -11,9 +11,11 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./tests",
-  // Pembanding basemap itu alat bantu visual, bukan tes lolos/gagal — jalankan
-  // manual: npx playwright test tests/basemap-compare.spec.ts
-  testIgnore: ["**/basemap-compare.spec.ts"],
+  // Berkas `*.visual.spec.ts` adalah alat bantu penghasil tangkapan layar,
+  // bukan tes lolos/gagal — dikeluarkan dari `npm test` karena selalu lolos
+  // dan lambat. Argumen CLI tidak bisa menimpa `testIgnore`, jadi disaring
+  // lewat env var: `npm run test:visual`.
+  testIgnore: process.env.VISUAL ? [] : ["**/*.visual.spec.ts"],
   fullyParallel: false,
   reporter: [["list"]],
   timeout: 60_000,

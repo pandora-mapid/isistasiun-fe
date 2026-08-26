@@ -13,7 +13,9 @@
 
 Roadmap ini menetapkan **urutan kerja**, bukan jadwal. Tidak ada tanggal di sini — yang diatur adalah apa yang harus selesai sebelum apa, supaya tidak ada kerja yang terbuang karena dikerjakan terlalu dini.
 
-Kondisi sekarang: lima halaman sudah jadi sebagai **mockup statis**. Peta di halaman `/peta` masih SVG palsu. Seluruh angka masih data contoh. Belum ada koneksi ke backend.
+Kondisi sekarang (**Fase 0 selesai**): halaman `/peta` sudah menampilkan peta MapLibre sungguhan di atas basemap OpenFreeMap Liberty, dengan titik pengamatan dan isochrone yang tergambar dari data contoh di `public/mock/`, filter kawasan tangkapan yang berfungsi, dan kontrol kamera 3D. Empat halaman lain masih mockup statis. Seluruh angka masih data contoh. Belum ada koneksi ke backend.
+
+**Berikutnya: Fase 1 (§3)** — menyambungkan interaksi yang sudah ada di UI ke peta dan ke data, masih memakai data contoh.
 
 Tujuan roadmap ini: membawa proyek dari **mockup statis** menjadi **WebGIS yang berfungsi**, tanpa pernah terblokir menunggu pihak lain.
 
@@ -62,8 +64,9 @@ Karena semuanya pekerjaan visual, semuanya aman dikerjakan di jeda tanpa menggan
 | 0.6 | Render isochrone, dengan filter 3 / 5 / 10 menit yang berfungsi |
 | 0.7 | Pastikan seluruh overlay yang sudah ada (navbar, panel kanan, legenda, panel slot waktu) tetap duduk rapi di atas kanvas peta |
 | 0.8 | Kumpulkan seluruh definisi gaya peta ke satu berkas terpisah |
+| 0.9 | Kontrol kamera: compass ber-umpan-balik kemiringan (klik = ratakan ke 2D di tempat) dan batas kemiringan 60° |
 
-> **Catatan basemap:** basemap GEO MAPID belum dipastikan menyediakan tile vektor untuk MapLibre. Sementara ini dipakai tile demo bawaan MapLibre — gratis, tanpa API key — dan **ditandai jelas di kode sebagai sementara**. Menukarnya nanti hanya mengubah satu URL.
+> **Catatan basemap:** basemap GEO MAPID belum dipastikan menyediakan tile vektor untuk MapLibre. Sementara ini dipakai **OpenFreeMap Liberty** — gratis, tanpa API key, menampilkan POI kawasan, dan punya bangunan 3D — **ditandai jelas di kode sebagai sementara**. Menukarnya nanti hanya mengubah satu URL, tapi periksa ulang font glyph-nya (lihat `LABEL_FONT`).
 
 > **Catatan data contoh:** bentuknya mengikuti tebakan terbaik dari `DATA_CONTRACT.md` Bagian B. Kalau backend menjawab dengan bentuk berbeda, yang berubah hanya lapisan pembacaan data — bukan kode peta.
 

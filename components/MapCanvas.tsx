@@ -11,6 +11,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import {
   resolveBasemapUrl,
+  CAMERA,
   FIT_PADDING,
   INITIAL_VIEW,
   LAYER,
@@ -127,6 +128,9 @@ export function MapCanvas({ catchmentMinutes }: Props) {
       center: INITIAL_VIEW.center,
       zoom: INITIAL_VIEW.zoom,
       attributionControl: { compact: true },
+      // Di atas 60 derajat pandangan mulai menatap cakrawala dan peta jadi
+      // sulit dibaca — sekaligus membuat kendali kemiringan terasa liar.
+      maxPitch: CAMERA.maxPitch,
     });
     mapRef.current = map;
 
@@ -139,7 +143,18 @@ export function MapCanvas({ catchmentMinutes }: Props) {
     // Dipasang SEBELUM kerja async apa pun, supaya event tidak keburu lewat.
     const styleReady = styleReadyPromise(map);
 
-    map.addControl(new NavigationControl({ showCompass: false }), "top-left");
+    // Compass ditampilkan dengan `visualizePitch` supaya arah DAN kemiringan
+    // terlihat, bukan ditebak.
+    //
+    // `visualizePitch` juga mengubah perilaku kliknya: MapLibre memanggil
+    // `resetNorthPitch()` alih-alih `resetNorth()`, sehingga sekali klik
+    // meratakan bearing DAN pitch ke nol tanpa memindahkan pusat peta. Itulah
+    // sebabnya tidak ada tombol "ratakan" buatan sendiri — compass sudah
+    // melakukannya persis.
+    map.addControl(
+      new NavigationControl({ showCompass: true, visualizePitch: true }),
+      "top-left",
+    );
 
     // MapLibre melaporkan kegagalan style/tile lewat event ini. Tanpa
     // pendengar, kegagalannya hanya muncul di console dan peta diam membisu.
@@ -148,6 +163,7 @@ export function MapCanvas({ catchmentMinutes }: Props) {
       lastMapError = event.error?.message ?? "Peta melaporkan kesalahan";
       console.error("[MapCanvas]", event.error);
     });
+
 
     let cancelled = false;
 
@@ -224,6 +240,8 @@ export function MapCanvas({ catchmentMinutes }: Props) {
     };
   }, []);
 
+
+
   // --- filter isochrone mengikuti pilihan kawasan tangkapan ---------------
   useEffect(() => {
     const map = mapRef.current;
@@ -248,13 +266,16 @@ export function MapCanvas({ catchmentMinutes }: Props) {
   return (
     <div style={{ position: "absolute", inset: 0 }}>
       <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
+
+
       {notice && (
         <div
           className="glass"
           style={{
+            // Digeser ke kanan supaya tidak menutupi kolom kontrol peta.
             position: "absolute",
-            left: 24,
-            top: 24,
+            left: 60,
+            top: 14,
             maxWidth: 420,
             padding: "12px 16px",
             fontSize: 12,

@@ -12,14 +12,15 @@
  * dipastikan apakah GEO MAPID menyediakan tile vektor yang bisa dikonsumsi
  * MapLibre (lihat DATA_CONTRACT.md Bagian D).
  *
- * CARTO Positron dipakai sementara karena gratis, tanpa API key, dan skema
- * abu-abunya paling dekat dengan bahasa desain Isi Stasiun — basemap OSM
- * standar yang berwarna-warni akan bertabrakan dengan palet slate/biru.
+ * OpenFreeMap Liberty dipilih setelah membandingkan empat kandidat: gratis,
+ * tanpa API key, menampilkan POI kawasan (warung, apotek, masjid, halte) yang
+ * justru merupakan subjek analisis ini, dan punya layer `building-3d` sehingga
+ * bangunan terekstrusi saat peta dimiringkan.
  *
  * Menukarnya nanti cukup mengganti URL di bawah ini.
  */
 export const BASEMAP_STYLE_URL =
-  "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+  "https://tiles.openfreemap.org/styles/liberty";
 
 /**
  * Pilihan basemap yang sudah diperiksa: gratis, tanpa API key, dan bisa
@@ -98,3 +99,21 @@ export const INITIAL_VIEW = {
 
 /** Kecepatan jalan kaki isochrone: 4,8 km/jam = 80 m/menit (ROADMAP §7). */
 export const CATCHMENT_MINUTES = [3, 5, 10] as const;
+
+/**
+ * Batasan dan gerak kamera.
+ *
+ * Peta ini alat membandingkan angka, bukan pertunjukan. Dalam tampilan miring,
+ * objek yang jauh tampak lebih kecil daripada yang dekat — sehingga besar
+ * lingkaran tidak lagi bisa dibandingkan secara adil. Karena itu kemiringan
+ * dibatasi, dan compass bawaan MapLibre (dengan `visualizePitch`) selalu
+ * tersedia untuk meratakan kembali ke pandangan tegak lurus tanpa kehilangan
+ * posisi — sekali klik.
+ */
+export const CAMERA = {
+  /**
+   * Kemiringan maksimum. Bawaan MapLibre 60; di atas itu pandangan mulai
+   * menatap cakrawala dan peta jadi sulit dibaca.
+   */
+  maxPitch: 60,
+} as const;

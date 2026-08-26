@@ -40,6 +40,20 @@ export const GAP_RADIUS = { min: 7, max: 22 } as const;
 /** Warna titik yang sampelnya tipis — tidak diestimasi, jadi netral. */
 export const THIN_SAMPLE_COLOR = "#94A3B8";
 
+/**
+ * Font untuk label titik.
+ *
+ * Wajib diisi eksplisit. Bawaan MapLibre adalah "Open Sans Regular", dan
+ * basemap OpenFreeMap tidak menyediakannya — permintaan glyph-nya 404 dan
+ * seluruh label hilang diam-diam tanpa pesan error. "Noto Sans Regular" ada
+ * pada Liberty maupun basemap CARTO, jadi aman untuk keempat pilihan di
+ * `BASEMAP_CHOICES`.
+ *
+ * Kalau basemap diganti ke GEO MAPID nanti, periksa ulang font apa yang
+ * disediakan endpoint glyph-nya.
+ */
+export const LABEL_FONT = ["Noto Sans Regular"];
+
 /** Warna isochrone, makin dekat makin pekat. */
 export const ISOCHRONE_COLOR = "#2563EB";
 export const ISOCHRONE_FILL_OPACITY: Record<number, number> = {
@@ -197,6 +211,7 @@ export function pointLabelLayer(): SymbolLayerSpecification {
     minzoom: 13.5,
     layout: {
       "text-field": ["get", "point_label"],
+      "text-font": LABEL_FONT,
       "text-size": 11,
       "text-offset": [0, 1.6],
       "text-anchor": "top",
