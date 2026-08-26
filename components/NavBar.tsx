@@ -16,6 +16,67 @@ const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
   { key: "rekomendasi", href: "/rekomendasi", label: "Rekomendasi" },
 ];
 
+/** Brand mark ("IS" square + wordmark) — shared by both nav variants so the
+ * two look identical wherever the nav appears. */
+function Brand() {
+  return (
+    <div className="row" style={{ gap: 10, marginRight: 8 }}>
+      <span
+        style={{
+          width: 22,
+          height: 22,
+          borderRadius: 12,
+          background: "#1D4ED8",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          font: "800 11px/1 var(--font-inter)",
+          color: "#fff",
+        }}
+      >
+        IS
+      </span>
+      <span
+        style={{
+          font: "800 16px/1 var(--font-inter)",
+          letterSpacing: "-.01em",
+        }}
+      >
+        Isi Stasiun
+      </span>
+    </div>
+  );
+}
+
+/** The 5 route pills with the active/inactive treatment — shared by both nav
+ * variants so the active state looks identical wherever the nav appears. */
+function NavLinks({ active }: { active: NavKey }) {
+  return (
+    <div className="row" style={{ gap: 4, marginRight: "auto" }}>
+      {NAV_ITEMS.map((item) => {
+        const isActive = item.key === active;
+        return (
+          <Link
+            key={item.key}
+            href={item.href}
+            aria-current={isActive ? "page" : undefined}
+            className="pill"
+            style={{
+              padding: "8px 14px",
+              fontSize: 13,
+              fontWeight: isActive ? 600 : 400,
+              background: isActive ? "rgba(29,78,216,.1)" : "transparent",
+              color: isActive ? "#1D4ED8" : "#475569",
+            }}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 /** Border-bottom nav row used on the content pages (Beranda, Insight,
  * Metodologi, Rekomendasi). `cta` is the page-specific action button. */
 export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
@@ -28,59 +89,17 @@ export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
         borderBottom: "1px solid rgba(15,23,42,.1)",
       }}
     >
-      <div className="row" style={{ gap: 10, marginRight: 8 }}>
-        <span
-          style={{
-            width: 22,
-            height: 22,
-            borderRadius: 12,
-            background: "#1D4ED8",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            font: "800 11px/1 var(--font-inter)",
-            color: "#fff",
-          }}
-        >
-          IS
-        </span>
-        <span
-          style={{
-            font: "800 16px/1 var(--font-inter)",
-            letterSpacing: "-.01em",
-          }}
-        >
-          Isi Stasiun
-        </span>
-      </div>
-      <div className="row" style={{ gap: 4, marginRight: "auto" }}>
-        {NAV_ITEMS.map((item) => {
-          const isActive = item.key === active;
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              aria-current={isActive ? "page" : undefined}
-              className="pill"
-              style={{
-                padding: "8px 14px",
-                fontSize: 13,
-                fontWeight: isActive ? 600 : 400,
-                background: isActive ? "rgba(29,78,216,.1)" : "transparent",
-                color: isActive ? "#1D4ED8" : "#475569",
-              }}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </div>
+      <Brand />
+      <NavLinks active={active} />
       {cta}
     </div>
   );
 }
 
-/** Floating glass-pill nav overlaying the map on the Peta screen. */
+/** Floating glass-pill nav overlaying the map on the Peta screen. Same brand
+ * mark and nav-link treatment as `NavBar` (only the container floats instead
+ * of sitting in a bordered row, since the map beneath it is full-bleed), plus
+ * the Peta-specific survey tag and actions. */
 export function FloatingNavBar({
   active,
   onCompare,
@@ -106,54 +125,8 @@ export function FloatingNavBar({
         zIndex: 20,
       }}
     >
-      <div
-        style={{
-          alignSelf: "stretch",
-          display: "flex",
-          alignItems: "center",
-          marginRight: 8,
-        }}
-      >
-        <span
-          style={{
-            font: "600 17px/1 var(--font-inter)",
-            letterSpacing: "-.01em",
-          }}
-        >
-          Isi Stasiun
-        </span>
-      </div>
-      <div
-        style={{
-          display: "flex",
-          gap: 26,
-          marginRight: "auto",
-          alignSelf: "stretch",
-        }}
-      >
-        {NAV_ITEMS.map((item) => {
-          const isActive = item.key === active;
-          return (
-            <Link
-              key={item.key}
-              href={item.href}
-              aria-current={isActive ? "page" : undefined}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                fontSize: 13,
-                fontWeight: isActive ? 600 : 400,
-                color: isActive ? "#1D4ED8" : "#475569",
-                borderBottom: isActive
-                  ? "2px solid #1D4ED8"
-                  : "2px solid transparent",
-              }}
-            >
-              {item.label}
-            </Link>
-          );
-        })}
-      </div>
+      <Brand />
+      <NavLinks active={active} />
       <span
         className="mono pill"
         style={{

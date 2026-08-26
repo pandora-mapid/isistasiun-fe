@@ -37,3 +37,4 @@ There is no test script; none of the common frameworks (Jest, Vitest, Playwright
 - **Path alias**: `@/*` maps to the project root (`./*`) per `tsconfig.json`.
 - **Fonts**: Inter (weights 400–900) loaded via `next/font/google` in `app/layout.tsx`, exposed as `--font-inter`.
 - **Linting**: flat ESLint config (`eslint.config.mjs`) extending `eslint-config-next`'s `core-web-vitals` and `typescript` rule sets.
+- **Typed route props**: `app/layout.tsx` takes `LayoutProps<"/">` (see its `children` prop), a globally-available type Next.js 16 generates per-route from `.next/types` — not an import. Page components would use the equivalent `PageProps<"...">`. None of the 5 `page.tsx` files need it yet (no dynamic segments), but reach for `PageProps<"/route">` rather than hand-rolling a props type if one gains params/searchParams.

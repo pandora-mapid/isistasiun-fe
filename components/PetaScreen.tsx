@@ -75,17 +75,22 @@ export function PetaScreen() {
       <div
         style={{
           position: "relative",
-          height: 860,
+          height: "100vh",
           background: "#F8FAFC",
           overflow: "hidden",
         }}
       >
         {/* Illustrative basemap — a real build renders this from actual GIS
-           data (station coordinates, OSM building/road layers) instead. */}
+           data (station coordinates, OSM building/road layers) instead.
+           preserveAspectRatio="none" stretches it to fill the viewport-height
+           container above without leaving gaps or cropping the sides (the
+           canvas width is fixed at 1440 = the viewBox width, so only the
+           vertical scale ever actually changes). */}
         <svg
-          width="1440"
-          height="860"
+          width="100%"
+          height="100%"
           viewBox="0 0 1440 860"
+          preserveAspectRatio="none"
           style={{ position: "absolute", inset: 0, display: "block" }}
         >
           <rect x="0" y="0" width="1440" height="860" fill="#F8FAFC" />
