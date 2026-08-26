@@ -24,6 +24,12 @@
 .DS_Store
 *.pem
 
+# competition documents (proposal, internal team planning) — keep out of git
+Proposal_IsiStasiun.pdf
+BACKEND_TASK_DIVISION_3_PERSON.md
+*.pdf
+*.docx
+
 # debug
 npm-debug.log*
 yarn-debug.log*

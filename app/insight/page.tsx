@@ -24,8 +24,8 @@ export default function InsightPage() {
         </div>
         <div style={{ borderRadius: 12, background: "#0F172A", padding: 32, position: "relative", overflow: "hidden" }}>
           <div className="k" style={{ color: "#93C5FD", position: "relative" }}>Kesenjangan terbesar</div>
-          <div className="mono" style={{ font: "800 52px/1 var(--font-inter)", letterSpacing: "-.03em", color: "#fff", margin: "18px 0 0", position: "relative" }}>
-            Rp XX,X jt<span style={{ fontSize: 18, color: "#94A3B8", fontWeight: 600 }}> / hari</span>
+          <div className="mono" style={{ font: "800 46px/1 var(--font-inter)", letterSpacing: "-.03em", color: "#fff", margin: "18px 0 0", position: "relative" }}>
+            Rp 1.800.000<span style={{ fontSize: 18, color: "#94A3B8", fontWeight: 600 }}> / hari</span>
           </div>
           <p style={{ fontSize: 13, lineHeight: 1.6, color: "rgba(255,255,255,.62)", margin: "14px 0 0", position: "relative" }}>
             Stasiun B · pintu 4 · slot 06–09. Potensi terbaca jauh di atas belanja yang tertangkap, dan tidak ada slot komersial aktif di sisi itu.
@@ -33,8 +33,8 @@ export default function InsightPage() {
           <div style={{ height: 1, background: "rgba(255,255,255,.12)", margin: "24px 0", position: "relative" }} />
           <div className="row" style={{ gap: 26, position: "relative" }}>
             <div><div className="k" style={{ color: "#94A3B8", fontSize: 9 }}>Simpul diamati</div><div className="mono" style={{ font: "800 22px/1 var(--font-inter)", color: "#93C5FD", marginTop: 8 }}>3</div></div>
-            <div><div className="k" style={{ color: "#94A3B8", fontSize: 9 }}>Struk terbaca</div><div className="mono" style={{ font: "800 22px/1 var(--font-inter)", color: "#93C5FD", marginTop: 8 }}>XXX</div></div>
-            <div><div className="k" style={{ color: "#94A3B8", fontSize: 9 }}>Slot kosong</div><div className="mono" style={{ font: "800 22px/1 var(--font-inter)", color: "#93C5FD", marginTop: 8 }}>XX</div></div>
+            <div><div className="k" style={{ color: "#94A3B8", fontSize: 9 }}>Struk terbaca</div><div className="mono" style={{ font: "800 22px/1 var(--font-inter)", color: "#93C5FD", marginTop: 8 }}>612</div></div>
+            <div><div className="k" style={{ color: "#94A3B8", fontSize: 9 }}>Slot kosong</div><div className="mono" style={{ font: "800 22px/1 var(--font-inter)", color: "#93C5FD", marginTop: 8 }}>3</div></div>
           </div>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function InsightPage() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1.1fr", alignItems: "center", padding: "17px 22px", background: "#fff", borderBottom: "1px solid rgba(15,23,42,.08)" }}>
               <span className="row" style={{ gap: 9, fontSize: 13.5, fontWeight: 600 }}><span className="dot" style={{ background: "#2563EB" }} />A · hunian</span>
-              <span style={{ fontSize: 13, color: "#64748B" }}>Keluar XX%</span>
+              <span style={{ fontSize: 13, color: "#64748B" }}>Keluar 61%</span>
               <span className="mono" style={{ fontSize: 13, color: "#64748B" }}>06–09</span>
               <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.1)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Terverifikasi</span>
             </div>
@@ -73,7 +73,7 @@ export default function InsightPage() {
             </div>
             <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr 1.1fr", alignItems: "center", padding: "17px 22px", background: "#fff" }}>
               <span className="row" style={{ gap: 9, fontSize: 13.5, fontWeight: 600 }}><span className="dot" style={{ background: "#475569" }} />C · perkantoran</span>
-              <span style={{ fontSize: 13, color: "#64748B" }}>Masuk XX%</span>
+              <span style={{ fontSize: 13, color: "#64748B" }}>Masuk 58%</span>
               <span className="mono" style={{ fontSize: 13, color: "#64748B" }}>16–19</span>
               <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.1)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Terverifikasi</span>
             </div>
@@ -90,10 +90,10 @@ export default function InsightPage() {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "flex-end", gap: 18, height: 190, marginTop: 28 }}>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 5 }}><span className="mono" style={{ font: "700 12px/1 var(--font-inter)", color: "#1D4ED8" }}>XX%</span><div style={{ height: 150, borderRadius: 12, background: "#3B82F6" }} /></div>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 5 }}><span className="mono" style={{ font: "700 12px/1 var(--font-inter)", color: "#94A3B8" }}>XX%</span><div style={{ height: 78, borderRadius: 12, background: "rgba(15,23,42,.12)" }} /></div>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 5 }}><span className="mono" style={{ font: "700 12px/1 var(--font-inter)", color: "#94A3B8" }}>XX%</span><div style={{ height: 118, borderRadius: 12, background: "rgba(15,23,42,.12)" }} /></div>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 5 }}><span className="mono" style={{ font: "700 12px/1 var(--font-inter)", color: "#94A3B8" }}>XX%</span><div style={{ height: 54, borderRadius: 12, background: "rgba(15,23,42,.12)" }} /></div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 5 }}><span className="mono" style={{ font: "700 12px/1 var(--font-inter)", color: "#1D4ED8" }}>38%</span><div style={{ height: 150, borderRadius: 12, background: "#3B82F6" }} /></div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 5 }}><span className="mono" style={{ font: "700 12px/1 var(--font-inter)", color: "#94A3B8" }}>20%</span><div style={{ height: 78, borderRadius: 12, background: "rgba(15,23,42,.12)" }} /></div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 5 }}><span className="mono" style={{ font: "700 12px/1 var(--font-inter)", color: "#94A3B8" }}>29%</span><div style={{ height: 118, borderRadius: 12, background: "rgba(15,23,42,.12)" }} /></div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "flex-end", gap: 5 }}><span className="mono" style={{ font: "700 12px/1 var(--font-inter)", color: "#94A3B8" }}>13%</span><div style={{ height: 54, borderRadius: 12, background: "rgba(15,23,42,.12)" }} /></div>
           </div>
           <div className="row" style={{ gap: 18, marginTop: 10 }}>
             <span className="mono" style={{ flex: 1, textAlign: "center", fontSize: 11.5, color: "#64748B" }}>06–09</span>
@@ -113,15 +113,15 @@ export default function InsightPage() {
             </Link>
             <Link href="/peta" style={{ display: "block", borderRadius: 12, background: "rgba(37,99,235,.09)", padding: "18px 20px", color: "#0F172A" }}>
               <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}><span className="k" style={{ color: "#1D4ED8", fontSize: 9 }}>Kategori hilang</span><span style={{ fontSize: 13, color: "#1D4ED8" }}>→</span></div>
-              <div style={{ fontSize: 14, lineHeight: 1.5 }}>Apotek tidak tersedia di <b>2 dari 3 simpul</b>, meski permintaan kawasan terbaca XX% di atas rata-rata.</div>
+              <div style={{ fontSize: 14, lineHeight: 1.5 }}>Apotek tidak tersedia di <b>2 dari 3 simpul</b>, meski permintaan kawasan terbaca 37% di atas rata-rata.</div>
             </Link>
             <Link href="/peta" style={{ display: "block", borderRadius: 12, background: "rgba(37,99,235,.1)", padding: "18px 20px", color: "#0F172A" }}>
               <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}><span className="k" style={{ color: "#1D4ED8", fontSize: 9 }}>Sewa / arus</span><span style={{ fontSize: 13, color: "#1D4ED8" }}>→</span></div>
-              <div style={{ fontSize: 14, lineHeight: 1.5 }}>Tarif per m² di <b>Stasiun C</b> setara Stasiun A, padahal arus yang lewat XX% lebih tinggi.</div>
+              <div style={{ fontSize: 14, lineHeight: 1.5 }}>Tarif per m² di <b>Stasiun C</b> setara Stasiun A, padahal arus yang lewat 24% lebih tinggi.</div>
             </Link>
             <div style={{ borderRadius: 12, background: "#F1F5F9", padding: "18px 20px" }}>
               <div className="k" style={{ color: "#94A3B8", fontSize: 9, marginBottom: 8 }}>Tidak diberi estimasi</div>
-              <div style={{ fontSize: 14, lineHeight: 1.5, color: "#64748B" }}>Slot malam Stasiun A ditandai sampel tipis (n &lt; XX). Angkanya ditahan sampai survei putaran kedua.</div>
+              <div style={{ fontSize: 14, lineHeight: 1.5, color: "#64748B" }}>Slot malam Stasiun A ditandai sampel tipis (n &lt; 30). Angkanya ditahan sampai survei putaran kedua.</div>
             </div>
           </div>
         </div>
@@ -145,28 +145,28 @@ export default function InsightPage() {
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.1)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Terisi</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.1)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Terisi</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(147,197,253,.55)", color: "#3B82F6", font: "600 12px/1 var(--font-inter)" }}>Kurang</span>
-            <span className="mono" style={{ fontSize: 13, color: "#64748B" }}>Tinggi · XX%</span>
+            <span className="mono" style={{ fontSize: 13, color: "#64748B" }}>Tinggi · 82%</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1.4fr repeat(3,1fr) 1.2fr", alignItems: "center", padding: "16px 24px", background: "#fff", borderTop: "1px solid rgba(15,23,42,.08)" }}>
             <span style={{ fontSize: 13.5, fontWeight: 600 }}>Apotek &amp; kebutuhan mendesak</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.12)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Kosong</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.12)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Kosong</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.1)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Terisi</span>
-            <span className="mono" style={{ fontSize: 13, color: "#64748B" }}>Tinggi · XX%</span>
+            <span className="mono" style={{ fontSize: 13, color: "#64748B" }}>Tinggi · 78%</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1.4fr repeat(3,1fr) 1.2fr", alignItems: "center", padding: "16px 24px", background: "#fff", borderTop: "1px solid rgba(15,23,42,.08)" }}>
             <span style={{ fontSize: 13.5, fontWeight: 600 }}>Titipan &amp; loker</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(147,197,253,.55)", color: "#3B82F6", font: "600 12px/1 var(--font-inter)" }}>Kurang</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.12)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Kosong</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(147,197,253,.55)", color: "#3B82F6", font: "600 12px/1 var(--font-inter)" }}>Kurang</span>
-            <span className="mono" style={{ fontSize: 13, color: "#64748B" }}>Sedang · XX%</span>
+            <span className="mono" style={{ fontSize: 13, color: "#64748B" }}>Sedang · 46%</span>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "1.4fr repeat(3,1fr) 1.2fr", alignItems: "center", padding: "16px 24px", background: "#fff", borderTop: "1px solid rgba(15,23,42,.08)" }}>
             <span style={{ fontSize: 13.5, fontWeight: 600 }}>Ritel oleh-oleh</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.1)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Terisi</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(147,197,253,.55)", color: "#3B82F6", font: "600 12px/1 var(--font-inter)" }}>Kurang</span>
             <span className="pill" style={{ justifySelf: "start", padding: "5px 12px", background: "rgba(29,78,216,.1)", color: "#1D4ED8", font: "600 12px/1 var(--font-inter)" }}>Terisi</span>
-            <span className="mono" style={{ fontSize: 13, color: "#94A3B8" }}>Rendah · XX%</span>
+            <span className="mono" style={{ fontSize: 13, color: "#94A3B8" }}>Rendah · 21%</span>
           </div>
         </div>
       </div>

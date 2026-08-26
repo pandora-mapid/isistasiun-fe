@@ -48,11 +48,15 @@ h3 {
   font-feature-settings: "tnum";
 }
 
-/* Fixed-width canvas each screen renders inside — this is a desktop-only
-   dashboard design (authored at 1440px), not yet a responsive layout. */
+/* Fluid-width canvas each screen renders inside — authored at 1440px, but
+   stretches to fill whatever the viewport is (no side gutters on wider
+   monitors). Internal layouts use CSS Grid `1fr` columns plus a few
+   fixed-width side panels/images, so widening mostly just gives prose
+   (already `ch`-capped) and grid columns more breathing room; only
+   PetaScreen's map overlay uses literal px coordinates, and those are all
+   edge-anchored (left/right/top/bottom), so they hold up under any width. */
 .page-canvas {
-  width: 1440px;
-  margin: 0 auto;
+  width: 100%;
   background: var(--gray-050);
   min-height: 100vh;
 }

@@ -19,15 +19,15 @@ export default function RekomendasiPage() {
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <div className="row" style={{ justifyContent: "space-between", borderRadius: 12, background: "rgba(29,78,216,.08)", padding: "20px 24px" }}>
             <span style={{ fontSize: 13, color: "#475569" }}>Total kesenjangan tiga simpul</span>
-            <span className="mono" style={{ font: "800 18px/1 var(--font-inter)", color: "#1D4ED8" }}>Rp X,X jt</span>
+            <span className="mono" style={{ font: "800 18px/1 var(--font-inter)", color: "#1D4ED8" }}>Rp 6.400.000</span>
           </div>
           <div className="row" style={{ justifyContent: "space-between", borderRadius: 12, background: "#F1F5F9", padding: "20px 24px" }}>
             <span style={{ fontSize: 13, color: "#475569" }}>Slot layak direkomendasikan</span>
-            <span className="mono" style={{ font: "800 18px/1 var(--font-inter)" }}>X dari XX</span>
+            <span className="mono" style={{ font: "800 18px/1 var(--font-inter)" }}>34 dari 48</span>
           </div>
           <div className="row" style={{ justifyContent: "space-between", borderRadius: 12, background: "#F1F5F9", padding: "20px 24px" }}>
             <span style={{ fontSize: 13, color: "#475569" }}>Ditunda karena sampel tipis</span>
-            <span className="mono" style={{ font: "800 18px/1 var(--font-inter)", color: "#64748B" }}>X slot</span>
+            <span className="mono" style={{ font: "800 18px/1 var(--font-inter)", color: "#64748B" }}>14 slot</span>
           </div>
         </div>
       </div>
@@ -56,7 +56,7 @@ export default function RekomendasiPage() {
             <span style={{ flex: 1.4, fontSize: 13.5, fontWeight: 600 }}>Stasiun B · Pintu 4</span>
             <span style={{ flex: 1.1, fontSize: 13 }} className="row"><span className="dot" style={{ background: "#2563EB", marginRight: 8 }} />Apotek &amp; kesehatan</span>
             <span className="mono" style={{ width: 96, fontSize: 12.5 }}>06–09</span>
-            <span className="mono" style={{ width: 120, textAlign: "right", fontSize: 13, fontWeight: 700, color: "#1D4ED8" }}>Rp X,X jt</span>
+            <span className="mono" style={{ width: 120, textAlign: "right", fontSize: 13, fontWeight: 700, color: "#1D4ED8" }}>Rp 1.800.000</span>
             <span style={{ width: 118 }} className="row"><span className="pill" style={{ width: 56, height: 6, background: "rgba(15,23,42,.1)" }}><span className="pill" style={{ display: "block", width: "86%", height: 6, background: "#1D4ED8" }} /></span><span className="mono" style={{ fontSize: 10.5, color: "#64748B", marginLeft: 8 }}>tinggi</span></span>
           </div>
           <div className="row" style={{ gap: 16, padding: "18px 24px", background: "#fff" }}>
@@ -64,7 +64,7 @@ export default function RekomendasiPage() {
             <span style={{ flex: 1.4, fontSize: 13.5, fontWeight: 600 }}>Stasiun C · Pintu 2</span>
             <span style={{ flex: 1.1, fontSize: 13 }} className="row"><span className="dot" style={{ background: "#1D4ED8", marginRight: 8 }} />F&amp;B cepat</span>
             <span className="mono" style={{ width: 96, fontSize: 12.5 }}>16–19</span>
-            <span className="mono" style={{ width: 120, textAlign: "right", fontSize: 13, fontWeight: 700 }}>Rp X,X jt</span>
+            <span className="mono" style={{ width: 120, textAlign: "right", fontSize: 13, fontWeight: 700 }}>Rp 1.400.000</span>
             <span style={{ width: 118 }} className="row"><span className="pill" style={{ width: 56, height: 6, background: "rgba(15,23,42,.1)" }}><span className="pill" style={{ display: "block", width: "74%", height: 6, background: "#1D4ED8" }} /></span><span className="mono" style={{ fontSize: 10.5, color: "#64748B", marginLeft: 8 }}>tinggi</span></span>
           </div>
           <div className="row" style={{ gap: 16, padding: "18px 24px", background: "#F1F5F9" }}>
@@ -72,7 +72,7 @@ export default function RekomendasiPage() {
             <span style={{ flex: 1.4, fontSize: 13.5, fontWeight: 600 }}>Stasiun A · Pintu 1</span>
             <span style={{ flex: 1.1, fontSize: 13 }} className="row"><span className="dot" style={{ background: "#475569", marginRight: 8 }} />Ritel kebutuhan harian</span>
             <span className="mono" style={{ width: 96, fontSize: 12.5 }}>06–09</span>
-            <span className="mono" style={{ width: 120, textAlign: "right", fontSize: 13, fontWeight: 700 }}>Rp X,X jt</span>
+            <span className="mono" style={{ width: 120, textAlign: "right", fontSize: 13, fontWeight: 700 }}>Rp 900.000</span>
             <span style={{ width: 118 }} className="row"><span className="pill" style={{ width: 56, height: 6, background: "rgba(15,23,42,.1)" }}><span className="pill" style={{ display: "block", width: "58%", height: 6, background: "#60A5FA" }} /></span><span className="mono" style={{ fontSize: 10.5, color: "#64748B", marginLeft: 8 }}>sedang</span></span>
           </div>
           <div className="row" style={{ gap: 16, padding: "18px 24px", background: "#fff" }}>
@@ -80,7 +80,7 @@ export default function RekomendasiPage() {
             <span style={{ flex: 1.4, fontSize: 13.5, fontWeight: 600 }}>Stasiun B · Pintu 1</span>
             <span style={{ flex: 1.1, fontSize: 13 }} className="row"><span className="dot" style={{ background: "#2563EB", marginRight: 8 }} />Jasa titip &amp; kurir</span>
             <span className="mono" style={{ width: 96, fontSize: 12.5 }}>11–14</span>
-            <span className="mono" style={{ width: 120, textAlign: "right", fontSize: 13, fontWeight: 700 }}>Rp X,X jt</span>
+            <span className="mono" style={{ width: 120, textAlign: "right", fontSize: 13, fontWeight: 700 }}>Rp 700.000</span>
             <span style={{ width: 118 }} className="row"><span className="pill" style={{ width: 56, height: 6, background: "rgba(15,23,42,.1)" }}><span className="pill" style={{ display: "block", width: "52%", height: 6, background: "#60A5FA" }} /></span><span className="mono" style={{ fontSize: 10.5, color: "#64748B", marginLeft: 8 }}>sedang</span></span>
           </div>
           <div className="row" style={{ gap: 16, padding: "18px 24px", background: "#F1F5F9" }}>
@@ -107,11 +107,11 @@ export default function RekomendasiPage() {
           <div style={{ borderRadius: 12, background: "rgba(29,78,216,.07)", padding: 30, display: "flex", flexDirection: "column" }}>
             <div className="row" style={{ justifyContent: "space-between" }}><span className="k" style={{ color: "#1D4ED8" }}>Prioritas 01</span><span className="chip" style={{ background: "rgba(29,78,216,.14)", borderColor: "transparent", color: "#1D4ED8", cursor: "default" }}>Kuartal ini</span></div>
             <h3 style={{ font: "800 21px/1.15 var(--font-inter)", letterSpacing: "-.015em", margin: "18px 0 12px" }}>Isi Pintu 4 dengan gerai apotek berformat kecil</h3>
-            <p style={{ fontSize: 13, lineHeight: 1.58, color: "#475569", margin: "0 0 20px" }}>Permintaan kategori ini terbaca XX% pada slot 06–09 tanpa satu pun gerai di dalam stasiun, sementara arus pintu tergolong tertinggi.</p>
+            <p style={{ fontSize: 13, lineHeight: 1.58, color: "#475569", margin: "0 0 20px" }}>Permintaan kategori ini terbaca 37% pada slot 06–09 tanpa satu pun gerai di dalam stasiun, sementara arus pintu tergolong tertinggi.</p>
             <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 9 }}>
-              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Potensi tertangkap</span><span className="mono" style={{ fontWeight: 700, color: "#1D4ED8" }}>Rp X,X jt / hari</span></div>
-              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Ukur ulang setelah</span><span className="mono">XX minggu</span></div>
-              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Dasar data</span><span className="mono">4 slot · XX struk</span></div>
+              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Potensi tertangkap</span><span className="mono" style={{ fontWeight: 700, color: "#1D4ED8" }}>Rp 1.800.000 / hari</span></div>
+              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Ukur ulang setelah</span><span className="mono">6 minggu</span></div>
+              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Dasar data</span><span className="mono">4 slot · 96 struk</span></div>
             </div>
           </div>
           <div style={{ borderRadius: 12, background: "rgba(71,85,105,.08)", padding: 30, display: "flex", flexDirection: "column" }}>
@@ -119,8 +119,8 @@ export default function RekomendasiPage() {
             <h3 style={{ font: "800 21px/1.15 var(--font-inter)", letterSpacing: "-.015em", margin: "18px 0 12px" }}>Ubah dasar sewa dari luas ruang ke arus pintu</h3>
             <p style={{ fontSize: 13, lineHeight: 1.58, color: "#475569", margin: "0 0 20px" }}>Indeks sewa terhadap arus menunjukkan pintu dengan arus tinggi dihargai setara pintu sepi, sehingga nilai ruang tidak tercermin.</p>
             <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 9 }}>
-              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Cakupan</span><span className="mono" style={{ fontWeight: 700 }}>XX titik sewa</span></div>
-              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Ukur ulang setelah</span><span className="mono">XX bulan</span></div>
+              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Cakupan</span><span className="mono" style={{ fontWeight: 700 }}>24 titik sewa</span></div>
+              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Ukur ulang setelah</span><span className="mono">3 bulan</span></div>
               <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Dasar data</span><span className="mono">3 simpul · 4 slot</span></div>
             </div>
           </div>
@@ -129,8 +129,8 @@ export default function RekomendasiPage() {
             <h3 style={{ font: "800 21px/1.15 var(--font-inter)", letterSpacing: "-.015em", margin: "18px 0 12px" }}>Perluas pencacahan ke simpul dengan sampel tipis</h3>
             <p style={{ fontSize: 13, lineHeight: 1.58, color: "#475569", margin: "0 0 20px" }}>Kawasan bertanda sampel tipis menahan sebagian rekomendasi. Satu putaran tambahan cukup untuk menaikkannya ke tingkat kepercayaan yang sama.</p>
             <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 9 }}>
-              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Slot terbuka</span><span className="mono" style={{ fontWeight: 700 }}>X slot</span></div>
-              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Kebutuhan</span><span className="mono">X hari kerja</span></div>
+              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Slot terbuka</span><span className="mono" style={{ fontWeight: 700 }}>14 slot</span></div>
+              <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Kebutuhan</span><span className="mono">5 hari kerja</span></div>
               <div className="row" style={{ justifyContent: "space-between", fontSize: 12 }}><span style={{ color: "#64748B" }}>Hasil</span><span className="mono">lapisan penuh</span></div>
             </div>
           </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FloatingNavBar } from "./NavBar";
+import { NavBar } from "./NavBar";
 
 type LayerRow = {
   key: string;
@@ -71,11 +71,24 @@ export function PetaScreen() {
   }
 
   return (
-    <div className="page-canvas">
+    <div
+      className="page-canvas"
+      style={{ height: "100vh", display: "flex", flexDirection: "column" }}
+    >
+      <NavBar
+        active="peta"
+        cta={
+          <div className="row" style={{ gap: 10 }}>
+            <button className="b bs">Bandingkan</button>
+            <button className="b bp">Brief PDF</button>
+          </div>
+        }
+      />
       <div
         style={{
           position: "relative",
-          height: "100vh",
+          flex: 1,
+          minHeight: 0,
           background: "#F8FAFC",
           overflow: "hidden",
         }}
@@ -233,7 +246,7 @@ export function PetaScreen() {
             Pintu 4 · Gap terbesar
           </div>
           <div className="mono" style={{ fontWeight: 600, fontSize: 13, lineHeight: 1, fontFamily: "var(--font-inter)", color: "#0F172A", marginTop: 4 }}>
-            Rp X,X jt / hari kerja
+            Rp 1.800.000 / hari kerja
           </div>
         </div>
 
@@ -243,13 +256,11 @@ export function PetaScreen() {
             <span style={{ font: "800 16px/1 var(--font-inter)" }}>Stasiun B</span>
           </div>
           <div className="mono" style={{ fontSize: 11.5, color: "#475569", marginTop: 6 }}>
-            Kesenjangan Rp X,X–X,X jt · 4 pintu
+            Kesenjangan Rp 2.400.000 – 4.100.000 · 4 pintu
           </div>
         </div>
 
-        <FloatingNavBar active="peta" />
-
-        <div style={{ position: "absolute", left: 24, top: 108, display: "flex", flexDirection: "column", gap: 6 }}>
+        <div style={{ position: "absolute", left: 24, top: 24, display: "flex", flexDirection: "column", gap: 6 }}>
           <div className="ic" style={{ background: "#fff", border: "1px solid #CBD5E1", boxShadow: "none" }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
               <path d="M5 12h14" />
@@ -306,7 +317,7 @@ export function PetaScreen() {
         </div>
 
         <div className="mono" style={{ position: "absolute", left: 24, bottom: 180, fontSize: 10.5, color: "rgba(255,255,255,.5)" }}>
-          −6,2077 · 106,8451 &nbsp;|&nbsp; z 15,4 &nbsp;|&nbsp; GEO MAPID
+          −6,2077 · 106,8451 &nbsp;|&nbsp; z 15,4 &nbsp;|&nbsp; GEO MAPID &nbsp;|&nbsp; survei 12–19 Agu · v0.3
         </div>
 
         <div
@@ -361,7 +372,7 @@ export function PetaScreen() {
 
         <div
           className="glass"
-          style={{ position: "absolute", right: 24, top: 108, bottom: 24, width: 414, borderRadius: 12, display: "flex", flexDirection: "column", overflow: "hidden" }}
+          style={{ position: "absolute", right: 24, top: 24, bottom: 24, width: 414, borderRadius: 12, display: "flex", flexDirection: "column", overflow: "hidden" }}
         >
           <div style={{ flex: "none", padding: "14px 14px 12px" }}>
             <div className="row pill" style={{ position: "relative", background: "#F1F5F9", padding: 4 }}>
@@ -524,8 +535,8 @@ export function PetaScreen() {
                         <span style={{ flex: 1, height: 9, background: "#1D4ED8" }} />
                       </div>
                       <div className="mono row" style={{ justifyContent: "space-between", fontSize: 10, color: "#94A3B8", marginTop: 6 }}>
-                        <span>&lt; Rp X jt</span>
-                        <span>&gt; Rp X jt</span>
+                        <span>&lt; Rp 1.000.000</span>
+                        <span>&gt; Rp 4.000.000</span>
                       </div>
                       <div className="row" style={{ alignItems: "flex-start", gap: 9, marginTop: 12 }}>
                         <span style={{ width: 13, height: 13, borderRadius: 12, border: "1.5px dashed #94A3B8", flex: "none", marginTop: 1 }} />
@@ -543,8 +554,8 @@ export function PetaScreen() {
 
                 <div style={{ borderRadius: 12, padding: 24, background: "#EEF2F6" }}>
                   <div className="k" style={{ color: "#1D4ED8", marginBottom: 12 }}>Kesenjangan belanja</div>
-                  <div className="mono" style={{ fontWeight: 700, fontSize: 52, lineHeight: 1, letterSpacing: "-.02em" }}>
-                    Rp X,X–X,X jt
+                  <div className="mono" style={{ fontWeight: 700, fontSize: 25, lineHeight: 1.15, letterSpacing: "-.01em", whiteSpace: "nowrap" }}>
+                    Rp 2.400.000 – 4.100.000
                   </div>
                   <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 9 }}>per hari kerja · rentang P10–P90 · 10.000 iterasi</div>
                   <div style={{ position: "relative", height: 12, margin: "18px 0 8px" }}>
@@ -569,23 +580,23 @@ export function PetaScreen() {
                   <div style={{ border: "1px solid #E2E8F0", borderRadius: 12, overflow: "hidden" }}>
                     <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderBottom: "1px solid #E2E8F0" }}>
                       <span style={{ fontSize: 12.5, color: "#475569" }}>F — arus pintu</span>
-                      <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>X.XXX <span style={{ color: "#94A3B8", fontWeight: 400 }}>org/jam</span></span>
+                      <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>2.450 <span style={{ color: "#94A3B8", fontWeight: 400 }}>org/jam</span></span>
                     </div>
                     <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderBottom: "1px solid #E2E8F0" }}>
                       <span style={{ fontSize: 12.5, color: "#475569" }}>E — entry ratio</span>
-                      <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>X,X <span style={{ color: "#94A3B8", fontWeight: 400 }}>%</span></span>
+                      <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>6,4 <span style={{ color: "#94A3B8", fontWeight: 400 }}>%</span></span>
                     </div>
                     <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderBottom: "1px solid #E2E8F0" }}>
                       <span style={{ fontSize: 12.5, color: "#475569" }}>C — konversi</span>
-                      <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>XX <span style={{ color: "#94A3B8", fontWeight: 400 }}>%</span></span>
+                      <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>72 <span style={{ color: "#94A3B8", fontWeight: 400 }}>%</span></span>
                     </div>
                     <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", background: "#EEF2F6" }}>
                       <span style={{ fontSize: 12.5, color: "#475569" }}>V — nilai transaksi <span style={{ fontSize: 9.5, color: "#94A3B8" }}>AI</span></span>
-                      <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8" }}>Rp XX.XXX</span>
+                      <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8" }}>Rp 42.000</span>
                     </div>
                   </div>
                   <div className="row" style={{ justifyContent: "space-between", marginTop: 14 }}>
-                    <span className="mono" style={{ fontSize: 11.5, color: "#64748B" }}>Potensi Rp X,X jt − tertangkap Rp X,X jt</span>
+                    <span className="mono" style={{ fontSize: 11.5, color: "#64748B" }}>Potensi Rp 2.600.000 − tertangkap Rp 800.000</span>
                     <button
                       onClick={() => setShowTransparansi(true)}
                       style={{ all: "unset", cursor: "pointer", fontSize: 11.5, fontWeight: 600, color: "#1D4ED8" }}
@@ -605,21 +616,21 @@ export function PetaScreen() {
                       <span className="pill" style={{ flex: 1, height: 14, background: "rgba(15,23,42,.08)" }}>
                         <span className="pill" style={{ display: "block", width: "88%", height: 14, background: "#1D4ED8" }} />
                       </span>
-                      <span className="mono" style={{ width: 64, textAlign: "right", fontSize: 11 }}>Rp X,X jt</span>
+                      <span className="mono" style={{ width: 92, textAlign: "right", fontSize: 11 }}>Rp 1.800.000</span>
                     </div>
                     <div className="row" style={{ gap: 11 }}>
                       <span style={{ width: 52, fontSize: 12, color: "#475569" }}>Pintu 1</span>
                       <span className="pill" style={{ flex: 1, height: 14, background: "rgba(15,23,42,.08)" }}>
                         <span className="pill" style={{ display: "block", width: "54%", height: 14, background: "#475569" }} />
                       </span>
-                      <span className="mono" style={{ width: 64, textAlign: "right", fontSize: 11 }}>Rp X,X jt</span>
+                      <span className="mono" style={{ width: 92, textAlign: "right", fontSize: 11 }}>Rp 1.100.000</span>
                     </div>
                     <div className="row" style={{ gap: 11 }}>
                       <span style={{ width: 52, fontSize: 12, color: "#475569" }}>Pintu 2</span>
                       <span className="pill" style={{ flex: 1, height: 14, background: "rgba(15,23,42,.08)" }}>
                         <span className="pill" style={{ display: "block", width: "31%", height: 14, background: "#2563EB" }} />
                       </span>
-                      <span className="mono" style={{ width: 64, textAlign: "right", fontSize: 11 }}>Rp X,X jt</span>
+                      <span className="mono" style={{ width: 92, textAlign: "right", fontSize: 11 }}>Rp 600.000</span>
                     </div>
                     <div className="row" style={{ gap: 11 }}>
                       <span style={{ width: 52, fontSize: 12, color: "#94A3B8" }}>Pintu 3</span>
@@ -639,11 +650,11 @@ export function PetaScreen() {
                   <div style={{ display: "flex", flexDirection: "column" }}>
                     <div className="row" style={{ justifyContent: "space-between", padding: "10px 2px", borderBottom: "1px solid #E2E8F0" }}>
                       <span style={{ fontSize: 13, fontWeight: 600 }}>Apotek &amp; kesehatan</span>
-                      <span className="mono" style={{ fontSize: 11.5, color: "#475569" }}>XX% · 0 gerai</span>
+                      <span className="mono" style={{ fontSize: 11.5, color: "#475569" }}>37% · 0 gerai</span>
                     </div>
                     <div className="row" style={{ justifyContent: "space-between", padding: "10px 2px" }}>
                       <span style={{ fontSize: 13 }}>Jasa</span>
-                      <span className="mono" style={{ fontSize: 11.5, color: "#475569" }}>XX% · 1 gerai</span>
+                      <span className="mono" style={{ fontSize: 11.5, color: "#475569" }}>22% · 1 gerai</span>
                     </div>
                   </div>
                 </div>
@@ -663,21 +674,45 @@ export function PetaScreen() {
                   <span className="dot" style={{ background: "#1D4ED8" }} />
                   <span className="k" style={{ color: "#1D4ED8" }}>Tanya data peta</span>
                 </div>
-                <div className="pill" style={{ background: "#F1F5F9", padding: "11px 15px", fontSize: 13, color: "#0F172A", marginBottom: 12 }}>
-                  simpul mana yang kekurangan gerai apotek pagi hari?
+
+                {/* User's question — right-aligned, solid accent bubble. */}
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <div style={{ maxWidth: "82%" }}>
+                    <div className="k" style={{ textAlign: "right", color: "#94A3B8", marginBottom: 4 }}>Kamu</div>
+                    <div
+                      style={{ borderRadius: 12, borderBottomRightRadius: 4, background: "#1D4ED8", padding: "11px 15px", fontSize: 13, color: "#fff" }}
+                    >
+                      simpul mana yang kekurangan gerai apotek pagi hari?
+                    </div>
+                  </div>
                 </div>
+
+                {/* AI's answer — left-aligned, neutral bubble with a small
+                   sparkle avatar, so the two speakers are never ambiguous. */}
                 {showCopilotResult && (
-                  <div style={{ borderRadius: 12, background: "#EEF2F6", padding: "16px 18px" }}>
-                    <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
-                      2 dari 3 simpul. Permintaan apotek di kawasan <b>Stasiun B</b> terbaca XX% tanpa satu pun gerai di dalam stasiun.
-                    </div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 14 }}>
-                      <span className="chip" style={{ background: "rgba(29,78,216,.1)", borderColor: "transparent", color: "#1D4ED8" }}>Lapisan → Kategori hilang</span>
-                      <span className="chip" style={{ background: "rgba(29,78,216,.1)", borderColor: "transparent", color: "#1D4ED8" }}>Kategori → Apotek</span>
-                      <span className="chip" style={{ background: "rgba(29,78,216,.1)", borderColor: "transparent", color: "#1D4ED8" }}>Slot → 06–09</span>
-                    </div>
-                    <div style={{ fontSize: 11.5, lineHeight: 1.5, color: "#64748B", marginTop: 14 }}>
-                      Setiap jawaban mengubah lapisan peta, dan menyebut slot waktu yang dipakai. Tidak ada angka di luar slot yang dicacah.
+                  <div className="row" style={{ gap: 8, alignItems: "flex-start", marginTop: 12 }}>
+                    <span
+                      style={{ width: 22, height: 22, borderRadius: 999, background: "rgba(29,78,216,.12)", flex: "none", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 17 }}
+                    >
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z" />
+                      </svg>
+                    </span>
+                    <div style={{ maxWidth: "82%" }}>
+                      <div className="k" style={{ color: "#94A3B8", marginBottom: 4 }}>Asisten data</div>
+                      <div style={{ borderRadius: 12, borderTopLeftRadius: 4, background: "#EEF2F6", padding: "16px 18px" }}>
+                        <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
+                          2 dari 3 simpul. Permintaan apotek di kawasan <b>Stasiun B</b> terbaca 37% tanpa satu pun gerai di dalam stasiun.
+                        </div>
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 14 }}>
+                          <span className="chip" style={{ background: "rgba(29,78,216,.1)", borderColor: "transparent", color: "#1D4ED8" }}>Lapisan → Kategori hilang</span>
+                          <span className="chip" style={{ background: "rgba(29,78,216,.1)", borderColor: "transparent", color: "#1D4ED8" }}>Kategori → Apotek</span>
+                          <span className="chip" style={{ background: "rgba(29,78,216,.1)", borderColor: "transparent", color: "#1D4ED8" }}>Slot → 06–09</span>
+                        </div>
+                        <div style={{ fontSize: 11.5, lineHeight: 1.5, color: "#64748B", marginTop: 14 }}>
+                          Setiap jawaban mengubah lapisan peta, dan menyebut slot waktu yang dipakai. Tidak ada angka di luar slot yang dicacah.
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -732,7 +767,7 @@ export function PetaScreen() {
               <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start", padding: "24px 26px 20px" }}>
                 <div>
                   <div className="k" style={{ color: "#1D4ED8", marginBottom: 8 }}>Panel transparansi</div>
-                  <div style={{ font: "800 21px/1.15 var(--font-inter)", letterSpacing: "-.015em" }}>Dari mana angka V = Rp XX.XXX berasal</div>
+                  <div style={{ font: "800 21px/1.15 var(--font-inter)", letterSpacing: "-.015em" }}>Dari mana angka V = Rp 42.000 berasal</div>
                 </div>
                 <div className="ic" onClick={() => setShowTransparansi(false)}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -751,7 +786,7 @@ export function PetaScreen() {
                     <div style={{ width: 40, height: 40, borderRadius: 12, background: "#F1F5F9", boxShadow: "0 0 0 2px #1D4ED8" }} />
                     <div style={{ width: 40, height: 40, borderRadius: 12, background: "#F1F5F9" }} />
                     <div style={{ width: 40, height: 40, borderRadius: 12, background: "#F1F5F9" }} />
-                    <div style={{ width: 40, height: 40, borderRadius: 12, border: "1.5px dashed rgba(15,23,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#94A3B8" }}>+XX</div>
+                    <div style={{ width: 40, height: 40, borderRadius: 12, border: "1.5px dashed rgba(15,23,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#94A3B8" }}>+18</div>
                   </div>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -761,25 +796,25 @@ export function PetaScreen() {
                       <span style={{ color: "#64748B" }}>Kategori (dinormalisasi)</span><span>F&amp;B siap saji</span>
                     </div>
                     <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", background: "#EEF2F6", fontSize: 12 }}>
-                      <span style={{ color: "#64748B" }}>Subtotal</span><span style={{ color: "#94A3B8" }}>Rp XX.XXX — tidak dipakai</span>
+                      <span style={{ color: "#64748B" }}>Subtotal</span><span style={{ color: "#94A3B8" }}>Rp 47.500 — tidak dipakai</span>
                     </div>
                     <div className="row" style={{ justifyContent: "space-between", padding: "12px 14px", borderRadius: "0 0 12px 12px", background: "rgba(29,78,216,.1)", fontSize: 12 }}>
                       <span style={{ fontWeight: 600 }}>Jumlah dibayarkan</span>
-                      <span className="mono" style={{ fontWeight: 700, color: "#1D4ED8" }}>Rp XX.XXX</span>
+                      <span className="mono" style={{ fontWeight: 700, color: "#1D4ED8" }}>Rp 42.000</span>
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
                     <div style={{ flex: 1, borderRadius: 12, background: "#F1F5F9", padding: 14 }}>
                       <div className="k" style={{ fontSize: 9, marginBottom: 7 }}>Keyakinan</div>
-                      <div className="mono" style={{ font: "700 18px/1 var(--font-inter)" }}>0,XX</div>
+                      <div className="mono" style={{ font: "700 18px/1 var(--font-inter)" }}>0,91</div>
                       <div className="pill" style={{ height: 5, background: "rgba(15,23,42,.1)", marginTop: 9 }}>
                         <div className="pill" style={{ width: "84%", height: 5, background: "#1D4ED8" }} />
                       </div>
                     </div>
                     <div style={{ flex: 1, borderRadius: 12, background: "#F1F5F9", padding: 14 }}>
                       <div className="k" style={{ fontSize: 9, marginBottom: 7 }}>Cakupan</div>
-                      <div className="mono" style={{ font: "700 18px/1 var(--font-inter)" }}>XX / XX</div>
-                      <div style={{ fontSize: 10, lineHeight: 1.4, color: "#64748B", marginTop: 6 }}>struk terbaca · X ambigu dikeluarkan</div>
+                      <div className="mono" style={{ font: "700 18px/1 var(--font-inter)" }}>182 / 196</div>
+                      <div style={{ fontSize: 10, lineHeight: 1.4, color: "#64748B", marginTop: 6 }}>struk terbaca · 4 ambigu dikeluarkan</div>
                     </div>
                   </div>
                   <div className="row" style={{ gap: 10, alignItems: "flex-start", marginTop: 12, borderRadius: 12, background: "rgba(29,78,216,.08)", padding: "13px 15px", fontSize: 11.5, lineHeight: 1.55 }}>

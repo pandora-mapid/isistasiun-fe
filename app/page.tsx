@@ -69,7 +69,7 @@ export default function BerandaPage() {
           <div className="glass" style={{ position: "absolute", left: 20, bottom: 20, borderRadius: 12, padding: "12px 16px" }}>
             <div className="k" style={{ marginBottom: 6 }}>Kesenjangan · Stasiun B</div>
             <div className="mono" style={{ font: "800 19px/1 var(--font-inter)", letterSpacing: "-.02em" }}>
-              Rp X,X–X,X jt <span style={{ font: "500 11px/1 var(--font-inter)", color: "#64748B" }}>/ hari</span>
+              Rp 2.400.000 – 4.100.000 <span style={{ font: "500 11px/1 var(--font-inter)", color: "#64748B" }}>/ hari</span>
             </div>
           </div>
           <div className="mono" style={{ position: "absolute", right: 18, top: 18, fontSize: 10, color: "rgba(255,255,255,.4)" }}>
@@ -108,7 +108,7 @@ export default function BerandaPage() {
           <p style={{ fontSize: 13, lineHeight: 1.58, color: "#475569", margin: "14px 0 0" }}>return on asset terhadap target 6% — aset 327,82 juta m² dinyatakan masih underleverage</p>
         </div>
         <div style={{ borderRadius: 12, background: "rgba(29,78,216,.1)", padding: "26px 28px" }}>
-          <div className="mono" style={{ font: "800 46px/1 var(--font-inter)", letterSpacing: "-.03em", color: "#1D4ED8" }}>Rp X jt</div>
+          <div className="mono" style={{ font: "800 46px/1 var(--font-inter)", letterSpacing: "-.03em", color: "#1D4ED8" }}>Rp 6.000.000</div>
           <p style={{ fontSize: 13, lineHeight: 1.58, color: "#475569", margin: "14px 0 0" }}>kesenjangan belanja harian yang kami ukur di tiga simpul, disajikan sebagai rentang P10–P90</p>
         </div>
       </div>
@@ -164,9 +164,9 @@ export default function BerandaPage() {
             <div style={{ padding: "20px 22px 22px" }}>
               <div className="row" style={{ justifyContent: "space-between" }}><span className="k">Hunian</span><span className="chip" style={{ cursor: "default", fontSize: 11 }}>3 pintu</span></div>
               <div style={{ font: "800 21px/1.1 var(--font-inter)", margin: "12px 0 14px" }}>Stasiun A</div>
-              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kesenjangan</span><span className="mono" style={{ fontSize: 12, fontWeight: 600 }}>Rp X,X–X,X jt</span></div>
+              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kesenjangan</span><span className="mono" style={{ fontSize: 12, fontWeight: 600 }}>Rp 1.100.000 – 2.000.000</span></div>
               <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Puncak arus</span><span className="mono" style={{ fontSize: 12 }}>06–09</span></div>
-              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kategori hilang</span><span className="mono" style={{ fontSize: 12 }}>X</span></div>
+              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kategori hilang</span><span className="mono" style={{ fontSize: 12 }}>1</span></div>
             </div>
           </div>
           <div className="hover-lift" style={{ borderRadius: 12, overflow: "hidden", background: "rgba(29,78,216,.06)", cursor: "pointer" }}>
@@ -182,9 +182,9 @@ export default function BerandaPage() {
             <div style={{ padding: "20px 22px 22px" }}>
               <div className="row" style={{ justifyContent: "space-between" }}><span className="k">Campuran</span><span className="chip" style={{ background: "rgba(29,78,216,.14)", borderColor: "transparent", color: "#1D4ED8", cursor: "default", fontSize: 11 }}>4 pintu</span></div>
               <div style={{ font: "800 21px/1.1 var(--font-inter)", margin: "12px 0 14px" }}>Stasiun B</div>
-              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kesenjangan</span><span className="mono" style={{ fontSize: 12, fontWeight: 600, color: "#1D4ED8" }}>Rp X,X–X,X jt</span></div>
+              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kesenjangan</span><span className="mono" style={{ fontSize: 12, fontWeight: 600, color: "#1D4ED8" }}>Rp 2.400.000 – 4.100.000</span></div>
               <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Puncak arus</span><span className="mono" style={{ fontSize: 12 }}>11–14</span></div>
-              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kategori hilang</span><span className="mono" style={{ fontSize: 12 }}>X</span></div>
+              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kategori hilang</span><span className="mono" style={{ fontSize: 12 }}>2</span></div>
             </div>
           </div>
           <div className="hover-lift" style={{ borderRadius: 12, overflow: "hidden", background: "#EEF2F6", cursor: "pointer" }}>
@@ -200,9 +200,9 @@ export default function BerandaPage() {
             <div style={{ padding: "20px 22px 22px" }}>
               <div className="row" style={{ justifyContent: "space-between" }}><span className="k">Perkantoran</span><span className="chip" style={{ cursor: "default", fontSize: 11 }}>5 pintu</span></div>
               <div style={{ font: "800 21px/1.1 var(--font-inter)", margin: "12px 0 14px" }}>Stasiun C</div>
-              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kesenjangan</span><span className="mono" style={{ fontSize: 12, fontWeight: 600 }}>Rp X,X–X,X jt</span></div>
+              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kesenjangan</span><span className="mono" style={{ fontSize: 12, fontWeight: 600 }}>Rp 1.600.000 – 2.700.000</span></div>
               <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Puncak arus</span><span className="mono" style={{ fontSize: 12 }}>16–19</span></div>
-              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kategori hilang</span><span className="mono" style={{ fontSize: 12 }}>X</span></div>
+              <div className="row" style={{ justifyContent: "space-between", padding: "9px 0", borderTop: "1px solid rgba(15,23,42,.1)" }}><span style={{ fontSize: 12, color: "#64748B" }}>Kategori hilang</span><span className="mono" style={{ fontSize: 12 }}>1</span></div>
             </div>
           </div>
         </div>

@@ -95,31 +95,31 @@ export default function MetodologiPage() {
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E9EEF3", boxShadow: "0 0 0 2px #1D4ED8" }} />
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E9EEF3" }} />
                 <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E9EEF3" }} />
-                <div style={{ width: 44, height: 44, borderRadius: 12, border: "1.5px dashed rgba(15,23,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, color: "#94A3B8" }}>+XX</div>
+                <div style={{ width: 44, height: 44, borderRadius: 12, border: "1.5px dashed rgba(15,23,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, color: "#94A3B8" }}>+18</div>
               </div>
             </div>
             <div>
               <div className="k" style={{ marginBottom: 11 }}>Hasil baca AI</div>
               <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
                 <div className="row" style={{ justifyContent: "space-between", padding: "13px 16px", borderRadius: "12px 12px 0 0", background: "#fff", fontSize: 13 }}><span style={{ color: "#64748B" }}>Kategori (dinormalisasi)</span><span style={{ fontWeight: 600 }}>F&amp;B siap saji</span></div>
-                <div className="row" style={{ justifyContent: "space-between", padding: "13px 16px", background: "#fff", fontSize: 13 }}><span style={{ color: "#64748B" }}>Subtotal sebelum pajak</span><span style={{ color: "#94A3B8" }}>Rp XX.XXX — tidak dipakai</span></div>
-                <div className="row" style={{ justifyContent: "space-between", padding: "13px 16px", background: "#fff", fontSize: 13 }}><span style={{ color: "#64748B" }}>Waktu transaksi</span><span className="mono">XX.XX · slot 06–09</span></div>
-                <div className="row" style={{ justifyContent: "space-between", padding: "14px 16px", borderRadius: "0 0 14px 14px", background: "rgba(29,78,216,.1)", fontSize: 13 }}><span style={{ fontWeight: 600 }}>Jumlah dibayarkan → V</span><span className="mono" style={{ fontWeight: 700, color: "#1D4ED8" }}>Rp XX.XXX</span></div>
+                <div className="row" style={{ justifyContent: "space-between", padding: "13px 16px", background: "#fff", fontSize: 13 }}><span style={{ color: "#64748B" }}>Subtotal sebelum pajak</span><span style={{ color: "#94A3B8" }}>Rp 47.500 — tidak dipakai</span></div>
+                <div className="row" style={{ justifyContent: "space-between", padding: "13px 16px", background: "#fff", fontSize: 13 }}><span style={{ color: "#64748B" }}>Waktu transaksi</span><span className="mono">07.42 · slot 06–09</span></div>
+                <div className="row" style={{ justifyContent: "space-between", padding: "14px 16px", borderRadius: "0 0 14px 14px", background: "rgba(29,78,216,.1)", fontSize: 13 }}><span style={{ fontWeight: 600 }}>Jumlah dibayarkan → V</span><span className="mono" style={{ fontWeight: 700, color: "#1D4ED8" }}>Rp 42.000</span></div>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginTop: 14 }}>
                 <div style={{ borderRadius: 12, background: "#fff", padding: 16 }}>
                   <div className="k" style={{ fontSize: 9, marginBottom: 9 }}>Keyakinan bacaan</div>
-                  <div className="mono" style={{ font: "700 20px/1 var(--font-inter)" }}>0,XX</div>
+                  <div className="mono" style={{ font: "700 20px/1 var(--font-inter)" }}>0,91</div>
                   <div className="pill" style={{ height: 5, background: "rgba(15,23,42,.1)", marginTop: 10 }}><div className="pill" style={{ width: "84%", height: 5, background: "#1D4ED8" }} /></div>
                 </div>
                 <div style={{ borderRadius: 12, background: "#fff", padding: 16 }}>
                   <div className="k" style={{ fontSize: 9, marginBottom: 9 }}>Cakupan</div>
-                  <div className="mono" style={{ font: "700 20px/1 var(--font-inter)" }}>XX / XX</div>
+                  <div className="mono" style={{ font: "700 20px/1 var(--font-inter)" }}>182 / 196</div>
                   <div style={{ fontSize: 10.5, lineHeight: 1.4, color: "#64748B", marginTop: 7 }}>struk terbaca</div>
                 </div>
                 <div style={{ borderRadius: 12, background: "#fff", padding: 16 }}>
                   <div className="k" style={{ fontSize: 9, marginBottom: 9 }}>Dibuang</div>
-                  <div className="mono" style={{ font: "700 20px/1 var(--font-inter)" }}>X</div>
+                  <div className="mono" style={{ font: "700 20px/1 var(--font-inter)" }}>4</div>
                   <div style={{ fontSize: 10.5, lineHeight: 1.4, color: "#64748B", marginTop: 7 }}>bacaan ambigu</div>
                 </div>
               </div>
@@ -191,7 +191,7 @@ export default function MetodologiPage() {
         <div style={{ borderRadius: 12, background: "#0F172A", padding: 34, position: "relative", overflow: "hidden" }}>
           <div className="k" style={{ color: "#93C5FD", position: "relative", marginBottom: 22 }}>Yang kami buang, dan alasannya</div>
           <div style={{ display: "flex", flexDirection: "column", gap: 16, position: "relative" }}>
-            <div className="row" style={{ gap: 14, alignItems: "flex-start" }}><span className="dot" style={{ background: "#1D4ED8", marginTop: 7 }} /><div><div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Blok dengan selisih antar pencacah &gt; XX%</div><div style={{ fontSize: 12.5, lineHeight: 1.55, color: "rgba(255,255,255,.62)", marginTop: 4 }}>Blok diulang; bila tetap berselisih, slot itu tidak dipakai.</div></div></div>
+            <div className="row" style={{ gap: 14, alignItems: "flex-start" }}><span className="dot" style={{ background: "#1D4ED8", marginTop: 7 }} /><div><div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Blok dengan selisih antar pencacah &gt; 15%</div><div style={{ fontSize: 12.5, lineHeight: 1.55, color: "rgba(255,255,255,.62)", marginTop: 4 }}>Blok diulang; bila tetap berselisih, slot itu tidak dipakai.</div></div></div>
             <div className="row" style={{ gap: 14, alignItems: "flex-start" }}><span className="dot" style={{ background: "#475569", marginTop: 7 }} /><div><div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Struk yang tidak terbaca utuh</div><div style={{ fontSize: 12.5, lineHeight: 1.55, color: "rgba(255,255,255,.62)", marginTop: 4 }}>Tidak ditebak. Dikeluarkan dari perhitungan dan dilaporkan jumlahnya.</div></div></div>
             <div className="row" style={{ gap: 14, alignItems: "flex-start" }}><span className="dot" style={{ background: "#2563EB", marginTop: 7 }} /><div><div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Kawasan dengan sampel di bawah ambang</div><div style={{ fontSize: 12.5, lineHeight: 1.55, color: "rgba(255,255,255,.62)", marginTop: 4 }}>Ditandai sebagai sampel tipis, tidak diberi estimasi, dan tidak dibaca aman maupun bermasalah.</div></div></div>
             <div className="row" style={{ gap: 14, alignItems: "flex-start" }}><span className="dot" style={{ background: "#2563EB", marginTop: 7 }} /><div><div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Hari dengan gangguan operasi</div><div style={{ fontSize: 12.5, lineHeight: 1.55, color: "rgba(255,255,255,.62)", marginTop: 4 }}>Rekayasa lalu lintas atau gangguan perjalanan membuat arus tidak mewakili hari biasa.</div></div></div>
