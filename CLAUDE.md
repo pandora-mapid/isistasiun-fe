@@ -22,13 +22,22 @@ Note the `@AGENTS.md` import above: `AGENTS.md` is auto-generated and rewritten 
 Run from `fe/` (the actual project root — the repo lives at `D:\Lomba\MAPID\fe`, not the outer `D:\Lomba\MAPID`):
 
 ```bash
-npm run dev     # start dev server (http://localhost:3000)
-npm run build   # production build
-npm run start   # serve the production build
-npm run lint    # ESLint (flat config, eslint.config.mjs)
+npm run dev        # start dev server (http://localhost:3000)
+npm run build      # production build
+npm run start      # serve the production build
+npm run lint       # ESLint (flat config, eslint.config.mjs)
+npm test           # Playwright: style-spec validation + browser smoke tests
+npm run test:style # just the fast, browser-free layer validation
 ```
 
-There is no test script; none of the common frameworks (Jest, Vitest, Playwright) are installed.
+`predev`/`prebuild` run `scripts/copy-maplibre-worker.mjs` automatically — see the MapLibre worker note under Architecture.
+
+**Testing** is Playwright (`tests/`, config in `playwright.config.ts`), added because three separate map bugs each produced a blank map with *no error message at all* and sailed past both typecheck and lint:
+
+- `tests/map-style.spec.ts` — validates every layer spec against MapLibre's official validator. No browser, ~1s. Catches illegal expressions (e.g. `feature-state` inside `filter`, `["zoom"]` nested inside `case`).
+- `tests/peta.spec.ts` — real Chromium. Asserts features are actually **rendered** (`queryRenderedFeatures`), not merely that the page loaded, and that the isochrone filter changes what's drawn.
+
+Playwright reuses an already-running dev server, and starts one if there isn't one.
 
 ## Architecture
 
@@ -37,4 +46,11 @@ There is no test script; none of the common frameworks (Jest, Vitest, Playwright
 - **Path alias**: `@/*` maps to the project root (`./*`) per `tsconfig.json`.
 - **Fonts**: Inter (weights 400–900) loaded via `next/font/google` in `app/layout.tsx`, exposed as `--font-inter`.
 - **Linting**: flat ESLint config (`eslint.config.mjs`) extending `eslint-config-next`'s `core-web-vitals` and `typescript` rule sets.
+- **The map** (`/peta`): MapLibre GL JS v6, wired up in `components/MapCanvas.tsx`. Three conventions there are load-bearing and each one, when broken, yields a blank map with **no error message**:
+  - **`feature-state` is legal in `paint`, illegal in `filter`.** Analytics numbers reach the map via `setFeatureState`, so anything driven by them (gap colour/size, thin-sample styling) must be a paint expression. This is why thin-sample points share one layer with the rest and are distinguished by colour rather than filtered into their own layer.
+  - **`["zoom"]` may only be the input to a top-level `interpolate`/`step`** — never nested inside `case`. Hence `circleRadiusExpression()` puts the zoom interpolation outermost and the thin-sample `case` inside it.
+  - **MapLibre v6 ships its worker as a separate file** and derives its URL from `import.meta.url`. Under Turbopack that isn't an `http(s):` URL, so MapLibre falls back to `new Worker("")` — a worker pointing at the *page*, which silently does nothing: no tiles requested, no GeoJSON parsed. Fixed by `setWorkerUrl()` at module scope in `MapCanvas.tsx`, pointing at a copy that `scripts/copy-maplibre-worker.mjs` places in `public/maplibre/` (gitignored, regenerated on `predev`/`prebuild`). Don't hand-edit that folder.
+- **Map styling lives in exactly one file**, `lib/map/style.ts` — colours, radii, opacity, layer specs. `ROADMAP.md` §1 requires visuals be changeable without touching data/logic, so don't inline colour or size values in `MapCanvas.tsx`.
+- **Data access goes through `lib/data/source.ts`**, which currently reads mock files from `public/mock/` (generated, committed). Phase 2 swaps that one file for the Go API; nothing else should need to change. Shapes are in `lib/data/types.ts` and mirror `DATA_CONTRACT.md`. Note `MapCanvas` already joins geometry to analytics via `setFeatureState` even though both come from mocks — deliberately, so the Phase 2 switch to vector tiles doesn't require rewriting style expressions.
+- **Project docs**: `DATA_CONTRACT.md` (frontend ⇄ backend agreement) and `ROADMAP.md` (phased plan) are committed. `Proposal_IsiStasiun.pdf` and `BACKEND_TASK_DIVISION_3_PERSON.md` are gitignored — read them for context but never commit them.
 - **Typed route props**: `app/layout.tsx` takes `LayoutProps<"/">` (see its `children` prop), a globally-available type Next.js 16 generates per-route from `.next/types` — not an import. Page components would use the equivalent `PageProps<"...">`. None of the 5 `page.tsx` files need it yet (no dynamic segments), but reach for `PageProps<"/route">` rather than hand-rolling a props type if one gains params/searchParams.

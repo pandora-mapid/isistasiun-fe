@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Salinan bundle MapLibre (dihasilkan scripts/copy-maplibre-worker.mjs),
+    // bukan kode kita.
+    "public/maplibre/**",
+    // Keluaran Playwright.
+    "test-results/**",
+    "playwright-report/**",
   ]),
 ]);
 

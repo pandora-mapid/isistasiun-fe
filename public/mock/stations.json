@@ -1,0 +1,24 @@
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "name": "Manggarai",
+      "typology": "transit",
+      "point_count": 3
+    },
+    {
+      "id": 2,
+      "name": "Sudirman",
+      "typology": "perkantoran",
+      "point_count": 4
+    },
+    {
+      "id": 3,
+      "name": "Stasiun C (belum ditentukan)",
+      "typology": "hunian",
+      "point_count": 3
+    }
+  ],
+  "error": null
+}

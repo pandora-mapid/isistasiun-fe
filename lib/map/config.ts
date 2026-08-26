@@ -1,0 +1,100 @@
+/**
+ * Konstanta peta — hal-hal yang kemungkinan besar berubah saat pindah ke
+ * data sungguhan. Dikumpulkan di sini supaya Fase 2 hanya menyentuh berkas ini.
+ *
+ * Lihat DATA_CONTRACT.md dan ROADMAP.md §5.
+ */
+
+/**
+ * ⚠️ SEMENTARA — basemap penambal.
+ *
+ * Proposal §5.1 menetapkan GEO MAPID sebagai basemap utama, tetapi belum
+ * dipastikan apakah GEO MAPID menyediakan tile vektor yang bisa dikonsumsi
+ * MapLibre (lihat DATA_CONTRACT.md Bagian D).
+ *
+ * CARTO Positron dipakai sementara karena gratis, tanpa API key, dan skema
+ * abu-abunya paling dekat dengan bahasa desain Isi Stasiun — basemap OSM
+ * standar yang berwarna-warni akan bertabrakan dengan palet slate/biru.
+ *
+ * Menukarnya nanti cukup mengganti URL di bawah ini.
+ */
+export const BASEMAP_STYLE_URL =
+  "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+
+/**
+ * Pilihan basemap yang sudah diperiksa: gratis, tanpa API key, dan bisa
+ * dikonsumsi MapLibre. Disimpan di sini supaya keputusan basemap bisa dicoba
+ * langsung, bukan diperdebatkan di angan-angan.
+ *
+ * Semuanya sementara sampai kepastian GEO MAPID didapat.
+ */
+export const BASEMAP_CHOICES: Record<string, string> = {
+  positron: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+  voyager: "https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json",
+  liberty: "https://tiles.openfreemap.org/styles/liberty",
+  bright: "https://tiles.openfreemap.org/styles/bright",
+};
+
+/**
+ * Alamat basemap yang dipakai, dengan kemungkinan ditimpa lewat query param.
+ *
+ * Contoh: `/peta?basemap=voyager` — memudahkan tim membandingkan pilihan
+ * tanpa mengubah kode. Kalau nilainya tidak dikenali, kembali ke bawaan.
+ */
+export function resolveBasemapUrl(): string {
+  if (typeof window === "undefined") return BASEMAP_STYLE_URL;
+  const pilihan = new URLSearchParams(window.location.search).get("basemap");
+  return (pilihan && BASEMAP_CHOICES[pilihan]) || BASEMAP_STYLE_URL;
+}
+
+/** Nama source di dalam peta. Fase 2 menukar tipenya dari geojson ke vector. */
+export const SOURCE = {
+  points: "observation-points",
+  isochrones: "isochrones",
+} as const;
+
+/**
+ * Nama layer di dalam tile vektor.
+ *
+ * Untuk source GeoJSON (Fase 0–1) nilai ini tidak dipakai. Saat backend
+ * menyediakan tile, isi dengan nama `source-layer` sungguhan — lihat
+ * DATA_CONTRACT.md Bagian A2 nomor 3.
+ */
+export const SOURCE_LAYER = {
+  points: "observation_points",
+  isochrones: "isochrones",
+} as const;
+
+/**
+ * ID layer yang digambar di atas peta.
+ *
+ * Titik bersampel tipis tidak punya layer sendiri — dibedakan lewat paint di
+ * `point-circle`, karena filter tidak boleh memakai `feature-state`.
+ */
+export const LAYER = {
+  isochroneFill: "isochrone-fill",
+  isochroneLine: "isochrone-line",
+  pointCircle: "point-circle",
+  pointLabel: "point-label",
+} as const;
+
+/**
+ * Ruang yang harus dikosongkan saat peta menyesuaikan tampilan ke sekumpulan
+ * titik, supaya penanda tidak tertutup panel yang melayang di atas peta.
+ * Angkanya mengikuti tata letak di PetaScreen.
+ */
+export const FIT_PADDING = {
+  top: 72,
+  bottom: 200, // panel slot waktu + legenda
+  left: 96, // kontrol zoom
+  right: 470, // panel ringkasan (lebar 414 + jarak 24)
+} as const;
+
+/** Tampilan awal — dipakai sebelum data termuat. */
+export const INITIAL_VIEW = {
+  center: [106.8395, -6.2145] as [number, number],
+  zoom: 12.4,
+} as const;
+
+/** Kecepatan jalan kaki isochrone: 4,8 km/jam = 80 m/menit (ROADMAP §7). */
+export const CATCHMENT_MINUTES = [3, 5, 10] as const;

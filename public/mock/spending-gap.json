@@ -1,0 +1,881 @@
+{
+  "success": true,
+  "data": {
+    "generated_at": "2026-08-20T10:00:00Z",
+    "pipeline_version": "mock-0.1",
+    "day_type": "weekday",
+    "points": [
+      {
+        "point_id": 11,
+        "station_id": 1,
+        "total": {
+          "potensi": {
+            "p10": 790000,
+            "p50": 1010000,
+            "p90": 1390000
+          },
+          "tertangkap": {
+            "p10": 240000,
+            "p50": 310000,
+            "p90": 430000
+          },
+          "gap": {
+            "p10": 550000,
+            "p50": 700000,
+            "p90": 970000
+          }
+        },
+        "confidence": 0.77,
+        "sampel_tipis": false,
+        "sample_meta": {
+          "gerai_count": 5,
+          "blok_count": 2
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": 210000,
+              "p50": 270000,
+              "p90": 370000
+            },
+            "variables": {
+              "F": 380,
+              "E": 0.066,
+              "C": 0.63,
+              "V": 45000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": 110000,
+              "p50": 140000,
+              "p90": 190000
+            },
+            "variables": {
+              "F": 200,
+              "E": 0.066,
+              "C": 0.63,
+              "V": 45000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": 160000,
+              "p50": 200000,
+              "p90": 280000
+            },
+            "variables": {
+              "F": 290,
+              "E": 0.066,
+              "C": 0.63,
+              "V": 45000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": 70000,
+              "p50": 90000,
+              "p90": 120000
+            },
+            "variables": {
+              "F": 130,
+              "E": 0.066,
+              "C": 0.63,
+              "V": 45000
+            },
+            "sampel_tipis": false
+          }
+        ]
+      },
+      {
+        "point_id": 12,
+        "station_id": 1,
+        "total": {
+          "potensi": {
+            "p10": 3260000,
+            "p50": 4180000,
+            "p90": 5770000
+          },
+          "tertangkap": {
+            "p10": 1000000,
+            "p50": 1280000,
+            "p90": 1770000
+          },
+          "gap": {
+            "p10": 2260000,
+            "p50": 2900000,
+            "p90": 4000000
+          }
+        },
+        "confidence": 0.82,
+        "sampel_tipis": false,
+        "sample_meta": {
+          "gerai_count": 3,
+          "blok_count": 2
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": 860000,
+              "p50": 1100000,
+              "p90": 1520000
+            },
+            "variables": {
+              "F": 1574,
+              "E": 0.07,
+              "C": 0.66,
+              "V": 30000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": 450000,
+              "p50": 580000,
+              "p90": 800000
+            },
+            "variables": {
+              "F": 829,
+              "E": 0.07,
+              "C": 0.66,
+              "V": 30000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": 660000,
+              "p50": 840000,
+              "p90": 1160000
+            },
+            "variables": {
+              "F": 1201,
+              "E": 0.07,
+              "C": 0.66,
+              "V": 30000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": 300000,
+              "p50": 380000,
+              "p90": 520000
+            },
+            "variables": {
+              "F": 539,
+              "E": 0.07,
+              "C": 0.66,
+              "V": 30000
+            },
+            "sampel_tipis": false
+          }
+        ]
+      },
+      {
+        "point_id": 13,
+        "station_id": 1,
+        "total": {
+          "potensi": {
+            "p10": 2360000,
+            "p50": 3020000,
+            "p90": 4170000
+          },
+          "tertangkap": {
+            "p10": 720000,
+            "p50": 920000,
+            "p90": 1270000
+          },
+          "gap": {
+            "p10": 1640000,
+            "p50": 2100000,
+            "p90": 2900000
+          }
+        },
+        "confidence": 0.87,
+        "sampel_tipis": false,
+        "sample_meta": {
+          "gerai_count": 4,
+          "blok_count": 2
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": 620000,
+              "p50": 800000,
+              "p90": 1100000
+            },
+            "variables": {
+              "F": 1140,
+              "E": 0.074,
+              "C": 0.69,
+              "V": 33000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": 330000,
+              "p50": 420000,
+              "p90": 580000
+            },
+            "variables": {
+              "F": 600,
+              "E": 0.074,
+              "C": 0.69,
+              "V": 33000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": 480000,
+              "p50": 610000,
+              "p90": 840000
+            },
+            "variables": {
+              "F": 870,
+              "E": 0.074,
+              "C": 0.69,
+              "V": 33000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": 210000,
+              "p50": 270000,
+              "p90": 370000
+            },
+            "variables": {
+              "F": 390,
+              "E": 0.074,
+              "C": 0.69,
+              "V": 33000
+            },
+            "sampel_tipis": false
+          }
+        ]
+      },
+      {
+        "point_id": 21,
+        "station_id": 2,
+        "total": {
+          "potensi": {
+            "p10": 1230000,
+            "p50": 1580000,
+            "p90": 2180000
+          },
+          "tertangkap": {
+            "p10": 370000,
+            "p50": 480000,
+            "p90": 660000
+          },
+          "gap": {
+            "p10": 860000,
+            "p50": 1100000,
+            "p90": 1520000
+          }
+        },
+        "confidence": 0.77,
+        "sampel_tipis": false,
+        "sample_meta": {
+          "gerai_count": 3,
+          "blok_count": 2
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": 330000,
+              "p50": 420000,
+              "p90": 580000
+            },
+            "variables": {
+              "F": 597,
+              "E": 0.05,
+              "C": 0.63,
+              "V": 39000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": 170000,
+              "p50": 220000,
+              "p90": 300000
+            },
+            "variables": {
+              "F": 314,
+              "E": 0.05,
+              "C": 0.63,
+              "V": 39000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": 250000,
+              "p50": 320000,
+              "p90": 440000
+            },
+            "variables": {
+              "F": 456,
+              "E": 0.05,
+              "C": 0.63,
+              "V": 39000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": 110000,
+              "p50": 140000,
+              "p90": 190000
+            },
+            "variables": {
+              "F": 204,
+              "E": 0.05,
+              "C": 0.63,
+              "V": 39000
+            },
+            "sampel_tipis": false
+          }
+        ]
+      },
+      {
+        "point_id": 22,
+        "station_id": 2,
+        "total": {
+          "potensi": {
+            "p10": 670000,
+            "p50": 860000,
+            "p90": 1190000
+          },
+          "tertangkap": {
+            "p10": 200000,
+            "p50": 260000,
+            "p90": 360000
+          },
+          "gap": {
+            "p10": 470000,
+            "p50": 600000,
+            "p90": 830000
+          }
+        },
+        "confidence": 0.82,
+        "sampel_tipis": false,
+        "sample_meta": {
+          "gerai_count": 4,
+          "blok_count": 2
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": 180000,
+              "p50": 230000,
+              "p90": 320000
+            },
+            "variables": {
+              "F": 326,
+              "E": 0.054,
+              "C": 0.66,
+              "V": 42000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": 90000,
+              "p50": 120000,
+              "p90": 170000
+            },
+            "variables": {
+              "F": 171,
+              "E": 0.054,
+              "C": 0.66,
+              "V": 42000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": 130000,
+              "p50": 170000,
+              "p90": 230000
+            },
+            "variables": {
+              "F": 249,
+              "E": 0.054,
+              "C": 0.66,
+              "V": 42000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": 60000,
+              "p50": 80000,
+              "p90": 110000
+            },
+            "variables": {
+              "F": 111,
+              "E": 0.054,
+              "C": 0.66,
+              "V": 42000
+            },
+            "sampel_tipis": false
+          }
+        ]
+      },
+      {
+        "point_id": 23,
+        "station_id": 2,
+        "total": {
+          "potensi": {
+            "p10": null,
+            "p50": null,
+            "p90": null
+          },
+          "tertangkap": {
+            "p10": null,
+            "p50": null,
+            "p90": null
+          },
+          "gap": {
+            "p10": null,
+            "p50": null,
+            "p90": null
+          }
+        },
+        "confidence": 0.42,
+        "sampel_tipis": true,
+        "sample_meta": {
+          "gerai_count": 1,
+          "blok_count": 1
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "variables": null,
+            "sampel_tipis": true
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "variables": null,
+            "sampel_tipis": true
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "variables": null,
+            "sampel_tipis": true
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "variables": null,
+            "sampel_tipis": true
+          }
+        ]
+      },
+      {
+        "point_id": 24,
+        "station_id": 2,
+        "total": {
+          "potensi": {
+            "p10": 2020000,
+            "p50": 2590000,
+            "p90": 3570000
+          },
+          "tertangkap": {
+            "p10": 620000,
+            "p50": 790000,
+            "p90": 1090000
+          },
+          "gap": {
+            "p10": 1400000,
+            "p50": 1800000,
+            "p90": 2480000
+          }
+        },
+        "confidence": 0.92,
+        "sampel_tipis": false,
+        "sample_meta": {
+          "gerai_count": 3,
+          "blok_count": 2
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": 530000,
+              "p50": 680000,
+              "p90": 940000
+            },
+            "variables": {
+              "F": 977,
+              "E": 0.062,
+              "C": 0.72,
+              "V": 30000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": 280000,
+              "p50": 360000,
+              "p90": 500000
+            },
+            "variables": {
+              "F": 514,
+              "E": 0.062,
+              "C": 0.72,
+              "V": 30000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": 410000,
+              "p50": 520000,
+              "p90": 720000
+            },
+            "variables": {
+              "F": 746,
+              "E": 0.062,
+              "C": 0.72,
+              "V": 30000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": 180000,
+              "p50": 230000,
+              "p90": 320000
+            },
+            "variables": {
+              "F": 334,
+              "E": 0.062,
+              "C": 0.72,
+              "V": 30000
+            },
+            "sampel_tipis": false
+          }
+        ]
+      },
+      {
+        "point_id": 31,
+        "station_id": 3,
+        "total": {
+          "potensi": {
+            "p10": 1350000,
+            "p50": 1730000,
+            "p90": 2390000
+          },
+          "tertangkap": {
+            "p10": 410000,
+            "p50": 530000,
+            "p90": 730000
+          },
+          "gap": {
+            "p10": 940000,
+            "p50": 1200000,
+            "p90": 1660000
+          }
+        },
+        "confidence": 0.77,
+        "sampel_tipis": false,
+        "sample_meta": {
+          "gerai_count": 4,
+          "blok_count": 2
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": 360000,
+              "p50": 460000,
+              "p90": 630000
+            },
+            "variables": {
+              "F": 651,
+              "E": 0.062,
+              "C": 0.63,
+              "V": 33000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": 190000,
+              "p50": 240000,
+              "p90": 330000
+            },
+            "variables": {
+              "F": 343,
+              "E": 0.062,
+              "C": 0.63,
+              "V": 33000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": 270000,
+              "p50": 350000,
+              "p90": 480000
+            },
+            "variables": {
+              "F": 497,
+              "E": 0.062,
+              "C": 0.63,
+              "V": 33000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": 120000,
+              "p50": 160000,
+              "p90": 220000
+            },
+            "variables": {
+              "F": 223,
+              "E": 0.062,
+              "C": 0.63,
+              "V": 33000
+            },
+            "sampel_tipis": false
+          }
+        ]
+      },
+      {
+        "point_id": 32,
+        "station_id": 3,
+        "total": {
+          "potensi": {
+            "p10": 900000,
+            "p50": 1150000,
+            "p90": 1590000
+          },
+          "tertangkap": {
+            "p10": 270000,
+            "p50": 350000,
+            "p90": 480000
+          },
+          "gap": {
+            "p10": 620000,
+            "p50": 800000,
+            "p90": 1100000
+          }
+        },
+        "confidence": 0.82,
+        "sampel_tipis": false,
+        "sample_meta": {
+          "gerai_count": 5,
+          "blok_count": 2
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": 230000,
+              "p50": 300000,
+              "p90": 410000
+            },
+            "variables": {
+              "F": 434,
+              "E": 0.066,
+              "C": 0.66,
+              "V": 36000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": 120000,
+              "p50": 160000,
+              "p90": 220000
+            },
+            "variables": {
+              "F": 229,
+              "E": 0.066,
+              "C": 0.66,
+              "V": 36000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": 180000,
+              "p50": 230000,
+              "p90": 320000
+            },
+            "variables": {
+              "F": 331,
+              "E": 0.066,
+              "C": 0.66,
+              "V": 36000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": 80000,
+              "p50": 100000,
+              "p90": 140000
+            },
+            "variables": {
+              "F": 149,
+              "E": 0.066,
+              "C": 0.66,
+              "V": 36000
+            },
+            "sampel_tipis": false
+          }
+        ]
+      },
+      {
+        "point_id": 33,
+        "station_id": 3,
+        "total": {
+          "potensi": {
+            "p10": 510000,
+            "p50": 650000,
+            "p90": 900000
+          },
+          "tertangkap": {
+            "p10": 160000,
+            "p50": 200000,
+            "p90": 280000
+          },
+          "gap": {
+            "p10": 350000,
+            "p50": 450000,
+            "p90": 620000
+          }
+        },
+        "confidence": 0.87,
+        "sampel_tipis": false,
+        "sample_meta": {
+          "gerai_count": 3,
+          "blok_count": 2
+        },
+        "by_slot": [
+          {
+            "slot": "pagi",
+            "gap": {
+              "p10": 130000,
+              "p50": 170000,
+              "p90": 230000
+            },
+            "variables": {
+              "F": 244,
+              "E": 0.07,
+              "C": 0.69,
+              "V": 39000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "siang",
+            "gap": {
+              "p10": 70000,
+              "p50": 90000,
+              "p90": 120000
+            },
+            "variables": {
+              "F": 129,
+              "E": 0.07,
+              "C": 0.69,
+              "V": 39000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "sore",
+            "gap": {
+              "p10": 100000,
+              "p50": 130000,
+              "p90": 180000
+            },
+            "variables": {
+              "F": 186,
+              "E": 0.07,
+              "C": 0.69,
+              "V": 39000
+            },
+            "sampel_tipis": false
+          },
+          {
+            "slot": "malam",
+            "gap": {
+              "p10": 50000,
+              "p50": 60000,
+              "p90": 80000
+            },
+            "variables": {
+              "F": 84,
+              "E": 0.07,
+              "C": 0.69,
+              "V": 39000
+            },
+            "sampel_tipis": false
+          }
+        ]
+      }
+    ]
+  },
+  "error": null
+}
