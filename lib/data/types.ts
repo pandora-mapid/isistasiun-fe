@@ -43,11 +43,38 @@ export type IsochroneProps = {
   duration_min: number;
 };
 
+/** Uraian F × E × C × V untuk satu slot. */
+export type Variables = { F: number; E: number; C: number; V: number };
+
+/**
+ * Rincian satu kategori usaha di dalam satu slot.
+ *
+ * `gerai_count` dan `nilai_transaksi` tidak berubah antar slot — keduanya ikut
+ * di tiap slot karena begitulah bentuk yang wajar keluar dari satu query
+ * agregat, dan menyalinnya lebih murah daripada menyatukan dua sumber.
+ */
+export type CategoryAnalytics = {
+  category: CategoryKey;
+  gap: Range;
+  potensi: Range;
+  tertangkap: Range;
+  /** Porsi permintaan kawasan untuk kategori ini, 0–1. */
+  demand_share: number;
+  /** Jumlah gerai kategori ini di dalam simpul. */
+  gerai_count: number;
+  /** Nilai transaksi rata-rata (V) kategori ini. */
+  nilai_transaksi: number;
+  sampel_tipis: boolean;
+};
+
 export type SlotAnalytics = {
   slot: SlotKey;
   gap: Range;
-  variables: { F: number; E: number; C: number; V: number } | null;
+  potensi: Range;
+  tertangkap: Range;
+  variables: Variables | null;
   sampel_tipis: boolean;
+  by_category: CategoryAnalytics[];
 };
 
 /** Hasil analisis satu titik pengamatan. */
@@ -62,6 +89,8 @@ export type PointAnalytics = {
   confidence: number;
   sampel_tipis: boolean;
   sample_meta: { gerai_count: number; blok_count: number };
+  /** Bahan mentah di balik nilai V — dipakai panel transparansi. */
+  evidence: { struk_total: number; struk_ambigu: number; struk_terbaca: number };
   by_slot: SlotAnalytics[];
 };
 
@@ -86,7 +115,22 @@ export type Station = {
  * hasil analisis. Nama kuncinya dibaca oleh ekspresi di `lib/map/style.ts`.
  */
 export type PointFeatureState = {
+  /** Kesenjangan yang sedang ditampilkan (mengikuti slot & kategori aktif). */
   gap: number;
+  /** Potensi yang sedang ditampilkan — dipakai lapisan cincin potensi. */
+  potensi: number;
   sampel_tipis: boolean;
   confidence: number;
+};
+
+/**
+ * Keadaan sesaat sebuah titik: sedang disorot kursor atau sedang dipilih.
+ *
+ * Dipisah dari `PointFeatureState` karena umurnya berbeda — yang satu ikut
+ * data, yang satu ikut kursor — walau keduanya sama-sama disetel lewat
+ * `setFeatureState` dan dibaca dari `paint`.
+ */
+export type PointInteractionState = {
+  hover?: boolean;
+  terpilih?: boolean;
 };

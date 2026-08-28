@@ -13,9 +13,9 @@
 
 Roadmap ini menetapkan **urutan kerja**, bukan jadwal. Tidak ada tanggal di sini — yang diatur adalah apa yang harus selesai sebelum apa, supaya tidak ada kerja yang terbuang karena dikerjakan terlalu dini.
 
-Kondisi sekarang (**Fase 0 selesai**): halaman `/peta` sudah menampilkan peta MapLibre sungguhan di atas basemap OpenFreeMap Liberty, dengan titik pengamatan dan isochrone yang tergambar dari data contoh di `public/mock/`, filter kawasan tangkapan yang berfungsi, dan kontrol kamera 3D. Empat halaman lain masih mockup statis. Seluruh angka masih data contoh. Belum ada koneksi ke backend.
+Kondisi sekarang (**Fase 0 dan Fase 1 selesai**): halaman `/peta` sudah menampilkan peta MapLibre sungguhan di atas basemap OpenFreeMap Liberty, dan **seluruh interaksinya berfungsi memakai data contoh** — slot waktu dan kategori mengubah angka di panel sekaligus warna dan ukuran titik di peta, klik titik mengisi panel ringkasan, panel lapisan menghidupkan dan mematikan layer peta, legenda mengikuti rentang data yang sedang aktif, dan panel transparansi terbuka dari titik yang sedang dipilih. Empat halaman lain masih mockup statis. Seluruh angka masih data contoh. Belum ada koneksi ke backend.
 
-**Berikutnya: Fase 1 (§3)** — menyambungkan interaksi yang sudah ada di UI ke peta dan ke data, masih memakai data contoh.
+**Berikutnya: JEDA (§4).** Fase 2 menunggu kesiapan backend. Selama jeda, pekerjaan visual di §6 dan utang teknis di §7 bebas dikerjakan.
 
 Tujuan roadmap ini: membawa proyek dari **mockup statis** menjadi **WebGIS yang berfungsi**, tanpa pernah terblokir menunggu pihak lain.
 
@@ -78,19 +78,23 @@ Karena semuanya pekerjaan visual, semuanya aman dikerjakan di jeda tanpa menggan
 
 **Masih memakai data contoh.** Tujuannya membuat seluruh interaksi bekerja sebelum ada backend, supaya saat Fase 2 tiba hanya ada satu hal baru yang perlu didebug.
 
-| # | Pekerjaan |
-|---|---|
-| 1.1 | Filter slot waktu mengubah angka yang ditampilkan |
-| 1.2 | Klik titik pengamatan → panel ringkasan terisi sesuai titik tersebut |
-| 1.3 | Panel lapisan: hidup/matikan tiap lapisan peta |
-| 1.4 | Filter kategori usaha mengubah tampilan titik |
-| 1.5 | Legenda mengikuti skala data yang sedang aktif, bukan angka mati |
-| 1.6 | Keadaan hover dan terpilih pada titik |
-| 1.7 | Panel transparansi terbuka dari titik yang sedang dipilih |
+| # | Pekerjaan | Status |
+|---|---|---|
+| 1.1 | Filter slot waktu mengubah angka yang ditampilkan | ✅ |
+| 1.2 | Klik titik pengamatan → panel ringkasan terisi sesuai titik tersebut | ✅ |
+| 1.3 | Panel lapisan: hidup/matikan tiap lapisan peta | ✅ sebagian — lihat catatan |
+| 1.4 | Filter kategori usaha mengubah tampilan titik | ✅ |
+| 1.5 | Legenda mengikuti skala data yang sedang aktif, bukan angka mati | ✅ |
+| 1.6 | Keadaan hover dan terpilih pada titik | ✅ |
+| 1.7 | Panel transparansi terbuka dari titik yang sedang dipilih | ✅ |
 
 > **Catatan:** filter kategori dan slot **tidak menyembunyikan titik**, hanya mengubah warna dan ukurannya. Ini konsekuensi batasan `feature-state` di MapLibre, dan tidak masalah karena hanya ada ±15 titik yang semuanya memang selalu relevan ditampilkan. Lihat `DATA_CONTRACT.md` §A1.
 
-**Selesai ketika:** seluruh interaksi di halaman Peta berfungsi penuh memakai data contoh — sehingga halaman itu sudah bisa didemokan apa adanya.
+> **Catatan 1.3 — empat baris lapisan sengaja dimatikan.** Dari tujuh baris di panel, hanya tiga yang punya data: **Kesenjangan belanja**, **Potensi belanja**, dan **Kepercayaan data**. Ketiganya benar-benar menghidupkan dan mematikan layer peta. Empat sisanya — *Kategori hilang*, *Arus pintu stasiun*, *Indeks sewa / arus*, *Event & aktivasi* — tidak punya layer karena datanya memang belum ada, jadi panelnya menandainya "belum ada data" dan tidak bisa diklik. Ini pilihan sadar: sakelar yang menyala tapi tidak mengubah apa pun lebih buruk daripada sakelar yang jujur mati.
+>
+> Kawasan tangkapan (isochrone) juga tidak diberi baris sendiri — kemunculannya sudah ditentukan tombol 3/5/10 menit.
+
+**Selesai ketika:** seluruh interaksi di halaman Peta berfungsi penuh memakai data contoh — sehingga halaman itu sudah bisa didemokan apa adanya. ✅ **Tercapai.**
 
 ---
 
@@ -130,8 +134,11 @@ Fitur-fitur yang **dijanjikan di proposal** tapi belum ada di kode. Sebagian bis
 | 3.4 | **Tabel atribut** | §3.2 | ⚠️ Sebagian |
 | 3.5 | **Bandingkan dua simpul berdampingan** | §3.2 | ⚠️ Sebagian |
 | 3.6 | **Copilot AI** tersambung ke `POST /copilot/query` | §3.4 | ✅ Ya |
+| 3.7 | **Pembanding akhir pekan** — proposal menjanjikan satu sampel akhir pekan sebagai pembanding. UI-nya sudah ada tempatnya di panel slot (ditandai "belum dicacah"), tapi belum ada datanya dan belum ada cara memilihnya | §5.2 | ✅ Ya — butuh survei akhir pekan + `day_type` dari backend |
 
 > Tombol "Bandingkan", "Tabel atribut", "Unduh brief", dan "Brief PDF" di UI sekarang sengaja dibuat mati. Semuanya adalah janji proposal, bukan hiasan — jadi perlu masuk daftar pekerjaan sadar, bukan dilupakan.
+
+> **Catatan 3.7.** `day_type` sudah ada di `lib/data/types.ts` sejak Fase 0, tapi nilainya selalu `weekday` dan tidak ada satu pun kendali yang mengubahnya. Jadi jenis hari sekarang adalah sumbu yang terpasang di tipe data tapi belum terpasang di UI — perlu diputuskan bentuk kendalinya saat datanya ada.
 
 ---
 
@@ -143,8 +150,10 @@ Kecil-kecil, bisa disisipkan kapan saja. Semuanya aman dikerjakan saat jeda.
 |---|---|
 | **Angka "n < 30" di halaman Insight** | Dikarang saat mengganti placeholder, tidak ada di proposal. Aturan sebenarnya (§5.2): minimal 3 gerai × 2 blok per kategori per stasiun. Bertentangan dengan metodologi sendiri kalau dibiarkan |
 | **Seluruh angka masih data contoh** | Wajar untuk sekarang, tapi footer tiap halaman harus tetap menyatakan "angka bersifat ilustratif" sampai data asli masuk |
-| **Slot "sore" tertulis 16–19** | Proposal §5.2 menyebut 16.00–18.59. Perbedaannya kosmetik, tapi perlu konsisten |
+| ~~**Slot "sore" tertulis 16–19**~~ | ✅ Selesai di Fase 1. `lib/data/dimensions.ts` memisahkan `label` (tulisan di tombol, tetap "16–19" mengikuti desain) dari `jam` (rentang sesungguhnya, "16.00–18.59"), dan `jam` muncul sebagai tooltip tombol serta di panel transparansi |
 | **Tipologi Manggarai** | Proposal menyebut tiga tipologi, Manggarai adalah kasus transit. Perlu diputuskan tim — memengaruhi halaman Insight |
+| **`F × E × C × V` tidak menghasilkan `gap`** | Di data contoh, mengalikan keempat variabel tidak menghasilkan angka kesenjangan yang ditampilkan di sebelahnya — keduanya dikarang terpisah saat Fase 0. Panelnya jujur menampilkan apa yang ada di data, jadi ini bukan bug kode, tapi bertabrakan dengan janji "setiap angka bisa dilacak" (§9 nomor 4). Perlu diputuskan saat Fase 2: backend mengirim variabel yang konsisten, atau data contohnya yang diturunkan dari rumus |
+| **Empat baris lapisan tanpa data** | *Kategori hilang*, *Arus pintu*, *Indeks sewa*, *Event* — lihat catatan §3. `Arus pintu` sebenarnya sudah punya angkanya (variabel `F` per slot), hanya belum diputuskan bentuk visualnya di peta |
 
 ---
 

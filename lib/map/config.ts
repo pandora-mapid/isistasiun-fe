@@ -75,9 +75,42 @@ export const SOURCE_LAYER = {
 export const LAYER = {
   isochroneFill: "isochrone-fill",
   isochroneLine: "isochrone-line",
+  pointConfidence: "point-confidence",
+  pointPotensi: "point-potensi",
   pointCircle: "point-circle",
   pointLabel: "point-label",
 } as const;
+
+/**
+ * Urutan menggambar, dari bawah ke atas.
+ *
+ * Halo kepercayaan paling bawah supaya tidak menutupi apa pun; cincin potensi
+ * di atasnya sebagai bingkai; lingkaran kesenjangan di atas keduanya karena
+ * itulah yang dibaca lebih dulu; label paling atas.
+ */
+export const LAYER_ORDER = [
+  LAYER.isochroneFill,
+  LAYER.isochroneLine,
+  LAYER.pointConfidence,
+  LAYER.pointPotensi,
+  LAYER.pointCircle,
+  LAYER.pointLabel,
+] as const;
+
+/**
+ * Baris di panel "Lapisan & filter" → layer peta yang benar-benar dihidupkan
+ * dan dimatikan olehnya.
+ *
+ * Pemetaan ini tinggal di sini, bukan di dalam komponen, supaya menambah layer
+ * peta tidak menuntut mengubah panel — dan sebaliknya. Baris panel yang tidak
+ * ada di daftar ini memang belum punya layer: datanya belum ada, dan panelnya
+ * menandainya begitu alih-alih memasang sakelar yang tidak melakukan apa pun.
+ */
+export const LAYER_GROUPS: Record<string, readonly string[]> = {
+  gap: [LAYER.pointCircle, LAYER.pointLabel],
+  potensi: [LAYER.pointPotensi],
+  kepercayaan: [LAYER.pointConfidence],
+};
 
 /**
  * Ruang yang harus dikosongkan saat peta menyesuaikan tampilan ke sekumpulan

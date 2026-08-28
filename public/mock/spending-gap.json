@@ -45,7 +45,129 @@
               "C": 0.63,
               "V": 45000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 90000,
+              "p50": 120000,
+              "p90": 170000
+            },
+            "potensi": {
+              "p10": 310000,
+              "p50": 390000,
+              "p90": 540000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "tertangkap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "potensi": {
+                  "p10": 140000,
+                  "p50": 180000,
+                  "p90": 250000
+                },
+                "demand_share": 0.4666,
+                "gerai_count": 4,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "demand_share": 0.1837,
+                "gerai_count": 3,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1061,
+                "gerai_count": 1,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1257,
+                "gerai_count": 2,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.1179,
+                "gerai_count": 3,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": false
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -60,7 +182,129 @@
               "C": 0.63,
               "V": 45000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 50000,
+              "p50": 60000,
+              "p90": 80000
+            },
+            "potensi": {
+              "p10": 160000,
+              "p50": 200000,
+              "p90": 280000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "demand_share": 0.4073,
+                "gerai_count": 4,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.205,
+                "gerai_count": 3,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.1118,
+                "gerai_count": 1,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.164,
+                "gerai_count": 2,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.1118,
+                "gerai_count": 3,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": false
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -75,7 +319,129 @@
               "C": 0.63,
               "V": 45000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 70000,
+              "p50": 90000,
+              "p90": 120000
+            },
+            "potensi": {
+              "p10": 230000,
+              "p50": 290000,
+              "p90": 400000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "potensi": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "demand_share": 0.3525,
+                "gerai_count": 4,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.2449,
+                "gerai_count": 3,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.128,
+                "gerai_count": 1,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1633,
+                "gerai_count": 2,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.1113,
+                "gerai_count": 3,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": false
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -90,9 +456,136 @@
               "C": 0.63,
               "V": 45000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 30000,
+              "p50": 40000,
+              "p90": 60000
+            },
+            "potensi": {
+              "p10": 100000,
+              "p50": 130000,
+              "p90": 180000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.4078,
+                "gerai_count": 4,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.2254,
+                "gerai_count": 3,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.1405,
+                "gerai_count": 1,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "demand_share": 0.1093,
+                "gerai_count": 2,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "demand_share": 0.1171,
+                "gerai_count": 3,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": false
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 285,
+          "struk_ambigu": 6,
+          "struk_terbaca": 279
+        }
       },
       {
         "point_id": 12,
@@ -134,7 +627,129 @@
               "C": 0.66,
               "V": 30000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 380000,
+              "p50": 480000,
+              "p90": 660000
+            },
+            "potensi": {
+              "p10": 1230000,
+              "p50": 1580000,
+              "p90": 2180000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 270000,
+                  "p50": 340000,
+                  "p90": 470000
+                },
+                "tertangkap": {
+                  "p10": 250000,
+                  "p50": 320000,
+                  "p90": 440000
+                },
+                "potensi": {
+                  "p10": 510000,
+                  "p50": 660000,
+                  "p90": 910000
+                },
+                "demand_share": 0.4666,
+                "gerai_count": 3,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 130000,
+                  "p50": 170000,
+                  "p90": 230000
+                },
+                "tertangkap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "potensi": {
+                  "p10": 190000,
+                  "p50": 250000,
+                  "p90": 350000
+                },
+                "demand_share": 0.1837,
+                "gerai_count": 2,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 230000,
+                  "p50": 300000,
+                  "p90": 410000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 230000,
+                  "p50": 300000,
+                  "p90": 410000
+                },
+                "demand_share": 0.1061,
+                "gerai_count": 0,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 140000,
+                  "p50": 180000,
+                  "p90": 250000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 160000,
+                  "p50": 210000,
+                  "p90": 290000
+                },
+                "demand_share": 0.1257,
+                "gerai_count": 1,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "tertangkap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "potensi": {
+                  "p10": 120000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "demand_share": 0.1179,
+                "gerai_count": 2,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -149,7 +764,129 @@
               "C": 0.66,
               "V": 30000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 200000,
+              "p50": 260000,
+              "p90": 360000
+            },
+            "potensi": {
+              "p10": 660000,
+              "p50": 840000,
+              "p90": 1160000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 120000,
+                  "p50": 150000,
+                  "p90": 210000
+                },
+                "tertangkap": {
+                  "p10": 120000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "potensi": {
+                  "p10": 240000,
+                  "p50": 310000,
+                  "p90": 430000
+                },
+                "demand_share": 0.4073,
+                "gerai_count": 3,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "tertangkap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "potensi": {
+                  "p10": 120000,
+                  "p50": 150000,
+                  "p90": 210000
+                },
+                "demand_share": 0.205,
+                "gerai_count": 2,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 120000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 120000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "demand_share": 0.1118,
+                "gerai_count": 0,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 170000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 110000,
+                  "p50": 140000,
+                  "p90": 190000
+                },
+                "demand_share": 0.164,
+                "gerai_count": 1,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.1118,
+                "gerai_count": 2,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -164,7 +901,129 @@
               "C": 0.66,
               "V": 30000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 290000,
+              "p50": 370000,
+              "p90": 510000
+            },
+            "potensi": {
+              "p10": 940000,
+              "p50": 1210000,
+              "p90": 1670000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 140000,
+                  "p50": 180000,
+                  "p90": 250000
+                },
+                "tertangkap": {
+                  "p10": 160000,
+                  "p50": 210000,
+                  "p90": 290000
+                },
+                "potensi": {
+                  "p10": 300000,
+                  "p50": 390000,
+                  "p90": 540000
+                },
+                "demand_share": 0.3525,
+                "gerai_count": 3,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 130000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "tertangkap": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "potensi": {
+                  "p10": 190000,
+                  "p50": 250000,
+                  "p90": 350000
+                },
+                "demand_share": 0.2449,
+                "gerai_count": 2,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 210000,
+                  "p50": 270000,
+                  "p90": 370000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 210000,
+                  "p50": 270000,
+                  "p90": 370000
+                },
+                "demand_share": 0.128,
+                "gerai_count": 0,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 130000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 150000,
+                  "p50": 190000,
+                  "p90": 260000
+                },
+                "demand_share": 0.1633,
+                "gerai_count": 1,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "potensi": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "demand_share": 0.1113,
+                "gerai_count": 2,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -179,9 +1038,136 @@
               "C": 0.66,
               "V": 30000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 130000,
+              "p50": 170000,
+              "p90": 240000
+            },
+            "potensi": {
+              "p10": 430000,
+              "p50": 550000,
+              "p90": 760000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "tertangkap": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "potensi": {
+                  "p10": 150000,
+                  "p50": 190000,
+                  "p90": 260000
+                },
+                "demand_share": 0.4078,
+                "gerai_count": 3,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "potensi": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "demand_share": 0.2254,
+                "gerai_count": 2,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "demand_share": 0.1405,
+                "gerai_count": 0,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.1093,
+                "gerai_count": 1,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.1171,
+                "gerai_count": 2,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": true
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 180,
+          "struk_ambigu": 4,
+          "struk_terbaca": 176
+        }
       },
       {
         "point_id": 13,
@@ -223,7 +1209,129 @@
               "C": 0.69,
               "V": 33000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 270000,
+              "p50": 350000,
+              "p90": 480000
+            },
+            "potensi": {
+              "p10": 900000,
+              "p50": 1150000,
+              "p90": 1590000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 220000,
+                  "p50": 280000,
+                  "p90": 380000
+                },
+                "tertangkap": {
+                  "p10": 170000,
+                  "p50": 220000,
+                  "p90": 300000
+                },
+                "potensi": {
+                  "p10": 390000,
+                  "p50": 500000,
+                  "p90": 690000
+                },
+                "demand_share": 0.4666,
+                "gerai_count": 4,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "tertangkap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "potensi": {
+                  "p10": 150000,
+                  "p50": 190000,
+                  "p90": 260000
+                },
+                "demand_share": 0.1837,
+                "gerai_count": 3,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 120000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 130000,
+                  "p50": 170000,
+                  "p90": 230000
+                },
+                "demand_share": 0.1061,
+                "gerai_count": 1,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 160000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 120000,
+                  "p50": 150000,
+                  "p90": 210000
+                },
+                "demand_share": 0.1257,
+                "gerai_count": 2,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 110000,
+                  "p50": 140000,
+                  "p90": 190000
+                },
+                "demand_share": 0.1179,
+                "gerai_count": 2,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -238,7 +1346,129 @@
               "C": 0.69,
               "V": 33000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 140000,
+              "p50": 180000,
+              "p90": 250000
+            },
+            "potensi": {
+              "p10": 470000,
+              "p50": 600000,
+              "p90": 830000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 170000
+                },
+                "tertangkap": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "potensi": {
+                  "p10": 170000,
+                  "p50": 220000,
+                  "p90": 300000
+                },
+                "demand_share": 0.4073,
+                "gerai_count": 4,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "potensi": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 170000
+                },
+                "demand_share": 0.205,
+                "gerai_count": 3,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "demand_share": 0.1118,
+                "gerai_count": 1,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "demand_share": 0.164,
+                "gerai_count": 2,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "demand_share": 0.1118,
+                "gerai_count": 2,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -253,7 +1483,129 @@
               "C": 0.69,
               "V": 33000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 210000,
+              "p50": 270000,
+              "p90": 370000
+            },
+            "potensi": {
+              "p10": 690000,
+              "p50": 880000,
+              "p90": 1220000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 110000,
+                  "p50": 140000,
+                  "p90": 190000
+                },
+                "tertangkap": {
+                  "p10": 110000,
+                  "p50": 140000,
+                  "p90": 190000
+                },
+                "potensi": {
+                  "p10": 220000,
+                  "p50": 280000,
+                  "p90": 390000
+                },
+                "demand_share": 0.3525,
+                "gerai_count": 4,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "tertangkap": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "potensi": {
+                  "p10": 160000,
+                  "p50": 200000,
+                  "p90": 280000
+                },
+                "demand_share": 0.2449,
+                "gerai_count": 3,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 110000,
+                  "p50": 140000,
+                  "p90": 190000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 120000,
+                  "p50": 150000,
+                  "p90": 210000
+                },
+                "demand_share": 0.128,
+                "gerai_count": 1,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 170000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 120000,
+                  "p50": 150000,
+                  "p90": 210000
+                },
+                "demand_share": 0.1633,
+                "gerai_count": 2,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "demand_share": 0.1113,
+                "gerai_count": 2,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -268,9 +1620,136 @@
               "C": 0.69,
               "V": 33000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 90000,
+              "p50": 120000,
+              "p90": 170000
+            },
+            "potensi": {
+              "p10": 300000,
+              "p50": 390000,
+              "p90": 540000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "potensi": {
+                  "p10": 110000,
+                  "p50": 140000,
+                  "p90": 190000
+                },
+                "demand_share": 0.4078,
+                "gerai_count": 4,
+                "nilai_transaksi": 40000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.2254,
+                "gerai_count": 3,
+                "nilai_transaksi": 26500,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.1405,
+                "gerai_count": 1,
+                "nilai_transaksi": 52000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.1093,
+                "gerai_count": 2,
+                "nilai_transaksi": 33000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1171,
+                "gerai_count": 2,
+                "nilai_transaksi": 24000,
+                "sampel_tipis": true
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 264,
+          "struk_ambigu": 6,
+          "struk_terbaca": 258
+        }
       },
       {
         "point_id": 21,
@@ -312,7 +1791,129 @@
               "C": 0.63,
               "V": 39000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 140000,
+              "p50": 180000,
+              "p90": 250000
+            },
+            "potensi": {
+              "p10": 470000,
+              "p50": 600000,
+              "p90": 830000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 120000,
+                  "p50": 150000,
+                  "p90": 210000
+                },
+                "tertangkap": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "potensi": {
+                  "p10": 220000,
+                  "p50": 280000,
+                  "p90": 390000
+                },
+                "demand_share": 0.5087,
+                "gerai_count": 5,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.1483,
+                "gerai_count": 3,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "demand_share": 0.1221,
+                "gerai_count": 1,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.124,
+                "gerai_count": 2,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.0969,
+                "gerai_count": 3,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -327,7 +1928,129 @@
               "C": 0.63,
               "V": 39000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 80000,
+              "p50": 100000,
+              "p90": 140000
+            },
+            "potensi": {
+              "p10": 250000,
+              "p50": 320000,
+              "p90": 440000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "potensi": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 170000
+                },
+                "demand_share": 0.4476,
+                "gerai_count": 5,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1668,
+                "gerai_count": 3,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.1297,
+                "gerai_count": 1,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.1631,
+                "gerai_count": 2,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.0927,
+                "gerai_count": 3,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -342,7 +2065,129 @@
               "C": 0.63,
               "V": 39000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 110000,
+              "p50": 140000,
+              "p90": 190000
+            },
+            "potensi": {
+              "p10": 360000,
+              "p50": 460000,
+              "p90": 630000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "potensi": {
+                  "p10": 120000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "demand_share": 0.3914,
+                "gerai_count": 5,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "demand_share": 0.2013,
+                "gerai_count": 3,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "demand_share": 0.15,
+                "gerai_count": 1,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.164,
+                "gerai_count": 2,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.0932,
+                "gerai_count": 3,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -357,9 +2202,136 @@
               "C": 0.63,
               "V": 39000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 50000,
+              "p50": 60000,
+              "p90": 80000
+            },
+            "potensi": {
+              "p10": 160000,
+              "p50": 200000,
+              "p90": 280000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.4481,
+                "gerai_count": 5,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.1833,
+                "gerai_count": 3,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1629,
+                "gerai_count": 1,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.1086,
+                "gerai_count": 2,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.097,
+                "gerai_count": 3,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 306,
+          "struk_ambigu": 7,
+          "struk_terbaca": 299
+        }
       },
       {
         "point_id": 22,
@@ -401,7 +2373,129 @@
               "C": 0.66,
               "V": 42000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 80000,
+              "p50": 110000,
+              "p90": 150000
+            },
+            "potensi": {
+              "p10": 260000,
+              "p50": 340000,
+              "p90": 470000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "tertangkap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "potensi": {
+                  "p10": 120000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "demand_share": 0.5087,
+                "gerai_count": 4,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1483,
+                "gerai_count": 4,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1221,
+                "gerai_count": 2,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.124,
+                "gerai_count": 3,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.0969,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -416,7 +2510,129 @@
               "C": 0.66,
               "V": 42000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 40000,
+              "p50": 50000,
+              "p90": 70000
+            },
+            "potensi": {
+              "p10": 130000,
+              "p50": 170000,
+              "p90": 240000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "demand_share": 0.4476,
+                "gerai_count": 4,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.1668,
+                "gerai_count": 4,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.1297,
+                "gerai_count": 2,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.1631,
+                "gerai_count": 3,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.0927,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -431,7 +2647,129 @@
               "C": 0.66,
               "V": 42000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 50000,
+              "p50": 70000,
+              "p90": 100000
+            },
+            "potensi": {
+              "p10": 190000,
+              "p50": 240000,
+              "p90": 330000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.3914,
+                "gerai_count": 4,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.2013,
+                "gerai_count": 4,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.15,
+                "gerai_count": 2,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.164,
+                "gerai_count": 3,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.0932,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -446,9 +2784,136 @@
               "C": 0.66,
               "V": 42000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 20000,
+              "p50": 30000,
+              "p90": 40000
+            },
+            "potensi": {
+              "p10": 90000,
+              "p50": 110000,
+              "p90": 150000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.4481,
+                "gerai_count": 4,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.1833,
+                "gerai_count": 4,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.1629,
+                "gerai_count": 2,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "demand_share": 0.1086,
+                "gerai_count": 3,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "demand_share": 0.097,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 327,
+          "struk_ambigu": 7,
+          "struk_terbaca": 320
+        }
       },
       {
         "point_id": 23,
@@ -485,7 +2950,129 @@
               "p90": null
             },
             "variables": null,
-            "sampel_tipis": true
+            "sampel_tipis": true,
+            "potensi": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "tertangkap": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.5087,
+                "gerai_count": 1,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.1483,
+                "gerai_count": 0,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.1221,
+                "gerai_count": 0,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.124,
+                "gerai_count": 0,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.0969,
+                "gerai_count": 1,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -495,7 +3082,129 @@
               "p90": null
             },
             "variables": null,
-            "sampel_tipis": true
+            "sampel_tipis": true,
+            "potensi": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "tertangkap": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.4476,
+                "gerai_count": 1,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.1668,
+                "gerai_count": 0,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.1297,
+                "gerai_count": 0,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.1631,
+                "gerai_count": 0,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.0927,
+                "gerai_count": 1,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -505,7 +3214,129 @@
               "p90": null
             },
             "variables": null,
-            "sampel_tipis": true
+            "sampel_tipis": true,
+            "potensi": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "tertangkap": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.3914,
+                "gerai_count": 1,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.2013,
+                "gerai_count": 0,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.15,
+                "gerai_count": 0,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.164,
+                "gerai_count": 0,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.0932,
+                "gerai_count": 1,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -515,18 +3346,145 @@
               "p90": null
             },
             "variables": null,
-            "sampel_tipis": true
+            "sampel_tipis": true,
+            "potensi": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "tertangkap": {
+              "p10": null,
+              "p50": null,
+              "p90": null
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.4481,
+                "gerai_count": 1,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.1833,
+                "gerai_count": 0,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.1629,
+                "gerai_count": 0,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.1086,
+                "gerai_count": 0,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "tertangkap": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "potensi": {
+                  "p10": null,
+                  "p50": null,
+                  "p90": null
+                },
+                "demand_share": 0.097,
+                "gerai_count": 1,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 54,
+          "struk_ambigu": 1,
+          "struk_terbaca": 53
+        }
       },
       {
         "point_id": 24,
         "station_id": 2,
         "total": {
           "potensi": {
-            "p10": 2020000,
-            "p50": 2590000,
-            "p90": 3570000
+            "p10": 2010000,
+            "p50": 2580000,
+            "p90": 3560000
           },
           "tertangkap": {
             "p10": 620000,
@@ -534,9 +3492,9 @@
             "p90": 1090000
           },
           "gap": {
-            "p10": 1400000,
-            "p50": 1800000,
-            "p90": 2480000
+            "p10": 1390000,
+            "p50": 1790000,
+            "p90": 2470000
           }
         },
         "confidence": 0.92,
@@ -559,7 +3517,129 @@
               "C": 0.72,
               "V": 30000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 240000,
+              "p50": 300000,
+              "p90": 410000
+            },
+            "potensi": {
+              "p10": 760000,
+              "p50": 980000,
+              "p90": 1350000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 160000,
+                  "p50": 210000,
+                  "p90": 290000
+                },
+                "tertangkap": {
+                  "p10": 160000,
+                  "p50": 210000,
+                  "p90": 290000
+                },
+                "potensi": {
+                  "p10": 330000,
+                  "p50": 420000,
+                  "p90": 580000
+                },
+                "demand_share": 0.5087,
+                "gerai_count": 3,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "tertangkap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "potensi": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "demand_share": 0.1483,
+                "gerai_count": 2,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 160000,
+                  "p50": 210000,
+                  "p90": 290000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 160000,
+                  "p50": 210000,
+                  "p90": 290000
+                },
+                "demand_share": 0.1221,
+                "gerai_count": 0,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "demand_share": 0.124,
+                "gerai_count": 1,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "demand_share": 0.0969,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -574,7 +3654,129 @@
               "C": 0.72,
               "V": 30000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 130000,
+              "p50": 160000,
+              "p90": 220000
+            },
+            "potensi": {
+              "p10": 410000,
+              "p50": 520000,
+              "p90": 720000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "tertangkap": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "potensi": {
+                  "p10": 160000,
+                  "p50": 210000,
+                  "p90": 290000
+                },
+                "demand_share": 0.4476,
+                "gerai_count": 3,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.1668,
+                "gerai_count": 2,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "demand_share": 0.1297,
+                "gerai_count": 0,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.1631,
+                "gerai_count": 1,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.0927,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -589,7 +3791,129 @@
               "C": 0.72,
               "V": 30000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 180000,
+              "p50": 230000,
+              "p90": 320000
+            },
+            "potensi": {
+              "p10": 580000,
+              "p50": 750000,
+              "p90": 1030000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 170000
+                },
+                "tertangkap": {
+                  "p10": 110000,
+                  "p50": 140000,
+                  "p90": 190000
+                },
+                "potensi": {
+                  "p10": 200000,
+                  "p50": 260000,
+                  "p90": 360000
+                },
+                "demand_share": 0.3914,
+                "gerai_count": 3,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "potensi": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "demand_share": 0.2013,
+                "gerai_count": 2,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 140000,
+                  "p50": 180000,
+                  "p90": 250000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 140000,
+                  "p50": 180000,
+                  "p90": 250000
+                },
+                "demand_share": 0.15,
+                "gerai_count": 0,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 170000
+                },
+                "demand_share": 0.164,
+                "gerai_count": 1,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.0932,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -604,18 +3928,145 @@
               "C": 0.72,
               "V": 30000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 80000,
+              "p50": 100000,
+              "p90": 140000
+            },
+            "potensi": {
+              "p10": 260000,
+              "p50": 330000,
+              "p90": 450000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "potensi": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 170000
+                },
+                "demand_share": 0.4481,
+                "gerai_count": 3,
+                "nilai_transaksi": 42000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1833,
+                "gerai_count": 2,
+                "nilai_transaksi": 28000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 130000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "demand_share": 0.1629,
+                "gerai_count": 0,
+                "nilai_transaksi": 55000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.1086,
+                "gerai_count": 1,
+                "nilai_transaksi": 35000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.097,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 180,
+          "struk_ambigu": 4,
+          "struk_terbaca": 176
+        }
       },
       {
         "point_id": 31,
         "station_id": 3,
         "total": {
           "potensi": {
-            "p10": 1350000,
-            "p50": 1730000,
-            "p90": 2390000
+            "p10": 1360000,
+            "p50": 1740000,
+            "p90": 2400000
           },
           "tertangkap": {
             "p10": 410000,
@@ -623,9 +4074,9 @@
             "p90": 730000
           },
           "gap": {
-            "p10": 940000,
-            "p50": 1200000,
-            "p90": 1660000
+            "p10": 950000,
+            "p50": 1210000,
+            "p90": 1670000
           }
         },
         "confidence": 0.77,
@@ -648,7 +4099,129 @@
               "C": 0.63,
               "V": 33000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 150000,
+              "p50": 200000,
+              "p90": 280000
+            },
+            "potensi": {
+              "p10": 520000,
+              "p50": 660000,
+              "p90": 910000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 160000
+                },
+                "tertangkap": {
+                  "p10": 90000,
+                  "p50": 110000,
+                  "p90": 150000
+                },
+                "potensi": {
+                  "p10": 180000,
+                  "p50": 230000,
+                  "p90": 320000
+                },
+                "demand_share": 0.3803,
+                "gerai_count": 4,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "tertangkap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "potensi": {
+                  "p10": 110000,
+                  "p50": 140000,
+                  "p90": 190000
+                },
+                "demand_share": 0.2241,
+                "gerai_count": 3,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 110000,
+                  "p50": 140000,
+                  "p90": 190000
+                },
+                "demand_share": 0.1643,
+                "gerai_count": 1,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "demand_share": 0.1298,
+                "gerai_count": 2,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.1014,
+                "gerai_count": 2,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -663,7 +4236,129 @@
               "C": 0.63,
               "V": 33000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 90000,
+              "p50": 110000,
+              "p90": 150000
+            },
+            "potensi": {
+              "p10": 270000,
+              "p50": 350000,
+              "p90": 480000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "potensi": {
+                  "p10": 80000,
+                  "p50": 100000,
+                  "p90": 140000
+                },
+                "demand_share": 0.3252,
+                "gerai_count": 4,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.2451,
+                "gerai_count": 3,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.1697,
+                "gerai_count": 1,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1659,
+                "gerai_count": 2,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.0943,
+                "gerai_count": 2,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -678,7 +4373,129 @@
               "C": 0.63,
               "V": 33000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 120000,
+              "p50": 150000,
+              "p90": 210000
+            },
+            "potensi": {
+              "p10": 390000,
+              "p50": 500000,
+              "p90": 690000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "potensi": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 170000
+                },
+                "demand_share": 0.274,
+                "gerai_count": 4,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "potensi": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "demand_share": 0.2849,
+                "gerai_count": 3,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 90000,
+                  "p50": 120000,
+                  "p90": 160000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 100000,
+                  "p50": 130000,
+                  "p90": 180000
+                },
+                "demand_share": 0.189,
+                "gerai_count": 1,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.1607,
+                "gerai_count": 2,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.0913,
+                "gerai_count": 2,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -693,18 +4510,145 @@
               "C": 0.63,
               "V": 33000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 50000,
+              "p50": 70000,
+              "p90": 100000
+            },
+            "potensi": {
+              "p10": 180000,
+              "p50": 230000,
+              "p90": 320000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.3201,
+                "gerai_count": 4,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.2648,
+                "gerai_count": 3,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "demand_share": 0.2095,
+                "gerai_count": 1,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.1086,
+                "gerai_count": 2,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.097,
+                "gerai_count": 2,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": true
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 264,
+          "struk_ambigu": 6,
+          "struk_terbaca": 258
+        }
       },
       {
         "point_id": 32,
         "station_id": 3,
         "total": {
           "potensi": {
-            "p10": 900000,
-            "p50": 1150000,
-            "p90": 1590000
+            "p10": 890000,
+            "p50": 1140000,
+            "p90": 1580000
           },
           "tertangkap": {
             "p10": 270000,
@@ -712,9 +4656,9 @@
             "p90": 480000
           },
           "gap": {
-            "p10": 620000,
-            "p50": 800000,
-            "p90": 1100000
+            "p10": 610000,
+            "p50": 790000,
+            "p90": 1090000
           }
         },
         "confidence": 0.82,
@@ -737,7 +4681,129 @@
               "C": 0.66,
               "V": 36000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 110000,
+              "p50": 140000,
+              "p90": 190000
+            },
+            "potensi": {
+              "p10": 340000,
+              "p50": 440000,
+              "p90": 610000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "tertangkap": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "potensi": {
+                  "p10": 130000,
+                  "p50": 160000,
+                  "p90": 220000
+                },
+                "demand_share": 0.3803,
+                "gerai_count": 5,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 70000,
+                  "p50": 90000,
+                  "p90": 120000
+                },
+                "demand_share": 0.2241,
+                "gerai_count": 4,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.1643,
+                "gerai_count": 2,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "demand_share": 0.1298,
+                "gerai_count": 2,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.1014,
+                "gerai_count": 3,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": false
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -752,7 +4818,129 @@
               "C": 0.66,
               "V": 36000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 50000,
+              "p50": 70000,
+              "p90": 100000
+            },
+            "potensi": {
+              "p10": 180000,
+              "p50": 230000,
+              "p90": 320000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.3252,
+                "gerai_count": 5,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.2451,
+                "gerai_count": 4,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.1697,
+                "gerai_count": 2,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1659,
+                "gerai_count": 2,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.0943,
+                "gerai_count": 3,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": false
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -767,7 +4955,129 @@
               "C": 0.66,
               "V": 36000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 80000,
+              "p50": 100000,
+              "p90": 140000
+            },
+            "potensi": {
+              "p10": 260000,
+              "p50": 330000,
+              "p90": 460000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.274,
+                "gerai_count": 5,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.2849,
+                "gerai_count": 4,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 60000,
+                  "p50": 80000,
+                  "p90": 110000
+                },
+                "demand_share": 0.189,
+                "gerai_count": 2,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.1607,
+                "gerai_count": 2,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.0913,
+                "gerai_count": 3,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": false
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -782,9 +5092,136 @@
               "C": 0.66,
               "V": 36000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 30000,
+              "p50": 40000,
+              "p90": 50000
+            },
+            "potensi": {
+              "p10": 110000,
+              "p50": 140000,
+              "p90": 190000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.3201,
+                "gerai_count": 5,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.2648,
+                "gerai_count": 4,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.2095,
+                "gerai_count": 2,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.1086,
+                "gerai_count": 2,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "demand_share": 0.097,
+                "gerai_count": 3,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": false
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 348,
+          "struk_ambigu": 8,
+          "struk_terbaca": 340
+        }
       },
       {
         "point_id": 33,
@@ -826,7 +5263,129 @@
               "C": 0.69,
               "V": 39000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 60000,
+              "p50": 70000,
+              "p90": 100000
+            },
+            "potensi": {
+              "p10": 190000,
+              "p50": 240000,
+              "p90": 330000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 70000,
+                  "p90": 100000
+                },
+                "demand_share": 0.3803,
+                "gerai_count": 3,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.2241,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 50000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.1643,
+                "gerai_count": 1,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.1298,
+                "gerai_count": 1,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.1014,
+                "gerai_count": 2,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "siang",
@@ -841,7 +5400,129 @@
               "C": 0.69,
               "V": 39000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 30000,
+              "p50": 40000,
+              "p90": 60000
+            },
+            "potensi": {
+              "p10": 100000,
+              "p50": 130000,
+              "p90": 180000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "potensi": {
+                  "p10": 40000,
+                  "p50": 50000,
+                  "p90": 70000
+                },
+                "demand_share": 0.3252,
+                "gerai_count": 3,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.2451,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.1697,
+                "gerai_count": 1,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.1659,
+                "gerai_count": 1,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "demand_share": 0.0943,
+                "gerai_count": 2,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "sore",
@@ -856,7 +5537,129 @@
               "C": 0.69,
               "V": 39000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 50000,
+              "p50": 60000,
+              "p90": 80000
+            },
+            "potensi": {
+              "p10": 150000,
+              "p50": 190000,
+              "p90": 260000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.274,
+                "gerai_count": 3,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 50000,
+                  "p50": 60000,
+                  "p90": 80000
+                },
+                "demand_share": 0.2849,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.189,
+                "gerai_count": 1,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 30000,
+                  "p50": 40000,
+                  "p90": 60000
+                },
+                "demand_share": 0.1607,
+                "gerai_count": 1,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.0913,
+                "gerai_count": 2,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": true
+              }
+            ]
           },
           {
             "slot": "malam",
@@ -871,9 +5674,136 @@
               "C": 0.69,
               "V": 39000
             },
-            "sampel_tipis": false
+            "sampel_tipis": false,
+            "tertangkap": {
+              "p10": 20000,
+              "p50": 30000,
+              "p90": 40000
+            },
+            "potensi": {
+              "p10": 70000,
+              "p50": 90000,
+              "p90": 120000
+            },
+            "by_category": [
+              {
+                "category": "fnb",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 30000,
+                  "p90": 40000
+                },
+                "demand_share": 0.3201,
+                "gerai_count": 3,
+                "nilai_transaksi": 38000,
+                "sampel_tipis": false
+              },
+              {
+                "category": "ritel",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.2648,
+                "gerai_count": 2,
+                "nilai_transaksi": 25000,
+                "sampel_tipis": true
+              },
+              {
+                "category": "apotek",
+                "gap": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 20000,
+                  "p50": 20000,
+                  "p90": 30000
+                },
+                "demand_share": 0.2095,
+                "gerai_count": 1,
+                "nilai_transaksi": 49500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "jasa",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "demand_share": 0.1086,
+                "gerai_count": 1,
+                "nilai_transaksi": 31500,
+                "sampel_tipis": true
+              },
+              {
+                "category": "lainnya",
+                "gap": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "tertangkap": {
+                  "p10": 0,
+                  "p50": 0,
+                  "p90": 0
+                },
+                "potensi": {
+                  "p10": 10000,
+                  "p50": 10000,
+                  "p90": 10000
+                },
+                "demand_share": 0.097,
+                "gerai_count": 2,
+                "nilai_transaksi": 22500,
+                "sampel_tipis": true
+              }
+            ]
           }
-        ]
+        ],
+        "evidence": {
+          "struk_total": 201,
+          "struk_ambigu": 4,
+          "struk_terbaca": 197
+        }
       }
     ]
   },

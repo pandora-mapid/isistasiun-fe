@@ -228,3 +228,209 @@ test("filter kawasan tangkapan hanya menampilkan durasi yang dipilih", async ({
   await page.getByText("3 mnt", { exact: true }).click();
   await expect.poll(renderedDurations, { timeout: 15_000 }).toEqual([3]);
 });
+
+/* -------------------------------------------------------------------------
+ * Fase 1 — interaksi
+ *
+ * Yang diperiksa di sini bukan "tombolnya bisa diklik", melainkan bahwa klik
+ * itu benar-benar mengubah apa yang tergambar atau apa yang tertulis. Tiga
+ * bug peta sebelumnya semuanya lolos karena halaman tetap terbuka dengan
+ * rapi sementara petanya sudah berhenti bekerja.
+ * ---------------------------------------------------------------------- */
+
+/** Nilai feature-state satu titik, seperti yang benar-benar dibaca MapLibre. */
+async function featureState(page: Page, id: number) {
+  return page.evaluate((pointId) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (window as unknown as { __map?: any }).__map;
+    return map.getFeatureState({ source: "observation-points", id: pointId });
+  }, id);
+}
+
+/** Seluruh nilai gap yang sedang tertempel di titik, terurut. */
+async function gapStates(page: Page) {
+  return page.evaluate(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (window as unknown as { __map?: any }).__map;
+    return map
+      .queryRenderedFeatures({ layers: ["point-circle"] })
+      .map((f: { id: number }) =>
+        map.getFeatureState({ source: "observation-points", id: f.id }).gap,
+      )
+      .sort((a: number, b: number) => a - b);
+  });
+}
+
+test("filter slot waktu mengubah angka yang ditempel ke peta", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  // Angka baru menempel setelah feature-state diterapkan.
+  await expect
+    .poll(async () => (await gapStates(page)).some((v: number) => v > 0), {
+      timeout: 15_000,
+    })
+    .toBe(true);
+
+  const pagi = await gapStates(page);
+  await page.getByRole("button", { name: "16–19" }).click();
+  await expect.poll(() => gapStates(page), { timeout: 15_000 }).not.toEqual(pagi);
+
+  // Panel ringkasan menyebut slot yang sedang aktif, bukan slot mati.
+  await expect(page.getByText("Brief simpul · 16–19")).toBeVisible();
+});
+
+test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  /**
+   * Titik dan posisi layarnya, langsung dari peta.
+   *
+   * `map.project()` menghasilkan koordinat relatif terhadap kanvas, sedangkan
+   * `page.mouse` memakai koordinat viewport — dan kanvas peta duduk di bawah
+   * navbar. Tanpa menambahkan offset kanvas, kliknya meleset beberapa puluh
+   * piksel ke atas dan tidak mengenai apa pun.
+   *
+   * Titik juga harus dipilih yang tidak tertutup panel melayang, karena panel
+   * itu yang akan menerima kliknya.
+   */
+  const target = await page.evaluate(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (window as unknown as { __map?: any }).__map;
+    const rect = map.getCanvas().getBoundingClientRect();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const feats = map.queryRenderedFeatures({ layers: ["point-circle"] }) as any[];
+
+    for (const f of feats) {
+      // Titik yang BUKAN pilihan awal, supaya perubahannya benar-benar terlihat.
+      const state = map.getFeatureState({ source: "observation-points", id: f.id });
+      if (state.terpilih) continue;
+
+      const p = map.project(f.geometry.coordinates);
+      const x = rect.left + p.x;
+      const y = rect.top + p.y;
+      // Sisi kanan ditempati panel ringkasan, sisi bawah panel slot & legenda.
+      if (x > window.innerWidth - 480) continue;
+      if (y > window.innerHeight - 230 || y < rect.top + 60) continue;
+
+      return { id: f.id as number, label: f.properties.point_label as string, x, y };
+    }
+    return null;
+  });
+
+  expect(target, "tidak ada titik yang bebas dari panel untuk diklik").not.toBeNull();
+  await page.mouse.click(target!.x, target!.y);
+
+  // Peta menandai titiknya terpilih…
+  await expect
+    .poll(async () => (await featureState(page, target!.id)).terpilih, {
+      timeout: 10_000,
+    })
+    .toBe(true);
+
+  // …dan panelnya menyebut titik itu.
+  await expect(
+    page.getByText(target!.label, { exact: false }).first(),
+  ).toBeVisible();
+});
+
+test("panel lapisan menghidupkan dan mematikan layer peta", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  /** Visibility satu layer seperti yang tercatat di style peta. */
+  const visibility = (id: string) =>
+    page.evaluate((layerId) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const map = (window as unknown as { __map?: any }).__map;
+      return map.getLayoutProperty(layerId, "visibility");
+    }, id);
+
+  await page.locator(".layers-toggle").click();
+
+  // "Potensi belanja" mati secara bawaan — menyalakannya harus terlihat.
+  await expect.poll(() => visibility("point-potensi")).toBe("none");
+  await page.locator(".lyr").filter({ hasText: "Potensi belanja" }).click();
+  await expect.poll(() => visibility("point-potensi")).toBe("visible");
+
+  // Mematikan lapisan kesenjangan menyembunyikan lingkarannya.
+  await page.locator(".lyr").filter({ hasText: "Kesenjangan belanja" }).click();
+  await expect.poll(() => visibility("point-circle")).toBe("none");
+});
+
+test("filter kategori mengubah tampilan titik tanpa menyembunyikannya", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  const jumlahAwal = await page.evaluate(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (window as unknown as { __map?: any }).__map;
+    return map.queryRenderedFeatures({ layers: ["point-circle"] }).length;
+  });
+  await expect
+    .poll(async () => (await gapStates(page)).some((v: number) => v > 0), {
+      timeout: 15_000,
+    })
+    .toBe(true);
+  const semua = await gapStates(page);
+
+  await page.locator(".layers-toggle").click();
+  await page.getByText("Apotek", { exact: true }).click();
+
+  // Angkanya berubah…
+  await expect.poll(() => gapStates(page), { timeout: 15_000 }).not.toEqual(semua);
+
+  // …tapi jumlah titik yang tergambar TETAP. Ini konsekuensi batasan
+  // feature-state di MapLibre, dan memang disengaja (ROADMAP §3).
+  const jumlahSesudah = await page.evaluate(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (window as unknown as { __map?: any }).__map;
+    return map.queryRenderedFeatures({ layers: ["point-circle"] }).length;
+  });
+  expect(jumlahSesudah).toBe(jumlahAwal);
+});
+
+test("legenda mengikuti skala data yang sedang aktif", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.locator(".layers-toggle").click();
+  const legenda = page.locator("text=/^Kesenjangan · /");
+  await expect(legenda).toBeVisible();
+
+  /** Batas atas legenda, sebagaimana tertulis di layar. */
+  const batasAtas = () =>
+    page.evaluate(() => {
+      const semua = [...document.querySelectorAll(".mono span")]
+        .map((el) => el.textContent ?? "")
+        .filter((t) => t.startsWith("Rp "));
+      return semua[semua.length - 1] ?? "";
+    });
+
+  const sebelum = await batasAtas();
+  expect(sebelum).not.toBe("");
+
+  // Menyaring ke satu kategori mengecilkan angkanya — legenda harus ikut,
+  // bukan tetap memajang batas mati "> Rp 4.000.000".
+  await page.getByText("Apotek", { exact: true }).click();
+  await expect.poll(batasAtas, { timeout: 15_000 }).not.toBe(sebelum);
+});
+
+test("panel transparansi terbuka dari titik yang sedang dipilih", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.getByText("Lihat bukti →").click();
+  const dialog = page.getByText("Panel transparansi ·");
+  await expect(dialog).toBeVisible();
+
+  // Judulnya menyebut nilai V yang sedang berlaku — bukan angka contoh mati.
+  await expect(page.getByText(/Dari mana angka V = Rp [\d.]+ berasal/)).toBeVisible();
+});

@@ -124,6 +124,16 @@ Semuanya pertanyaan, bukan permintaan:
 | 6 | Angka gap tersedia per slot waktu, atau hanya total harian? | Menentukan apakah tombol slot waktu bisa mengubah angka |
 | 7 | Titik bersampel tipis dikirim seperti apa? | Lihat C1 |
 | 8 | Ada rincian per kategori, atau hanya agregat? | Menentukan isi panel transparansi |
+| 9 | Akhir pekan dikirim bagaimana — payload terpisah ber-`day_type`, atau parameter query? | Proposal menjanjikan satu sampel akhir pekan sebagai pembanding (§5.2). Frontend sudah punya field `day_type`, tapi belum tahu cara memintanya |
+
+> **Catatan — bentuk yang sekarang ditembak frontend.** Selama Fase 1, data contoh dilengkapi supaya seluruh interaksi bisa dibangun. Bentuk di bawah ini **tebakan, bukan permintaan**:
+>
+> - tiap titik punya `by_slot[]`, dan tiap slot membawa `gap`, `potensi`, `tertangkap`, `variables`, serta `by_category[]`
+> - tiap entri `by_category[]` membawa `gap`/`potensi`/`tertangkap`, `demand_share`, `gerai_count`, `nilai_transaksi`, dan `sampel_tipis`
+> - tiap titik punya `evidence` (`struk_total`, `struk_terbaca`, `struk_ambigu`) untuk panel transparansi
+> - `sampel_tipis` per kategori mengikuti ambang proposal §5.2: kurang dari 3 gerai, atau kurang dari 2 blok
+>
+> Kalau backend memakai bentuk lain, yang berubah hanya `lib/data/types.ts` dan `lib/data/source.ts`. **Yang benar-benar dibutuhkan cuma dua:** angka gap tersedia per slot **dan** per kategori (kalau hanya agregat, filter kategori tidak bisa berfungsi), serta ada flag yang membedakan "tidak diestimasi" dari "hasilnya nol" (lihat C1).
 
 ---
 
