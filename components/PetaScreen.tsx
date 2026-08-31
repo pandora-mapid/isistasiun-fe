@@ -137,7 +137,8 @@ const QUESTIONS = [
 ];
 
 export function PetaScreen() {
-  const { points, isochrones, analytics, stations, error } = usePetaData();
+  const { points, isochrones, analytics, stations, entrances, error } =
+    usePetaData();
 
   const [tab, setTab] = useState<"brief" | "copilot">("brief");
   const [layersOpen, setLayersOpen] = useState(false);
@@ -217,22 +218,27 @@ export function PetaScreen() {
     return out;
   }, [metrics]);
 
-  /** Nama tiap titik, diambil dari geometri (bukan dari hasil analisis). */
+  /**
+   * Nama tiap titik dan tiap stasiun.
+   *
+   * Keduanya dibaca dari **atribut**, bukan dari geometri. Selama geometri
+   * masih GeoJSON, browser kebetulan memegang daftar fitur lengkap sehingga
+   * nama bisa diambil dari sana — tetapi begitu geometri pindah ke tile
+   * vektor, yang diterima hanya fitur di dalam layar. Panel akan menampilkan
+   * `#24` alih-alih "Pintu 4" untuk titik yang sedang tidak terlihat, dan
+   * gejalanya sulit dilacak. Lihat ROADMAP §4.1.
+   */
   const pointLabels = useMemo(() => {
     const out = new Map<number, string>();
-    for (const f of points?.features ?? []) {
-      out.set(f.properties.id, f.properties.point_label);
-    }
+    for (const e of entrances ?? []) out.set(e.id, e.point_label);
     return out;
-  }, [points]);
+  }, [entrances]);
 
   const stationNames = useMemo(() => {
     const out = new Map<number, string>();
-    for (const f of points?.features ?? []) {
-      out.set(f.properties.station_id, f.properties.station_name);
-    }
+    for (const st of stations ?? []) out.set(st.id, st.name);
     return out;
-  }, [points]);
+  }, [stations]);
 
   const visibleLayers = useMemo(
     () => activeLayers.flatMap((key) => LAYER_GROUPS[key] ?? []),

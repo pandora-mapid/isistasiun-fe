@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| Versi | `0.1` |
-| Tanggal | 26 Agustus 2026 |
+| Versi | `0.2` |
+| Tanggal | 31 Agustus 2026 |
 | Cakupan | Frontend saja (Next.js + MapLibre GL JS) |
-| Dokumen terkait | [`DATA_CONTRACT.md`](DATA_CONTRACT.md) |
+| Dokumen terkait | [`DATA_CONTRACT.md`](DATA_CONTRACT.md) · [`USER_FLOW.md`](USER_FLOW.md) |
 
 ---
 
@@ -15,7 +15,14 @@ Roadmap ini menetapkan **urutan kerja**, bukan jadwal. Tidak ada tanggal di sini
 
 Kondisi sekarang (**Fase 0 dan Fase 1 selesai**): halaman `/peta` sudah menampilkan peta MapLibre sungguhan di atas basemap OpenFreeMap Liberty, dan **seluruh interaksinya berfungsi memakai data contoh** — slot waktu dan kategori mengubah angka di panel sekaligus warna dan ukuran titik di peta, klik titik mengisi panel ringkasan, panel lapisan menghidupkan dan mematikan layer peta, legenda mengikuti rentang data yang sedang aktif, dan panel transparansi terbuka dari titik yang sedang dipilih. Empat halaman lain masih mockup statis. Seluruh angka masih data contoh. Belum ada koneksi ke backend.
 
-**Berikutnya: JEDA (§4).** Fase 2 menunggu kesiapan backend. Selama jeda, pekerjaan visual di §6 dan utang teknis di §7 bebas dikerjakan.
+**Berikutnya: JEDA (§4).** Fase 2 menunggu kesiapan backend — tile dan endpoint-nya belum ada, jadi belum ada yang bisa disambung.
+
+Dua hal berubah sejak versi `0.1`, keduanya menambah pekerjaan yang bisa diselesaikan **selama jeda**:
+
+- **Arsitektur sudah disepakati** — frontend menembak dua sumber terpisah: atribut lewat Go `/api/v1`, geometri lewat CDN tile. Dari situ ketahuan ada beberapa ketergantungan tersembunyi di kode frontend yang lebih murah dibereskan sekarang daripada nanti (§4.1).
+- **Basemap GEO MAPID sudah pasti bisa dipakai** — MAPID menyediakan endpoint GL Style, yang memang format yang dibaca MapLibre. Pertanyaan terbuka di [`DATA_CONTRACT.md`](DATA_CONTRACT.md) Bagian D terjawab, dan penukaran basemap tidak lagi perlu menunggu Fase 2. Tim memutuskan basemap **disajikan lewat proxy backend**, bukan diambil browser langsung (§4.4). Sisi frontend-nya sudah selesai dan diuji langsung ke MAPID — seluruh pemeriksaan lolos, termasuk font dan POI.
+
+Satu hal yang justru **mengecil** setelah `02-BACKEND-SPEC.md` dan `04-VALUE-PROP-AND-MONETIZATION.md` dibaca: **autentikasi bukan prasyarat Fase 2.** Seluruh fitur yang sudah dibangun berada di tier gratis, dan lapisan dasarnya wajib terbuka demi equity UMKM (Locus Charter). Auth menyusul bersama fitur premium, sebagai jalur terpisah — lihat §6.1.
 
 Tujuan roadmap ini: membawa proyek dari **mockup statis** menjadi **WebGIS yang berfungsi**, tanpa pernah terblokir menunggu pihak lain.
 
@@ -98,25 +105,98 @@ Karena semuanya pekerjaan visual, semuanya aman dikerjakan di jeda tanpa menggan
 
 ---
 
-## 4. ⏸️ JEDA — lihat §1
+## 4. ⏸️ JEDA — posisi sekarang
 
-Setelah Fase 1 selesai, proyek masuk masa tunggu backend. Selama jeda ini pekerjaan visual bebas dilakukan. Fase 2 baru dimulai ketika backend siap.
+Fase 1 selesai, dan proyek masuk masa tunggu backend. **Fase 2 tetap baru dimulai setelah backend siap** — bukan sekarang. Tile dan endpoint-nya belum ada.
+
+Yang berubah dari rencana semula: jeda ini **tidak lagi hanya untuk pekerjaan visual**. Setelah arsitektur disepakati, ada beberapa persiapan yang bisa diselesaikan tanpa menyentuh backend sama sekali — dan mengerjakannya sekarang membuat Fase 2 jauh lebih pendek.
+
+| # | Pekerjaan | Kenapa dikerjakan sekarang |
+|---|---|---|
+| **4.1** | **Lepaskan ketergantungan pada daftar fitur lengkap** | Yang paling penting. Lihat catatan di bawah |
+| 4.2 | Pindahkan seluruh URL ke variabel lingkungan, sediakan `.env.example` | Sekarang tidak ada satu pun env var; semua alamat ditulis mati. Harus beres sebelum ada alamat yang berbeda antara lokal dan produksi |
+| 4.3 | Jadikan bounding box awal sebuah konstanta di `lib/map/config.ts` | Siap ditimpa nilai dari TileJSON nanti, tanpa mengubah komponen |
+| 4.4 | **Siapkan basemap GEO MAPID lewat proxy** (dulu butir 2.7) | ✅ **Sisi frontend selesai.** Alamat lewat env var, jalan keluar langsung tersedia, dan seluruh pemeriksaan basemap lolos. Tinggal menunggu proxy backend. Lihat dua catatan di bawah |
+| 4.5 | Responsivitas (§6 butir 3.1), ekspor CSV/PDF (3.2 dan 3.3), utang teknis §7 | Murni frontend, seperti rencana semula |
+
+> **Catatan 4.1 — ketergantungan tersembunyi yang paling mahal kalau ditunda.**
+> Selama geometri datang sebagai GeoJSON, browser memegang **seluruh daftar fitur**. Tiga tempat di kode memanfaatkan itu:
+>
+> | Yang dipakai | Untuk apa |
+> |---|---|
+> | `points.features` → `pointLabels` | Nama titik ("Pintu 4") di panel dan daftar |
+> | `points.features` → `stationNames` | Nama stasiun di judul brief |
+> | `points.features` → `fitBounds` | Pandangan awal supaya semua titik terlihat |
+>
+> Dengan tile vektor, daftar itu **tidak ada lagi** — browser hanya menerima fitur yang kebetulan masuk layar. Ketiganya harus pindah ke API (`GET /stations`, `GET /stations/:id/entrances`), dan itu **bisa dikerjakan sekarang memakai data contoh**.
+>
+> Kalau ditunda sampai tile datang, gejalanya menyesatkan dan sulit dilacak: peta terbuka di tempat acak, dan panel menampilkan `#24` alih-alih "Pintu 4".
+
+> **Catatan 4.4 — basemap lewat proxy, dan kenapa jalan keluar itu wajib.**
+> Tim memutuskan browser tidak menembak `basemap.mapid.io` langsung; permintaan tile diteruskan backend supaya API key tidak sampai ke browser.
+>
+> Konsekuensinya bagi frontend: kalau alamat basemap **hanya** menunjuk proxy, `/peta` mati total setiap kali backend belum jalan — dan itu melanggar prinsip nomor 1 di §9. Karena itu alamat basemap wajib lewat variabel lingkungan yang bisa diarahkan langsung ke MAPID saat bekerja lokal. Override `?basemap=` yang sudah ada dipertahankan.
+>
+> Yang harus dikerjakan **backend**, dan perlu ditagih sejak awal:
+>
+> | Kewajiban proxy | Kalau terlewat |
+> |---|---|
+> | Menulis ulang `glyphs`, `sprite`, dan `sources.*.tiles` di dalam `style.json` | Ketiganya berisi URL absolut ber-key. Browser tetap menembak MAPID **tanpa key** → 401 → peta dasar kosong |
+> | Header cache di endpoint tile | Peta terasa berat, dan frontend tidak bisa menambalnya |
+> | Mempertahankan field atribusi | Atribusi MAPID hilang dari peta |
+>
+> **Jangan taruh proxy basemap di balik bearer token.** MapLibre tidak menyisipkan header sendiri ke permintaan tile/glyph/sprite — perlu `transformRequest`, dan tokennya ikut tertempel di ratusan permintaan per sesi. Lebih penting lagi: `/peta` adalah tier gratis dan wajib jalan tanpa login. Kalau proxy perlu dilindungi, pakai cookie same-origin atau pembatasan referer.
+
+> **Hasil pemeriksaan 4.4 — GEO MAPID sudah diuji langsung.** ✅
+> Style `basic` ("Street Mapid") dimuat di `localhost` lewat `.env.local`, lalu diperiksa. Keempat kekhawatiran gugur:
+>
+> | Yang dikhawatirkan | Hasil |
+> |---|---|
+> | `Noto Sans Regular` tidak tersedia → label hilang diam-diam | ✅ **Tersedia** — style itu memakainya sendiri, bersama keluarga Roboto. `LABEL_FONT` tidak perlu diubah |
+> | Permintaan glyph 404 | ✅ Nol respons 4xx/5xx; 33 tes lulus dengan MAPID aktif |
+> | Bangunan 3D tidak ada | ✅ Layer `building-3d` ada — nama yang sama persis dengan Liberty |
+> | POI kawasan lebih sepi dari Liberty | ✅ Setara — Alfamart, Indomaret, Lawson, ATM, toko roti semuanya tampil |
+>
+> Sebabnya ketahuan sekaligus: **"Street Mapid" diturunkan dari OSM Liberty** — sprite-nya menunjuk `maputnik.github.io/osm-liberty` dan layer 3D-nya sama-sama `building-3d`. Karena itu berpindah di antara keduanya nyaris tidak mengubah tampilan.
+
+> **⚠️ Temuan 4.4 — style MAPID memanggil dua host pihak ketiga.**
+> Di luar `basemap.mapid.io`, style itu menarik dari dua alamat lain yang **bukan milik MAPID dan tidak membawa API key**:
+>
+> | Bagian | Host | Isinya |
+> |---|---|---|
+> | `sprite` | `maputnik.github.io` | Seluruh ikon POI — Alfamart, Indomaret, ATM, dan lainnya |
+> | `natural_earth_shaded_relief` | `klokantech.github.io` | Relief raster untuk zoom rendah |
+>
+> Dua akibatnya, keduanya perlu disampaikan ke backend:
+>
+> 1. **Mem-proxy `basemap.mapid.io` saja tidak cukup.** Browser tetap akan menembak `maputnik.github.io` langsung. Perlu diputuskan: ikut di-proxy, atau dibiarkan langsung — dibiarkan langsung aman, karena tidak ada key di sana.
+> 2. **Ada ketergantungan pada GitHub Pages yang di luar kendali tim mana pun.** Kalau repo itu hilang atau layanannya mati, seluruh ikon POI lenyap dari peta. Risikonya kecil, tapi lebih baik diketahui sekarang daripada saat penjurian.
+
+**Selesai ketika:** butir 4.1–4.4 beres, sehingga Fase 2 tinggal menukar sumber data — bukan lagi merombak komponen.
 
 ---
 
 ## 5. Fase 2 — Sambung ke backend
 
-**Bergantung pada kesiapan backend.** Kalau Fase 0–1 rapi, fase ini pendek — karena yang berubah hanya sumber datanya.
+> ⏸️ **Fase ini belum dimulai.** Backend belum siap — tile dan endpoint-nya belum ada. Yang bisa dikerjakan sekarang ada di §4.
 
-| # | Pekerjaan | Prasyarat dari backend |
+**Bergantung pada kesiapan backend.** Kalau §4 beres, fase ini pendek — karena yang berubah tinggal sumber datanya, bukan komponennya.
+
+| # | Pekerjaan frontend | Prasyarat dari backend |
 |---|---|---|
-| 2.1 | Tukar sumber tile ke URL backend | URL template tile + nama `source-layer` |
-| 2.2 | Tukar data contoh dengan panggilan API | Endpoint aktif + CORS |
-| 2.3 | Gabungkan tile dengan atribut lewat `setFeatureState` | ID fitur berupa integer |
-| 2.4 | Terapkan ulang state saat tile baru dimuat (event `sourcedata`) | — |
-| 2.5 | Tangani keadaan memuat, gagal, dan kosong untuk dua sumber data | — |
-| 2.6 | Tangani titik bersampel tipis — dirender putus-putus, bukan sebagai gap nol | Flag pembeda dari backend |
-| 2.7 | Tukar basemap sementara ke GEO MAPID | Kepastian tile GEO MAPID |
+| 2.1 | Tukar sumber geometri dari GeoJSON ke tile vektor: `SOURCE` jadi `type: "vector"`, dan **keenam spesifikasi layer** di `lib/map/style.ts` wajib menambahkan `source-layer` — sekarang tidak ada sama sekali karena GeoJSON tidak memakainya | URL template tile + nama `source-layer` + **CORS di CDN tile**, bukan hanya di Go API |
+| 2.2 | Tukar data contoh dengan panggilan API — cukup `BASE` di `lib/data/source.ts` | Endpoint aktif + CORS |
+| 2.3 | Gabungkan tile dengan atribut lewat `setFeatureState` | ID fitur berupa integer; kalau bukan, sediakan properti integer supaya bisa dipakai `promoteId` |
+| 2.4 | Terapkan ulang state saat tile baru dimuat (event `sourcedata`) | — ✅ **sudah berjalan sejak Fase 1**, termasuk untuk penanda terpilih |
+| 2.5 | Tangani keadaan memuat, gagal, dan kosong untuk **dua origin terpisah** — Go API dan CDN tile bisa gagal sendiri-sendiri | — |
+| 2.6 | Tangani titik bersampel tipis — tidak diestimasi, bukan gap nol | Flag pembeda dari backend |
+| 2.7 | ~~Tukar basemap ke GEO MAPID~~ → **dipindah ke §4.4**, karena tidak butuh backend | — |
+| 2.8 | Sisipkan header `Authorization` di satu titik pada `lib/data/source.ts` — diam saja selama token belum ada | — ✅ **bisa dicicil di §4**, dan **bukan prasyarat**: enam endpoint peta ada di tier gratis |
+
+> **Catatan 2.8 — autentikasi tidak memblokir fase ini.**
+> `02-BACKEND-SPEC.md` §1 menetapkan JWT untuk membedakan publik (gratis) dari operator kawasan (berbayar), tetapi `04-VALUE-PROP-AND-MONETIZATION.md` §3 menegaskan lapisan dasar — spending gap, kategori hilang, arus pintu, confidence layer, panel transparansi — **wajib terbuka** demi equity UMKM (Locus Charter, *protect the vulnerable*).
+>
+> Artinya enam endpoint yang dikonsumsi halaman Peta **tidak butuh token**, dan `/peta` **tidak boleh** berada di balik dinding login. Itu keputusan kebijakan, bukan kelalaian — jadi jangan "dirapikan" belakangan dengan menambahkan proteksi rute global. Pekerjaan auth yang sesungguhnya ada di §6.1.
 
 **Selesai ketika:** halaman Peta menampilkan data sungguhan dari backend, dan data contoh sudah tidak dipakai lagi.
 
@@ -140,6 +220,30 @@ Fitur-fitur yang **dijanjikan di proposal** tapi belum ada di kode. Sebagian bis
 
 > **Catatan 3.7.** `day_type` sudah ada di `lib/data/types.ts` sejak Fase 0, tapi nilainya selalu `weekday` dan tidak ada satu pun kendali yang mengubahnya. Jadi jenis hari sekarang adalah sumbu yang terpasang di tipe data tapi belum terpasang di UI — perlu diputuskan bentuk kendalinya saat datanya ada.
 
+### 6.1 Auth dan tier berbayar — jalur terpisah
+
+**Bukan bagian dari Fase 2.** Halaman Peta tetap terbuka tanpa login; yang butuh auth hanyalah fitur premium, dan UI-nya belum ada sama sekali.
+
+| # | Pekerjaan | Catatan |
+|---|---|---|
+| 6.1.1 | Halaman login (`POST /auth/login`) | Belum ada di kelima layar mana pun |
+| 6.1.2 | **Keputusan penyimpanan token** | Cookie `httpOnly` (aman dari XSS, butuh CORS credentials dan kerja sama backend) · memori saja (aman, tapi login ulang tiap refresh) · `localStorage` (terbuka terhadap XSS). Perlu diputuskan bersama backend, bukan belakangan |
+| 6.1.3 | Alur refresh (`POST /auth/refresh`) | 401 → refresh → ulangi sekali → logout. Jaga dua jebakan: perulangan tak berujung, dan beberapa request paralel yang me-refresh berbarengan |
+| 6.1.4 | Proteksi rute **hanya untuk area premium** | `/peta` tetap terbuka — lihat catatan 2.8 |
+| 6.1.5 | `/premium/deep-analysis/:station_id` | Layar baru: pilih petak kosong + kategori kandidat → estimasi P10–P90 + kepercayaan. Belum ada di [`USER_FLOW.md`](USER_FLOW.md) |
+
+> **⚠️ Tiering itu batas, bukan gembok — dan ini memengaruhi 3.2, 3.3, 3.5, dan 3.6.**
+> `04-VALUE-PROP-AND-MONETIZATION.md` §3 tidak mengunci fitur, melainkan membatasi sebagiannya:
+>
+> | Fitur | Gratis | Premium |
+> |---|---|---|
+> | Bandingkan (3.5) | 2 simpul | Multi-simpul / lintas koridor |
+> | Ekspor PDF & CSV (3.2, 3.3) | 1 simpul | Bulk seluruh simpul |
+> | Copilot (3.6) | Rate-limit ketat | Rate-limit lebih tinggi |
+> | AI Brief | Ringkasan singkat | Brief mendalam |
+>
+> Keempatnya **harus dibangun dengan batasan tier sejak awal**, lengkap dengan keadaan "batas tercapai · upgrade" di layar. Menyisipkannya setelah fiturnya jadi jauh lebih mahal daripada memasangnya dari awal.
+
 ---
 
 ## 7. Utang teknis
@@ -154,6 +258,8 @@ Kecil-kecil, bisa disisipkan kapan saja. Semuanya aman dikerjakan saat jeda.
 | **Tipologi Manggarai** | Proposal menyebut tiga tipologi, Manggarai adalah kasus transit. Perlu diputuskan tim — memengaruhi halaman Insight |
 | **`F × E × C × V` tidak menghasilkan `gap`** | Di data contoh, mengalikan keempat variabel tidak menghasilkan angka kesenjangan yang ditampilkan di sebelahnya — keduanya dikarang terpisah saat Fase 0. Panelnya jujur menampilkan apa yang ada di data, jadi ini bukan bug kode, tapi bertabrakan dengan janji "setiap angka bisa dilacak" (§9 nomor 4). Perlu diputuskan saat Fase 2: backend mengirim variabel yang konsisten, atau data contohnya yang diturunkan dari rumus |
 | **Empat baris lapisan tanpa data** | *Kategori hilang*, *Arus pintu*, *Indeks sewa*, *Event* — lihat catatan §3. `Arus pintu` sebenarnya sudah punya angkanya (variabel `F` per slot), hanya belum diputuskan bentuk visualnya di peta |
+| **Tidak ada variabel lingkungan sama sekali** | Seluruh alamat — API, tile, basemap — ditulis mati di kode. Aman selama semuanya data contoh lokal, tapi harus beres sebelum ada alamat yang berbeda antara lokal dan produksi. Lihat §4.2 |
+| ~~**Autentikasi belum pernah dibahas**~~ | ✅ Terjawab. `02-BACKEND-SPEC.md` §1 memakai JWT, tapi enam endpoint peta ada di tier gratis dan tidak butuh token. Pekerjaan auth pindah ke §6.1 sebagai jalur terpisah |
 
 ---
 
@@ -163,12 +269,18 @@ Ringkasan apa yang memblokir apa:
 
 | Pekerjaan | Terblokir oleh |
 |---|---|
-| Fase 0 dan 1 | **Tidak ada** — bisa mulai kapan saja |
-| Fase 2 | Kesiapan backend (tile + endpoint) |
-| 2.7 tukar basemap | Kepastian tile GEO MAPID |
-| 3.1 responsivitas | **Tidak ada** — bisa dikerjakan saat jeda |
+| Fase 0 dan 1 | ✅ selesai |
+| **4.1 lepas ketergantungan daftar fitur** | **Tidak ada** — bisa dikerjakan sekarang, dan sebaiknya duluan |
+| 4.2 variabel lingkungan | **Tidak ada** |
+| 4.3 bounding box konstanta | **Tidak ada** |
+| **4.4 siapkan basemap GEO MAPID** | ✅ **Sisi frontend selesai dan sudah diuji.** Penayangan lewat proxy menunggu backend |
+| Fase 2 seluruhnya | Kesiapan backend (tile + endpoint) — **belum siap** |
+| 2.8 sisip header `Authorization` | **Tidak ada** — bisa dicicil sekarang, bukan prasyarat |
+| 6.1 auth dan tier berbayar | Kesiapan endpoint `/auth/*` dan `/premium/*` — **jalur terpisah, tidak memblokir Fase 2** |
+| 3.1 responsivitas | **Tidak ada** — cocok saat jeda |
 | 3.2 dan 3.3 ekspor | **Tidak ada** — murni frontend |
 | 3.6 copilot | Kontrak `POST /copilot/query`, belum dibahas |
+| 3.7 pembanding akhir pekan | Survei akhir pekan + `day_type` dari backend |
 | Angka sungguhan di seluruh halaman | Survei lapangan + pipeline batch |
 
 ---

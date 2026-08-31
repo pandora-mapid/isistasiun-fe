@@ -10,7 +10,13 @@ import { test } from "@playwright/test";
  *
  * Jalankan: npx playwright test tests/basemap-compare.spec.ts
  */
-const PILIHAN = ["positron", "voyager", "liberty", "bright"] as const;
+/**
+ * `mapid` hanya menghasilkan tangkapan layar kalau `NEXT_PUBLIC_BASEMAP_URL`
+ * terisi di `.env.local` — URL-nya membawa API key, jadi tidak bisa ditulis di
+ * repo. Tanpa itu, `resolveBasemapUrl()` jatuh ke basemap bawaan dan gambarnya
+ * jadi duplikat Liberty; bukan kegagalan, hanya tidak berguna dibandingkan.
+ */
+const PILIHAN = ["mapid", "liberty", "positron", "voyager", "bright"] as const;
 
 for (const nama of PILIHAN) {
   test(`basemap ${nama}`, async ({ page }) => {

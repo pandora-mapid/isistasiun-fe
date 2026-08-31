@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import type { FeatureCollection, Point, Polygon } from "geojson";
 
 import {
+  loadEntrances,
   loadIsochrones,
   loadObservationPoints,
   loadSpendingGap,
@@ -31,6 +32,14 @@ export type PetaData = {
   isochrones: FeatureCollection<Polygon, IsochroneProps> | null;
   analytics: SpendingGapPayload | null;
   stations: Station[] | null;
+  /**
+   * Nama tiap titik pengamatan — atribut, bukan geometri.
+   *
+   * Sengaja dipisah dari `points`: begitu geometri pindah ke tile vektor,
+   * daftar fitur lengkap tidak lagi ada di browser, sementara nama titik tetap
+   * harus tersedia untuk seluruh titik. Lihat ROADMAP §4.1.
+   */
+  entrances: ObservationPointProps[] | null;
   /** Pesan kegagalan yang layak ditampilkan, bukan hanya dicatat di console. */
   error: string | null;
 };
@@ -40,6 +49,7 @@ const KOSONG: PetaData = {
   isochrones: null,
   analytics: null,
   stations: null,
+  entrances: null,
   error: null,
 };
 
@@ -54,10 +64,18 @@ export function usePetaData(): PetaData {
       loadIsochrones(),
       loadSpendingGap(),
       loadStations(),
+      loadEntrances(),
     ])
-      .then(([points, isochrones, analytics, stations]) => {
+      .then(([points, isochrones, analytics, stations, entrances]) => {
         if (cancelled) return;
-        setData({ points, isochrones, analytics, stations, error: null });
+        setData({
+          points,
+          isochrones,
+          analytics,
+          stations,
+          entrances,
+          error: null,
+        });
       })
       .catch((err: unknown) => {
         if (cancelled) return;

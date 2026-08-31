@@ -38,6 +38,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# Kecuali contohnya: berkas ini justru daftar apa saja yang perlu diisi, dan
+# sengaja tidak berisi satu pun nilai rahasia.
+!.env.example
 
 # vercel
 .vercel

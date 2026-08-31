@@ -17,14 +17,45 @@ import type {
 } from "./types";
 
 /**
- * ⚠️ SEMENTARA — data contoh, bukan hasil survei.
+ * Alamat sumber data.
  *
- * Fase 2: ganti menjadi base URL Go API, mis. `/api/v1`.
+ * Selama masih data contoh, nilainya `/mock`. Fase 2 cukup mengisi
+ * `NEXT_PUBLIC_API_BASE_URL` dengan `…/api/v1` — tanpa menyentuh kode.
+ *
+ * Ditulis sebagai rujukan literal ke `process.env.NEXT_PUBLIC_…`, bukan lewat
+ * variabel perantara: Next.js menyisipkan nilainya saat build dengan mencocokkan
+ * teks, jadi rujukan dinamis tidak akan tergantikan dan hasilnya `undefined`.
  */
-const BASE = "/mock";
+const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "/mock";
+
+/**
+ * Token yang disisipkan ke setiap permintaan, kalau ada.
+ *
+ * ⚠️ Halaman Peta **tidak boleh** menuntut token. `02-BACKEND-SPEC.md` §1
+ * memakai JWT untuk memisahkan tier gratis dari berbayar, tetapi
+ * `04-VALUE-PROP-AND-MONETIZATION.md` §3 mewajibkan lapisan dasar tetap
+ * terbuka demi equity UMKM. Jadi seluruh isi berkas ini harus tetap bekerja
+ * ketika tokennya `null` — dan memang begitu adanya sekarang.
+ *
+ * Titik sisipnya disiapkan lebih dulu supaya saat fitur premium dibangun
+ * (ROADMAP §6.1), yang berubah hanya satu berkas ini.
+ */
+let authToken: string | null = null;
+
+export function setAuthToken(token: string | null): void {
+  authToken = token;
+}
+
+function headers(): HeadersInit | undefined {
+  if (!authToken) return undefined;
+  return { Authorization: `Bearer ${authToken}` };
+}
 
 async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}/${path}`, { cache: "no-store" });
+  const res = await fetch(`${BASE}/${path}`, {
+    cache: "no-store",
+    headers: headers(),
+  });
   if (!res.ok) {
     throw new Error(`Gagal memuat ${path}: ${res.status} ${res.statusText}`);
   }
@@ -66,4 +97,22 @@ export async function loadSpendingGap(): Promise<SpendingGapPayload> {
 /** Daftar stasiun. Fase 2: `GET /api/v1/stations`. */
 export async function loadStations(): Promise<Station[]> {
   return unwrap(await getJson<ApiEnvelope<Station[]>>("stations.json"));
+}
+
+/**
+ * Daftar titik pengamatan beserta namanya — **atribut, bukan geometri**.
+ *
+ * Ini yang membuat panel tidak lagi bergantung pada geometri untuk mengetahui
+ * nama sebuah titik. Selama geometri masih GeoJSON, browser kebetulan memegang
+ * seluruh daftar fitur sehingga namanya bisa dibaca dari sana. Begitu geometri
+ * pindah ke tile vektor, browser hanya menerima fitur yang kebetulan masuk
+ * layar — dan nama titik di luar layar menghilang. Gejalanya menyesatkan:
+ * panel menampilkan `#24` alih-alih "Pintu 4". Lihat ROADMAP §4.1.
+ *
+ * Fase 2: `GET /api/v1/stations/:id/entrances`. Kalau backend hanya menyediakan
+ * bentuk per stasiun, panggil sekali per stasiun lalu gabungkan di sini —
+ * pemanggilnya tidak perlu tahu.
+ */
+export async function loadEntrances(): Promise<ObservationPointProps[]> {
+  return unwrap(await getJson<ApiEnvelope<ObservationPointProps[]>>("entrances.json"));
 }

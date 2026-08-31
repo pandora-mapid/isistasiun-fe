@@ -93,12 +93,15 @@ export const SELECTED_COLOR = "#0F172A";
  *
  * Wajib diisi eksplisit. Bawaan MapLibre adalah "Open Sans Regular", dan
  * basemap OpenFreeMap tidak menyediakannya — permintaan glyph-nya 404 dan
- * seluruh label hilang diam-diam tanpa pesan error. "Noto Sans Regular" ada
- * pada Liberty maupun basemap CARTO, jadi aman untuk keempat pilihan di
- * `BASEMAP_CHOICES`.
+ * seluruh label hilang diam-diam tanpa pesan error.
  *
- * Kalau basemap diganti ke GEO MAPID nanti, periksa ulang font apa yang
- * disediakan endpoint glyph-nya.
+ * "Noto Sans Regular" sudah diperiksa tersedia pada Liberty, basemap CARTO,
+ * **dan GEO MAPID** (style `basic` memakainya sendiri, bersama keluarga
+ * Roboto). Jadi aman untuk seluruh pilihan di `BASEMAP_NAMES`.
+ *
+ * Kalau basemap diganti lagi, periksa ulang: `tests/peta.spec.ts` gagal pada
+ * respons 4xx/5xx apa pun, jadi glyph yang hilang akan tertangkap di sana —
+ * bukan muncul sebagai label yang diam-diam raib.
  */
 export const LABEL_FONT = ["Noto Sans Regular"];
 

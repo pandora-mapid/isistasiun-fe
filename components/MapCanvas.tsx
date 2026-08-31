@@ -24,6 +24,7 @@ import {
   LAYER,
   LAYER_ORDER,
   SOURCE,
+  STUDY_BOUNDS,
 } from "@/lib/map/config";
 import {
   isochroneFillLayer,
@@ -276,14 +277,18 @@ export function MapCanvas({
     map.addLayer(pointCircleLayer(gapDomain));
     if (glyphsAvailableRef.current) map.addLayer(pointLabelLayer());
 
-    // Bawa tampilan ke seluruh titik, sisakan ruang untuk panel melayang.
-    const bounds = new LngLatBounds();
-    for (const feature of points.features) {
-      bounds.extend(feature.geometry.coordinates as [number, number]);
-    }
-    if (!bounds.isEmpty()) {
-      map.fitBounds(bounds, { padding: FIT_PADDING, duration: 0 });
-    }
+    // Bawa tampilan ke seluruh kawasan studi, sisakan ruang untuk panel
+    // melayang.
+    //
+    // Kotaknya datang dari konstanta, BUKAN dijumlahkan dari fitur yang sedang
+    // dimuat. Menjumlahkan fitur kebetulan bekerja selama geometri berupa
+    // GeoJSON — browser memegang daftar lengkapnya — tetapi berhenti bekerja
+    // begitu geometri pindah ke tile vektor: yang diterima hanya fitur di
+    // dalam layar, dan peta akan terbuka di tempat acak. Lihat ROADMAP §4.1.
+    map.fitBounds(new LngLatBounds(STUDY_BOUNDS), {
+      padding: FIT_PADDING,
+      duration: 0,
+    });
 
     setLayersReady(true);
     // `gapDomain`/`potensiDomain` sengaja tidak masuk daftar: layer dipasang

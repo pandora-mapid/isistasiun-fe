@@ -174,9 +174,33 @@ Ini urusan internal, tidak perlu jawaban dari backend:
 | **Tipologi Manggarai** | Proposal §3.1 menyebut tiga tipologi: hunian, perkantoran, campuran. Manggarai dipilih sebagai kasus transit — jadi tipologi keempat, atau dimasukkan ke `campuran`? Memengaruhi klaim di halaman Insight |
 | **Stasiun ketiga** | Manggarai dan Sudirman sudah ada. Yang ketiga (hunian) belum |
 | **Kecepatan jalan kaki isochrone** | Proposal tidak menyebut angkanya. Perlu dikunci karena menentukan bentuk poligon |
-| **Basemap GEO MAPID** | Belum dipastikan menyediakan tile vektor untuk MapLibre |
+| ~~**Basemap GEO MAPID**~~ | ✅ **Terjawab.** MAPID menyediakan endpoint **GL Style** (`style.json`) — persis format yang dibaca MapLibre, lengkap dengan bangunan 3D. Tim memutuskan basemap **disajikan lewat proxy backend**, bukan diambil browser langsung, supaya API key tidak sampai ke browser. Lihat catatan di bawah |
 | **Ekspor PDF & CSV** | Dijanjikan proposal §3.2. Bisa dikerjakan sepenuhnya di frontend, tanpa backend |
 | **Ambang sampel tipis** | Proposal §5.2: minimal 3 gerai × 2 blok per kategori per stasiun. Angka "n < 30" di halaman Insight sekarang keliru dan perlu diperbaiki |
+
+---
+
+> **Catatan basemap lewat proxy — tiga kewajiban yang harus dipenuhi backend.**
+>
+> `style.json` berisi URL absolut ke `glyphs`, `sprite`, dan `sources.*.tiles`, dan **ketiganya membawa API key**. Kalau proxy hanya meneruskan berkasnya apa adanya, browser tetap menembak `basemap.mapid.io` secara langsung **tanpa key** — hasilnya 401 dan peta dasar kosong, tanpa satu pun pesan error.
+>
+> | Kewajiban | Kalau terlewat |
+> |---|---|
+> | Menulis ulang `glyphs`, `sprite`, dan `sources.*.tiles` supaya menunjuk balik ke proxy | Peta dasar kosong |
+> | Header cache di endpoint tile | Peta terasa berat; frontend tidak bisa menambalnya |
+> | Mempertahankan field atribusi di dalam style | Atribusi MAPID hilang dari peta |
+>
+> **Jangan menaruh proxy basemap di balik bearer token.** MapLibre tidak menyisipkan header sendiri ke permintaan tile, glyph, dan sprite — perlu `transformRequest`, dan tokennya ikut tertempel di ratusan permintaan tiap sesi. Lebih penting lagi, halaman Peta ada di tier gratis dan wajib bisa dibuka tanpa login (lihat D2). Kalau proxy perlu dilindungi, pakai cookie same-origin atau pembatasan referer.
+>
+> Frontend tetap menyediakan jalan langsung ke MAPID lewat variabel lingkungan untuk pengembangan lokal, supaya `/peta` tidak ikut mati setiap kali backend belum jalan.
+
+## D2. Autentikasi — halaman Peta tetap terbuka
+
+`02-BACKEND-SPEC.md` §1 menetapkan JWT untuk memisahkan tier gratis dari berbayar. Yang perlu dipastikan bersama: **enam endpoint di §B1 tidak menuntut token.**
+
+Dasarnya bukan kenyamanan frontend, melainkan `04-VALUE-PROP-AND-MONETIZATION.md` §3 — lapisan kesenjangan, kategori hilang, dan arus pintu **wajib terbuka** demi equity UMKM (Locus Charter, *protect the vulnerable*). Premium hanya boleh mengunci kedalaman, kesegaran, dan skala.
+
+Frontend sudah menyiapkan titik sisip header `Authorization` di `lib/data/source.ts`; nilainya `null` selama belum ada login, dan seluruh halaman Peta bekerja penuh tanpanya.
 
 ---
 
