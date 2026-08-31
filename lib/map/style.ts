@@ -42,9 +42,6 @@ export const GAP_RAMP = [
 /** Ukuran lingkaran (piksel) pada nilai gap terendah dan tertinggi. */
 export const GAP_RADIUS = { min: 7, max: 22 } as const;
 
-/** Ukuran cincin potensi pada nilai potensi terendah dan tertinggi. */
-export const POTENSI_RADIUS = { min: 13, max: 34 } as const;
-
 /**
  * Ukuran halo kepercayaan — selalu sedikit lebih besar dari lingkaran gap.
  *
@@ -80,9 +77,6 @@ export const THIN_SAMPLE_COLOR = "#94A3B8";
  * benar-benar terlihat.
  */
 export const CONFIDENCE_COLOR = "#64748B";
-
-/** Warna cincin "Potensi belanja" — netral, karena hanya bingkai. */
-export const POTENSI_COLOR = "#475569";
 
 /** Warna sorot dan pilih. Sengaja berbeda supaya keduanya tidak tertukar. */
 export const HOVER_COLOR = "#1D4ED8";
@@ -330,33 +324,6 @@ function confidenceOpacityExpression(confidenceDomain: Domain): unknown[] {
 }
 
 /**
- * Lapisan "Potensi belanja" — cincin kosong seukuran potensi.
- *
- * Digambar sebagai cincin, bukan lingkaran terisi, supaya bisa hidup
- * berdampingan dengan lingkaran kesenjangan di dalamnya: jarak antara cincin
- * dan lingkaran itulah yang terbaca sebagai bagian yang belum tertangkap.
- */
-export function pointPotensiLayer(domain: Domain): CircleLayerSpecification {
-  return {
-    id: LAYER.pointPotensi,
-    type: "circle",
-    source: SOURCE.points,
-    paint: {
-      "circle-color": POTENSI_COLOR,
-      "circle-opacity": 0.04,
-      "circle-radius": radiusExpression(
-        "potensi",
-        domain,
-        POTENSI_RADIUS,
-      ) as unknown as number,
-      "circle-stroke-color": POTENSI_COLOR,
-      "circle-stroke-opacity": ["case", IS_THIN, 0.25, 0.5] as unknown as number,
-      "circle-stroke-width": 1.1,
-    },
-  };
-}
-
-/**
  * Titik pengamatan — satu layer untuk semua titik.
  *
  * Titik bersampel tipis TIDAK dipisah ke layer sendiri, karena memisahkannya
@@ -479,15 +446,40 @@ export function scaleDependentPaint(
   ];
 }
 
-/** Paint cincin potensi, yang skalanya memakai rentang potensi sendiri. */
-export function potensiScaledPaint(
-  domain: Domain,
-): { layer: string; property: string; value: unknown }[] {
-  return [
-    {
-      layer: LAYER.pointPotensi,
-      property: "circle-radius",
-      value: radiusExpression("potensi", domain, POTENSI_RADIUS),
+/* -------------------------------------------------------------------------
+ * Label angka — arus pintu
+ *
+ * Membaca dari ["get", ...], BUKAN ["feature-state", ...], dan itu wajib:
+ * `text-field` adalah properti layout, dan MapLibre menolak ekspresi
+ * feature-state di sana. Angkanya karena itu ikut sebagai properti fitur pada
+ * source `point-label-values`, yang diperbarui tiap kali slot berganti.
+ * ---------------------------------------------------------------------- */
+
+/** Warna tulisan arus pintu — netral, karena ia keterangan, bukan penilaian. */
+export const ARUS_COLOR = "#475569";
+
+/** Angka arus pintu (F), tulisan kecil di bawah nama titik. */
+export function pointArusLayer(): SymbolLayerSpecification {
+  return {
+    id: LAYER.pointArus,
+    type: "symbol",
+    source: SOURCE.pointLabels,
+    minzoom: 13.5,
+    filter: ["has", "arus_teks"],
+    layout: {
+      "text-field": ["get", "arus_teks"],
+      "text-font": LABEL_FONT,
+      "text-size": 10,
+      // Cukup rendah supaya kotak teksnya tidak bersenggolan dengan nama titik
+      // di atasnya — termasuk `text-padding` bawaan MapLibre.
+      "text-offset": [0, 3.6],
+      "text-anchor": "top",
+      "text-allow-overlap": false,
     },
-  ];
+    paint: {
+      "text-color": ARUS_COLOR,
+      "text-halo-color": "#FFFFFF",
+      "text-halo-width": 1.5,
+    },
+  };
 }

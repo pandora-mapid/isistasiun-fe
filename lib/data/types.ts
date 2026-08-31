@@ -117,8 +117,6 @@ export type Station = {
 export type PointFeatureState = {
   /** Kesenjangan yang sedang ditampilkan (mengikuti slot & kategori aktif). */
   gap: number;
-  /** Potensi yang sedang ditampilkan — dipakai lapisan cincin potensi. */
-  potensi: number;
   sampel_tipis: boolean;
   confidence: number;
 };

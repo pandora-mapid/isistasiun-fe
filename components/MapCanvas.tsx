@@ -29,11 +29,10 @@ import {
 import {
   isochroneFillLayer,
   isochroneLineLayer,
+  pointArusLayer,
   pointCircleLayer,
   pointConfidenceLayer,
   pointLabelLayer,
-  pointPotensiLayer,
-  potensiScaledPaint,
   scaleDependentPaint,
 } from "@/lib/map/style";
 
@@ -43,14 +42,20 @@ type Props = {
   /** Geometri isochrone. `null` selama data belum termuat. */
   isochrones: FeatureCollection<Polygon, IsochroneProps> | null;
   /**
+   * Titik beserta angka yang akan ditulis sebagai label, sebagai **properti**.
+   *
+   * Terpisah dari `featureStates` karena `text-field` adalah properti layout,
+   * dan MapLibre menolak ekspresi `feature-state` di layout. Jadi angka yang
+   * perlu dibaca sebagai tulisan harus ikut di dalam properti fitur.
+   */
+  labelData: FeatureCollection<Point> | null;
+  /**
    * Angka yang ditempelkan ke tiap titik, mengikuti slot dan kategori yang
    * sedang dipilih. Kuncinya id fitur.
    */
   featureStates: Map<number, PointFeatureState>;
   /** Rentang nilai gap yang sedang aktif — menentukan warna dan ukuran. */
   gapDomain: Domain;
-  /** Rentang nilai potensi yang sedang aktif — menentukan ukuran cincin. */
-  potensiDomain: Domain;
   /** Sebaran skor kepercayaan yang sedang aktif — menentukan kepekatan halo. */
   confidenceDomain: Domain;
   /** Kawasan tangkapan yang sedang dipilih: 3, 5, atau 10 menit. */
@@ -150,9 +155,9 @@ function styleReadyPromise(map: MapLibreMap): Promise<boolean> {
 export function MapCanvas({
   points,
   isochrones,
+  labelData,
   featureStates,
   gapDomain,
-  potensiDomain,
   confidenceDomain,
   catchmentMinutes,
   visibleLayers,
@@ -268,14 +273,24 @@ export function MapCanvas({
 
     map.addSource(SOURCE.isochrones, { type: "geojson", data: isochrones });
     map.addSource(SOURCE.points, { type: "geojson", data: points });
+    map.addSource(SOURCE.pointLabels, {
+      type: "geojson",
+      data: labelData ?? { type: "FeatureCollection", features: [] },
+    });
 
     // Urutan mengikuti LAYER_ORDER: isochrone paling bawah, label paling atas.
     map.addLayer(isochroneFillLayer());
     map.addLayer(isochroneLineLayer());
     map.addLayer(pointConfidenceLayer(gapDomain, confidenceDomain));
-    map.addLayer(pointPotensiLayer(potensiDomain));
     map.addLayer(pointCircleLayer(gapDomain));
-    if (glyphsAvailableRef.current) map.addLayer(pointLabelLayer());
+    // Seluruh layer bertulisan butuh glyph dari jaringan; lewati kalau basemap
+    // saja gagal dimuat, karena endpoint glyph-nya ikut hilang.
+    if (glyphsAvailableRef.current) {
+      // Urutannya mengikuti LAYER_ORDER: arus lebih dulu, nama titik sesudahnya
+      // — lihat catatan di sana soal prioritas penempatan simbol.
+      map.addLayer(pointArusLayer());
+      map.addLayer(pointLabelLayer());
+    }
 
     // Bawa tampilan ke seluruh kawasan studi, sisakan ruang untuk panel
     // melayang.
@@ -291,10 +306,10 @@ export function MapCanvas({
     });
 
     setLayersReady(true);
-    // `gapDomain`/`potensiDomain` sengaja tidak masuk daftar: layer dipasang
+    // `gapDomain` sengaja tidak masuk daftar: layer dipasang
     // sekali, lalu skalanya diperbarui oleh efek tersendiri di bawah.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleReady, points, isochrones, layersReady]);
+  }, [styleReady, points, isochrones, labelData, layersReady]);
 
   // --- interaksi titik: sorot dan pilih -----------------------------------
   //
@@ -383,20 +398,35 @@ export function MapCanvas({
     };
   }, [featureStates, selectedPointId, layersReady]);
 
+  // --- angka label mengikuti slot dan kategori yang sedang dipilih --------
+  //
+  // Source-nya di-`setData` ulang, bukan disetel lewat feature-state, karena
+  // `text-field` adalah properti layout dan MapLibre menolak feature-state di
+  // sana. Isinya hanya sebanyak titik pengamatan, jadi ongkosnya kecil.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !labelData) return;
+
+    const src = map.getSource(SOURCE.pointLabels);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(labelData);
+    }
+  }, [labelData, layersReady]);
+
   // --- skala warna & ukuran mengikuti rentang data aktif ------------------
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !layersReady) return;
 
-    for (const { layer, property, value } of [
-      ...scaleDependentPaint(gapDomain, confidenceDomain),
-      ...potensiScaledPaint(potensiDomain),
-    ]) {
+    for (const { layer, property, value } of scaleDependentPaint(
+      gapDomain,
+      confidenceDomain,
+    )) {
       if (map.getLayer(layer)) {
         map.setPaintProperty(layer, property as never, value as never);
       }
     }
-  }, [gapDomain, potensiDomain, confidenceDomain, layersReady]);
+  }, [gapDomain, confidenceDomain, layersReady]);
 
   // --- melaporkan skala peta ke legenda -----------------------------------
   //

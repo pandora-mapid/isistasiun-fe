@@ -247,6 +247,36 @@ async function featureState(page: Page, id: number) {
   }, id);
 }
 
+/** Jumlah titik yang tergambar saat ini. */
+function hitungTitik(page: Page) {
+  return page.evaluate(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (window as unknown as { __map?: any }).__map;
+    return map.queryRenderedFeatures({ layers: ["point-circle"] }).length;
+  });
+}
+
+/**
+ * Jumlah titik setelah gambarnya berhenti bertambah.
+ *
+ * `waitForMapReady` hanya menunggu titik PERTAMA tergambar, jadi menghitung
+ * tepat sesudahnya bisa menangkap keadaan setengah jadi — pernah terbaca 6
+ * dari 10, lalu tesnya gagal membandingkan angka yang diambil di dua momen
+ * berbeda. Menunggu dua pembacaan berturut-turut sama menghilangkan balapan
+ * itu tanpa perlu menuliskan jumlah titik yang diharapkan, yang akan basi
+ * setiap kali data contohnya berubah.
+ */
+async function jumlahTitikStabil(page: Page): Promise<number> {
+  let sebelumnya = -1;
+  for (let i = 0; i < 24; i++) {
+    const n = await hitungTitik(page);
+    if (n > 0 && n === sebelumnya) return n;
+    sebelumnya = n;
+    await page.waitForTimeout(250);
+  }
+  throw new Error(`jumlah titik tidak pernah tenang (terakhir ${sebelumnya})`);
+}
+
 /** Seluruh nilai gap yang sedang tertempel di titik, terurut. */
 async function gapStates(page: Page) {
   return page.evaluate(() => {
@@ -351,10 +381,10 @@ test("panel lapisan menghidupkan dan mematikan layer peta", async ({ page }) => 
 
   await page.locator(".layers-toggle").click();
 
-  // "Potensi belanja" mati secara bawaan — menyalakannya harus terlihat.
-  await expect.poll(() => visibility("point-potensi")).toBe("none");
-  await page.locator(".lyr").filter({ hasText: "Potensi belanja" }).click();
-  await expect.poll(() => visibility("point-potensi")).toBe("visible");
+  // "Arus pintu" mati secara bawaan — menyalakannya harus terlihat.
+  await expect.poll(() => visibility("point-arus")).toBe("none");
+  await page.locator(".lyr").filter({ hasText: "Arus pintu stasiun" }).click();
+  await expect.poll(() => visibility("point-arus")).toBe("visible");
 
   // Mematikan lapisan kesenjangan menyembunyikan lingkarannya.
   await page.locator(".lyr").filter({ hasText: "Kesenjangan belanja" }).click();
@@ -367,11 +397,7 @@ test("filter kategori mengubah tampilan titik tanpa menyembunyikannya", async ({
   await page.goto("/peta", { waitUntil: "domcontentloaded" });
   await waitForMapReady(page);
 
-  const jumlahAwal = await page.evaluate(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const map = (window as unknown as { __map?: any }).__map;
-    return map.queryRenderedFeatures({ layers: ["point-circle"] }).length;
-  });
+  const jumlahAwal = await jumlahTitikStabil(page);
   await expect
     .poll(async () => (await gapStates(page)).some((v: number) => v > 0), {
       timeout: 15_000,
@@ -387,11 +413,7 @@ test("filter kategori mengubah tampilan titik tanpa menyembunyikannya", async ({
 
   // …tapi jumlah titik yang tergambar TETAP. Ini konsekuensi batasan
   // feature-state di MapLibre, dan memang disengaja (ROADMAP §3).
-  const jumlahSesudah = await page.evaluate(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const map = (window as unknown as { __map?: any }).__map;
-    return map.queryRenderedFeatures({ layers: ["point-circle"] }).length;
-  });
+  const jumlahSesudah = await jumlahTitikStabil(page);
   expect(jumlahSesudah).toBe(jumlahAwal);
 });
 
@@ -433,4 +455,53 @@ test("panel transparansi terbuka dari titik yang sedang dipilih", async ({
 
   // Judulnya menyebut nilai V yang sedang berlaku — bukan angka contoh mati.
   await expect(page.getByText(/Dari mana angka V = Rp [\d.]+ berasal/)).toBeVisible();
+});
+
+test("lapisan arus pintu menggambar angkanya", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  /** Jumlah simbol yang benar-benar DITEMPATKAN, bukan sekadar terpasang. */
+  const tergambar = () =>
+    page.evaluate(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const map = (window as unknown as { __map?: any }).__map;
+      const n = (id: string) =>
+        map.getLayer(id)
+          ? map.queryRenderedFeatures({ layers: [id] }).length
+          : -1;
+      return { nama: n("point-label"), arus: n("point-arus") };
+    });
+
+  // Dekatkan supaya label melewati minzoom-nya dan titiknya tidak berdesakan.
+  await page.evaluate(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (window as unknown as { __map?: any }).__map;
+    map.jumpTo({ center: [106.8503, -6.2149], zoom: 16.8 });
+  });
+  await expect.poll(async () => (await tergambar()).nama, { timeout: 15_000 })
+    .toBeGreaterThan(0);
+
+  const sebelum = await tergambar();
+  expect(sebelum.arus, "arus seharusnya mati secara bawaan").toBe(0);
+
+  await page.locator(".layers-toggle").click();
+  await page.locator(".lyr").filter({ hasText: "Arus pintu stasiun" }).click();
+
+  // Benar-benar menggambar sesuatu — bukan sekadar sakelarnya menyala.
+  await expect.poll(async () => (await tergambar()).arus, { timeout: 15_000 })
+    .toBeGreaterThan(0);
+
+  // Dan yang paling penting: menyalakannya TIDAK BOLEH menghapus nama titik.
+  //
+  // MapLibre menempatkan simbol dalam urutan terbalik, jadi layer yang
+  // ditambahkan belakangan merebut prioritas saat kotak teksnya bertabrakan.
+  // Waktu layer arus sempat diletakkan sesudah nama titik, seluruh nama lenyap
+  // dari peta tanpa satu pun pesan error — persis kelas kegagalan yang membuat
+  // berkas tes ini ada.
+  const sesudah = await tergambar();
+  expect(
+    sesudah.nama,
+    "menyalakan lapisan arus menghapus nama titik",
+  ).toBe(sebelum.nama);
 });

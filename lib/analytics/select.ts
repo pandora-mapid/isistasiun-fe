@@ -25,6 +25,16 @@ import type {
 
 const NULL_RANGE: Range = { p10: null, p50: null, p90: null };
 
+/**
+ * Ambang minimum gerai per kategori sebelum sebuah kategori dianggap "hilang".
+ *
+ * Proposal §5.2: minimal 3 gerai × 2 blok per kategori per stasiun. Ditulis
+ * sekali di sini karena dipakai dua tempat — daftar kategori hilang di panel
+ * dan penghitung lencana di peta — dan keduanya wajib memakai angka yang sama.
+ */
+export const AMBANG_GERAI = 3;
+
+
 /** Angka satu titik pada satu potongan slot × kategori. */
 export type PointMetric = {
   pointId: number;
@@ -38,6 +48,8 @@ export type PointMetric = {
   confidence: number;
   /** Hanya terisi kalau satu kategori sedang dipilih. */
   kategori: CategoryAnalytics | null;
+  /** Arus pintu (F) pada slot ini, org/jam. `null` kalau tidak ada. */
+  arus: number | null;
 };
 
 export function findPoint(
@@ -87,6 +99,7 @@ export function metricFor(
     sampelTipis: point.sampel_tipis || (slotRow?.sampel_tipis ?? false),
     confidence: point.confidence,
     kategori: null,
+    arus: slotRow?.variables?.F ?? null,
   };
   if (!slotRow) return dasar;
 
@@ -216,7 +229,7 @@ export function pointsOfStation(
 export function missingCategories(
   point: PointAnalytics,
   slot: SlotKey,
-  ambangGerai = 3,
+  ambangGerai: number = AMBANG_GERAI,
 ): CategoryAnalytics[] {
   const slotRow = slotOf(point, slot);
   if (!slotRow) return [];

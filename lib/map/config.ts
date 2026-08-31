@@ -98,6 +98,20 @@ function basemapDefault(): string {
 export const SOURCE = {
   points: "observation-points",
   isochrones: "isochrones",
+  /**
+   * Sumber khusus label angka — geometri yang sama, tapi angkanya ikut di
+   * dalam **properti**, bukan lewat `setFeatureState`.
+   *
+   * Ini bukan duplikasi yang tidak perlu, melainkan jalan keluar dari batasan
+   * MapLibre: `text-field` adalah properti *layout*, dan validator menolak
+   * ekspresi `feature-state` di layout ("feature-state data expressions are
+   * not supported with layout properties"). Karena label harus menampilkan
+   * angka yang berubah mengikuti slot, angkanya wajib berupa properti fitur —
+   * dan itu berarti source-nya diperbarui ulang tiap kali slot berganti.
+   *
+   * Ongkosnya kecil: isinya hanya sebanyak titik pengamatan (belasan).
+   */
+  pointLabels: "point-label-values",
 } as const;
 
 /**
@@ -122,24 +136,30 @@ export const LAYER = {
   isochroneFill: "isochrone-fill",
   isochroneLine: "isochrone-line",
   pointConfidence: "point-confidence",
-  pointPotensi: "point-potensi",
   pointCircle: "point-circle",
   pointLabel: "point-label",
+  /** Angka arus pintu (F), tulisan kecil di bawah nama titik. */
+  pointArus: "point-arus",
 } as const;
 
 /**
  * Urutan menggambar, dari bawah ke atas.
  *
- * Halo kepercayaan paling bawah supaya tidak menutupi apa pun; cincin potensi
- * di atasnya sebagai bingkai; lingkaran kesenjangan di atas keduanya karena
- * itulah yang dibaca lebih dulu; label paling atas.
+ * Halo kepercayaan paling bawah supaya tidak menutupi apa pun; lingkaran
+ * kesenjangan di atasnya karena itulah yang dibaca lebih dulu; label paling
+ * atas.
  */
 export const LAYER_ORDER = [
   LAYER.isochroneFill,
   LAYER.isochroneLine,
   LAYER.pointConfidence,
-  LAYER.pointPotensi,
   LAYER.pointCircle,
+  // Arus sengaja SEBELUM nama titik. MapLibre menempatkan simbol dalam urutan
+  // terbalik — layer yang lebih akhir menang saat kotak teksnya bertabrakan.
+  // Waktu arus diletakkan sesudah nama, seluruh nama titik lenyap dari peta
+  // tanpa pesan apa pun. Nama lebih penting daripada angka arus, jadi nama
+  // yang harus berada di urutan belakang.
+  LAYER.pointArus,
   LAYER.pointLabel,
 ] as const;
 
@@ -154,8 +174,8 @@ export const LAYER_ORDER = [
  */
 export const LAYER_GROUPS: Record<string, readonly string[]> = {
   gap: [LAYER.pointCircle, LAYER.pointLabel],
-  potensi: [LAYER.pointPotensi],
   kepercayaan: [LAYER.pointConfidence],
+  arus: [LAYER.pointArus],
 };
 
 /**

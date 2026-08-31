@@ -55,12 +55,15 @@ type LayerRow = {
  * menandainya "belum ada data" alih-alih memasang sakelar yang diam-diam
  * tidak melakukan apa pun. Lihat ROADMAP §6 untuk yang mana saja janji
  * proposal dan kapan datanya diharapkan ada.
+ *
+ * Dua baris — *Kategori hilang* dan *Arus pintu* — sempat ditandai "belum ada
+ * data" padahal datanya sudah ada sejak Fase 1 (`by_category` dan variabel
+ * `F`). Yang belum ada waktu itu bentuk visualnya, bukan datanya, dan label
+ * yang keliru itu membuat panel ini ikut menyesatkan.
  */
 const LAYER_ROWS: LayerRow[] = [
   { key: "gap", label: "Kesenjangan belanja", dot: "#1D4ED8", tint: "rgba(29,78,216,.1)" },
-  { key: "potensi", label: "Potensi belanja", dot: "#475569", tint: "rgba(71,85,105,.1)" },
   { key: "kepercayaan", label: "Kepercayaan data", dot: "#CBD5E1", tint: "rgba(29,78,216,.08)" },
-  { key: "kategori-hilang", label: "Kategori hilang", dot: "#60A5FA", tint: "rgba(96,165,250,.12)" },
   { key: "arus", label: "Arus pintu stasiun", dot: "#2563EB", tint: "rgba(37,99,235,.1)" },
   { key: "sewa", label: "Indeks sewa / arus", dot: "#334155", tint: "rgba(51,65,85,.1)" },
   { key: "event", label: "Event & aktivasi", dot: "#94A3B8", tint: "rgba(148,163,184,.14)" },
@@ -192,14 +195,6 @@ export function PetaScreen() {
     [metrics],
   );
 
-  const potensiDomain = useMemo(
-    () =>
-      metrics.size
-        ? domainOf(metrics.values(), (m) => m.potensi)
-        : DOMAIN_AWAL,
-    [metrics],
-  );
-
   const confidenceDomain = useMemo(
     () => confidenceDomainOf(metrics.values()),
     [metrics],
@@ -210,13 +205,40 @@ export function PetaScreen() {
     for (const [id, m] of metrics) {
       out.set(id, {
         gap: m.gap.p50 ?? 0,
-        potensi: m.potensi.p50 ?? 0,
         sampel_tipis: m.sampelTipis,
         confidence: m.confidence,
       });
     }
     return out;
   }, [metrics]);
+
+  /**
+   * Titik beserta angka yang ditulis sebagai label di peta.
+   *
+   * Angkanya ikut sebagai **properti fitur**, bukan lewat `setFeatureState`,
+   * karena `text-field` adalah properti layout dan MapLibre menolak ekspresi
+   * feature-state di sana. Konsekuensinya source ini disusun ulang tiap kali
+   * slot atau kategori berganti — murah, karena isinya cuma belasan titik.
+   */
+  const labelData = useMemo(() => {
+    if (!points) return null;
+    return {
+      type: "FeatureCollection" as const,
+      features: points.features.map((f) => {
+        const m = metrics.get(f.properties.id);
+        return {
+          type: "Feature" as const,
+          geometry: f.geometry,
+          properties: {
+            // `arus_teks` sengaja tidak disetel kalau angkanya tidak ada —
+            // layer-nya memakai filter ["has", …], jadi titik tanpa angka
+            // tidak menampilkan tulisan kosong.
+            ...(m?.arus != null ? { arus_teks: `${ribuan(m.arus)}/jam` } : {}),
+          },
+        };
+      }),
+    };
+  }, [points, metrics]);
 
   /**
    * Nama tiap titik dan tiap stasiun.
@@ -320,9 +342,9 @@ export function PetaScreen() {
         <MapCanvas
           points={points}
           isochrones={isochrones}
+          labelData={labelData}
           featureStates={featureStates}
           gapDomain={gapDomain}
-          potensiDomain={potensiDomain}
           confidenceDomain={confidenceDomain}
           catchmentMinutes={activeCatchment}
           visibleLayers={visibleLayers}
@@ -338,8 +360,13 @@ export function PetaScreen() {
             position: "absolute",
             left: 24,
             bottom: 132,
-            gap: 14,
+            gap: 12,
             alignItems: "stretch",
+            // Penjaga saja: isinya sekarang tetap, tapi kalau suatu saat ada
+            // butir baru, lebih baik turun sebaris daripada meluber menutupi
+            // panel di kanannya.
+            flexWrap: "wrap",
+            maxWidth: "calc(100% - 500px)",
             padding: "10px 16px 12px",
             background: "#fff",
             border: "1px solid #E2E8F0",
@@ -394,14 +421,14 @@ export function PetaScreen() {
           <span style={LEGENDA_GRUP}>
             <span className="k">Mutu data</span>
             <span className="row" style={{ gap: 14 }}>
-              <span className="row" style={{ ...LEGENDA_TEKS, gap: 6 }}>
-                <span
-                  className="dot"
-                  title="tidak diestimasi — sampel di bawah 3 gerai × 2 blok"
-                  style={{ background: "#fff", width: 12, height: 12, boxShadow: "0 0 0 1.5px #94A3B8" }}
-                />
-                Sampel tipis
-              </span>
+              {/* "Sampel tipis" sengaja TIDAK ada di sini. Keputusan tim:
+                 panel kanan sudah menerangkannya ("Tidak diestimasi" beserta
+                 alasannya), jadi legendanya dianggap mengulang.
+
+                 Titiknya tetap digambar berbeda di peta — lingkaran putih
+                 bergaris abu — dan itu tidak boleh ikut dihapus: menghapusnya
+                 akan membuat titik tanpa data terbaca sebagai titik bergap
+                 terkecil, persis kebalikan dari maksudnya. */}
               <span className="row" style={{ ...LEGENDA_TEKS, gap: 8 }}>
                 <span
                   title="halo makin tebal berarti kepercayaan makin rendah"
@@ -412,6 +439,10 @@ export function PetaScreen() {
             </span>
           </span>
 
+          {/* Lapisan opsional (arus pintu) tidak diberi butir legenda:
+             labelnya di peta sudah menulis satuannya sendiri — "380/jam" —
+             jadi ia menerangkan dirinya tanpa kunci baca. Bandingkan dengan
+             lingkaran sampel tipis yang tanpa kata sama sekali. */}
           <span style={LEGENDA_SEKAT} />
 
           <span style={LEGENDA_GRUP}>

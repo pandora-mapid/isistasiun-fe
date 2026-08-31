@@ -89,7 +89,7 @@ Karena semuanya pekerjaan visual, semuanya aman dikerjakan di jeda tanpa menggan
 |---|---|---|
 | 1.1 | Filter slot waktu mengubah angka yang ditampilkan | ✅ |
 | 1.2 | Klik titik pengamatan → panel ringkasan terisi sesuai titik tersebut | ✅ |
-| 1.3 | Panel lapisan: hidup/matikan tiap lapisan peta | ✅ sebagian — lihat catatan |
+| 1.3 | Panel lapisan: hidup/matikan tiap lapisan peta | ✅ — 3 baris hidup; 2 sisanya memang belum punya data |
 | 1.4 | Filter kategori usaha mengubah tampilan titik | ✅ |
 | 1.5 | Legenda mengikuti skala data yang sedang aktif, bukan angka mati | ✅ |
 | 1.6 | Keadaan hover dan terpilih pada titik | ✅ |
@@ -97,9 +97,32 @@ Karena semuanya pekerjaan visual, semuanya aman dikerjakan di jeda tanpa menggan
 
 > **Catatan:** filter kategori dan slot **tidak menyembunyikan titik**, hanya mengubah warna dan ukurannya. Ini konsekuensi batasan `feature-state` di MapLibre, dan tidak masalah karena hanya ada ±15 titik yang semuanya memang selalu relevan ditampilkan. Lihat `DATA_CONTRACT.md` §A1.
 
-> **Catatan 1.3 — empat baris lapisan sengaja dimatikan.** Dari tujuh baris di panel, hanya tiga yang punya data: **Kesenjangan belanja**, **Potensi belanja**, dan **Kepercayaan data**. Ketiganya benar-benar menghidupkan dan mematikan layer peta. Empat sisanya — *Kategori hilang*, *Arus pintu stasiun*, *Indeks sewa / arus*, *Event & aktivasi* — tidak punya layer karena datanya memang belum ada, jadi panelnya menandainya "belum ada data" dan tidak bisa diklik. Ini pilihan sadar: sakelar yang menyala tapi tidak mengubah apa pun lebih buruk daripada sakelar yang jujur mati.
+> **Catatan 1.3 — lima baris hidup, dua memang belum punya data.**
 >
-> Kawasan tangkapan (isochrone) juga tidak diberi baris sendiri — kemunculannya sudah ditentukan tombol 3/5/10 menit.
+> | Baris | Yang digambar |
+> |---|---|
+> | Kesenjangan belanja | Lingkaran berwarna dan berukuran |
+> | Kepercayaan data | Halo abu — makin tebal, makin lemah datanya |
+> | **Arus pintu stasiun** | **Angka `org/jam` di bawah nama titik** |
+> | Indeks sewa / arus | — belum ada data |
+> | Event & aktivasi | — belum ada data |
+>
+Baris yang ditebalkan sempat ditandai "belum ada data" **padahal variabel `F` sudah ada sejak Fase 1**. Yang belum ada waktu itu bentuk visualnya, bukan datanya — dan label yang keliru itu membuat panel ini ikut menyesatkan, persis hal yang paling dihindari proyek ini.
+>
+> Dua baris terakhir benar-benar kosong: `/analytics/rent-flow-index` dan `/analytics/event-potential` ada di spesifikasi backend, tapi belum ada data contohnya.
+>
+> **Baris "Kategori hilang" dihapus dari panel lapisan.** Sempat digambar sebagai lencana angka di sudut lingkaran, tapi panel kanan sudah menyajikannya jauh lebih baik: nama kategorinya, persen permintaan, jumlah gerai, subjudul yang menerangkan perbandingannya, dan barisnya bisa diklik untuk menyaring peta. Lencana itu cuma salinan yang kehilangan seluruh keterangan tadi dan menyisakan satu angka yang tidak bisa ditafsirkan sendirian.
+>
+> Ada persoalan yang lebih dalam juga: ambang "3 gerai" di proposal §5.2 sebenarnya **ambang kecukupan sampel**, bukan ambang peluang pasar. Memakainya untuk mendefinisikan "kategori hilang" membuat kondisinya **identik dengan sampel tipis** — dua nama untuk satu aturan yang sama, sementara persentase permintaan tidak ikut menentukan sama sekali. Definisi "hilang" perlu diputuskan tersendiri; lihat §7.
+>
+> **Baris "Potensi belanja" dihapus.** Ia menggambar cincin luar seukuran potensi, dengan maksud jarak antara cincin dan lingkaran terbaca sebagai "yang sudah tertangkap". Ternyata tidak bisa: cincin dan lingkaran memakai dua skala terpisah, sehingga dua titik dengan perbandingan potensi/gap yang **identik** (1,44) tergambar dengan jarak berbeda (1,78 dan 1,55). Membuatnya jujur menuntut skala berlabuh nol berbasis luas, yang berarti merombak ukuran lingkaran kesenjangan juga — encoding utama peta ini. Karena `gap = potensi − tertangkap` membuat ketiganya saling menyimpulkan dan angkanya sudah tersaji tepat di panel kanan, cincin itu tidak pernah menambah informasi baru. Lihat ROADMAP §7.
+>
+> Kawasan tangkapan (isochrone) tidak diberi baris sendiri — kemunculannya sudah ditentukan tombol 3/5/10 menit.
+
+> **Catatan teknis 1.3 — dua jebakan MapLibre yang ditemukan saat mengerjakannya.**
+>
+> 1. **`feature-state` tidak berlaku di properti layout.** `text-field` adalah properti layout, jadi label tidak bisa membaca angka yang ditempel lewat `setFeatureState` — validator menolaknya dengan *"feature-state data expressions are not supported with layout properties"*. Jalan keluarnya: satu source GeoJSON kecil khusus label (`point-label-values`) yang angkanya ikut sebagai **properti fitur** dan disusun ulang tiap kali slot berganti. Ongkosnya kecil karena isinya hanya sebanyak titik pengamatan.
+> 2. **Layer simbol yang ditambahkan belakangan merebut prioritas penempatan.** MapLibre menempatkan simbol dalam urutan terbalik. Waktu layer arus diletakkan sesudah nama titik, **seluruh nama lenyap dari peta tanpa satu pun pesan error**. Urutannya sekarang: arus dulu, nama titik sesudahnya — supaya yang mengalah saat sempit adalah angka arus, bukan namanya. Dikunci oleh tes di `tests/peta.spec.ts`.
 
 **Selesai ketika:** seluruh interaksi di halaman Peta berfungsi penuh memakai data contoh — sehingga halaman itu sudah bisa didemokan apa adanya. ✅ **Tercapai.**
 
@@ -257,7 +280,9 @@ Kecil-kecil, bisa disisipkan kapan saja. Semuanya aman dikerjakan saat jeda.
 | ~~**Slot "sore" tertulis 16–19**~~ | ✅ Selesai di Fase 1. `lib/data/dimensions.ts` memisahkan `label` (tulisan di tombol, tetap "16–19" mengikuti desain) dari `jam` (rentang sesungguhnya, "16.00–18.59"), dan `jam` muncul sebagai tooltip tombol serta di panel transparansi |
 | **Tipologi Manggarai** | Proposal menyebut tiga tipologi, Manggarai adalah kasus transit. Perlu diputuskan tim — memengaruhi halaman Insight |
 | **`F × E × C × V` tidak menghasilkan `gap`** | Di data contoh, mengalikan keempat variabel tidak menghasilkan angka kesenjangan yang ditampilkan di sebelahnya — keduanya dikarang terpisah saat Fase 0. Panelnya jujur menampilkan apa yang ada di data, jadi ini bukan bug kode, tapi bertabrakan dengan janji "setiap angka bisa dilacak" (§9 nomor 4). Perlu diputuskan saat Fase 2: backend mengirim variabel yang konsisten, atau data contohnya yang diturunkan dari rumus |
-| **Empat baris lapisan tanpa data** | *Kategori hilang*, *Arus pintu*, *Indeks sewa*, *Event* — lihat catatan §3. `Arus pintu` sebenarnya sudah punya angkanya (variabel `F` per slot), hanya belum diputuskan bentuk visualnya di peta |
+| **Definisi "kategori hilang" masih rancu** | Saringannya memakai ambang 3 gerai, padahal angka itu di proposal §5.2 adalah ambang **kecukupan sampel**, bukan ambang peluang pasar. Akibatnya "kategori hilang" dan "sampel tipis" jadi kondisi yang persis sama, dan persentase permintaan cuma dipakai mengurutkan — tidak menentukan. Perlu diputuskan: "hilang" itu berarti gerai = 0, atau permintaan tinggi dengan gerai sedikit? Terkait langsung dengan urutan daftarnya, yang sekarang membuat Apotek dengan **nol gerai** terpotong dari tiga besar |
+| **Potensi belanja tidak punya lapisan peta** | Angkanya tetap tampil di panel kanan dan di situ sudah tepat. Yang dihapus lapisan petanya, karena cincin berskala terpisah membuat jarak antar-titik tidak bisa dibandingkan. Kalau suatu saat potensi perlu tampil di peta, syaratnya skala berlabuh nol berbasis luas yang dipakai bersama lingkaran kesenjangan |
+| **Dua baris lapisan tanpa data** | *Indeks sewa / arus* dan *Event & aktivasi*. Keduanya punya endpoint di spesifikasi backend (`/analytics/rent-flow-index`, `/analytics/event-potential`) tapi belum ada data contohnya. *Kategori hilang* dan *Arus pintu* sudah selesai — lihat catatan §3 |
 | **Tidak ada variabel lingkungan sama sekali** | Seluruh alamat — API, tile, basemap — ditulis mati di kode. Aman selama semuanya data contoh lokal, tapi harus beres sebelum ada alamat yang berbeda antara lokal dan produksi. Lihat §4.2 |
 | ~~**Autentikasi belum pernah dibahas**~~ | ✅ Terjawab. `02-BACKEND-SPEC.md` §1 memakai JWT, tapi enam endpoint peta ada di tier gratis dan tidak butuh token. Pekerjaan auth pindah ke §6.1 sebagai jalur terpisah |
 

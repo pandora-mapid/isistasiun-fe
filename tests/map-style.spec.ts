@@ -5,11 +5,10 @@ import { SOURCE } from "../lib/map/config";
 import {
   isochroneFillLayer,
   isochroneLineLayer,
+  pointArusLayer,
   pointCircleLayer,
   pointConfidenceLayer,
   pointLabelLayer,
-  pointPotensiLayer,
-  potensiScaledPaint,
   scaleDependentPaint,
 } from "../lib/map/style";
 import type { Domain } from "../lib/analytics/select";
@@ -33,6 +32,7 @@ function styleWith(layers: unknown[]) {
     sources: {
       [SOURCE.points]: { type: "geojson", data: EMPTY_FC },
       [SOURCE.isochrones]: { type: "geojson", data: EMPTY_FC },
+      [SOURCE.pointLabels]: { type: "geojson", data: EMPTY_FC },
     },
     layers,
   };
@@ -58,9 +58,9 @@ const LAYERS: { nama: string; buat: () => unknown }[] = [
   { nama: "isochrone-fill", buat: isochroneFillLayer },
   { nama: "isochrone-line", buat: isochroneLineLayer },
   { nama: "point-confidence", buat: () => pointConfidenceLayer(DOMAIN_UJI, CONF_UJI) },
-  { nama: "point-potensi", buat: () => pointPotensiLayer(DOMAIN_UJI) },
   { nama: "point-circle", buat: () => pointCircleLayer(DOMAIN_UJI) },
   { nama: "point-label", buat: pointLabelLayer },
+  { nama: "point-arus", buat: pointArusLayer },
 ];
 
 for (const { nama, buat } of LAYERS) {
@@ -96,7 +96,6 @@ for (const { nama, domain } of DOMAINS) {
   test(`layer titik tetap sah pada ${nama}`, () => {
     const layers = [
       pointConfidenceLayer(domain, CONF_UJI),
-      pointPotensiLayer(domain),
       pointCircleLayer(domain),
     ];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -108,10 +107,7 @@ for (const { nama, domain } of DOMAINS) {
     // `setPaintProperty` tidak divalidasi MapLibre saat runtime — kalau
     // ekspresinya cacat, layer diam-diam berhenti menggambar. Jadi hasil
     // `scaleDependentPaint` dipasang ke layer tiruan lalu divalidasi di sini.
-    const perubahan = [
-      ...scaleDependentPaint(domain, CONF_UJI),
-      ...potensiScaledPaint(domain),
-    ];
+    const perubahan = scaleDependentPaint(domain, CONF_UJI);
     expect(perubahan.length).toBeGreaterThan(0);
 
     for (const { layer, property, value } of perubahan) {
