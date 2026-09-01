@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 import { scaleBarFor } from "../lib/map/scale";
-import { jarak } from "../lib/format";
+import { jarak, rentangRingkas, TIDAK_DIESTIMASI } from "../lib/format";
 
 /**
  * Uji batang skala — tanpa browser, jadi cepat.
@@ -54,4 +54,33 @@ test("jarak diformat dengan satuan yang wajar", () => {
   expect(jarak(1000)).toBe("1 km");
   expect(jarak(2000)).toBe("2 km");
   expect(jarak(1500)).toBe("1,5 km");
+});
+
+/* -------------------------------------------------------------------------
+ * Rentang ringkas
+ *
+ * Hidup di berkas ini karena di sinilah pemformatan angka sudah diuji
+ * (`jarak`). Aturannya satu: satuan ditulis sekali kalau kedua ujungnya memang
+ * berada pada satuan yang sama, dan tidak pernah kalau tidak.
+ * ---------------------------------------------------------------------- */
+
+test("satuan ditulis sekali kalau kedua ujungnya sama-sama jutaan", () => {
+  expect(rentangRingkas({ p10: 2_300_000, p50: 2_900_000, p90: 4_000_000 })).toBe(
+    "Rp 2,3 – 4,0 jt",
+  );
+});
+
+test("satuan berbeda tetap ditulis penuh, supaya tidak menyesatkan", () => {
+  // "Rp 950 – 1,7 jt" akan terbaca sebagai 950 juta. Ujung yang berbeda satuan
+  // wajib menyebut satuannya masing-masing.
+  expect(rentangRingkas({ p10: 950_000, p50: 1_200_000, p90: 1_700_000 })).toBe(
+    "Rp 950 rb – Rp 1,7 jt",
+  );
+});
+
+test("rentang yang tidak diestimasi tidak pernah jadi Rp 0", () => {
+  expect(rentangRingkas({ p10: null, p50: null, p90: null })).toBe(
+    TIDAK_DIESTIMASI,
+  );
+  expect(rentangRingkas(null)).toBe(TIDAK_DIESTIMASI);
 });

@@ -10,6 +10,8 @@ import {
   missingCategories,
   pointsOfStation,
   posisiDalamRentang,
+  totalMetricFor,
+  totalMetrics,
   type PointMetric,
 } from "../lib/analytics/select";
 import { ALL_CATEGORIES } from "../lib/data/dimensions";
@@ -341,4 +343,41 @@ test("posisi jatuh ke tengah kalau rentangnya tidak bisa dibaca", () => {
   expect(posisiDalamRentang({ p10: null, p50: null, p90: null }, 150)).toBe(0.5);
   // Lebar nol: membaginya akan menghasilkan Infinity, bukan penanda di ujung.
   expect(posisiDalamRentang({ p10: 100, p50: 100, p90: 100 }, 100)).toBe(0.5);
+});
+
+/* -------------------------------------------------------------------------
+ * Angka setingkat hari
+ *
+ * Halaman Beranda berbicara dalam satuan "per hari". Godaannya adalah
+ * menjumlahkan keempat slot sendiri — dan itu melahirkan angka yang tidak ada
+ * di payload, persis yang dilarang ROADMAP §9 nomor 4.
+ * ---------------------------------------------------------------------- */
+
+test("angka harian dipetik dari total, bukan dijumlahkan dari slot", () => {
+  const p = titik(11, {
+    total: { potensi: r(1_010_000), tertangkap: r(310_000), gap: r(700_000) },
+    // Kalau keempat slot dijumlahkan hasilnya jauh berbeda dari `total`.
+    by_slot: [slot("pagi", { gap: r(270_000) }), slot("sore", { gap: r(310_000) })],
+  });
+  expect(totalMetricFor(p).gap.p50).toBe(700_000);
+});
+
+test("angka harian tidak mengarang F × E × C × V setingkat hari", () => {
+  // Keempat variabel hanya dicacah per slot; nilai "rata-rata sehari" tidak
+  // pernah diukur siapa pun, jadi tidak boleh muncul seolah-olah ada.
+  const m = totalMetricFor(titik(11));
+  expect(m.variables).toBeNull();
+  expect(m.arus).toBeNull();
+});
+
+test("sampel tipis dan kepercayaan ikut terbawa ke angka harian", () => {
+  const m = totalMetricFor(titik(11, { sampel_tipis: true, confidence: 0.42 }));
+  expect(m.sampelTipis).toBe(true);
+  expect(m.confidence).toBe(0.42);
+});
+
+test("totalMetrics terkunci berdasarkan id titik", () => {
+  const map = totalMetrics(payload([titik(11), titik(12, { station_id: 2 })]));
+  expect([...map.keys()].sort()).toEqual([11, 12]);
+  expect(map.get(12)?.stationId).toBe(2);
 });

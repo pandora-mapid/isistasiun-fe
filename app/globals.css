@@ -260,3 +260,336 @@ h3 {
   font-family: var(--font-inter), system-ui, sans-serif;
   font-size: 10px;
 }
+
+/* ==========================================================================
+   NavBar — warnanya lewat variabel, bukan hex literal.
+
+   Nilai bawaannya PERSIS nilai yang dulu ditulis di dalam komponen, jadi
+   keempat layar yang belum dimigrasi tetap piksel-identik. Yang didapat: satu
+   layar bisa menyetel ulang navigasinya dari dalam scope-nya sendiri, tanpa
+   melahirkan varian NavBar kedua — yang memang dilarang di CLAUDE.md.
+   ========================================================================== */
+:root {
+  --nav-brand-bg: var(--accent-700);
+  --nav-brand-fg: #ffffff;
+  --nav-wordmark: var(--gray-900);
+  --nav-idle: var(--gray-600);
+  --nav-active-fg: var(--accent-700);
+  --nav-active-bg: rgba(29, 78, 216, 0.1);
+  --nav-border: rgba(15, 23, 42, 0.1);
+}
+
+/* ==========================================================================
+   Sistem "laporan instrumen" — dipakai halaman Beranda.
+
+   Ditambahkan DI SAMPING tangga `--gray-*`/`--accent-*` yang lama, tidak
+   menggantikannya: `body`, `.page-canvas`, dan empat layar lain masih membaca
+   yang lama. Mengubah yang lama berarti merombak seluruh aplikasi padahal yang
+   sedang dikerjakan satu halaman.
+   ========================================================================== */
+:root {
+  /* --- Kertas & tinta ---------------------------------------------------
+     Netral lama adalah Tailwind slate apa adanya — dingin, dan persis itu yang
+     membuat halaman terbaca sebagai bawaan. Netral di sini hangat. */
+  --paper: #faf8f4;
+  --paper-2: #f3efe7;
+  --surface: #ffffff;
+  --ink: #16130f;
+  --ink-2: #423b32;
+  --ink-muted: #6b6355;
+  --ink-faint: #a09788;
+
+  /* Hairline menggantikan isi kartu. Itu satu perubahan yang paling banyak
+     menghapus kesan "kumpulan kartu". */
+  --rule: rgba(22, 19, 15, 0.13);
+  --rule-soft: rgba(22, 19, 15, 0.07);
+  --rule-strong: rgba(22, 19, 15, 0.34);
+  --rule-ink: rgba(250, 248, 244, 0.18);
+
+  /* --- Data -------------------------------------------------------------
+     ⚠️ Biru WAJIB tetap sama dengan `GAP_RAMP` di lib/map/style.ts. Di peta ia
+     membawa arti — besar kesenjangan — jadi menggesernya di sini akan membuat
+     halaman depan dan peta menjanjikan dua skala yang berbeda.
+
+     Aturannya: biru HANYA untuk angka, peta, dan mark data. Bukan untuk
+     "ini penting". */
+  --data: #1d4ed8;
+  --data-soft: #93c5fd;
+  --data-mid: #60a5fa;
+  --data-wash: rgba(29, 78, 216, 0.08);
+
+  /* Oker HANYA untuk kerja lapangan: pencacahan, survei, foto, struk. Memberi
+     biru satu arti berarti butuh warna kedua untuk arti yang lain. */
+  --field: #b45f33;
+  --field-wash: rgba(180, 95, 51, 0.1);
+
+  /* --- Tangga tipografi, rasio 1.25 -------------------------------------
+     Menggantikan ±17 ukuran ad-hoc yang saling dempet (12/12.5, 13/13.5,
+     14/14.5, 26/32/34). Itu bukan tangga, itu drift. */
+  --t-display: clamp(38px, 4.9vw, 74px);
+  --t-h1: clamp(32px, 4.2vw, 60px);
+  --t-h2: clamp(26px, 2.9vw, 40px);
+  --t-h3: clamp(21px, 2vw, 27px);
+  --t-lead: 18px;
+  --t-body: 15px;
+  --t-small: 13px;
+  --t-micro: 11px;
+
+  /* --- Ruang, basis 8 --------------------------------------------------- */
+  --s1: 8px;
+  --s2: 16px;
+  --s3: 24px;
+  --s4: 40px;
+  --s5: 64px;
+  --s6: 96px;
+  --s7: 128px;
+
+  /* --- Radius yang punya maksud -----------------------------------------
+     Yang lama satu nilai untuk segalanya: `borderRadius: 12` muncul 92 kali,
+     dipakai untuk lingkaran 26px, kotak 44px, kartu 420px, dan bar 5px
+     sekaligus. Di sini wadah data bersudut TAJAM — itu yang membuatnya terbaca
+     sebagai instrumen, bukan sebagai kartu. */
+  --r-none: 0;
+  --r-xs: 2px;
+  --r-sm: 6px;
+  --r-pill: 999px;
+
+  --page-x: clamp(20px, 4.6vw, 68px);
+  --page-max: 1400px;
+}
+
+/* Ground halaman. Ditempel sebagai scope, bukan dengan mengubah `.page-canvas`,
+   supaya empat layar lain tidak ikut berubah warna. */
+.paper-canvas {
+  background: var(--paper);
+  color: var(--ink);
+
+  /* Navigasi ikut nada kertas — komponennya sendiri tidak diubah. */
+  --nav-brand-bg: var(--ink);
+  --nav-brand-fg: var(--paper);
+  --nav-wordmark: var(--ink);
+  --nav-idle: var(--ink-muted);
+  /* Bukan biru: menandai halaman yang sedang dibuka bukan menampilkan data,
+     dan setiap pemakaian biru di luar angka mengencerkan artinya. */
+  --nav-active-fg: var(--ink);
+  --nav-active-bg: rgba(22, 19, 15, 0.07);
+  --nav-border: var(--rule);
+}
+
+/* --- Tata letak ---------------------------------------------------------- */
+
+.wrap {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding-inline: var(--page-x);
+}
+
+/* Grid 12 kolom. Pembagiannya asimetris (5/7, 4/8) — bukan `1fr 1fr` dan
+   `repeat(3,1fr)` di mana-mana, yang membuat tiap section terlihat sama. */
+.g12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--s3);
+}
+
+/* Band tinta full-bleed: satu-satunya ketukan kontras nilai di halaman yang
+   selain itu terang dari atas sampai bawah. */
+.ink-band {
+  background: var(--ink);
+  color: var(--paper);
+  --rule: var(--rule-ink);
+  --ink-muted: rgba(250, 248, 244, 0.58);
+  --ink-faint: rgba(250, 248, 244, 0.4);
+  --data: var(--data-mid);
+  --field: #e08b5c;
+}
+
+.rule-t {
+  border-top: 1px solid var(--rule);
+}
+.rule-b {
+  border-bottom: 1px solid var(--rule);
+}
+
+/* --- Tipografi ----------------------------------------------------------- */
+
+.serif {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+  text-wrap: balance;
+}
+
+/* Angka. Monospace sungguhan, bukan Inter ber-tabular-nums seperti `.mono`.
+   `.mono` sengaja DIBIARKAN apa adanya — ia dipakai keempat layar lain, dan
+   beberapa panel peta punya kolom berlebar tetap yang akan pecah kalau lebar
+   angkanya berubah. Migrasinya menyusul, per layar. */
+.fig {
+  font-family: var(--font-mono), ui-monospace, "SF Mono", monospace;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: "tnum", "zero";
+  letter-spacing: -0.02em;
+}
+
+/* Rubrik section: nomor + label kapital kecil. */
+.eyebrow {
+  font: 500 var(--t-micro) / 1.5 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.measure {
+  max-width: 64ch;
+}
+.measure-narrow {
+  max-width: 54ch;
+}
+
+/* Tag sumber. Dua warna, dua arti — lapangan dan mesin. */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font: 500 var(--t-micro) / 1.4 var(--font-inter), system-ui, sans-serif;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.tag-field {
+  background: var(--field-wash);
+  color: var(--field);
+}
+.tag-data {
+  background: var(--data-wash);
+  color: var(--data);
+}
+
+/* Kartu yang benar-benar sebuah unit yang bisa diklik — dan hanya itu.
+   Sudut nyaris tajam, garis rambut, tanpa isi warna. */
+.card {
+  border: 1px solid var(--rule);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  transition:
+    border-color 0.18s ease-out,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+a.card:hover,
+a.card:focus-visible {
+  border-color: var(--rule-strong, rgba(22, 19, 15, 0.34));
+  transform: translateY(-2px);
+}
+
+/* Tombol bersama (`.b`, `.bp`, `.bs`) disetel ulang DI DALAM scope ini saja —
+   definisinya tidak disentuh, jadi empat layar lain tetap seperti sekarang.
+
+   Dua hal yang diperbaiki. Radius 12px milik tombol lama adalah radius yang
+   sama dengan segalanya di desain lama; di sini wadah data bersudut tajam, dan
+   tombol yang membulat sendirian akan terbaca sebagai tempelan dari sistem
+   lain. Dan warnanya: sejak biru dikunci untuk data, tombol utama tidak boleh
+   lagi biru — kalau biru berarti "angka kami", tombol biru mengencerkan arti
+   itu setiap kali muncul. */
+.paper-canvas .b {
+  border-radius: var(--r-xs);
+}
+.paper-canvas .bp {
+  background: var(--ink);
+  color: var(--paper);
+}
+.paper-canvas .bp:hover {
+  background: var(--ink-2);
+}
+.paper-canvas .bs {
+  border-color: var(--rule-strong);
+  color: var(--ink);
+}
+.paper-canvas .bs:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+/* Di atas band tinta, tombol utama membalik — kalau tidak, tinta di atas tinta
+   dan tombolnya lenyap. Specificity-nya sengaja lebih tinggi dari aturan di
+   atas. */
+.ink-band .b.bp {
+  background: var(--paper);
+  color: var(--ink);
+}
+.ink-band .b.bp:hover {
+  background: #fff;
+}
+
+/* --- Gerak ---------------------------------------------------------------
+   Digerakkan scroll TANPA JavaScript, lewat `animation-timeline: view()`.
+
+   Sengaja bukan IntersectionObserver: observer menuntut markup yang tersembunyi
+   sejak server, jadi kalau hidrasi telat atau gagal, isinya tidak pernah
+   muncul. Dengan cara ini peramban yang belum mendukung `view()` — Safari dan
+   Firefox hari ini — cukup menampilkan segalanya seperti biasa. Tidak ada
+   keadaan di mana teks hilang.
+   -------------------------------------------------------------------------- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 4% cover 26%;
+    }
+  }
+}
+/* Sengaja HANYA `transform`, tanpa opacity.
+   Versi pertama memudarkan dari `opacity: 0`, dan itu berarti ada keadaan sah
+   di mana seluruh isi halaman tidak terlihat — tangkapan layar satu halaman
+   penuh membuktikannya: hero dan penutup tergambar, seluruh bagian tengah
+   kosong. Untuk halaman yang akan dinilai juri, "bisa ter-capture kosong"
+   adalah kegagalan diam-diam, persis kelas bug yang paling dijaga di repo ini.
+   Menggeser posisi saja tetap terasa sebagai gerak, dan tidak punya satu pun
+   keadaan di mana teksnya hilang. */
+@keyframes reveal-in {
+  from {
+    transform: translateY(26px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* Cetak dan ekspor PDF tidak punya gulungan; matikan seluruhnya. */
+@media print {
+  .reveal,
+  .draw,
+  .draw-dot {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Momen tanda tangan: bar rentang P10–P90 di hero menggambar dirinya sendiri,
+   sekali, saat halaman dibuka. Rentang adalah klaim epistemik produk ini —
+   jadi yang bergerak sebaiknya justru itu, bukan hiasan. */
+@media (prefers-reduced-motion: no-preference) {
+  .draw {
+    animation: draw-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+  }
+  .draw-dot {
+    animation: fade-in 0.5s ease-out 1.15s both;
+  }
+}
+@keyframes draw-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

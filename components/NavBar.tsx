@@ -16,8 +16,17 @@ const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
   { key: "rekomendasi", href: "/rekomendasi", label: "Rekomendasi" },
 ];
 
-/** Brand mark ("IS" square + wordmark) — shared by both nav variants so the
- * two look identical wherever the nav appears. */
+/**
+ * Brand mark ("IS" square + wordmark) — shared by both nav variants so the
+ * two look identical wherever the nav appears.
+ *
+ * Colours come from `--nav-*` custom properties whose defaults, set in
+ * `globals.css`, are the exact literals this file used to hardcode — so every
+ * screen that hasn't been restyled renders pixel-identically. A screen that
+ * *has* been restyled (currently only Beranda) overrides those variables inside
+ * its own scope. That is deliberately not a second `NavBar`: one nav, one set
+ * of markup, repainted by whatever page it lands on.
+ */
 function Brand() {
   return (
     <div className="row" style={{ gap: 10, marginRight: 8 }}>
@@ -26,12 +35,12 @@ function Brand() {
           width: 22,
           height: 22,
           borderRadius: 12,
-          background: "#1D4ED8",
+          background: "var(--nav-brand-bg)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           font: "800 11px/1 var(--font-inter)",
-          color: "#fff",
+          color: "var(--nav-brand-fg)",
         }}
       >
         IS
@@ -40,6 +49,7 @@ function Brand() {
         style={{
           font: "800 16px/1 var(--font-inter)",
           letterSpacing: "-.01em",
+          color: "var(--nav-wordmark)",
         }}
       >
         Isi Stasiun
@@ -65,8 +75,8 @@ function NavLinks({ active }: { active: NavKey }) {
               padding: "8px 14px",
               fontSize: 13,
               fontWeight: isActive ? 600 : 400,
-              background: isActive ? "rgba(29,78,216,.1)" : "transparent",
-              color: isActive ? "#1D4ED8" : "#475569",
+              background: isActive ? "var(--nav-active-bg)" : "transparent",
+              color: isActive ? "var(--nav-active-fg)" : "var(--nav-idle)",
             }}
           >
             {item.label}
@@ -86,7 +96,7 @@ export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
       style={{
         gap: 22,
         padding: "20px 28px",
-        borderBottom: "1px solid rgba(15,23,42,.1)",
+        borderBottom: "1px solid var(--nav-border)",
       }}
     >
       <Brand />

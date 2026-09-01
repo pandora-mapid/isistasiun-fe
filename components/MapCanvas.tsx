@@ -71,6 +71,27 @@ type Props = {
    * bergerak. Dipakai legenda untuk menggambar batang skala yang sungguhan.
    */
   onScaleChange?: (metersPerPixel: number) => void;
+  /**
+   * Boleh digeser, di-zoom, dan diklik. Bawaannya ya.
+   *
+   * Dimatikan untuk peta hero di Beranda: di sana peta adalah gambar yang
+   * hidup, bukan alat. Membiarkannya interaktif berarti gulungan halaman
+   * tertelan peta begitu kursor melintasinya — pengunjung terjebak di tengah
+   * halaman tanpa tahu kenapa.
+   *
+   * Saat mati, kendali navigasi tidak dipasang dan pendengar sorot/klik tidak
+   * didaftarkan sama sekali — bukan sekadar disembunyikan.
+   */
+  interactive?: boolean;
+  /**
+   * Ruang yang dikosongkan saat menyesuaikan tampilan ke kawasan studi.
+   *
+   * Bawaannya `FIT_PADDING`, yang angkanya mengikuti panel-panel melayang di
+   * halaman Peta. Peta hero tidak punya panel itu, jadi ia mengirim padding
+   * sendiri — kalau tidak, petanya menyusut ke tengah menyisakan ruang untuk
+   * sesuatu yang tidak ada di sana.
+   */
+  fitPadding?: { top: number; bottom: number; left: number; right: number };
 };
 
 /** Batas menunggu style basemap sebelum dianggap gagal. */
@@ -187,6 +208,8 @@ export function MapCanvas({
   onSelectPoint,
   dataError = null,
   onScaleChange,
+  interactive = true,
+  fitPadding = FIT_PADDING,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -231,6 +254,11 @@ export function MapCanvas({
       // Di atas 60 derajat pandangan mulai menatap cakrawala dan peta jadi
       // sulit dibaca — sekaligus membuat kendali kemiringan terasa liar.
       maxPitch: CAMERA.maxPitch,
+      // Mematikan ini melepas SELURUH penangan bawaan sekaligus — geser, zoom,
+      // putar, gulung. Itu yang dibutuhkan peta hero: ia gambar yang hidup,
+      // bukan alat, dan peta yang menelan gulungan halaman di tengah landing
+      // page adalah jebakan, bukan fitur.
+      interactive,
     });
     mapRef.current = map;
 
@@ -251,10 +279,12 @@ export function MapCanvas({
     // meratakan bearing DAN pitch ke nol tanpa memindahkan pusat peta. Itulah
     // sebabnya tidak ada tombol "ratakan" buatan sendiri — compass sudah
     // melakukannya persis.
-    map.addControl(
-      new NavigationControl({ showCompass: true, visualizePitch: true }),
-      "top-left",
-    );
+    if (interactive) {
+      map.addControl(
+        new NavigationControl({ showCompass: true, visualizePitch: true }),
+        "top-left",
+      );
+    }
 
     // MapLibre melaporkan kegagalan style/tile lewat event ini. Tanpa
     // pendengar, kegagalannya hanya muncul di console dan peta diam membisu.
@@ -314,6 +344,10 @@ export function MapCanvas({
       map.remove();
       mapRef.current = null;
     };
+    // `interactive` sengaja tidak masuk daftar: ia menentukan bagaimana peta
+    // DIBUAT, dan peta hanya dibuat sekali. Memasukkannya justru berarti
+    // membongkar dan membangun ulang seluruh peta kalau nilainya berubah.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- memasang source, layer, dan penangan interaksi ---------------------
@@ -351,7 +385,7 @@ export function MapCanvas({
     // begitu geometri pindah ke tile vektor: yang diterima hanya fitur di
     // dalam layar, dan peta akan terbuka di tempat acak. Lihat ROADMAP §4.1.
     map.fitBounds(new LngLatBounds(STUDY_BOUNDS), {
-      padding: FIT_PADDING,
+      padding: fitPadding,
       duration: 0,
     });
 
@@ -371,7 +405,10 @@ export function MapCanvas({
   // sempurna tapi tidak menanggapi satu klik pun.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !layersReady) return;
+    // Peta non-interaktif tidak mendaftarkan pendengar sama sekali — bukan
+    // memasangnya lalu mengabaikannya. Kursor "pointer" di atas sesuatu yang
+    // tidak bisa diklik adalah janji yang tidak ditepati.
+    if (!map || !layersReady || !interactive) return;
 
     const clearHover = () => {
       if (hoveredRef.current === null) return;
@@ -410,7 +447,7 @@ export function MapCanvas({
       map.off("mouseleave", LAYER.pointCircle, onLeave);
       map.off("click", LAYER.pointCircle, onClick);
     };
-  }, [layersReady]);
+  }, [layersReady, interactive]);
 
   // --- menempelkan seluruh keadaan fitur ke peta --------------------------
   //

@@ -284,6 +284,8 @@ Kecil-kecil, bisa disisipkan kapan saja. Semuanya aman dikerjakan saat jeda.
 |---|---|
 | **Angka "n < 30" di halaman Insight** | Dikarang saat mengganti placeholder, tidak ada di proposal. Aturan sebenarnya (§5.2): minimal 3 gerai × 2 blok per kategori per stasiun. Bertentangan dengan metodologi sendiri kalau dibiarkan |
 | **Seluruh angka masih data contoh** | Wajar untuk sekarang, tapi footer tiap halaman harus tetap menyatakan "angka bersifat ilustratif" sampai data asli masuk. Keempat layar statis sekarang sudah menyatakannya — Insight sempat tidak punya footer sama sekali, padahal justru yang paling padat angka karangan |
+| ~~**Beranda mengarang angka yang dibantah datanya sendiri**~~ | ✅ Selesai. Kartu simpul di Beranda dulu menulis "Stasiun A/B/C" dengan tipologi dan jumlah pintu yang bertentangan dengan `stations.json` (Stasiun C disebut 5 pintu, datanya 3). Sekarang Beranda membaca `usePetaData()` + `lib/analytics/select.ts`, sumber yang sama dengan halaman Peta, jadi keduanya mustahil berbeda |
+| **Tiga layar masih memakai sistem desain lama** | Insight, Metodologi, dan Rekomendasi. Beranda sudah pindah ke sistem "laporan instrumen" (kertas hangat, tangga tipografi/ruang/radius yang sungguhan, hairline menggantikan isi kartu, biru dikunci untuk data) yang hidup berdampingan di `globals.css` lewat scope `.paper-canvas`. Sengaja belum disatukan: token lama masih dibaca `body`, `.page-canvas`, dan ketiga layar itu. Dimigrasi satu layar per kali, bukan dengan mengubah token lama |
 | ~~**Slot "sore" tertulis 16–19**~~ | ✅ Selesai di Fase 1. `lib/data/dimensions.ts` memisahkan `label` (tulisan di tombol, tetap "16–19" mengikuti desain) dari `jam` (rentang sesungguhnya, "16.00–18.59"), dan `jam` muncul sebagai tooltip tombol serta di panel transparansi |
 | **Tipologi Manggarai** | Proposal menyebut tiga tipologi, Manggarai adalah kasus transit. Perlu diputuskan tim — memengaruhi halaman Insight |
 | **`F × E × C × V` tidak menghasilkan `gap`** | Di data contoh, mengalikan keempat variabel tidak menghasilkan angka kesenjangan yang ditampilkan di sebelahnya — keduanya dikarang terpisah saat Fase 0. Panelnya jujur menampilkan apa yang ada di data, jadi ini bukan bug kode, tapi bertabrakan dengan janji "setiap angka bisa dilacak" (§9 nomor 4). Perlu diputuskan saat Fase 2: backend mengirim variabel yang konsisten, atau data contohnya yang diturunkan dari rumus |
@@ -311,7 +313,7 @@ Ringkasan apa yang memblokir apa:
 | Fase 2 seluruhnya | Kesiapan backend (tile + endpoint) — **belum siap** |
 | 2.8 sisip header `Authorization` | **Tidak ada** — bisa dicicil sekarang, bukan prasyarat |
 | 6.1 auth dan tier berbayar | Kesiapan endpoint `/auth/*` dan `/premium/*` — **jalur terpisah, tidak memblokir Fase 2** |
-| 3.1 responsivitas | **Tidak ada** — cocok saat jeda, dan sebaiknya sekalian dengan jebakan fokus modal (§7) |
+| 3.1 responsivitas | **Tidak ada** — cocok saat jeda, dan sebaiknya sekalian dengan jebakan fokus modal (§7). Beranda sudah memakai `clamp()` dan grid 12 kolom sehingga bertahan sampai ±1100px; tiga layar lain belum |
 | 3.2 dan 3.3 ekspor | **Tidak ada** — murni frontend |
 | 3.6 copilot | Kontrak `POST /copilot/query`, belum dibahas |
 | 3.7 pembanding akhir pekan | Survei akhir pekan + `day_type` dari backend |
