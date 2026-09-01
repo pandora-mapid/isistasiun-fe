@@ -1,7 +1,9 @@
 "use client";
 
 /**
- * Tiga angka yang melatarbelakangi proyek ini, sebagai satu rel mendatar.
+ * Tiga angka yang melatarbelakangi proyek ini, sebagai tiga kartu mengambang
+ * (rel hairline pada sistem editorial putaran 1–4 digantikan kartu bersama
+ * `.card` yang sama dipakai section 05/07, sejak sistem "modern" putaran 5).
  *
  * Dua perubahan terhadap versi lama, dan keduanya bukan soal rupa:
  *
@@ -63,17 +65,11 @@ export function RelStatistik() {
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "var(--s4)",
+        gap: "var(--s3)",
       }}
     >
       {butir.map((b, i) => (
-        <div
-          key={b.nilai + i}
-          style={{
-            paddingLeft: i === 0 ? 0 : "var(--s4)",
-            borderLeft: i === 0 ? undefined : "1px solid var(--rule)",
-          }}
-        >
+        <div key={b.nilai + i} className="card" style={{ padding: "var(--s4)" }}>
           <div
             className="fig"
             style={{

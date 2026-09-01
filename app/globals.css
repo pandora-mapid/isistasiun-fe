@@ -277,6 +277,17 @@ h3 {
   --nav-active-fg: var(--accent-700);
   --nav-active-bg: rgba(29, 78, 216, 0.1);
   --nav-border: rgba(15, 23, 42, 0.1);
+
+  /* Bentuk baris nav — bukan cuma warnanya. Nilai default di bawah ini
+     PERSIS style inline yang dulu ada langsung di NavBar.tsx, jadi keempat
+     layar yang belum dimigrasi tetap piksel-identik. Beranda (`.paper-canvas`)
+     menyetel ulang di scope-nya sendiri untuk jadi nav pill mengambang. */
+  --nav-radius: 0;
+  --nav-margin: 0;
+  --nav-bg: transparent;
+  --nav-shadow: none;
+  --nav-border-w: 1px;
+  --nav-brand-radius: 12px;
 }
 
 /* ==========================================================================
@@ -299,12 +310,25 @@ h3 {
   --ink-muted: #6b6355;
   --ink-faint: #a09788;
 
-  /* Hairline menggantikan isi kartu. Itu satu perubahan yang paling banyak
-     menghapus kesan "kumpulan kartu". */
+  /* Sejak putaran kelima ("modern") kartu-kartu kembali — hairline masih ada
+     sebagai pemisah ringan, tapi bukan lagi satu-satunya bahasa permukaan. */
   --rule: rgba(22, 19, 15, 0.13);
   --rule-soft: rgba(22, 19, 15, 0.07);
   --rule-strong: rgba(22, 19, 15, 0.34);
   --rule-ink: rgba(250, 248, 244, 0.18);
+
+  /* Dua tingkat bayangan. Sistem editorial lama menjadikan bayangan
+     pengecualian tunggal (hanya kartu peta hero); sistem modern menjadikannya
+     kosakata biasa — hampir semua kartu memakai `--shadow-soft`, dan
+     `--shadow-lift` naik satu tingkat lagi untuk elemen paling penting di
+     layar (kartu peta hero). Jangan tulis nilai shadow literal di komponen —
+     dua token ini sudah mencakup seluruh kebutuhan Beranda. */
+  --shadow-soft:
+    0 10px 28px -12px rgba(22, 19, 15, 0.16),
+    0 2px 8px -2px rgba(22, 19, 15, 0.06);
+  --shadow-lift:
+    0 28px 56px -20px rgba(22, 19, 15, 0.24),
+    0 6px 16px -4px rgba(22, 19, 15, 0.1);
 
   /* --- Data -------------------------------------------------------------
      ⚠️ Biru WAJIB tetap sama dengan `GAP_RAMP` di lib/map/style.ts. Di peta ia
@@ -322,6 +346,15 @@ h3 {
      biru satu arti berarti butuh warna kedua untuk arti yang lain. */
   --field: #b45f33;
   --field-wash: rgba(180, 95, 51, 0.1);
+
+  /* Emas HANYA untuk chrome merek: tombol aksi, sorot navigasi, badge
+     dekoratif. Satu-satunya hue baru yang ditambahkan putaran kelima —
+     bukan pengganti biru/oker, dan tidak pernah dipakai untuk angka atau
+     mark di peta. Tiga warna, tiga arti; melanggarnya di salah satu arah
+     mengencerkan ketiganya sekaligus. */
+  --brand: #c99a3c;
+  --brand-strong: #a97f2b;
+  --brand-wash: rgba(201, 154, 60, 0.14);
 
   /* --- Tangga tipografi, rasio 1.25 -------------------------------------
      Menggantikan ±17 ukuran ad-hoc yang saling dempet (12/12.5, 13/13.5,
@@ -347,11 +380,16 @@ h3 {
   /* --- Radius yang punya maksud -----------------------------------------
      Yang lama satu nilai untuk segalanya: `borderRadius: 12` muncul 92 kali,
      dipakai untuk lingkaran 26px, kotak 44px, kartu 420px, dan bar 5px
-     sekaligus. Di sini wadah data bersudut TAJAM — itu yang membuatnya terbaca
-     sebagai instrumen, bukan sebagai kartu. */
+     sekaligus. Sistem editorial menjawabnya dengan sudut nyaris tajam di
+     mana-mana; sistem modern (putaran kelima) menjawabnya dengan tangga radius
+     yang naik bersama ukuran elemennya — `--r-xs`/`--r-sm` untuk detail kecil
+     (tanda, tick), `--r-md`/`--r-lg` untuk kartu, `--r-pill` untuk tombol dan
+     nav. Bukan lagi "semua tajam", tapi tetap bukan "semua 12px" yang lama. */
   --r-none: 0;
   --r-xs: 2px;
   --r-sm: 6px;
+  --r-md: 18px;
+  --r-lg: 28px;
   --r-pill: 999px;
 
   --page-x: clamp(20px, 4.6vw, 68px);
@@ -370,10 +408,23 @@ h3 {
   --nav-wordmark: var(--ink);
   --nav-idle: var(--ink-muted);
   /* Bukan biru: menandai halaman yang sedang dibuka bukan menampilkan data,
-     dan setiap pemakaian biru di luar angka mengencerkan artinya. */
-  --nav-active-fg: var(--ink);
-  --nav-active-bg: rgba(22, 19, 15, 0.07);
+     dan setiap pemakaian biru di luar angka mengencerkan artinya. Emas
+     dipakai di sini justru karena ia SUDAH berarti "chrome merek" — sorotan
+     nav adalah chrome, bukan data, jadi ini bukan hue keempat, cuma pemakaian
+     yang konsisten dengan tombol. */
+  --nav-active-fg: var(--brand-strong);
+  --nav-active-bg: var(--brand-wash);
   --nav-border: var(--rule);
+
+  /* Bentuk: nav lepas dari baris bersudut tajam yang menempel ke tepi
+     viewport, jadi pil mengambang dengan bayangan lembut — bahasa yang sama
+     dengan kartu dan tombol di sistem ini. */
+  --nav-radius: var(--r-pill);
+  --nav-margin: var(--s3) var(--page-x) 0;
+  --nav-bg: var(--surface);
+  --nav-shadow: var(--shadow-soft);
+  --nav-border-w: 0px;
+  --nav-brand-radius: var(--r-pill);
 }
 
 /* --- Tata letak ---------------------------------------------------------- */
@@ -411,14 +462,12 @@ h3 {
   border-bottom: 1px solid var(--rule);
 }
 
-/* --- Tipografi ----------------------------------------------------------- */
-
-.serif {
-  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
-  font-weight: 400;
-  letter-spacing: -0.012em;
-  text-wrap: balance;
-}
+/* --- Tipografi -----------------------------------------------------------
+   `.serif` (Instrument Serif) dipakai sistem editorial putaran 1–4 untuk
+   semua headline Beranda. Putaran kelima ("modern") memindahkan headline ke
+   Inter 800/900 dan melepas font itu sepenuhnya (lihat `layout.tsx`) — kelas
+   ini dihapus di sini juga, bukan dibiarkan merujuk variabel yang sudah tidak
+   ada. */
 
 /* Angka. Monospace sungguhan, bukan Inter ber-tabular-nums seperti `.mono`.
    `.mono` sengaja DIBIARKAN apa adanya — ia dipakai keempat layar lain, dan
@@ -439,6 +488,26 @@ h3 {
   color: var(--ink-faint);
 }
 
+/* Eyebrow yang sama, dibungkus jadi chip pil — dipakai lewat helper
+   `Lencana()` di page.tsx untuk setiap kicker level-section. Latarnya netral
+   (`--paper-2`) secara default; hero memakai `--brand-wash` karena itu satu-
+   satunya kicker yang juga sebuah klaim ("pengukuran langsung"), bukan
+   sekadar nomor urut. */
+.eyebrow-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  background: var(--paper-2);
+}
+/* Di atas band tinta, "kertas muda" jadi salah arah — chip-nya jadi
+   terang-di-atas-terang begitu `--ink-faint` ikut dibalik jadi warna terang.
+   Latarnya diganti versi tinta-tembus yang sama nadanya dengan `--rule-ink`. */
+.ink-band .eyebrow-chip {
+  background: rgba(250, 248, 244, 0.12);
+}
+
 .measure {
   max-width: 64ch;
 }
@@ -446,7 +515,9 @@ h3 {
   max-width: 54ch;
 }
 
-/* Tag sumber. Dua warna, dua arti — lapangan dan mesin. */
+/* Tag sumber. Dua warna dari tiga yang ada, masing-masing satu arti tetap —
+   lapangan dan mesin. (Warna ketiga, emas, tidak pernah dipakai di sini: tag
+   ini melaporkan data, dan emas dikunci untuk chrome, bukan data.) */
 .tag {
   display: inline-flex;
   align-items: center;
@@ -466,58 +537,75 @@ h3 {
   color: var(--data);
 }
 
-/* Kartu yang benar-benar sebuah unit yang bisa diklik — dan hanya itu.
-   Sudut nyaris tajam, garis rambut, tanpa isi warna. */
+/* Kartu. Sistem editorial menjaganya sudut nyaris tajam dan tanpa bayangan
+   sama sekali — "hairline menggantikan isi kartu" adalah baris yang dulu
+   tertulis di sini. Sistem modern membalik itu: radius besar dan
+   `--shadow-soft` adalah keadaan DEFAULT, bukan pengecualian, dan hover
+   menaikkannya lagi ke `--shadow-lift` alih-alih sekadar mengubah warna
+   garis. */
 .card {
-  border: 1px solid var(--rule);
-  border-radius: var(--r-xs);
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--r-lg);
   background: var(--surface);
+  box-shadow: var(--shadow-soft);
   transition:
-    border-color 0.18s ease-out,
+    box-shadow 0.18s ease-out,
     transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 a.card:hover,
 a.card:focus-visible {
-  border-color: var(--rule-strong, rgba(22, 19, 15, 0.34));
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+  transform: translateY(-3px);
 }
 
 /* Tombol bersama (`.b`, `.bp`, `.bs`) disetel ulang DI DALAM scope ini saja —
    definisinya tidak disentuh, jadi empat layar lain tetap seperti sekarang.
 
-   Dua hal yang diperbaiki. Radius 12px milik tombol lama adalah radius yang
-   sama dengan segalanya di desain lama; di sini wadah data bersudut tajam, dan
-   tombol yang membulat sendirian akan terbaca sebagai tempelan dari sistem
-   lain. Dan warnanya: sejak biru dikunci untuk data, tombol utama tidak boleh
-   lagi biru — kalau biru berarti "angka kami", tombol biru mengencerkan arti
-   itu setiap kali muncul. */
+   Sistem editorial membuat tombol bersudut tajam dan berwarna tinta, sengaja
+   menjauh dari biru (dikunci untuk data). Sistem modern (putaran kelima)
+   membuatnya pil penuh dengan bayangan lembut — dan warnanya sekarang emas
+   (`--brand`), bukan tinta: itu warna chrome yang memang dicadangkan untuk
+   "tindakan utama", jadi tombol boleh memakainya tanpa menabrak aturan
+   "biru hanya data". */
 .paper-canvas .b {
-  border-radius: var(--r-xs);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-soft);
+  transition:
+    background 0.15s ease-out,
+    border-color 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    transform 0.15s ease-out;
+}
+.paper-canvas .b:hover {
+  transform: translateY(-1px);
 }
 .paper-canvas .bp {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--brand);
+  color: var(--ink);
 }
 .paper-canvas .bp:hover {
-  background: var(--ink-2);
+  background: var(--brand-strong);
 }
 .paper-canvas .bs {
+  background: var(--surface);
   border-color: var(--rule-strong);
   color: var(--ink);
+  box-shadow: none;
 }
 .paper-canvas .bs:hover {
   border-color: var(--ink);
   color: var(--ink);
 }
-/* Di atas band tinta, tombol utama membalik — kalau tidak, tinta di atas tinta
-   dan tombolnya lenyap. Specificity-nya sengaja lebih tinggi dari aturan di
-   atas. */
+/* Di atas band tinta, tombol utama tetap emas — satu bahasa "aksen = tindakan
+   utama" di terang maupun gelap, bukan lagi kertas/tinta yang dibalik.
+   Specificity-nya sengaja lebih tinggi dari aturan di atas. */
 .ink-band .b.bp {
-  background: var(--paper);
+  background: var(--brand);
   color: var(--ink);
+  box-shadow: none;
 }
 .ink-band .b.bp:hover {
-  background: #fff;
+  background: var(--brand-strong);
 }
 
 /* --- Gerak ---------------------------------------------------------------
@@ -592,4 +680,33 @@ a.card:focus-visible {
   to {
     opacity: 1;
   }
+}
+
+/* Badge cincin di kartu peta hero — teks melingkar yang berputar pelan.
+   Murni dekoratif (lihat `BadgeCincin.tsx`), jadi dijaga
+   `prefers-reduced-motion` dengan pola yang sama persis dengan `.draw` di
+   atas: pengguna yang meminta gerak lebih sedikit melihatnya diam. */
+@media (prefers-reduced-motion: no-preference) {
+  .ring-spin {
+    animation: ring-spin 22s linear infinite;
+  }
+}
+@keyframes ring-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Bidang cahaya lembut di belakang konten — lingkaran blur beropasitas
+   rendah, murni dekoratif (tidak pernah membawa informasi), dipakai untuk
+   memberi kedalaman di belakang hero dan section 05 tanpa menambah elemen
+   yang harus dibaca. Warna & posisi diatur inline per pemakaian. */
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(64px);
+  pointer-events: none;
 }

@@ -70,13 +70,16 @@ export function Persamaan() {
           style={{ rowGap: "var(--s4)", alignItems: "start" }}
         >
           <div style={{ gridColumn: "span 4" }}>
-            <div className="eyebrow" style={{ marginBottom: "var(--s2)" }}>
+            <span
+              className="eyebrow-chip eyebrow"
+              style={{ marginBottom: "var(--s2)", display: "inline-flex" }}
+            >
               03 — Instrumen
-            </div>
+            </span>
             <h2
-              className="serif"
               style={{
-                font: `400 var(--t-h2)/1.06 var(--font-serif), Georgia, serif`,
+                font: `800 var(--t-h2)/1.06 var(--font-inter), system-ui, sans-serif`,
+                letterSpacing: "-0.02em",
                 margin: 0,
               }}
             >

@@ -1,11 +1,13 @@
 "use client";
 
 /**
- * Tiga kartu simpul — satu-satunya kartu yang bertahan di halaman ini.
+ * Tiga kartu simpul — satu-satunya kartu yang benar-benar bisa diklik.
  *
- * Bertahan karena ia memang satu unit yang bisa diklik; sisa halaman yang dulu
- * berupa kartu sekarang berupa band ber-hairline. Isinya dibangun ulang dari
- * dua sisi:
+ * (Sistem editorial putaran 1–4 menjadikan kartu ini pengecualian tunggal di
+ * halaman yang selain itu ber-hairline. Sistem "modern" putaran 5 membalik
+ * itu — kartu ada di mana-mana lagi — tapi bedanya di sini tetap berarti:
+ * hanya kartu inilah yang jadi `<Link>`, bukan sekadar wadah visual.)
+ * Isinya dibangun ulang dari dua sisi:
  *
  * 1. **Angkanya dari data, bukan karangan.** Versi lama menulis "Stasiun A/B/C"
  *    dengan tipologi dan jumlah pintu yang dibantah `stations.json` — Stasiun C
@@ -22,7 +24,7 @@
 
 import Link from "next/link";
 
-import { rentangRingkas } from "@/lib/format";
+import { rentangRingkas, rupiahRingkas } from "@/lib/format";
 import { useBeranda } from "./BerandaData";
 import { RangeBar } from "./RangeBar";
 import { SlotSparkline } from "./SlotSparkline";
@@ -49,9 +51,9 @@ export function KartuSimpul() {
             key={i}
             aria-hidden
             style={{
-              height: 300,
+              height: 340,
               border: "1px solid var(--rule)",
-              borderRadius: "var(--r-xs)",
+              borderRadius: "var(--r-lg)",
               background: "var(--paper-2)",
             }}
           />
@@ -75,7 +77,7 @@ export function KartuSimpul() {
           className="card"
           style={{
             display: "block",
-            padding: "var(--s3)",
+            padding: "var(--s4)",
             color: "inherit",
             textDecoration: "none",
           }}
@@ -94,9 +96,9 @@ export function KartuSimpul() {
           </div>
 
           <h3
-            className="serif"
             style={{
-              font: `400 var(--t-h3)/1.1 var(--font-serif), Georgia, serif`,
+              font: `800 var(--t-h3)/1.1 var(--font-inter), system-ui, sans-serif`,
+              letterSpacing: "-0.015em",
               margin: "var(--s2) 0 4px",
               // Nama stasiun bisa satu atau dua baris ("Stasiun C (belum
               // ditentukan)"). Tanpa ruang yang dicadangkan, satu judul panjang
@@ -119,7 +121,7 @@ export function KartuSimpul() {
           <div
             className="fig"
             style={{
-              fontSize: "clamp(17px, 1.5vw, 20px)",
+              fontSize: "clamp(19px, 1.7vw, 23px)",
               whiteSpace: "nowrap",
             }}
           >
@@ -137,9 +139,26 @@ export function KartuSimpul() {
 
           {metric && <RangeBar range={metric.gap} labels={false} />}
 
+          {/* Baris data tambahan — bukan hiasan, dua angka ini memang
+             komponen dari gap di atasnya (gap = potensi − tertangkap), dan
+             frasanya sama persis dengan yang dipakai panel /peta. Ini yang
+             membuat kartu terasa lebih padat tanpa mengarang satu angka pun. */}
+          {metric && (
+            <div
+              style={{
+                marginTop: "var(--s2)",
+                fontSize: "var(--t-micro)",
+                color: "var(--ink-muted)",
+              }}
+            >
+              Potensi {rupiahRingkas(metric.potensi.p50)} − tertangkap{" "}
+              {rupiahRingkas(metric.tertangkap.p50)}
+            </div>
+          )}
+
           <div
             style={{
-              marginTop: "var(--s3)",
+              marginTop: "var(--s4)",
               paddingTop: "var(--s2)",
               borderTop: "1px solid var(--rule)",
             }}

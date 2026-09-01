@@ -1,30 +1,24 @@
 import type { Metadata } from "next";
-import { Inter, Instrument_Serif, JetBrains_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
 /**
- * Tiga famili, tiga tugas yang tidak saling menggantikan.
+ * Dua famili, dua tugas yang tidak saling menggantikan.
  *
  * Selalu dirujuk lewat variabel CSS, tidak pernah sebagai string literal:
  * next/font mengacak nama font-family yang sebenarnya dihasilkan, jadi menulis
  * `'Inter'` di dalam CSS diam-diam jatuh ke font sistem.
+ *
+ * Instrument Serif (`--font-serif`) sempat dimuat khusus untuk headline
+ * Beranda versi editorial ("laporan instrumen"). Putaran kelima memindahkan
+ * Beranda ke sistem "modern" — headline besar sekarang Inter 800/900, bukan
+ * serif — dan tidak ada layar lain yang pernah memakainya, jadi fontnya
+ * dilepas seluruhnya alih-alih dibiarkan termuat tanpa pemakai.
  */
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800", "900"],
-});
-
-/**
- * Huruf display. Hanya punya bobot 400 — dan itu memang cukup, karena ia hanya
- * dipakai pada ukuran besar di mana kontras goresannya justru jadi kekuatan.
- * Jangan dipakai untuk teks kecil yang butuh tebal.
- */
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
 });
 
 /**
@@ -51,7 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="id"
-      className={`${inter.variable} ${instrumentSerif.variable} ${jetbrainsMono.variable} antialiased`}
+      className={`${inter.variable} ${jetbrainsMono.variable} antialiased`}
     >
       <body>{children}</body>
     </html>

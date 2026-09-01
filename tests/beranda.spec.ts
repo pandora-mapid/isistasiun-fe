@@ -124,7 +124,7 @@ test("gerak dimatikan saat pengguna memintanya", async ({ page }) => {
   await tungguPeta(page);
 
   const bergerak = await page.evaluate(() =>
-    [...document.querySelectorAll(".reveal, .draw, .draw-dot")].filter(
+    [...document.querySelectorAll(".reveal, .draw, .draw-dot, .ring-spin")].filter(
       (el) => getComputedStyle(el).animationName !== "none",
     ).length,
   );

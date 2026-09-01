@@ -34,7 +34,7 @@ function Brand() {
         style={{
           width: 22,
           height: 22,
-          borderRadius: 12,
+          borderRadius: "var(--nav-brand-radius, 12px)",
           background: "var(--nav-brand-bg)",
           display: "flex",
           alignItems: "center",
@@ -88,7 +88,14 @@ function NavLinks({ active }: { active: NavKey }) {
 }
 
 /** Border-bottom nav row used on the content pages (Beranda, Insight,
- * Metodologi, Rekomendasi). `cta` is the page-specific action button. */
+ * Metodologi, Rekomendasi). `cta` is the page-specific action button.
+ *
+ * Shape (radius/margin/background/shadow/border-width) travels through the
+ * same `--nav-*` custom-property seam as the colours above, with defaults
+ * that reproduce today's plain border-bottom row exactly — so a screen that
+ * hasn't opted in stays pixel-identical. Beranda's `.paper-canvas` scope is
+ * currently the only one that overrides them, turning this same markup into
+ * a floating pill bar without a second NavBar existing anywhere. */
 export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
   return (
     <div
@@ -96,7 +103,11 @@ export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
       style={{
         gap: 22,
         padding: "20px 28px",
-        borderBottom: "1px solid var(--nav-border)",
+        margin: "var(--nav-margin, 0)",
+        background: "var(--nav-bg, transparent)",
+        borderRadius: "var(--nav-radius, 0)",
+        borderBottom: "var(--nav-border-w, 1px) solid var(--nav-border)",
+        boxShadow: "var(--nav-shadow, none)",
       }}
     >
       <Brand />
