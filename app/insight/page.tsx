@@ -170,6 +170,11 @@ export default function InsightPage() {
           </div>
         </div>
       </div>
+
+      <div className="row" style={{ justifyContent: "space-between", padding: "20px 56px 28px", borderTop: "1px solid rgba(15,23,42,.1)" }}>
+        <span style={{ fontSize: 11.5, color: "#94A3B8" }}>Isi Stasiun · dibangun di atas GEO MAPID · seluruh angka pada halaman ini bersifat ilustratif</span>
+        <Link href="/metodologi" style={{ fontSize: 11.5, fontWeight: 600 }}>Lanjut ke metodologi →</Link>
+      </div>
     </div>
   );
 }

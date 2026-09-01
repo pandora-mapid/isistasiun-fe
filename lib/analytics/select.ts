@@ -29,8 +29,11 @@ const NULL_RANGE: Range = { p10: null, p50: null, p90: null };
  * Ambang minimum gerai per kategori sebelum sebuah kategori dianggap "hilang".
  *
  * Proposal §5.2: minimal 3 gerai × 2 blok per kategori per stasiun. Ditulis
- * sekali di sini karena dipakai dua tempat — daftar kategori hilang di panel
- * dan penghitung lencana di peta — dan keduanya wajib memakai angka yang sama.
+ * sekali di sini, bukan disebar sebagai angka telanjang di dalam `filter`,
+ * supaya ambangnya bisa ditinjau di satu tempat — dan itu memang perlu:
+ * ROADMAP §7 mencatat angka ini sebenarnya ambang **kecukupan sampel**, bukan
+ * ambang peluang pasar, sehingga "kategori hilang" dan "sampel tipis" kini
+ * jatuh pada kondisi yang persis sama. Keputusannya belum diambil.
  */
 export const AMBANG_GERAI = 3;
 

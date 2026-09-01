@@ -112,6 +112,28 @@ const OFFLINE_STYLE = {
 };
 
 /**
+ * Kegagalan pengambilan sumber daya peta beserta status HTTP-nya — atau `null`
+ * kalau errornya bukan jenis itu.
+ *
+ * MapLibre membungkus kegagalan HTTP sebagai `AJAXError`, satu-satunya jenis
+ * error yang membawa `status` dan `url`. Tanpa keduanya, kegagalan mengambil
+ * tile tidak bisa dibedakan dari kesalahan gaya biasa.
+ */
+function sumberDayaGagal(
+  error: unknown,
+): { status: number; host: string } | null {
+  const e = error as { status?: unknown; url?: unknown };
+  if (typeof e?.status !== "number" || e.status < 400) return null;
+  let host = "";
+  try {
+    host = new URL(String(e.url ?? ""), window.location.href).host;
+  } catch {
+    host = "";
+  }
+  return { status: e.status, host };
+}
+
+/**
  * Menunggu style siap menerima `addSource` / `addLayer`, dengan batas waktu.
  *
  * Dua hal yang sengaja dihindari di sini, keduanya pernah membuat peta diam
@@ -179,6 +201,14 @@ export function MapCanvas({
   /** Apakah glyph label bisa diambil — ikut gagal kalau basemap gagal. */
   const glyphsAvailableRef = useRef(true);
   /**
+   * Pesan kegagalan sudah pernah ditampilkan.
+   *
+   * Tile yang gagal datang berulang kali — satu per tile, per tingkat zoom.
+   * Tanpa penjaga ini, pesannya ditulis ulang puluhan kali dan menimpa pesan
+   * pertama yang justru paling menjelaskan.
+   */
+  const noticeShownRef = useRef(false);
+  /**
    * Penangan klik selalu dibaca dari ref, bukan ditutup di dalam closure.
    * Pendengar peta dipasang sekali seumur hidup layer; kalau closure-nya ikut
    * dibekukan di sana, klik akan memanggil versi lama dari `onSelectPoint`.
@@ -229,9 +259,27 @@ export function MapCanvas({
     // MapLibre melaporkan kegagalan style/tile lewat event ini. Tanpa
     // pendengar, kegagalannya hanya muncul di console dan peta diam membisu.
     let lastMapError: string | null = null;
+    /** Style sudah selesai dimuat — sesudah ini jalur timeout tidak berlaku. */
+    let styleSudahTermuat = false;
     map.on("error", (event) => {
       lastMapError = event.error?.message ?? "Peta melaporkan kesalahan";
       console.error("[MapCanvas]", event.error);
+
+      // Kegagalan SESUDAH style termuat tidak tertangkap jalur timeout di
+      // bawah, dan itu justru bentuk kegagalan yang paling mungkin terjadi di
+      // produksi: proxy mengirim `style.json` yang sah tapi lupa menulis ulang
+      // `glyphs`, `sprite`, atau `sources.*.tiles`, sehingga browser menembak
+      // MAPID tanpa key. `style.load` menyala normal, lalu setiap tile 401 —
+      // peta dasar kosong tanpa satu pun pesan di layar (ROADMAP §4.4).
+      if (!styleSudahTermuat || noticeShownRef.current) return;
+      const gagal = sumberDayaGagal(event.error);
+      if (!gagal) return;
+      noticeShownRef.current = true;
+      setNotice(
+        `Sebagian peta dasar gagal dimuat (HTTP ${gagal.status}${
+          gagal.host ? ` dari ${gagal.host}` : ""
+        }). Lapisan data tetap ditampilkan.`,
+      );
     });
 
     let cancelled = false;
@@ -248,6 +296,7 @@ export function MapCanvas({
         map.setStyle(OFFLINE_STYLE);
         basemapOk = await fallbackReady;
         if (cancelled) return;
+        noticeShownRef.current = true;
         setNotice(
           lastMapError
             ? `Basemap gagal dimuat (${lastMapError}). Lapisan data tetap ditampilkan di atas latar polos.`
@@ -256,6 +305,7 @@ export function MapCanvas({
       }
       // Label butuh glyph dari jaringan; tanpa basemap layer label dilewati.
       glyphsAvailableRef.current = basemapOk;
+      styleSudahTermuat = true;
       setStyleReady(true);
     })();
 

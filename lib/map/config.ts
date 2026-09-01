@@ -55,8 +55,16 @@ export const BASEMAP_NAMES = [
   "bright",
 ] as const;
 
+export type BasemapName = (typeof BASEMAP_NAMES)[number];
+
+/** Apakah sebuah teks adalah nama basemap yang dikenali. */
+function namaBasemapDikenali(nama: string): nama is BasemapName {
+  return (BASEMAP_NAMES as readonly string[]).includes(nama);
+}
+
 /** Alamat satu pilihan basemap, atau `null` kalau namanya tidak dikenali. */
 function basemapChoiceUrl(nama: string): string | null {
+  if (!namaBasemapDikenali(nama)) return null;
   if (nama === "mapid") return process.env.NEXT_PUBLIC_BASEMAP_URL || null;
   return BASEMAP_CHOICES[nama] ?? null;
 }

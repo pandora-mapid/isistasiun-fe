@@ -8,8 +8,6 @@
  * dijaga di sini supaya tidak ada satu pun tempat yang diam-diam
  * menampilkannya sebagai "Rp 0" — lihat DATA_CONTRACT §C1.
  */
-import type { Range } from "./data/types";
-
 /** Tulisan yang dipakai konsisten untuk nilai yang memang tidak diestimasi. */
 export const TIDAK_DIESTIMASI = "tidak diestimasi";
 
@@ -38,12 +36,6 @@ export function rupiahRingkas(value: number | null | undefined): string {
     return `Rp ${teks} jt`;
   }
   return `Rp ${RIBUAN.format(Math.round(value / 1000))} rb`;
-}
-
-/** Rentang P10–P90, atau keterangan kalau memang tidak diestimasi. */
-export function rentangRupiah(range: Range | null | undefined): string {
-  if (!range || range.p10 === null || range.p90 === null) return TIDAK_DIESTIMASI;
-  return `${rupiah(range.p10)} – ${RIBUAN.format(range.p90)}`;
 }
 
 /** Pecahan 0–1 menjadi persen. `0.064` → `6,4%`. */

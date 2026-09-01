@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useMemo, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { NavBar } from "./NavBar";
 import { MapCanvas } from "./MapCanvas";
@@ -164,6 +164,22 @@ export function PetaScreen() {
   );
   /** Meter per piksel layar, dilaporkan peta tiap kali kameranya bergerak. */
   const [metersPerPixel, setMetersPerPixel] = useState<number | null>(null);
+
+  /**
+   * Esc menutup modal transparansi.
+   *
+   * Latar gelapnya memang bisa diklik untuk menutup, tapi latar itu tidak bisa
+   * dijangkau keyboard sama sekali — tanpa Esc, pengguna yang tidak memakai
+   * tetikus hanya punya satu jalan keluar, yaitu menemukan tombol silangnya.
+   */
+  useEffect(() => {
+    if (!showTransparansi) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowTransparansi(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [showTransparansi]);
 
   /**
    * Peta melaporkan skala di setiap frame gerakan. Perubahan di bawah 1%
@@ -626,22 +642,30 @@ export function PetaScreen() {
                     </div>
                   </div>
                   {selectedPoint && (
-                    <div className="ic" onClick={() => setPilihanTitik(null)} title="lepas pilihan">
+                    <button
+                      type="button"
+                      className="ic btn-reset"
+                      onClick={() => setPilihanTitik(null)}
+                      title="lepas pilihan"
+                      aria-label="Lepas pilihan titik"
+                    >
                       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                         <path d="M18 6 6 18" />
                         <path d="m6 6 12 12" />
                       </svg>
-                    </div>
+                    </button>
                   )}
                 </div>
               </div>
 
               <div className="sc" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 22px 8px" }}>
                 <div style={{ borderRadius: 12, background: "#F1F5F9", marginBottom: 26, overflow: "hidden" }}>
-                  <div
+                  <button
+                    type="button"
                     onClick={() => setLayersOpen((v) => !v)}
-                    className="row layers-toggle"
-                    style={{ gap: 10, padding: "13px 15px", cursor: "pointer" }}
+                    className="row layers-toggle btn-reset"
+                    aria-expanded={layersOpen}
+                    style={{ gap: 10, width: "100%", padding: "13px 15px", cursor: "pointer" }}
                   >
                     <svg
                       width="14"
@@ -658,7 +682,7 @@ export function PetaScreen() {
                     </svg>
                     <span className="k" style={{ flex: 1, color: "#1D4ED8" }}>Lapisan &amp; filter</span>
                     <span className="mono" style={{ fontSize: 10.5, color: "#94A3B8" }}>{layerCount}</span>
-                  </div>
+                  </button>
 
                   {!layersOpen && (
                     <div className="row" style={{ gap: 7, padding: "0 15px 13px", whiteSpace: "nowrap", overflow: "hidden" }}>
@@ -684,10 +708,17 @@ export function PetaScreen() {
                           const tersedia = r.key in LAYER_GROUPS;
                           const on = activeLayers.includes(r.key);
                           return (
-                            <div
+                            <button
+                              type="button"
                               key={r.key}
                               onClick={() => toggleLayer(r.key)}
-                              className="lyr"
+                              className="lyr btn-reset"
+                              // Bukan `disabled`: baris tanpa data tetap layak
+                              // dijangkau Tab supaya keterangan "belum ada data"
+                              // ikut terbaca — yang dicegah hanya efeknya, dan
+                              // itu sudah dijaga `toggleLayer`.
+                              aria-disabled={!tersedia}
+                              aria-pressed={on}
                               title={
                                 tersedia
                                   ? undefined
@@ -710,7 +741,7 @@ export function PetaScreen() {
                                   belum ada data
                                 </span>
                               )}
-                            </div>
+                            </button>
                           );
                         })}
                       </div>
@@ -721,15 +752,17 @@ export function PetaScreen() {
                           const active = activeCategory === c.key;
                           const dot = CATEGORY_DOT[c.key];
                           return (
-                            <span
+                            <button
+                              type="button"
                               key={c.key}
-                              className="chip"
+                              className="chip btn-reset"
+                              aria-pressed={active}
                               onClick={() => setActiveCategory(c.key as CategoryFilter)}
                               style={active ? { background: "#0F172A", color: "#fff", borderColor: "#0F172A" } : undefined}
                             >
                               {dot && <span className="dot" style={{ background: dot }} />}
                               {c.label}
-                            </span>
+                            </button>
                           );
                         })}
                       </div>
@@ -744,10 +777,12 @@ export function PetaScreen() {
                         {CATCHMENT_MINUTES.map((m) => {
                           const active = activeCatchment === m;
                           return (
-                            <span
+                            <button
+                              type="button"
                               key={m}
                               onClick={() => setActiveCatchment(m)}
-                              className="pill"
+                              className="pill btn-reset"
+                              aria-pressed={active}
                               style={{
                                 flex: 1,
                                 textAlign: "center",
@@ -760,7 +795,7 @@ export function PetaScreen() {
                               }}
                             >
                               {m} mnt
-                            </span>
+                            </button>
                           );
                         })}
                       </div>
@@ -934,11 +969,13 @@ export function PetaScreen() {
                           const aktif = m.pointId === selectedPointId;
                           const nilai = m.gap.p50;
                           return (
-                            <div
+                            <button
+                              type="button"
                               key={m.pointId}
-                              className="row"
+                              className="row btn-reset"
+                              aria-pressed={aktif}
                               onClick={() => setPilihanTitik(m.pointId)}
-                              style={{ gap: 11, cursor: "pointer" }}
+                              style={{ gap: 11, width: "100%", cursor: "pointer" }}
                             >
                               <span
                                 style={{
@@ -974,7 +1011,7 @@ export function PetaScreen() {
                               >
                                 {nilai === null ? "sampel tipis" : rupiah(nilai)}
                               </span>
-                            </div>
+                            </button>
                           );
                         })}
                       </div>
@@ -994,11 +1031,13 @@ export function PetaScreen() {
                           </div>
                         )}
                         {kategoriHilang.map((c, i) => (
-                          <div
+                          <button
+                            type="button"
                             key={c.category}
-                            className="row"
+                            className="row btn-reset"
                             onClick={() => setActiveCategory(c.category)}
                             style={{
+                              width: "100%",
                               justifyContent: "space-between",
                               padding: "10px 2px",
                               borderBottom: i < kategoriHilang.length - 1 ? "1px solid #E2E8F0" : undefined,
@@ -1011,7 +1050,7 @@ export function PetaScreen() {
                             <span className="mono" style={{ fontSize: 11.5, color: "#475569" }}>
                               {persen(c.demand_share, 0)} · {c.gerai_count} gerai
                             </span>
-                          </div>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -1083,14 +1122,15 @@ export function PetaScreen() {
                 <div className="k" style={{ margin: "20px 0 10px" }}>Pertanyaan lain</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
                   {QUESTIONS.map((q) => (
-                    <div
+                    <button
+                      type="button"
                       key={q}
                       onClick={() => setShowCopilotResult(true)}
-                      className="lyr"
-                      style={{ border: "1px solid rgba(15,23,42,.12)", borderRadius: 12, padding: "10px 15px", fontSize: 12.5 }}
+                      className="lyr btn-reset"
+                      style={{ border: "1px solid rgba(15,23,42,.12)", borderRadius: 12, width: "100%", padding: "10px 15px", fontSize: 12.5 }}
                     >
                       {q}
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -1125,6 +1165,9 @@ export function PetaScreen() {
             }}
           >
             <div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="transparansi-judul"
               onClick={(e) => e.stopPropagation()}
               style={{ width: "100%", maxWidth: 700, background: "#fff", borderRadius: 12, boxShadow: "0 40px 100px rgba(15,23,42,.3)", overflow: "hidden" }}
             >
@@ -1133,16 +1176,26 @@ export function PetaScreen() {
                   <div className="k" style={{ color: "#1D4ED8", marginBottom: 8 }}>
                     Panel transparansi · {pointLabels.get(selectedPoint.point_id) ?? "titik"}
                   </div>
-                  <div style={{ font: "800 21px/1.15 var(--font-inter)", letterSpacing: "-.015em" }}>
+                  <div id="transparansi-judul" style={{ font: "800 21px/1.15 var(--font-inter)", letterSpacing: "-.015em" }}>
                     Dari mana angka V = {rupiah(nilaiV)} berasal
                   </div>
                 </div>
-                <div className="ic" onClick={() => setShowTransparansi(false)}>
+                <button
+                  type="button"
+                  // Fokus dipindah ke dalam modal begitu ia terbuka. Tanpa ini
+                  // fokus tertinggal di tombol "Lihat bukti" yang sekarang
+                  // tertutup lapisan gelap, dan Tab berikutnya menyusuri panel
+                  // di baliknya, bukan isi modalnya.
+                  autoFocus
+                  className="ic btn-reset"
+                  onClick={() => setShowTransparansi(false)}
+                  aria-label="Tutup panel transparansi"
+                >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                     <path d="M18 6 6 18" />
                     <path d="m6 6 12 12" />
                   </svg>
-                </div>
+                </button>
               </div>
               <div style={{ display: "flex", gap: 22, padding: "0 26px 26px" }}>
                 <div style={{ width: 230, flex: "none" }}>

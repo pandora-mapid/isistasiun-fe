@@ -505,3 +505,79 @@ test("lapisan arus pintu menggambar angkanya", async ({ page }) => {
     "menyalakan lapisan arus menghapus nama titik",
   ).toBe(sebelum.nama);
 });
+
+/* -------------------------------------------------------------------------
+ * Aksesibilitas keyboard
+ *
+ * Seluruh kendali panel dulu ditulis sebagai `<div onClick>`: terlihat normal,
+ * bisa diklik, dan sama sekali tidak bisa dijangkau Tab maupun ditekan Enter.
+ * Kelas kegagalan itu tidak terlihat di tangkapan layar dan tidak tertangkap
+ * lint, jadi dikunci di sini.
+ * ---------------------------------------------------------------------- */
+
+test("panel lapisan bisa dioperasikan tanpa tetikus", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  const toggle = page.locator(".layers-toggle");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.focus();
+  await expect(toggle).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+
+  // Menyalakan satu lapisan lewat Enter harus benar-benar menggerakkan peta,
+  // bukan sekadar mengubah rupa barisnya.
+  const arus = page.locator(".lyr").filter({ hasText: "Arus pintu stasiun" });
+  await expect(arus).toHaveAttribute("aria-pressed", "false");
+  await arus.focus();
+  await page.keyboard.press("Enter");
+  await expect(arus).toHaveAttribute("aria-pressed", "true");
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const map = (window as unknown as { __map?: any }).__map;
+        return map.getLayoutProperty("point-arus", "visibility");
+      }),
+    )
+    .toBe("visible");
+});
+
+test("baris lapisan tanpa data tetap terbaca, tapi tidak mengubah apa pun", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.locator(".layers-toggle").click();
+  const sewa = page.locator(".lyr").filter({ hasText: "Indeks sewa" });
+  // `aria-disabled`, bukan `disabled`: barisnya tetap bisa dijangkau supaya
+  // keterangan "belum ada data" ikut terbaca pembaca layar. Playwright sendiri
+  // menolak mengkliknya — bukti bahwa atributnya memang terbaca sebagai "tidak
+  // tersedia" — jadi dicoba lewat jalur yang benar-benar tersisa: fokus + Enter.
+  await expect(sewa).toHaveAttribute("aria-disabled", "true");
+  await sewa.focus();
+  await expect(sewa).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(sewa).toHaveAttribute("aria-pressed", "false");
+});
+
+test("panel transparansi menerima fokus dan ditutup dengan Esc", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.getByText("Lihat bukti →").click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+
+  // Fokus harus pindah KE DALAM modal; kalau tertinggal di belakang, Tab
+  // menyusuri panel yang sedang tertutup lapisan gelap.
+  const tutup = page.getByRole("button", { name: "Tutup panel transparansi" });
+  await expect(tutup).toBeFocused();
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});

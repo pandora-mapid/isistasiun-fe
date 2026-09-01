@@ -136,11 +136,11 @@ Yang berubah dari rencana semula: jeda ini **tidak lagi hanya untuk pekerjaan vi
 
 | # | Pekerjaan | Kenapa dikerjakan sekarang |
 |---|---|---|
-| **4.1** | **Lepaskan ketergantungan pada daftar fitur lengkap** | Yang paling penting. Lihat catatan di bawah |
-| 4.2 | Pindahkan seluruh URL ke variabel lingkungan, sediakan `.env.example` | Sekarang tidak ada satu pun env var; semua alamat ditulis mati. Harus beres sebelum ada alamat yang berbeda antara lokal dan produksi |
-| 4.3 | Jadikan bounding box awal sebuah konstanta di `lib/map/config.ts` | Siap ditimpa nilai dari TileJSON nanti, tanpa mengubah komponen |
-| 4.4 | **Siapkan basemap GEO MAPID lewat proxy** (dulu butir 2.7) | ✅ **Sisi frontend selesai.** Alamat lewat env var, jalan keluar langsung tersedia, dan seluruh pemeriksaan basemap lolos. Tinggal menunggu proxy backend. Lihat dua catatan di bawah |
-| 4.5 | Responsivitas (§6 butir 3.1), ekspor CSV/PDF (3.2 dan 3.3), utang teknis §7 | Murni frontend, seperti rencana semula |
+| **4.1** | **Lepaskan ketergantungan pada daftar fitur lengkap** | ✅ **Selesai.** Ketiganya sudah pindah: nama titik lewat `loadEntrances()`, nama stasiun lewat `loadStations()`, dan pandangan awal lewat `STUDY_BOUNDS`. Tidak ada lagi satu pun perulangan atas `points.features`. Lihat catatan di bawah |
+| 4.2 | Pindahkan seluruh URL ke variabel lingkungan, sediakan `.env.example` | ✅ **Selesai.** `NEXT_PUBLIC_API_BASE_URL` dan `NEXT_PUBLIC_BASEMAP_URL`, keduanya dirujuk secara literal, dan `.env.example` dikomit (butuh negasi `!.env.example` di `.gitignore` supaya lolos dari aturan `.env*`) |
+| 4.3 | Jadikan bounding box awal sebuah konstanta di `lib/map/config.ts` | ✅ **Selesai.** `STUDY_BOUNDS`. Siap ditimpa nilai dari TileJSON nanti, tanpa mengubah komponen |
+| 4.4 | **Siapkan basemap GEO MAPID lewat proxy** (dulu butir 2.7) | ✅ **Sisi frontend selesai.** Alamat lewat env var, jalan keluar langsung tersedia, dan seluruh pemeriksaan basemap lolos. Tinggal menunggu proxy backend. Lihat catatan-catatan di bawah |
+| 4.5 | Responsivitas (§6 butir 3.1), ekspor CSV/PDF (3.2 dan 3.3), utang teknis §7 | Murni frontend, seperti rencana semula. **Sebagian sudah dikerjakan:** aksesibilitas keyboard `/peta`, pesan kegagalan basemap sesudah `style.load`, dan tes untuk `lib/analytics/select.ts` — lihat §7. Responsivitas masih terbuka |
 
 > **Catatan 4.1 — ketergantungan tersembunyi yang paling mahal kalau ditunda.**
 > Selama geometri datang sebagai GeoJSON, browser memegang **seluruh daftar fitur**. Tiga tempat di kode memanfaatkan itu:
@@ -164,7 +164,7 @@ Yang berubah dari rencana semula: jeda ini **tidak lagi hanya untuk pekerjaan vi
 >
 > | Kewajiban proxy | Kalau terlewat |
 > |---|---|
-> | Menulis ulang `glyphs`, `sprite`, dan `sources.*.tiles` di dalam `style.json` | Ketiganya berisi URL absolut ber-key. Browser tetap menembak MAPID **tanpa key** → 401 → peta dasar kosong |
+> | Menulis ulang `glyphs`, `sprite`, dan `sources.*.tiles` di dalam `style.json` | Ketiganya berisi URL absolut ber-key. Browser tetap menembak MAPID **tanpa key** → 401 → peta dasar kosong. Frontend sekarang **menyebutkan** kegagalan itu di layar beserta status dan hostnya (lihat catatan di bawah), tapi tidak bisa menambalnya |
 > | Header cache di endpoint tile | Peta terasa berat, dan frontend tidak bisa menambalnya |
 > | Mempertahankan field atribusi | Atribusi MAPID hilang dari peta |
 >
@@ -182,6 +182,11 @@ Yang berubah dari rencana semula: jeda ini **tidak lagi hanya untuk pekerjaan vi
 >
 > Sebabnya ketahuan sekaligus: **"Street Mapid" diturunkan dari OSM Liberty** — sprite-nya menunjuk `maputnik.github.io/osm-liberty` dan layer 3D-nya sama-sama `building-3d`. Karena itu berpindah di antara keduanya nyaris tidak mengubah tampilan.
 
+> **Catatan 4.4 — kegagalan proxy tidak lagi diam.**
+> Kegagalan basemap dulu hanya tertangkap kalau `style.load` tidak pernah menyala. Bentuk kegagalan yang justru paling mungkin muncul di produksi tidak seperti itu: proxy mengirim `style.json` yang sah tapi lupa menulis ulang salah satu field ber-key, sehingga style termuat **normal** lalu setiap tile 401 satu per satu. Gejalanya peta dasar kosong tanpa satu pun pesan.
+>
+> `MapCanvas` sekarang membaca `status` dan `url` dari `AJAXError` MapLibre dan memunculkan pesan sekali saja — *"Sebagian peta dasar gagal dimuat (HTTP 401 dari basemap.mapid.io)"*. Lapisan data tetap tergambar. Ini alat diagnosa saat proxy pertama kali dipasang, bukan pengganti kewajiban di tabel atas.
+
 > **⚠️ Temuan 4.4 — style MAPID memanggil dua host pihak ketiga.**
 > Di luar `basemap.mapid.io`, style itu menarik dari dua alamat lain yang **bukan milik MAPID dan tidak membawa API key**:
 >
@@ -196,6 +201,8 @@ Yang berubah dari rencana semula: jeda ini **tidak lagi hanya untuk pekerjaan vi
 > 2. **Ada ketergantungan pada GitHub Pages yang di luar kendali tim mana pun.** Kalau repo itu hilang atau layanannya mati, seluruh ikon POI lenyap dari peta. Risikonya kecil, tapi lebih baik diketahui sekarang daripada saat penjurian.
 
 **Selesai ketika:** butir 4.1–4.4 beres, sehingga Fase 2 tinggal menukar sumber data — bukan lagi merombak komponen.
+
+> ✅ **Butir 4.1–4.4 sudah beres dari sisi frontend.** Yang tersisa di §4 hanya 4.5, dan itu tidak memblokir apa pun. Fase 2 kini benar-benar tinggal menunggu tile dan endpoint dari backend.
 
 ---
 
@@ -276,14 +283,16 @@ Kecil-kecil, bisa disisipkan kapan saja. Semuanya aman dikerjakan saat jeda.
 | Hal | Catatan |
 |---|---|
 | **Angka "n < 30" di halaman Insight** | Dikarang saat mengganti placeholder, tidak ada di proposal. Aturan sebenarnya (§5.2): minimal 3 gerai × 2 blok per kategori per stasiun. Bertentangan dengan metodologi sendiri kalau dibiarkan |
-| **Seluruh angka masih data contoh** | Wajar untuk sekarang, tapi footer tiap halaman harus tetap menyatakan "angka bersifat ilustratif" sampai data asli masuk |
+| **Seluruh angka masih data contoh** | Wajar untuk sekarang, tapi footer tiap halaman harus tetap menyatakan "angka bersifat ilustratif" sampai data asli masuk. Keempat layar statis sekarang sudah menyatakannya — Insight sempat tidak punya footer sama sekali, padahal justru yang paling padat angka karangan |
 | ~~**Slot "sore" tertulis 16–19**~~ | ✅ Selesai di Fase 1. `lib/data/dimensions.ts` memisahkan `label` (tulisan di tombol, tetap "16–19" mengikuti desain) dari `jam` (rentang sesungguhnya, "16.00–18.59"), dan `jam` muncul sebagai tooltip tombol serta di panel transparansi |
 | **Tipologi Manggarai** | Proposal menyebut tiga tipologi, Manggarai adalah kasus transit. Perlu diputuskan tim — memengaruhi halaman Insight |
 | **`F × E × C × V` tidak menghasilkan `gap`** | Di data contoh, mengalikan keempat variabel tidak menghasilkan angka kesenjangan yang ditampilkan di sebelahnya — keduanya dikarang terpisah saat Fase 0. Panelnya jujur menampilkan apa yang ada di data, jadi ini bukan bug kode, tapi bertabrakan dengan janji "setiap angka bisa dilacak" (§9 nomor 4). Perlu diputuskan saat Fase 2: backend mengirim variabel yang konsisten, atau data contohnya yang diturunkan dari rumus |
 | **Definisi "kategori hilang" masih rancu** | Saringannya memakai ambang 3 gerai, padahal angka itu di proposal §5.2 adalah ambang **kecukupan sampel**, bukan ambang peluang pasar. Akibatnya "kategori hilang" dan "sampel tipis" jadi kondisi yang persis sama, dan persentase permintaan cuma dipakai mengurutkan — tidak menentukan. Perlu diputuskan: "hilang" itu berarti gerai = 0, atau permintaan tinggi dengan gerai sedikit? Terkait langsung dengan urutan daftarnya, yang sekarang membuat Apotek dengan **nol gerai** terpotong dari tiga besar |
 | **Potensi belanja tidak punya lapisan peta** | Angkanya tetap tampil di panel kanan dan di situ sudah tepat. Yang dihapus lapisan petanya, karena cincin berskala terpisah membuat jarak antar-titik tidak bisa dibandingkan. Kalau suatu saat potensi perlu tampil di peta, syaratnya skala berlabuh nol berbasis luas yang dipakai bersama lingkaran kesenjangan |
 | **Dua baris lapisan tanpa data** | *Indeks sewa / arus* dan *Event & aktivasi*. Keduanya punya endpoint di spesifikasi backend (`/analytics/rent-flow-index`, `/analytics/event-potential`) tapi belum ada data contohnya. *Kategori hilang* dan *Arus pintu* sudah selesai — lihat catatan §3 |
-| **Tidak ada variabel lingkungan sama sekali** | Seluruh alamat — API, tile, basemap — ditulis mati di kode. Aman selama semuanya data contoh lokal, tapi harus beres sebelum ada alamat yang berbeda antara lokal dan produksi. Lihat §4.2 |
+| ~~**Tidak ada variabel lingkungan sama sekali**~~ | ✅ Selesai di §4.2. `NEXT_PUBLIC_API_BASE_URL` dan `NEXT_PUBLIC_BASEMAP_URL` keduanya dirujuk literal — Next.js menyisipkan nilainya dengan mencocokkan teks, jadi rujukan lewat variabel perantara menghasilkan `undefined` |
+| **Modal transparansi belum menjebak fokus** | Sudah punya `role="dialog"`, Esc, dan fokus awal yang pindah ke dalam. Yang belum: Tab masih bisa keluar dan menyusuri panel di baliknya yang sedang tertutup lapisan gelap. Dikerjakan bersama responsivitas, karena menyentuh JSX yang sama |
+| **`setFeatureState` dan `setFilter` dipanggil pada setiap `sourcedata`** | `sourcedata` juga menyala untuk tile basemap, jadi selama peta digeser keduanya dipanggil berkali-kali per detik dengan nilai yang identik — MapLibre tidak membandingkan isinya, layer ditandai kotor tiap kali. Tak terasa pada 10 titik. **Kerjakan tepat sebelum Fase 2**, bukan sekarang: saring `e.sourceId` lebih dulu, dan bentuk akhirnya baru jelas setelah source-nya jadi tile vektor (2.1) |
 | ~~**Autentikasi belum pernah dibahas**~~ | ✅ Terjawab. `02-BACKEND-SPEC.md` §1 memakai JWT, tapi enam endpoint peta ada di tier gratis dan tidak butuh token. Pekerjaan auth pindah ke §6.1 sebagai jalur terpisah |
 
 ---
@@ -295,14 +304,14 @@ Ringkasan apa yang memblokir apa:
 | Pekerjaan | Terblokir oleh |
 |---|---|
 | Fase 0 dan 1 | ✅ selesai |
-| **4.1 lepas ketergantungan daftar fitur** | **Tidak ada** — bisa dikerjakan sekarang, dan sebaiknya duluan |
-| 4.2 variabel lingkungan | **Tidak ada** |
-| 4.3 bounding box konstanta | **Tidak ada** |
+| **4.1 lepas ketergantungan daftar fitur** | ✅ **Selesai** |
+| 4.2 variabel lingkungan | ✅ **Selesai** |
+| 4.3 bounding box konstanta | ✅ **Selesai** |
 | **4.4 siapkan basemap GEO MAPID** | ✅ **Sisi frontend selesai dan sudah diuji.** Penayangan lewat proxy menunggu backend |
 | Fase 2 seluruhnya | Kesiapan backend (tile + endpoint) — **belum siap** |
 | 2.8 sisip header `Authorization` | **Tidak ada** — bisa dicicil sekarang, bukan prasyarat |
 | 6.1 auth dan tier berbayar | Kesiapan endpoint `/auth/*` dan `/premium/*` — **jalur terpisah, tidak memblokir Fase 2** |
-| 3.1 responsivitas | **Tidak ada** — cocok saat jeda |
+| 3.1 responsivitas | **Tidak ada** — cocok saat jeda, dan sebaiknya sekalian dengan jebakan fokus modal (§7) |
 | 3.2 dan 3.3 ekspor | **Tidak ada** — murni frontend |
 | 3.6 copilot | Kontrak `POST /copilot/query`, belum dibahas |
 | 3.7 pembanding akhir pekan | Survei akhir pekan + `day_type` dari backend |

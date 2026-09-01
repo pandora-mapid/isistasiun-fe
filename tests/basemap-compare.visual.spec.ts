@@ -1,5 +1,7 @@
 import { test } from "@playwright/test";
 
+import { BASEMAP_NAMES } from "../lib/map/config";
+
 /**
  * Membandingkan pilihan basemap secara visual, pada pemandangan yang sama
  * dan dengan lapisan data terpasang.
@@ -16,9 +18,7 @@ import { test } from "@playwright/test";
  * repo. Tanpa itu, `resolveBasemapUrl()` jatuh ke basemap bawaan dan gambarnya
  * jadi duplikat Liberty; bukan kegagalan, hanya tidak berguna dibandingkan.
  */
-const PILIHAN = ["mapid", "liberty", "positron", "voyager", "bright"] as const;
-
-for (const nama of PILIHAN) {
+for (const nama of BASEMAP_NAMES) {
   test(`basemap ${nama}`, async ({ page }) => {
     await page.goto(`/peta?basemap=${nama}`, { waitUntil: "domcontentloaded" });
 

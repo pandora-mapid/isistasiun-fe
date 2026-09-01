@@ -85,6 +85,35 @@ h3 {
     0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
+/* Tombol yang seluruh tampilannya sudah ditentukan kelas lain (`.lyr`,
+   `.chip`, `.pill`, `.ic`, `.row`) atau oleh style inline.
+
+   Kendali-kendali di halaman Peta dulu ditulis sebagai `<div onClick>`, jadi
+   tidak ada satu pun yang bisa dijangkau Tab maupun ditekan Enter — panel
+   lapisan, chip kategori, pil kawasan, dan seluruh baris yang bisa diklik.
+   Mengubahnya menjadi `<button>` mengembalikan perilaku itu secara gratis;
+   kelas ini yang membuang gaya bawaan browser supaya tampilannya tidak ikut
+   berubah sedikit pun.
+
+   ⚠️ Harus berada DI ATAS `.pill`, `.row`, `.lyr`, `.chip`, dan `.ic`.
+   Semuanya sama-sama selector satu kelas, jadi yang menang adalah yang
+   ditulis belakangan — kalau `all: unset` di sini pindah ke bawah, ia justru
+   menghapus tampilan yang seharusnya ia pertahankan. */
+.btn-reset {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+/* Cincin fokus hanya untuk keyboard, bukan untuk klik tetikus. Tanpa ini
+   `all: unset` ikut menghapus penanda fokus bawaan, dan pengguna keyboard
+   kehilangan jejak posisinya. */
+.btn-reset:focus-visible {
+  outline: 2px solid var(--accent-700);
+  outline-offset: 2px;
+}
+.btn-reset[aria-disabled="true"] {
+  cursor: not-allowed;
+}
 .pill {
   border-radius: 999px;
 }
