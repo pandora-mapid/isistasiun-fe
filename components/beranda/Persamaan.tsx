@@ -74,7 +74,7 @@ export function Persamaan() {
               className="eyebrow-chip eyebrow"
               style={{ marginBottom: "var(--s2)", display: "inline-flex" }}
             >
-              03 — Instrumen
+              Instrumen
             </span>
             <h2
               style={{

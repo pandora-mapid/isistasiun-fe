@@ -6,58 +6,96 @@ import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { BerandaData } from "@/components/beranda/BerandaData";
 import { HeroPeta } from "@/components/beranda/HeroPeta";
 import { Jejak } from "@/components/beranda/Jejak";
-import { KartuSimpul } from "@/components/beranda/KartuSimpul";
+import { PerbandinganSimpul } from "@/components/beranda/PerbandinganSimpul";
 import { Persamaan } from "@/components/beranda/Persamaan";
-import { RelStatistik } from "@/components/beranda/RelStatistik";
+import {
+  RelStatistikAngka,
+  RelStatistikKutipan,
+} from "@/components/beranda/RelStatistik";
 
 /**
  * Beranda.
  *
  * Halaman ini tetap **server component**. Sifat client dikurung di komponen
- * daun — `HeroPeta`, `Persamaan`, `KartuSimpul`, `RelStatistik`, `Jejak` —
- * yang semuanya membaca satu provider di atasnya. Anak yang dioper ke
- * `BerandaData` tetap dirender di server.
+ * daun — `HeroPeta`, `Persamaan`, `PerbandinganSimpul`, `RelStatistik`,
+ * `Jejak` — yang semuanya membaca satu provider di atasnya. Anak yang dioper
+ * ke `BerandaData` tetap dirender di server.
  *
- * Bahasa visualnya, sejak putaran kelima, adalah "modern": kartu kembali
- * (radius besar, bayangan lembut sebagai kosakata biasa, bukan pengecualian
- * tunggal), tombol & nav jadi pil, satu warna aksen baru (`--brand`, emas)
- * khusus untuk chrome — tombol, sorot nav, badge — dan tidak pernah untuk
- * angka atau mark data. Empat putaran sebelumnya membangun sistem editorial
- * "laporan instrumen" (serif, hairline, sudut tajam); itu digantikan di sini,
- * bukan ditumpuk di atasnya — lihat `globals.css` untuk token-tokennya.
+ * **Putaran keenam ("bento") merombak kerangkanya, bukan cuma kulitnya.**
+ * Lima putaran sebelumnya (editorial → modern) memperbaiki tipografi, warna,
+ * radius, bayangan — tapi tetap berdiri di atas satu kerangka yang sama:
+ * `wrap > g12 (12 kolom) > Rubrik (kolom sticky) + konten`, section demi
+ * section berbaris vertikal seragam, sebagian full-bleed berganti tint.
+ * `Rubrik()` — sumber kolom sticky itu — sudah dihapus dari file ini.
+ * Sebagai gantinya, hampir semua section sekarang satu `.bento`: grid
+ * 4-kolom berisi ubin berukuran campuran (lihat `globals.css` untuk
+ * `--tile-*`/`--r-xl`/`.bento-tile`), radius seragam.
+ *
+ * **Putaran ketujuh menjawab dua hal yang muncul begitu putaran keenam
+ * terlihat: hero yang dipusatkan ternyata dirindukan sebagai dua kolom
+ * (peta kembali di kiri, teks di kanan — dibalik dari sebelum putaran 6),
+ * dan section-section bento-nya terasa monoton — resep yang sama (kicker →
+ * judul → baris N-ubin-sama-besar di atas kertas polos) diulang tanpa
+ * berubah dari satu topik ke topik berikutnya.** Jawabannya BUKAN menambah
+ * warna baru (variasi warna putaran 6 sudah disukai, dipertahankan persis),
+ * tapi memvariasikan DUA hal berbeda per section: latar section (sebagian
+ * full-bleed `--tile-*`, sebagian kertas polos) dan pola komposisinya
+ * (baris ubin sama besar, ubin asimetris, teks-sempit+ubin, daftar-polos+
+ * kartu-unggulan) — lihat komentar di setiap section untuk pola spesifiknya.
+ *
+ * **Putaran kesembilan** mencoba numeral raksasa PUDAR di belakang tiap judul
+ * (`01`–`05`, dipotong tepi) + "judul di kanan / isi di kiri" di tiga
+ * section + hero dengan dua elemen separuh-keluar. User menolak semuanya.
+ *
+ * **Putaran kesepuluh** menyeragamkan kelima section (header selebar section
+ * → garis-rambut → isi lebar penuh). User menolak: "sekali mengganti,
+ * semuanya ikut, jadinya MONOTON".
+ *
+ * **Putaran kesebelas — komposisi berbeda per section (riset: DESIGN.md
+ * Linear/Stripe/Notion/Figma/PostHog, Klim, "Wealth shown to scale", PolicyViz
+ * small-multiples, CSS stacked cards).** Prinsip: koherensi di SISTEM kecil
+ * yang tetap, variasi di KOMPOSISI. (1) Nomor bab jadi bagian depan kicker
+ * (`1 — DUDUK PERKARA`), ukuran persis kicker. (2) Tiap section arketipe
+ * BEDA + judul selang-seling kiri/kanan: S1 angka-raksasa (judul kanan), S2
+ * foto+overlap DIPERTAHANKAN, S3 kartu staggered + skala bersama (judul
+ * kiri), S4 kartu-highlight disandingkan daftar (judul full), S5 tumpukan
+ * kartu bergeser (judul kanan). (3) Keluarga kartu `.kartu` — satu sudut
+ * tajam, garis-rambut, tanpa bayangan — jadi tanda-tangan yang menyatukan.
  */
 
-/** Kicker section: nomor + label, dibungkus jadi chip pil. */
+/** Kicker section — chip pil polos, tanpa nomor urut kecil (nomor hidup di
+ * `KepalaBab`, bukan label "1 dari N").
+ *
+ * `warna="ink"` untuk band tinta: `Lencana` selalu menyetel `background`
+ * inline, dan inline itu menang atas aturan `.ink-band .eyebrow-chip`. Tanpa
+ * varian ini, di atas band tinta pil-nya jadi krem opak dengan teks putih
+ * 40% di atasnya — kotak yang isinya tak terbaca. */
 function Lencana({
-  nomor,
   label,
   warna = "netral",
+  dot = false,
 }: {
-  nomor?: string;
   label: string;
-  warna?: "netral" | "brand";
+  warna?: "netral" | "brand" | "ink";
+  dot?: boolean;
 }) {
+  const background =
+    warna === "brand"
+      ? "var(--brand-wash)"
+      : warna === "ink"
+        ? "rgba(250, 248, 244, 0.12)"
+        : "var(--paper-2)";
   return (
     <span
       className="eyebrow-chip eyebrow"
       style={{
-        background: warna === "brand" ? "var(--brand-wash)" : "var(--paper-2)",
+        background,
+        ...(warna === "ink" ? { color: "var(--paper)" } : null),
       }}
     >
-      {nomor && <span className="dot" style={{ background: "var(--brand)" }} />}
-      {nomor ? `${nomor} — ${label}` : label}
+      {dot && <span className="dot" style={{ background: "var(--brand)" }} />}
+      {label}
     </span>
-  );
-}
-
-/** Rubrik section: kicker yang menempel selama section-nya berjalan. */
-function Rubrik({ nomor, label }: { nomor: string; label: string }) {
-  return (
-    <div style={{ gridColumn: "span 3" }}>
-      <div style={{ position: "sticky", top: "var(--s4)" }}>
-        <Lencana nomor={nomor} label={label} />
-      </div>
-    </div>
   );
 }
 
@@ -76,6 +114,72 @@ function Judul({ children }: { children: ReactNode }) {
   );
 }
 
+/**
+ * Kepala bab — kicker (bernomor) + judul + garis-rambut.
+ *
+ * Riwayat nomor bab: putaran 9 numeral raksasa PUDAR di belakang judul
+ * (ditolak); putaran 10 numeral SOLID raksasa sebaris judul (ditolak juga —
+ * "kelewat besar, tidak setara tulisan section-nya"). Putaran 11: nomor jadi
+ * bagian DEPAN teks kicker (`1 — DUDUK PERKARA`) — ukuran/berat/warna persis
+ * kicker karena LITERAL bagian darinya. Konvensi masthead editorial (Stripe
+ * Press, It's Nice That).
+ *
+ * Dipakai full-width (S2, S4) ATAU sebagai satu kolom grid yang berselang-
+ * seling kiri/kanan (S1 kanan, S3 kiri, S5 kanan). Garis-rambut ikut lebar
+ * wadahnya — di kolom sempit itu disengaja (gaya Klim).
+ */
+function KepalaBab({
+  n,
+  kicker,
+  judul,
+}: {
+  n: number;
+  kicker: string;
+  judul: ReactNode;
+}) {
+  return (
+    <div style={{ marginBottom: "var(--s4)" }}>
+      <Lencana label={`${n} — ${kicker}`} />
+      <div style={{ marginTop: "var(--s2)" }}>
+        <Judul>{judul}</Judul>
+      </div>
+      <div
+        style={{ marginTop: "var(--s3)", borderBottom: "1px solid var(--rule)" }}
+      />
+    </div>
+  );
+}
+
+const KEPUTUSAN = [
+  {
+    judul: "Komposisi kategori penyewa per pintu",
+    isi: "Kategori yang permintaannya terbaca tinggi namun gerainya nol jadi prioritas pertama.",
+  },
+  {
+    judul: "Harga sewa yang mengikuti arus, bukan luas",
+    isi: "Indeks sewa terhadap arus pejalan membuat perbedaan nilai antar pintu terlihat.",
+  },
+  {
+    judul: "Jadwal aktivasi pada slot yang tepat",
+    isi: "Slot dengan kesenjangan terbesar menunjukkan jam yang paling layak diisi lebih dahulu.",
+  },
+];
+
+const AUDIENS = [
+  {
+    judul: "Operator & pengelola kawasan",
+    isi: "Dasar terukur untuk komposisi kategori penyewa dan peninjauan harga sewa — kelompok yang paling langsung memakai brief per titik.",
+  },
+  {
+    judul: "Pelaku usaha kecil",
+    isi: "Akses terbuka ke informasi arus dan potensi belanja yang selama ini hanya dimiliki pihak bermodal besar.",
+  },
+  {
+    judul: "Pemerintah daerah & perencana",
+    isi: "Protokol pencacahan diterbitkan terbuka agar kota lain dapat menghasilkan lapisan setara.",
+  },
+];
+
 export default function BerandaPage() {
   return (
     <BerandaData>
@@ -90,56 +194,42 @@ export default function BerandaPage() {
         />
 
         {/* ================================================================
-            01 · Hero
-
-            Peta BUKAN lagi panel setinggi hero — ia kartu berukuran tetap
-            (lihat HeroPeta.tsx) yang mengambang di sisi kanan teks, rata bawah
-            sejajar baris tombol. Percobaan pertama (kolom sempit tapi tetap
-            setinggi hero) menghasilkan strip vertikal aneh; kartu ini yang
-            diminta.
+            Hero — dua kolom, tulisan di KIRI dan peta di KANAN (dibalik lagi
+            di putaran 8 atas permintaan eksplisit user; peta juga dikecilkan —
+            kolom teks lebih lebar, `alignItems: center` supaya peta tak
+            diregang setinggi kolom teks). Ini pola yang KHAS milik hero —
+            tidak ada section lain di halaman ini yang berbentuk dua-kolom-
+            sejajar-tinggi — jadi ia sendiri sudah jadi pembeda pertama sebelum
+            pembaca sampai ke section berikutnya.
             ================================================================ */}
         <section
+          className="wrap reveal"
           style={{
-            position: "relative",
-            padding: "clamp(40px, 5.4vw, 80px) var(--page-x)",
-            overflow: "hidden",
+            paddingTop: "clamp(40px, 5vw, 72px)",
+            paddingBottom: "var(--s6)",
           }}
         >
-          {/* Cahaya lembut di belakang judul — murni dekoratif, ditempatkan
-             jauh dari sudut kiri-bawah kartu peta supaya tidak bentrok
-             dengan warna latar polos yang menutup "gigitan"-nya (lihat
-             HeroPeta.tsx). */}
-          <div
-            className="glow"
-            aria-hidden
-            style={{
-              width: 480,
-              height: 480,
-              top: -220,
-              left: -160,
-              background: "var(--brand-wash)",
-              opacity: 0.9,
-            }}
-          />
           <div
             style={{
-              position: "relative",
               display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr) auto",
-              columnGap: "var(--s6)",
-              alignItems: "end",
+              gridTemplateColumns: "minmax(0, 1.2fr) minmax(0, 0.9fr)",
+              gap: "var(--s5)",
+              alignItems: "center",
             }}
           >
-            <div style={{ maxWidth: 640 }}>
-              <div style={{ marginBottom: "var(--s3)" }}>
-                <Lencana nomor="01" label="Pengukuran" warna="brand" />
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
+              {/* Dibungkus <div>: kolom ini `align-items: stretch` (bawaan
+                 flex-column), jadi `Lencana` langsung akan diregang selebar
+                 kolom — pil `--brand-wash`-nya melar ke ujung. <div> pembungkus
+                 yang menyerap regangan; chip balik ke lebar konten. */}
+              <div>
+                <Lencana label="Pengukuran langsung" warna="brand" dot />
               </div>
               <h1
                 style={{
                   font: "800 var(--t-display)/1.02 var(--font-inter), system-ui, sans-serif",
                   letterSpacing: "-0.028em",
-                  margin: 0,
-                  maxWidth: "15ch",
+                  margin: "var(--s3) 0 0",
                 }}
               >
                 Berapa rupiah yang{" "}
@@ -180,9 +270,9 @@ export default function BerandaPage() {
                 }}
               >
                 Dua besaran diukur pada simpul transit yang sama, dengan
-                instrumen yang sama: potensi belanja komuter, dan belanja yang
-                benar-benar tertangkap gerai di dalam stasiun. Selisihnya
-                adalah batas atas peluang pendapatan non-tiket.
+                instrumen yang sama: potensi belanja komuter, dan belanja
+                yang benar-benar tertangkap gerai di dalam stasiun.
+                Selisihnya adalah batas atas peluang pendapatan non-tiket.
               </p>
               <div
                 style={{
@@ -214,489 +304,448 @@ export default function BerandaPage() {
 
           <p
             style={{
-              margin: "var(--s4) 0 0",
-              paddingTop: "var(--s3)",
-              borderTop: "1px solid var(--rule)",
+              margin: "var(--s5) 0 0",
               fontSize: "var(--t-small)",
               lineHeight: 1.6,
-              color: "var(--ink-muted)",
-              maxWidth: "46ch",
+              color: "var(--ink-faint)",
             }}
           >
-            Setiap angka adalah rentang, bukan satu titik — dan setiap rentang
-            dapat ditelusuri sampai ke foto aslinya.
+            Setiap angka adalah rentang, bukan satu titik — dan setiap
+            rentang dapat ditelusuri sampai ke foto aslinya.
           </p>
         </section>
 
         {/* ================================================================
-            02 · Angka yang melatarbelakangi
+            1 · Duduk perkara — full-bleed `--tile-sky`. Arketipe: ANGKA
+            RAKSASA + catatan tepi. Angka yang KAMI ukur (`Rp 2,9 jt`) berdiri
+            raksasa di KIRI; judul + kicker di KANAN. Dua fakta KAI yang cuma
+            DIKUTIP mengecil jadi catatan di bawah angka raksasa. (Judul KANAN
+            — awal ritme selang-seling S1-kanan/S3-kiri/S5-kanan.)
             ================================================================ */}
-        <section
-          className="wrap reveal"
-          style={{ padding: "var(--s6) var(--page-x)" }}
-        >
-          <div className="g12" style={{ rowGap: "var(--s4)" }}>
-            <Rubrik nomor="02" label="Duduk perkara" />
-            <div style={{ gridColumn: "4 / span 9" }}>
-              <Judul>
-                Aset paling ramai di kota ini adalah aset yang paling sedikit
-                diukur.
-              </Judul>
-              <div style={{ marginTop: "var(--s5)" }}>
-                <RelStatistik />
+        <section className="reveal" style={{ background: "var(--tile-sky)" }}>
+          <div
+            className="wrap"
+            style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) minmax(0, 0.9fr)",
+                gap: "var(--s5)",
+                alignItems: "center",
+              }}
+            >
+              <RelStatistikAngka />
+              <div>
+                <KepalaBab
+                  n={1}
+                  kicker="Duduk perkara"
+                  judul="Aset paling ramai di kota ini adalah aset yang paling sedikit diukur."
+                />
+                <RelStatistikKutipan />
               </div>
             </div>
           </div>
         </section>
 
         {/* ================================================================
-            03 · Persamaan — band tinta, satu-satunya ketukan kontras nilai
+            Persamaan — band tinta. Putaran 9 hanya mengganti teks eyebrow-nya
+            ("03 — Instrumen" → "Instrumen"): angka "03" itu sisa skema
+            penomoran putaran 6, dan sekarang bentrok dengan numeral `03` bab
+            "Yang sudah dicacah". Isi & tata letak band tetap.
             ================================================================ */}
         <div className="reveal">
           <Persamaan />
         </div>
 
         {/* ================================================================
-            04 · Metode
+            2 · Cara datanya dikumpulkan — full-bleed `--field-wash`. Putaran
+            10: header selebar section (KepalaBab, seperti section lain), lalu
+            badan tetap DUA KOLOM — satu-satunya section yang badannya dua
+            kolom: foto letterbox + kartu angka overlap di KIRI (tak berubah
+            dari putaran 9), dua paragraf di KANAN.
             ================================================================ */}
-        <section
-          className="wrap reveal"
-          style={{ padding: "var(--s6) var(--page-x) var(--s5)" }}
-        >
-          <div className="g12" style={{ rowGap: "var(--s4)" }}>
-            <Rubrik nomor="04" label="Cara datanya dikumpulkan" />
-            <div style={{ gridColumn: "4 / span 6" }}>
-              <Judul>Dua pasang mata, lalu satu mesin pembaca.</Judul>
-              <p
-                className="measure"
-                style={{
-                  margin: "var(--s3) 0 0",
-                  fontSize: "var(--t-body)",
-                  lineHeight: 1.68,
-                  color: "var(--ink-2)",
-                }}
-              >
-                Dua pencacah berdiri di garis pengamatan tiap pintu selama blok
-                menerus 15 menit. Foto struk dari gerai yang bersedia kemudian
-                dibaca ulang oleh AI, dengan aturan yang ditetapkan sebelum
-                survei dimulai — bukan sesudah datanya terlihat.
-              </p>
-              <p
-                className="measure"
-                style={{
-                  margin: "var(--s3) 0 0",
-                  fontSize: "var(--t-body)",
-                  lineHeight: 1.68,
-                  color: "var(--ink-2)",
-                }}
-              >
-                Blok yang selisih antar-pencacahnya melebihi 15% diulang. Kalau
-                setelah diulang tetap berselisih, slot itu tidak dipakai sama
-                sekali.
-              </p>
-            </div>
+        <section className="reveal" style={{ background: "var(--field-wash)" }}>
+          <div
+            className="wrap"
+            style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
+          >
+            <KepalaBab
+              n={2}
+              kicker="Cara datanya dikumpulkan"
+              judul="Dua pasang mata, lalu satu mesin pembaca."
+            />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 7fr) minmax(0, 5fr)",
+                gap: "var(--s5)",
+                alignItems: "start",
+              }}
+            >
+              {/* KIRI — foto letterbox + kartu angka yang menembus sudutnya. */}
+              <div style={{ position: "relative" }}>
+                <div
+                  className="bento-tile"
+                  style={{
+                    padding: 0,
+                    overflow: "hidden",
+                    aspectRatio: "16 / 7",
+                  }}
+                >
+                  <ImagePlaceholder label="Foto pencacahan di pintu stasiun · identitas diredaksi" />
+                </div>
 
-            {/* Catatan lapangan: satu-satunya tempat oker dipakai di section
-               ini, karena isinya memang kerja tangan — bukan hasil hitungan.
-               Sekarang berupa satu kartu ber-tint oker, bukan sekadar garis
-               kiri — bahasa yang sama dengan kartu bertint di section 05/07. */}
-            <div style={{ gridColumn: "11 / span 2" }}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "var(--s2)",
-                  padding: "var(--s3)",
-                  background: "var(--field-wash)",
-                  borderRadius: "var(--r-md)",
-                }}
-              >
-                {[
-                  ["2", "pencacah per pintu"],
-                  ["15", "menit per blok"],
-                  ["3", "stasiun"],
-                  ["4", "slot waktu"],
-                ].map(([n, t]) => (
-                  <div key={t}>
-                    <div
-                      className="fig"
-                      style={{ fontSize: 21, color: "var(--field)" }}
-                    >
-                      {n}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: "var(--t-micro)",
-                        lineHeight: 1.4,
-                        color: "var(--ink-muted)",
-                      }}
-                    >
-                      {t}
-                    </div>
+                {/* ~separuh keluar dari sudut kanan-bawah foto. Angka lapangan
+                   dipisah garis-rambut: pembungkus grid berlatar `--rule`,
+                   tiap sel berlatar `--surface`, `gap: 1px` yang menyingkap
+                   garis di antaranya. `.kartu` = satu sudut tajam + garis-
+                   rambut + tanpa bayangan (keluarga kartu Beranda). */}
+                <div
+                  className="kartu"
+                  style={{
+                    position: "absolute",
+                    right: -28,
+                    bottom: -32,
+                    width: "min(360px, 82%)",
+                    padding: 0,
+                    overflow: "hidden",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(4, 1fr)",
+                      gap: "1px",
+                      background: "var(--rule)",
+                    }}
+                  >
+                    {[
+                      ["2", "pencacah per pintu"],
+                      ["15", "menit per blok"],
+                      ["3", "stasiun"],
+                      ["4", "slot waktu"],
+                    ].map(([n, t]) => (
+                      <div
+                        key={t}
+                        style={{
+                          background: "var(--surface)",
+                          padding: "var(--s2) var(--s3)",
+                        }}
+                      >
+                        <div
+                          className="fig"
+                          style={{ fontSize: 20, color: "var(--field)" }}
+                        >
+                          {n}
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 4,
+                            fontSize: "var(--t-micro)",
+                            lineHeight: 1.35,
+                            color: "var(--ink-muted)",
+                          }}
+                        >
+                          {t}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              </div>
+
+              {/* KANAN — dua paragraf (teks tak berubah). */}
+              <div>
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "var(--t-body)",
+                    lineHeight: 1.68,
+                    color: "var(--ink-2)",
+                  }}
+                >
+                  Dua pencacah berdiri di garis pengamatan tiap pintu selama
+                  blok menerus 15 menit. Foto struk dari gerai yang bersedia
+                  kemudian dibaca ulang oleh AI, dengan aturan yang ditetapkan
+                  sebelum survei dimulai — bukan sesudah datanya terlihat.
+                </p>
+                <p
+                  style={{
+                    margin: "var(--s3) 0 0",
+                    fontSize: "var(--t-body)",
+                    lineHeight: 1.68,
+                    color: "var(--ink-2)",
+                  }}
+                >
+                  Blok yang selisih antar-pencacahnya melebihi 15% diulang.
+                  Kalau setelah diulang tetap berselisih, slot itu tidak
+                  dipakai sama sekali.
+                </p>
               </div>
             </div>
           </div>
         </section>
 
-        {/* Satu band foto full-bleed, menggantikan tiga kotak "Foto …" yang
-           dulu berjejer di sepertiga atas halaman. Foto adalah janji; tiga
-           kotak kosong di paling atas hanya memajang apa yang belum ada. */}
-        <section
-          className="reveal"
-          style={{
-            borderTop: "1px solid var(--rule)",
-            borderBottom: "1px solid var(--rule)",
-            background: "var(--paper-2)",
-          }}
-        >
-          <div style={{ height: "clamp(220px, 26vw, 340px)" }}>
-            <ImagePlaceholder label="Foto pencacahan di pintu stasiun · identitas diredaksi" />
+        {/* ================================================================
+            3 · Yang sudah dicacah — full-bleed `--tile-mint`. Arketipe: KARTU
+            STAGGERED + skala bersama. Judul di KIRI (selang-seling), tiga
+            kartu tinggi-berbeda di KANAN — tiap kartu batang rentang mini
+            pada SATU skala yang dicetak sekali di atasnya (`PerbandinganSimpul`).
+            Judul H2 "Tiga simpul, tiga tipe kawasan." tetap satu blok teks
+            utuh (dicek persis oleh tests/beranda.spec.ts).
+            ================================================================ */}
+        <section className="reveal" style={{ background: "var(--tile-mint)" }}>
+          <div
+            className="wrap"
+            style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 0.6fr) minmax(0, 1.4fr)",
+                gap: "var(--s5)",
+                alignItems: "start",
+              }}
+            >
+              <div>
+                <KepalaBab
+                  n={3}
+                  kicker="Yang sudah dicacah"
+                  judul="Tiga simpul, tiga tipe kawasan."
+                />
+                <p
+                  style={{
+                    margin: "0 0 var(--s3)",
+                    fontSize: "var(--t-small)",
+                    lineHeight: 1.6,
+                    color: "var(--ink-2)",
+                    maxWidth: "36ch",
+                  }}
+                >
+                  Ketiga batang memakai skala rupiah yang sama — makin ke
+                  kanan, makin besar kesenjangannya. Garis tebal = median.
+                </p>
+                <Link
+                  href="/peta"
+                  style={{
+                    fontSize: "var(--t-small)",
+                    fontWeight: 600,
+                    color: "var(--data)",
+                  }}
+                >
+                  Lihat semuanya di peta →
+                </Link>
+              </div>
+              <PerbandinganSimpul />
+            </div>
           </div>
         </section>
 
         {/* ================================================================
-            05 · Tiga simpul
-
-            Full-bleed sampai tepi viewport, bukan `className="wrap"` langsung
-            di section — pola yang sama dengan Persamaan.tsx. Latarnya
-            `--data-wash`, biru sangat muda: bukan warna baru, dan taat aturan
-            "biru = data" karena section ini memang isinya data sungguhan.
-            Kartu putih di atasnya jadi kontras — kedalaman tanpa warna baru.
+            4 · Dari peta ke keputusan — full-bleed `--tile-violet`. Arketipe:
+            LIST + HIGHLIGHT SPLIT. Header selebar section, lalu badan dua
+            kolom — KARTU emas "1 hari kerja" di KIRI (satu-satunya elemen
+            ber-isi penuh di halaman) DISANDINGKAN dengan daftar 3 keputusan
+            bernomor di KANAN.
             ================================================================ */}
-        <section
-          className="reveal"
-          style={{
-            position: "relative",
-            padding: "var(--s6) 0",
-            background: "var(--data-wash)",
-            overflow: "hidden",
-          }}
-        >
+        <section className="reveal" style={{ background: "var(--tile-violet)" }}>
           <div
-            className="glow"
-            aria-hidden
-            style={{
-              width: 420,
-              height: 420,
-              top: -180,
-              right: -140,
-              background: "var(--data-soft)",
-              opacity: 0.35,
-            }}
-          />
-          <div className="wrap" style={{ position: "relative" }}>
-            {/* Bukan lagi <Rubrik/> di kolom sticky terpisah — kartu di
-               bawahnya cukup tinggi sehingga kolom rubrik akan kosong
-               sepanjang sisa section (persis yang dikeluhkan). Label sekarang
-               sebaris langsung di atas judul, dan kontennya memakai 12 kolom
-               penuh, bukan 9. */}
-            <div style={{ marginBottom: "var(--s2)" }}>
-              <Lencana nomor="05" label="Yang sudah dicacah" />
-            </div>
-            <Judul>Tiga simpul, tiga tipe kawasan.</Judul>
-            <div style={{ marginTop: "var(--s5)" }}>
-              <KartuSimpul />
-            </div>
-            {/* Link "Lihat semuanya" dulu duduk sebaris dengan judul lewat
-               space-between — di layar lebar itu menciptakan jarak kosong
-               mentah persis di baris paling atas section, sebelum satu kartu
-               pun terlihat. Sekarang ia jadi penutup di bawah grid kartu. */}
-            <div style={{ marginTop: "var(--s3)", textAlign: "right" }}>
-              <Link
-                href="/peta"
+            className="wrap"
+            style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
+          >
+            <KepalaBab
+              n={4}
+              kicker="Keputusan yang bisa diambil"
+              judul="Dari peta ke keputusan sewa."
+            />
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 0.62fr) minmax(0, 1fr)",
+                gap: "var(--s5)",
+                alignItems: "start",
+              }}
+            >
+              {/* KIRI — kartu highlight "1 hari kerja". */}
+              <div
+                className="kartu"
                 style={{
-                  fontSize: "var(--t-small)",
-                  fontWeight: 600,
-                  color: "var(--data)",
+                  background: "var(--brand-wash)",
+                  padding: "var(--s4)",
+                  alignSelf: "start",
+                  marginTop: 4,
                 }}
               >
-                Lihat semuanya di peta →
-              </Link>
-            </div>
-          </div>
-        </section>
+                <span
+                  className="fig"
+                  style={{
+                    font: "700 clamp(48px, 7vw, 80px)/1 var(--font-mono), ui-monospace, monospace",
+                    letterSpacing: "-0.04em",
+                    color: "var(--brand-strong)",
+                  }}
+                >
+                  1
+                </span>
+                <div style={{ marginTop: 6, fontSize: "var(--t-body)", fontWeight: 700 }}>
+                  hari kerja
+                </div>
+                <p
+                  style={{
+                    margin: "var(--s2) 0 var(--s3)",
+                    fontSize: "var(--t-small)",
+                    lineHeight: 1.6,
+                    color: "var(--ink-2)",
+                  }}
+                >
+                  waktu satu tim mencacah satu simpul dan menghasilkan brief
+                  seperti yang ada di halaman peta.
+                </p>
+                <Link
+                  href="/peta"
+                  style={{
+                    fontSize: "var(--t-small)",
+                    fontWeight: 600,
+                    color: "var(--data)",
+                  }}
+                >
+                  Lihat contoh brief →
+                </Link>
+              </div>
 
-        {/* ================================================================
-            06 · Dari peta ke keputusan
-            ================================================================ */}
-        <section
-          className="wrap reveal"
-          style={{
-            padding: "var(--s6) var(--page-x)",
-            borderTop: "1px solid var(--rule)",
-          }}
-        >
-          {/* Bukan lagi <Rubrik/> + dua kolom rata atas — kotak "1 hari kerja"
-             jauh lebih pendek daripada daftar bernomor di sebelahnya, dan rata
-             atas menyisakan void besar di bawahnya. Bentuknya tetap dua kolom
-             (beda dari section 05 yang satu blok penuh) — yang berubah cuma
-             `alignItems: "center"`, supaya kotak yang lebih pendek duduk di
-             tengah tinggi daftar, bukan menempel di atas lalu menggantung. */}
-          <div style={{ marginBottom: "var(--s2)" }}>
-            <Lencana nomor="06" label="Keputusan yang bisa diambil" />
-          </div>
-          <Judul>Dari peta ke keputusan sewa.</Judul>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "minmax(0, 1fr) minmax(220px, 300px)",
-              columnGap: "var(--s5)",
-              alignItems: "center",
-              marginTop: "var(--s5)",
-            }}
-          >
-            <div>
-              {[
-                  [
-                    "Komposisi kategori penyewa per pintu",
-                    "Kategori yang permintaannya terbaca tinggi namun gerainya nol jadi prioritas pertama.",
-                  ],
-                  [
-                    "Harga sewa yang mengikuti arus, bukan luas",
-                    "Indeks sewa terhadap arus pejalan membuat perbedaan nilai antar pintu terlihat.",
-                  ],
-                  [
-                    "Jadwal aktivasi pada slot yang tepat",
-                    "Slot dengan kesenjangan terbesar menunjukkan jam yang paling layak diisi lebih dahulu.",
-                  ],
-                ].map(([judul, isi], i) => (
+              {/* KANAN — 3 keputusan, nomor mono menggantung di selokan baris. */}
+              <div>
+                {KEPUTUSAN.map((k, i) => (
                   <div
-                    key={judul}
+                    key={k.judul}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "auto 1fr",
+                      gridTemplateColumns: "2.5ch 1fr",
                       gap: "var(--s3)",
                       padding: "var(--s3) 0",
-                      borderTop: "1px solid var(--rule)",
+                      borderTop:
+                        i === 0 ? undefined : "1px solid var(--rule)",
+                      borderBottom:
+                        i === KEPUTUSAN.length - 1
+                          ? "1px solid var(--rule)"
+                          : undefined,
                     }}
                   >
                     <span
                       className="fig"
                       style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: 28,
-                        height: 28,
-                        borderRadius: "var(--r-pill)",
-                        background: "var(--paper-2)",
-                        fontSize: 12,
-                        color: "var(--ink-muted)",
+                        fontSize: "var(--t-body)",
+                        fontWeight: 700,
+                        color: "var(--data)",
                       }}
                     >
-                      {String(i + 1).padStart(2, "0")}
+                      {i + 1}
                     </span>
                     <div>
-                      <div
-                        style={{
-                          fontSize: "var(--t-body)",
-                          fontWeight: 600,
-                          marginBottom: 5,
-                        }}
-                      >
-                        {judul}
+                      <div style={{ fontSize: "var(--t-body)", fontWeight: 700 }}>
+                        {k.judul}
                       </div>
                       <div
                         style={{
+                          marginTop: 4,
                           fontSize: "var(--t-small)",
                           lineHeight: 1.6,
                           color: "var(--ink-muted)",
                         }}
                       >
-                        {isi}
+                        {k.isi}
                       </div>
                     </div>
                   </div>
                 ))}
-            </div>
-
-            <div
-              className="card"
-              style={{
-                padding: "var(--s4)",
-              }}
-            >
-              <div
-                className="fig"
-                style={{
-                  font: "700 clamp(28px, 3vw, 42px)/1 var(--font-mono), ui-monospace, monospace",
-                  letterSpacing: "-0.04em",
-                  color: "var(--brand-strong)",
-                }}
-              >
-                1
               </div>
-              <div
-                style={{
-                  marginTop: 8,
-                  fontSize: "var(--t-body)",
-                  fontWeight: 600,
-                }}
-              >
-                hari kerja
-              </div>
-              <p
-                style={{
-                  margin: "var(--s2) 0 var(--s3)",
-                  fontSize: "var(--t-small)",
-                  lineHeight: 1.6,
-                  color: "var(--ink-muted)",
-                }}
-              >
-                waktu yang dibutuhkan satu tim untuk mencacah satu simpul dan
-                menghasilkan brief seperti yang ada di halaman peta.
-              </p>
-              <Link
-                href="/peta"
-                style={{
-                  fontSize: "var(--t-small)",
-                  fontWeight: 600,
-                  color: "var(--data)",
-                }}
-              >
-                Lihat contoh brief →
-              </Link>
             </div>
           </div>
         </section>
 
         {/* ================================================================
-            07 · Untuk siapa
-
-            Full-bleed juga, tapi tint-nya `--paper-2` — netral, BUKAN biru
-            atau oker, karena section ini soal audiens, bukan data maupun
-            kerja lapangan. Token yang sama persis dipakai kolofon (08) di
-            bawahnya, jadi tidak ada warna baru yang ditambahkan.
+            5 · Untuk siapa — full-bleed `--tile-rose`. Arketipe: TUMPUKAN
+            KARTU BERGESER. Isi di KIRI (selang-seling: S5-kanan judul), judul
+            di KANAN. Tiga kartu keluarga (`.kartu`, satu sudut tajam) bergeser
+            diagonal — tiap kartu turun + geser kanan, sebagian saling menimpa
+            di SUDUT (yang tertimpa cuma padding, teks tetap terbaca penuh).
             ================================================================ */}
-        <section
-          className="reveal"
-          style={{
-            padding: "var(--s6) 0",
-            background: "var(--paper-2)",
-            // `--paper-2` bedanya tipis dari `--paper` — perlu garis ini
-            // supaya batas dengan section 06 (kertas polos) di atasnya tetap
-            // terlihat, bukan cuma menyatu diam-diam.
-            borderTop: "1px solid var(--rule)",
-          }}
-        >
-          <div className="wrap">
-            {/* Sebelumnya section ini sama sekali tidak punya label
-               section-level — kolom 1-3 kosong total sepanjang section, tidak
-               ada satu pun "07 — …" di sana. Ditambahkan sekarang, tapi
-               bentuknya beda lagi dari 05 dan 06: TANPA judul besar (section
-               ini bukan satu "beat" utama; tiga mini-judul di kartunya sudah
-               cukup menjelaskan diri sendiri) — eyebrow dipasangkan sebaris
-               dengan satu kalimat pendek, lalu band 3 kolom langsung memakai
-               lebar penuh. */}
-            <div
-              className="row"
-              style={{
-                justifyContent: "space-between",
-                alignItems: "baseline",
-                flexWrap: "wrap",
-                gap: "var(--s2)",
-              }}
-            >
-              <Lencana nomor="07" label="Untuk siapa" />
-              <div
-                style={{ fontSize: "var(--t-small)", color: "var(--ink-muted)" }}
-              >
-                Tiga kelompok yang datanya kami buka bagi.
-              </div>
-            </div>
+        <section className="reveal" style={{ background: "var(--tile-rose)" }}>
+          <div
+            className="wrap"
+            style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
+          >
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
-                gap: "var(--s4)",
-                marginTop: "var(--s4)",
+                gridTemplateColumns: "minmax(0, 1fr) minmax(0, 0.95fr)",
+                gap: "var(--s5)",
+                alignItems: "center",
               }}
             >
-              {[
-                [
-                  "Operator & pengelola kawasan",
-                  "Dasar terukur untuk komposisi kategori penyewa dan peninjauan harga sewa.",
-                ],
-                [
-                  "Pelaku usaha kecil",
-                  "Akses terbuka ke informasi arus dan potensi belanja yang selama ini hanya dimiliki pihak bermodal besar.",
-                ],
-                [
-                  "Pemerintah daerah & perencana",
-                  "Protokol pencacahan diterbitkan terbuka agar kota lain dapat menghasilkan lapisan setara.",
-                ],
-              ].map(([judul, isi], i) => (
-                // Kartu, bukan lagi kolom teks polos — pola yang sama dengan
-                // section 05 (kartu putih di atas tint), supaya section ini
-                // tidak lagi terbaca kosong hanya karena tint-nya sendiri.
-                <div key={judul} className="card" style={{ padding: "var(--s4)" }}>
-                  {/* Angka polos, bukan "01 — Untuk siapa" seperti dulu —
-                     label itu sekarang sudah dinyatakan sekali di atas,
-                     mengulanginya di tiap kartu jadi berlebihan. Sama seperti
-                     angka polos pada daftar bernomor di section 06. */}
-                  <span
-                    className="fig"
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      width: 28,
-                      height: 28,
-                      borderRadius: "var(--r-pill)",
-                      background: "var(--paper-2)",
-                      fontSize: 12,
-                      color: "var(--ink-muted)",
-                      marginBottom: 14,
-                    }}
-                  >
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
+              <div style={{ position: "relative" }}>
+                {AUDIENS.map((a, i) => (
                   <div
+                    key={a.judul}
+                    className="kartu"
                     style={{
-                      fontSize: "var(--t-body)",
-                      fontWeight: 700,
-                      marginBottom: 6,
+                      position: "relative",
+                      zIndex: i + 1,
+                      width: "min(340px, 88%)",
+                      padding: "var(--s4) var(--s4) var(--s5)",
+                      background: "var(--surface)",
+                      marginTop: i === 0 ? 0 : "calc(var(--s4) * -1)",
+                      transform: `translateX(${i * 30}%)`,
                     }}
                   >
-                    {judul}
+                    <div
+                      style={{
+                        fontSize: "var(--t-body)",
+                        fontWeight: 700,
+                        letterSpacing: "-0.01em",
+                      }}
+                    >
+                      {a.judul}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 6,
+                        fontSize: "var(--t-small)",
+                        lineHeight: 1.6,
+                        color: "var(--ink-2)",
+                        maxWidth: "26ch",
+                      }}
+                    >
+                      {a.isi}
+                    </div>
                   </div>
-                  <div
-                    style={{
-                      fontSize: "var(--t-small)",
-                      lineHeight: 1.6,
-                      color: "var(--ink-muted)",
-                    }}
-                  >
-                    {isi}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <KepalaBab
+                n={5}
+                kicker="Untuk siapa"
+                judul="Tiga kelompok yang datanya kami buka bagi."
+              />
             </div>
           </div>
         </section>
 
         {/* ================================================================
-            08 · Kolofon — ukuran baris sempit, ritme berbeda dari seluruh
-            halaman di atasnya. Bagian kejujuran ini pembeda proyek; ia diberi
-            bentuk yang membuatnya dibaca, bukan dilewati.
+            Kolofon — satu ubin lebar netral (bukan pastel: bagian kejujuran/
+            keterbatasan ini sengaja beda nada dari bento yang playful di
+            section lain). `paddingTop` ditambah putaran 9 — sebelumnya 0,
+            jadi panel `--paper-2` menempel persis di batas bawah band rose
+            "Untuk siapa" tanpa ruang `--paper` di antaranya.
             ================================================================ */}
         <section
-          className="reveal"
-          style={{
-            padding: "var(--s6) var(--page-x)",
-            borderTop: "1px solid var(--rule)",
-            background: "var(--paper-2)",
-          }}
+          className="wrap reveal"
+          style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
         >
-          <div style={{ maxWidth: 660, margin: "0 auto" }}>
+          <div className="bento-panel" style={{ maxWidth: 760, margin: "0 auto" }}>
             <div
-              style={{
-                marginBottom: "var(--s3)",
-                display: "flex",
-                justifyContent: "center",
-              }}
+              style={{ marginBottom: "var(--s3)", display: "flex", justifyContent: "center" }}
             >
               <Lencana label="Yang kami nyatakan terbuka" />
             </div>
@@ -709,9 +758,6 @@ export default function BerandaPage() {
                 margin: "0 0 var(--s5)",
               }}
             >
-              {/* Tidak dibuat miring — Inter di sini hanya dimuat gaya
-                 normal, jadi italic akan jatuh ke miring sintetis peramban.
-                 Bedanya dari paragraf biasa cukup lewat bobot & warna. */}
               Estimasi potensi bukan proyeksi pendapatan yang pasti. Biaya
               operasi dan risiko usaha tidak diperhitungkan di dalamnya.
             </div>
@@ -738,11 +784,7 @@ export default function BerandaPage() {
               <div style={{ paddingTop: "var(--s3)" }}>
                 <Link
                   href="/metodologi"
-                  style={{
-                    fontSize: "var(--t-small)",
-                    fontWeight: 600,
-                    color: "var(--data)",
-                  }}
+                  style={{ fontSize: "var(--t-small)", fontWeight: 600, color: "var(--data)" }}
                 >
                   Baca keterbatasan lengkap →
                 </Link>
@@ -752,14 +794,18 @@ export default function BerandaPage() {
         </section>
 
         {/* ================================================================
-            09 · Penutup
+            Penutup — band tinta. Putaran 9 hanya memperbaiki chip-nya: lewat
+            helper `Lencana`, `background` inline `--paper-2` menang atas
+            aturan `.ink-band .eyebrow-chip`, jadi pil-nya krem opak dengan
+            teks putih-40% di atasnya — kotak tanpa isi terbaca. `warna="ink"`
+            memakai latar tinta-tembus + teks terang. Sisanya tak berubah.
             ================================================================ */}
-        <section className="ink-band" style={{ padding: "var(--s6) 0" }}>
+        <section className="ink-band" style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}>
           <div className="wrap">
             <div className="g12" style={{ rowGap: "var(--s4)" }}>
               <div style={{ gridColumn: "span 7" }}>
                 <div style={{ marginBottom: "var(--s3)" }}>
-                  <Lencana label="Rantai sebabnya sederhana" />
+                  <Lencana label="Rantai sebabnya sederhana" warna="ink" />
                 </div>
                 <p
                   style={{
@@ -787,8 +833,8 @@ export default function BerandaPage() {
                     color: "var(--ink-muted)",
                   }}
                 >
-                  Ruang fiskal yang terbebas dapat dipakai memperluas jangkauan
-                  layanan.
+                  Ruang fiskal yang terbebas dapat dipakai memperluas
+                  jangkauan layanan.
                 </p>
                 <Link
                   href="/peta"
@@ -812,8 +858,8 @@ export default function BerandaPage() {
           }}
         >
           <span style={{ fontSize: 11.5, color: "var(--ink-faint)" }}>
-            Isi Stasiun · dibangun di atas GEO MAPID · seluruh angka pada halaman
-            ini bersifat ilustratif
+            Isi Stasiun · dibangun di atas GEO MAPID · seluruh angka pada
+            halaman ini bersifat ilustratif
           </span>
           <Jejak />
         </footer>

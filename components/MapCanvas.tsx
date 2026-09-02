@@ -92,6 +92,13 @@ type Props = {
    * sesuatu yang tidak ada di sana.
    */
   fitPadding?: { top: number; bottom: number; left: number; right: number };
+  /**
+   * Radius kliping DOM untuk pembungkus peta — chrome embed, bukan gaya peta
+   * (`lib/map/style.ts` tetap satu-satunya sumber warna/ukuran layer). Dipakai
+   * peta hero Beranda supaya sudut kanvas MapLibre benar-benar terpotong
+   * membulat; `/peta` tidak mengopernya → tanpa radius, seperti sebelumnya.
+   */
+  borderRadius?: number | string;
 };
 
 /** Batas menunggu style basemap sebelum dianggap gagal. */
@@ -210,6 +217,7 @@ export function MapCanvas({
   onScaleChange,
   interactive = true,
   fitPadding = FIT_PADDING,
+  borderRadius,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -584,7 +592,14 @@ export function MapCanvas({
   const pesan = dataError ?? notice;
 
   return (
-    <div style={{ position: "absolute", inset: 0 }}>
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        borderRadius,
+        overflow: borderRadius ? "hidden" : undefined,
+      }}
+    >
       <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
 
       {pesan && (

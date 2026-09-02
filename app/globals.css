@@ -356,6 +356,23 @@ h3 {
   --brand-strong: #a97f2b;
   --brand-wash: rgba(201, 154, 60, 0.14);
 
+  /* --- Pastel ubin bento --------------------------------------------------
+     Putaran keenam ("bento") rombak KERANGKA halaman, bukan cuma kulitnya —
+     lihat komentar di atas struktur section di `page.tsx`. Empat warna ini
+     KHUSUS latar ubin, dan sengaja tidak berarti apa-apa secara individual:
+     kolektif artinya cuma "ini ubin dekoratif", persis seperti referensi
+     Dribbble yang ditunjuk user (warna ubin di sana tidak mengkodekan makna).
+     Ini LAPISAN TERPISAH dari `--data`/`--field`/`--brand` di atas — aturan
+     "biru hanya angka data, oker hanya lapangan, emas hanya chrome" berlaku
+     di level TEKS/ANGKA dan tidak melonggar sedikit pun; latar ubin boleh
+     pastel apa saja, angka data di dalamnya tetap biru bukan ikut warna ubin.
+     `--tile-sky` sengaja jauh dari `--data` (#1d4ed8) — cukup pucat supaya
+     tidak terbaca sebagai "ini data" walau sama-sama biru. */
+  --tile-sky: #e4f1f6;
+  --tile-violet: #ece7fb;
+  --tile-mint: #e3f3ea;
+  --tile-rose: #fbe9ec;
+
   /* --- Tangga tipografi, rasio 1.25 -------------------------------------
      Menggantikan ±17 ukuran ad-hoc yang saling dempet (12/12.5, 13/13.5,
      14/14.5, 26/32/34). Itu bukan tangga, itu drift. */
@@ -380,16 +397,21 @@ h3 {
   /* --- Radius yang punya maksud -----------------------------------------
      Yang lama satu nilai untuk segalanya: `borderRadius: 12` muncul 92 kali,
      dipakai untuk lingkaran 26px, kotak 44px, kartu 420px, dan bar 5px
-     sekaligus. Sistem editorial menjawabnya dengan sudut nyaris tajam di
-     mana-mana; sistem modern (putaran kelima) menjawabnya dengan tangga radius
-     yang naik bersama ukuran elemennya — `--r-xs`/`--r-sm` untuk detail kecil
-     (tanda, tick), `--r-md`/`--r-lg` untuk kartu, `--r-pill` untuk tombol dan
-     nav. Bukan lagi "semua tajam", tapi tetap bukan "semua 12px" yang lama. */
+     sekaligus. Sistem editorial (putaran 1–4) menjawabnya dengan sudut nyaris
+     tajam di mana-mana; sistem modern (putaran 5) dengan tangga radius yang
+     naik bersama ukuran elemen. Putaran 6 ("bento") menyederhanakannya sekali
+     lagi: `--r-xs`/`--r-sm` untuk detail kecil (tanda, tick), `--r-md` untuk
+     ubin sedang yang belum sempat dimigrasi ke `--r-xl`, `--r-xl` untuk
+     SEMUA ubin/kartu bento, `--r-pill` untuk tombol dan nav. */
   --r-none: 0;
   --r-xs: 2px;
   --r-sm: 6px;
   --r-md: 18px;
-  --r-lg: 28px;
+  /* Radius seragam untuk SEMUA ubin bento (kartu, tombol tetap `--r-pill`).
+     Riset bento grid 2025/2026 sepakat pada satu titik: radius yang sama di
+     semua ubin adalah yang menyatukan grid asimetris secara visual — beda
+     radius per ubin justru membuatnya terbaca acak, bukan satu sistem. */
+  --r-xl: 32px;
   --r-pill: 999px;
 
   --page-x: clamp(20px, 4.6vw, 68px);
@@ -425,6 +447,16 @@ h3 {
   --nav-shadow: var(--shadow-soft);
   --nav-border-w: 0px;
   --nav-brand-radius: var(--r-pill);
+
+  /* Craft pass (putaran 10): rag judul diseimbangkan supaya tidak ada baris
+     terakhir satu kata; tanda kutip & bullet menggantung ke margin supaya
+     tepi kiri tetap lurus. Keduanya diabaikan mulus di peramban yang belum
+     mendukung — tidak ada layout yang pecah. */
+  hanging-punctuation: first;
+}
+.paper-canvas h1,
+.paper-canvas h2 {
+  text-wrap: balance;
 }
 
 /* --- Tata letak ---------------------------------------------------------- */
@@ -480,7 +512,7 @@ h3 {
   letter-spacing: -0.02em;
 }
 
-/* Rubrik section: nomor + label kapital kecil. */
+/* Kicker section: label kapital kecil. */
 .eyebrow {
   font: 500 var(--t-micro) / 1.5 var(--font-mono), ui-monospace, monospace;
   letter-spacing: 0.17em;
@@ -537,25 +569,76 @@ h3 {
   color: var(--data);
 }
 
-/* Kartu. Sistem editorial menjaganya sudut nyaris tajam dan tanpa bayangan
-   sama sekali — "hairline menggantikan isi kartu" adalah baris yang dulu
-   tertulis di sini. Sistem modern membalik itu: radius besar dan
-   `--shadow-soft` adalah keadaan DEFAULT, bukan pengecualian, dan hover
-   menaikkannya lagi ke `--shadow-lift` alih-alih sekadar mengubah warna
-   garis. */
+/* Ubin & kartu — satu bahasa visual bersama.
+ *
+ * `.bento` adalah grid-nya (lihat pola section di `page.tsx`); `.bento-tile`
+ * dan `.card` adalah isinya. Keduanya sengaja berbagi resep persis (radius
+ * `--r-xl` seragam, `--shadow-soft` default) supaya seluruh halaman terbaca
+ * sebagai satu sistem — bedanya cuma semantik: `.card` khusus unit yang
+ * benar-benar `<Link>` (tiga kartu simpul), `.bento-tile` untuk sel grid
+ * lain yang tidak semuanya bisa diklik.
+ *
+ * Sistem editorial (putaran 1–4) menjaga sudut nyaris tajam tanpa bayangan
+ * sama sekali — "hairline menggantikan isi kartu" adalah baris yang dulu
+ * tertulis di sini. Sistem modern (putaran 5) membuat bayangan jadi
+ * kosakata biasa. Putaran keenam ("bento") menaikkan radiusnya sekali lagi
+ * ke `--r-xl` dan menambah pilihan latar pastel (`--tile-*`) — lihat token
+ * di atas untuk kenapa warna ubin dan warna angka di dalamnya dua lapis yang
+ * independen. */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s3);
+}
+@media (max-width: 1100px) {
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.bento-tile,
 .card {
   border: 1px solid var(--rule-soft);
-  border-radius: var(--r-lg);
+  border-radius: var(--r-xl);
   background: var(--surface);
   box-shadow: var(--shadow-soft);
   transition:
     box-shadow 0.18s ease-out,
     transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
+a.bento-tile:hover,
+a.bento-tile:focus-visible,
 a.card:hover,
 a.card:focus-visible {
   box-shadow: var(--shadow-lift);
   transform: translateY(-3px);
+}
+
+/* Keluarga kartu "kreatif" Beranda (putaran 11) — kartu overlap hero &
+   Section 2, kartu staggered Section 3, kartu highlight Section 4, tumpukan
+   kartu Section 5. Rata + garis-rambut + SATU sudut tajam (kiri-bawah)
+   sebagai tanda-tangan halaman — membedakannya dari kotak rounded biasa.
+   TANPA bayangan (sistem kertas-hangat: garis 1px, bukan elevasi). Komponen
+   menambah `background`/`padding` sendiri. */
+.kartu {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md) var(--r-md) var(--r-md) 0;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+a.kartu:hover,
+a.kartu:focus-visible {
+  transform: translateY(-2px);
+}
+
+/* Bingkai lembut dipakai jarang, hanya di section 08 — satu ubin lebar untuk
+   bagian kejujuran/keterbatasan, sengaja BUKAN pastel (nadanya beda sengaja
+   dari bento yang playful di section lain). Section bento lain TIDAK dibungkus
+   panel ini — ubinnya sendiri (radius + bayangan) sudah cukup menyatukan
+   grid tanpa perlu bingkai kedua yang bersarang. */
+.bento-panel {
+  background: var(--paper-2);
+  border-radius: var(--r-xl);
+  padding: var(--s4);
 }
 
 /* Tombol bersama (`.b`, `.bp`, `.bs`) disetel ulang DI DALAM scope ini saja —
@@ -680,33 +763,4 @@ a.card:focus-visible {
   to {
     opacity: 1;
   }
-}
-
-/* Badge cincin di kartu peta hero — teks melingkar yang berputar pelan.
-   Murni dekoratif (lihat `BadgeCincin.tsx`), jadi dijaga
-   `prefers-reduced-motion` dengan pola yang sama persis dengan `.draw` di
-   atas: pengguna yang meminta gerak lebih sedikit melihatnya diam. */
-@media (prefers-reduced-motion: no-preference) {
-  .ring-spin {
-    animation: ring-spin 22s linear infinite;
-  }
-}
-@keyframes ring-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Bidang cahaya lembut di belakang konten — lingkaran blur beropasitas
-   rendah, murni dekoratif (tidak pernah membawa informasi), dipakai untuk
-   memberi kedalaman di belakang hero dan section 05 tanpa menambah elemen
-   yang harus dibaca. Warna & posisi diatur inline per pemakaian. */
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(64px);
-  pointer-events: none;
 }
