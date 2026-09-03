@@ -24,7 +24,7 @@
 
 import { persen, ribuan, rupiah } from "@/lib/format";
 import { useBeranda } from "./BerandaData";
-import { KickerBernomor } from "./KickerBernomor";
+import { KickerBernomor } from "@/components/paper/KickerBernomor";
 
 type Suku = {
   huruf: string;

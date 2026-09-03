@@ -1,12 +1,12 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import { NavBar } from "@/components/NavBar";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
+import { KepalaBab } from "@/components/paper/KepalaBab";
+import { Lencana } from "@/components/paper/Lencana";
 import { BerandaData } from "@/components/beranda/BerandaData";
 import { HeroPeta } from "@/components/beranda/HeroPeta";
 import { Jejak } from "@/components/beranda/Jejak";
-import { KickerBernomor } from "@/components/beranda/KickerBernomor";
 import { PerbandinganSimpul } from "@/components/beranda/PerbandinganSimpul";
 import { Persamaan } from "@/components/beranda/Persamaan";
 import {
@@ -71,105 +71,6 @@ import {
  * **Putaran ketiga belas:** nomor bab kehilangan em-dash (cukup angka + pil)
  * dan fontnya dinaikkan jadi numeral display besar — lihat `KickerBernomor`.
  */
-
-/** Kicker section — chip pil polos, tanpa nomor urut kecil (nomor hidup di
- * `KepalaBab`, bukan label "1 dari N").
- *
- * `warna="ink"` untuk band tinta: `Lencana` selalu menyetel `background`
- * inline, dan inline itu menang atas aturan `.ink-band .eyebrow-chip`. Tanpa
- * varian ini, di atas band tinta pil-nya jadi krem opak dengan teks putih
- * 40% di atasnya — kotak yang isinya tak terbaca. */
-function Lencana({
-  label,
-  warna = "netral",
-  dot = false,
-}: {
-  label: string;
-  warna?: "netral" | "brand" | "ink";
-  dot?: boolean;
-}) {
-  const background =
-    warna === "brand"
-      ? "var(--brand-wash)"
-      : warna === "ink"
-        ? "rgba(250, 248, 244, 0.12)"
-        : "var(--paper-2)";
-  return (
-    <span
-      className="eyebrow-chip eyebrow"
-      style={{
-        background,
-        ...(warna === "ink" ? { color: "var(--paper)" } : null),
-      }}
-    >
-      {dot && <span className="dot" style={{ background: "var(--brand)" }} />}
-      {label}
-    </span>
-  );
-}
-
-/** Judul section dengan ukuran dan famili yang sama di seluruh halaman. */
-function Judul({ children }: { children: ReactNode }) {
-  return (
-    <h2
-      style={{
-        font: "800 var(--t-h2)/1.06 var(--font-inter), system-ui, sans-serif",
-        letterSpacing: "-0.02em",
-        margin: 0,
-      }}
-    >
-      {children}
-    </h2>
-  );
-}
-
-/**
- * Kepala bab — kicker bernomor + judul + garis-rambut.
- *
- * Nomor bab hidup di `KickerBernomor` (putaran 12: angka di LUAR pil kicker,
- * fontnya diperbesar sendiri). `KepalaBab` tinggal menyusun kicker → judul →
- * garis-rambut. Dipakai full-width (bab 3 & 5) ATAU sebagai satu kolom grid
- * yang berselang-seling kiri/kanan (bab 1 kanan, 4 kiri, 6 kanan). Garis-
- * rambut ikut lebar wadahnya — di kolom sempit itu disengaja (gaya Klim).
- *
- * `align="right"` (bab 1) merata-kanankan kicker + judul; garis-rambut tetap
- * selebar wadah. `halfRule` (bab 5) memotong garis-rambut jadi setengah kiri
- * saja — di sisi kanan yang bebas garis, section itu menaikkan kartunya
- * supaya mulai sejajar garis, bukan di bawahnya.
- */
-function KepalaBab({
-  n,
-  kicker,
-  judul,
-  align = "left",
-  halfRule = false,
-}: {
-  n: number;
-  kicker: string;
-  judul: ReactNode;
-  align?: "left" | "right";
-  halfRule?: boolean;
-}) {
-  return (
-    <div style={{ marginBottom: "var(--s4)" }}>
-      <KickerBernomor n={n} kicker={kicker} align={align} />
-      <div style={{ marginTop: "var(--s2)", textAlign: align }}>
-        <Judul>{judul}</Judul>
-      </div>
-      <div
-        style={{
-          marginTop: "var(--s3)",
-          borderBottom: "1px solid var(--rule)",
-          // Setengah kiri: berhenti persis di tepi kolom pertama grid `1fr 1fr`
-          // yang gap-nya `--s5`.
-          ...(halfRule
-            ? { width: "calc(50% - var(--s5) / 2)" }
-            : null),
-        }}
-      />
-    </div>
-  );
-}
 
 const KEPUTUSAN = [
   {
