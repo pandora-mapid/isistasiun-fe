@@ -6,6 +6,7 @@ import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { BerandaData } from "@/components/beranda/BerandaData";
 import { HeroPeta } from "@/components/beranda/HeroPeta";
 import { Jejak } from "@/components/beranda/Jejak";
+import { KickerBernomor } from "@/components/beranda/KickerBernomor";
 import { PerbandinganSimpul } from "@/components/beranda/PerbandinganSimpul";
 import { Persamaan } from "@/components/beranda/Persamaan";
 import {
@@ -54,13 +55,21 @@ import {
  * **Putaran kesebelas — komposisi berbeda per section (riset: DESIGN.md
  * Linear/Stripe/Notion/Figma/PostHog, Klim, "Wealth shown to scale", PolicyViz
  * small-multiples, CSS stacked cards).** Prinsip: koherensi di SISTEM kecil
- * yang tetap, variasi di KOMPOSISI. (1) Nomor bab jadi bagian depan kicker
- * (`1 — DUDUK PERKARA`), ukuran persis kicker. (2) Tiap section arketipe
- * BEDA + judul selang-seling kiri/kanan: S1 angka-raksasa (judul kanan), S2
- * foto+overlap DIPERTAHANKAN, S3 kartu staggered + skala bersama (judul
- * kiri), S4 kartu-highlight disandingkan daftar (judul full), S5 tumpukan
- * kartu bergeser (judul kanan). (3) Keluarga kartu `.kartu` — satu sudut
- * tajam, garis-rambut, tanpa bayangan — jadi tanda-tangan yang menyatukan.
+ * yang tetap, variasi di KOMPOSISI. Tiap section arketipe BEDA + judul
+ * selang-seling kiri/kanan: angka-raksasa / foto+overlap / kartu staggered +
+ * skala bersama / kartu-highlight disandingkan daftar / tumpukan kartu
+ * bergeser. Keluarga kartu `.kartu` (garis-rambut, tanpa bayangan) jadi
+ * benang merah yang menyatukan.
+ *
+ * **Putaran kedua belas — refinement:** (1) nomor bab keluar dari pil kicker
+ * & fontnya diperbesar sendiri (`KickerBernomor`). (2) Instrumen (Persamaan)
+ * jadi bab bernomor — seluruh section RENOMOR (1 Duduk / 2 Instrumen / 3 Cara
+ * datanya / 4 Yang sudah dicacah / 5 Dari peta ke keputusan / 6 Untuk siapa).
+ * (3) `.kartu` sudutnya membulat seragam (buang sudut tajam). (4) Kolofon
+ * dilebarkan + dirapatkan ke tengah.
+ *
+ * **Putaran ketiga belas:** nomor bab kehilangan em-dash (cukup angka + pil)
+ * dan fontnya dinaikkan jadi numeral display besar — lihat `KickerBernomor`.
  */
 
 /** Kicker section — chip pil polos, tanpa nomor urut kecil (nomor hidup di
@@ -115,18 +124,13 @@ function Judul({ children }: { children: ReactNode }) {
 }
 
 /**
- * Kepala bab — kicker (bernomor) + judul + garis-rambut.
+ * Kepala bab — kicker bernomor + judul + garis-rambut.
  *
- * Riwayat nomor bab: putaran 9 numeral raksasa PUDAR di belakang judul
- * (ditolak); putaran 10 numeral SOLID raksasa sebaris judul (ditolak juga —
- * "kelewat besar, tidak setara tulisan section-nya"). Putaran 11: nomor jadi
- * bagian DEPAN teks kicker (`1 — DUDUK PERKARA`) — ukuran/berat/warna persis
- * kicker karena LITERAL bagian darinya. Konvensi masthead editorial (Stripe
- * Press, It's Nice That).
- *
- * Dipakai full-width (S2, S4) ATAU sebagai satu kolom grid yang berselang-
- * seling kiri/kanan (S1 kanan, S3 kiri, S5 kanan). Garis-rambut ikut lebar
- * wadahnya — di kolom sempit itu disengaja (gaya Klim).
+ * Nomor bab hidup di `KickerBernomor` (putaran 12: angka di LUAR pil kicker,
+ * fontnya diperbesar sendiri). `KepalaBab` tinggal menyusun kicker → judul →
+ * garis-rambut. Dipakai full-width (bab 3 & 5) ATAU sebagai satu kolom grid
+ * yang berselang-seling kiri/kanan (bab 1 kanan, 4 kiri, 6 kanan). Garis-
+ * rambut ikut lebar wadahnya — di kolom sempit itu disengaja (gaya Klim).
  */
 function KepalaBab({
   n,
@@ -139,7 +143,7 @@ function KepalaBab({
 }) {
   return (
     <div style={{ marginBottom: "var(--s4)" }}>
-      <Lencana label={`${n} — ${kicker}`} />
+      <KickerBernomor n={n} kicker={kicker} />
       <div style={{ marginTop: "var(--s2)" }}>
         <Judul>{judul}</Judul>
       </div>
@@ -320,7 +324,7 @@ export default function BerandaPage() {
             RAKSASA + catatan tepi. Angka yang KAMI ukur (`Rp 2,9 jt`) berdiri
             raksasa di KIRI; judul + kicker di KANAN. Dua fakta KAI yang cuma
             DIKUTIP mengecil jadi catatan di bawah angka raksasa. (Judul KANAN
-            — awal ritme selang-seling S1-kanan/S3-kiri/S5-kanan.)
+            — awal ritme selang-seling: bab 1 kanan, bab 4 kiri, bab 6 kanan.)
             ================================================================ */}
         <section className="reveal" style={{ background: "var(--tile-sky)" }}>
           <div
@@ -349,21 +353,21 @@ export default function BerandaPage() {
         </section>
 
         {/* ================================================================
-            Persamaan — band tinta. Putaran 9 hanya mengganti teks eyebrow-nya
-            ("03 — Instrumen" → "Instrumen"): angka "03" itu sisa skema
-            penomoran putaran 6, dan sekarang bentrok dengan numeral `03` bab
-            "Yang sudah dicacah". Isi & tata letak band tetap.
+            2 · Instrumen (Persamaan) — band tinta. Putaran 12: user minta
+            Instrumen diperlakukan sebagai section penuh, jadi dapat nomor
+            (`2 —`) seperti bab lain — nomornya ada DI DALAM `Persamaan.tsx`
+            lewat `KickerBernomor`. Isi & tata letak band F×E×C×V tetap.
             ================================================================ */}
         <div className="reveal">
           <Persamaan />
         </div>
 
         {/* ================================================================
-            2 · Cara datanya dikumpulkan — full-bleed `--field-wash`. Putaran
-            10: header selebar section (KepalaBab, seperti section lain), lalu
-            badan tetap DUA KOLOM — satu-satunya section yang badannya dua
-            kolom: foto letterbox + kartu angka overlap di KIRI (tak berubah
-            dari putaran 9), dua paragraf di KANAN.
+            3 · Cara datanya dikumpulkan — full-bleed `--field-wash`. Header
+            selebar section, lalu badan DUA KOLOM — satu-satunya section yang
+            badannya dua kolom: foto letterbox + kartu angka overlap di KIRI,
+            dua paragraf di KANAN. (Putaran 12: Instrumen jadi bab 2, jadi
+            section ini bab 3.)
             ================================================================ */}
         <section className="reveal" style={{ background: "var(--field-wash)" }}>
           <div
@@ -371,7 +375,7 @@ export default function BerandaPage() {
             style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
           >
             <KepalaBab
-              n={2}
+              n={3}
               kicker="Cara datanya dikumpulkan"
               judul="Dua pasang mata, lalu satu mesin pembaca."
             />
@@ -399,8 +403,8 @@ export default function BerandaPage() {
                 {/* ~separuh keluar dari sudut kanan-bawah foto. Angka lapangan
                    dipisah garis-rambut: pembungkus grid berlatar `--rule`,
                    tiap sel berlatar `--surface`, `gap: 1px` yang menyingkap
-                   garis di antaranya. `.kartu` = satu sudut tajam + garis-
-                   rambut + tanpa bayangan (keluarga kartu Beranda). */}
+                   garis di antaranya. `.kartu` = garis-rambut + sudut membulat
+                   seragam, tanpa bayangan (keluarga kartu Beranda). */}
                 <div
                   className="kartu"
                   style={{
@@ -488,7 +492,7 @@ export default function BerandaPage() {
         </section>
 
         {/* ================================================================
-            3 · Yang sudah dicacah — full-bleed `--tile-mint`. Arketipe: KARTU
+            4 · Yang sudah dicacah — full-bleed `--tile-mint`. Arketipe: KARTU
             STAGGERED + skala bersama. Judul di KIRI (selang-seling), tiga
             kartu tinggi-berbeda di KANAN — tiap kartu batang rentang mini
             pada SATU skala yang dicetak sekali di atasnya (`PerbandinganSimpul`).
@@ -510,7 +514,7 @@ export default function BerandaPage() {
             >
               <div>
                 <KepalaBab
-                  n={3}
+                  n={4}
                   kicker="Yang sudah dicacah"
                   judul="Tiga simpul, tiga tipe kawasan."
                 />
@@ -543,7 +547,7 @@ export default function BerandaPage() {
         </section>
 
         {/* ================================================================
-            4 · Dari peta ke keputusan — full-bleed `--tile-violet`. Arketipe:
+            5 · Dari peta ke keputusan — full-bleed `--tile-violet`. Arketipe:
             LIST + HIGHLIGHT SPLIT. Header selebar section, lalu badan dua
             kolom — KARTU emas "1 hari kerja" di KIRI (satu-satunya elemen
             ber-isi penuh di halaman) DISANDINGKAN dengan daftar 3 keputusan
@@ -555,7 +559,7 @@ export default function BerandaPage() {
             style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
           >
             <KepalaBab
-              n={4}
+              n={5}
               kicker="Keputusan yang bisa diambil"
               judul="Dari peta ke keputusan sewa."
             />
@@ -665,11 +669,11 @@ export default function BerandaPage() {
         </section>
 
         {/* ================================================================
-            5 · Untuk siapa — full-bleed `--tile-rose`. Arketipe: TUMPUKAN
-            KARTU BERGESER. Isi di KIRI (selang-seling: S5-kanan judul), judul
-            di KANAN. Tiga kartu keluarga (`.kartu`, satu sudut tajam) bergeser
-            diagonal — tiap kartu turun + geser kanan, sebagian saling menimpa
-            di SUDUT (yang tertimpa cuma padding, teks tetap terbaca penuh).
+            6 · Untuk siapa — full-bleed `--tile-rose`. Arketipe: TUMPUKAN
+            KARTU BERGESER. Isi di KIRI (selang-seling: judul di KANAN). Tiga
+            kartu keluarga (`.kartu`) bergeser diagonal — tiap kartu turun +
+            geser kanan, sebagian saling menimpa di SUDUT (yang tertimpa cuma
+            padding, teks tetap terbaca penuh).
             ================================================================ */}
         <section className="reveal" style={{ background: "var(--tile-rose)" }}>
           <div
@@ -724,7 +728,7 @@ export default function BerandaPage() {
               </div>
 
               <KepalaBab
-                n={5}
+                n={6}
                 kicker="Untuk siapa"
                 judul="Tiga kelompok yang datanya kami buka bagi."
               />
@@ -733,35 +737,48 @@ export default function BerandaPage() {
         </section>
 
         {/* ================================================================
-            Kolofon — satu ubin lebar netral (bukan pastel: bagian kejujuran/
-            keterbatasan ini sengaja beda nada dari bento yang playful di
-            section lain). `paddingTop` ditambah putaran 9 — sebelumnya 0,
-            jadi panel `--paper-2` menempel persis di batas bawah band rose
-            "Untuk siapa" tanpa ruang `--paper` di antaranya.
+            Kolofon — satu panel lebar netral (bukan pastel: bagian kejujuran/
+            keterbatasan ini sengaja beda nada dari section lain). Putaran 12:
+            panel DILEBARKAN (`maxWidth` 760 → 1040) dan tiga disclaimer
+            dijadikan BARIS 3 KOLOM, semua rata tengah — supaya section tidak
+            memanjang tinggi ke bawah.
             ================================================================ */}
         <section
           className="wrap reveal"
           style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
         >
-          <div className="bento-panel" style={{ maxWidth: 760, margin: "0 auto" }}>
+          <div
+            className="bento-panel"
+            style={{ maxWidth: 1040, margin: "0 auto", textAlign: "center" }}
+          >
             <div
               style={{ marginBottom: "var(--s3)", display: "flex", justifyContent: "center" }}
             >
               <Lencana label="Yang kami nyatakan terbuka" />
             </div>
             <div
+              className="measure"
               style={{
                 font: "500 clamp(19px, 1.9vw, 25px)/1.5 var(--font-inter), system-ui, sans-serif",
                 letterSpacing: "-0.01em",
                 color: "var(--ink-2)",
-                textAlign: "center",
-                margin: "0 0 var(--s5)",
+                margin: "0 auto",
               }}
             >
               Estimasi potensi bukan proyeksi pendapatan yang pasti. Biaya
               operasi dan risiko usaha tidak diperhitungkan di dalamnya.
             </div>
-            <div className="measure-narrow" style={{ margin: "0 auto" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                gap: "var(--s4)",
+                borderTop: "1px solid var(--rule)",
+                marginTop: "var(--s5)",
+                paddingTop: "var(--s4)",
+                textAlign: "left",
+              }}
+            >
               {[
                 "Tiga stasiun berarti hasilnya indikatif; seluruh pengujian bersifat kalibrasi, bukan pembuktian.",
                 "Kawasan dengan sampel tipis ditandai dan tidak diberi estimasi — bukan dibaca sebagai nol.",
@@ -771,24 +788,22 @@ export default function BerandaPage() {
                   key={t}
                   style={{
                     margin: 0,
-                    padding: "var(--s3) 0",
-                    borderTop: "1px solid var(--rule)",
                     fontSize: "var(--t-small)",
-                    lineHeight: 1.7,
+                    lineHeight: 1.65,
                     color: "var(--ink-2)",
                   }}
                 >
                   {t}
                 </p>
               ))}
-              <div style={{ paddingTop: "var(--s3)" }}>
-                <Link
-                  href="/metodologi"
-                  style={{ fontSize: "var(--t-small)", fontWeight: 600, color: "var(--data)" }}
-                >
-                  Baca keterbatasan lengkap →
-                </Link>
-              </div>
+            </div>
+            <div style={{ marginTop: "var(--s4)" }}>
+              <Link
+                href="/metodologi"
+                style={{ fontSize: "var(--t-small)", fontWeight: 600, color: "var(--data)" }}
+              >
+                Baca keterbatasan lengkap →
+              </Link>
             </div>
           </div>
         </section>

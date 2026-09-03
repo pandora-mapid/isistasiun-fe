@@ -613,16 +613,16 @@ a.card:focus-visible {
   transform: translateY(-3px);
 }
 
-/* Keluarga kartu "kreatif" Beranda (putaran 11) — kartu overlap hero &
-   Section 2, kartu staggered Section 3, kartu highlight Section 4, tumpukan
-   kartu Section 5. Rata + garis-rambut + SATU sudut tajam (kiri-bawah)
-   sebagai tanda-tangan halaman — membedakannya dari kotak rounded biasa.
-   TANPA bayangan (sistem kertas-hangat: garis 1px, bukan elevasi). Komponen
-   menambah `background`/`padding` sendiri. */
+/* Keluarga kartu "kreatif" Beranda — kartu overlap hero & bab 3, kartu
+   staggered bab 4, kartu highlight bab 5, tumpukan kartu bab 6. Rata +
+   garis-rambut + sudut membulat SERAGAM `--r-md` (putaran 11 sempat pakai
+   satu sudut tajam; putaran 12 user minta semua sudut sama). TANPA bayangan
+   (sistem kertas-hangat: garis 1px, bukan elevasi). Komponen menambah
+   `background`/`padding` sendiri. */
 .kartu {
   background: var(--surface);
   border: 1px solid var(--rule);
-  border-radius: var(--r-md) var(--r-md) var(--r-md) 0;
+  border-radius: var(--r-md);
   transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 a.kartu:hover,

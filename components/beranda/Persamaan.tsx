@@ -10,10 +10,15 @@
  *
  * Bentuk persamaan mengembalikan hubungan itu, dan angkanya diambil dari satu
  * titik pada satu slot yang benar-benar dicacah — bukan rata-rata karangan.
+ *
+ * Putaran 12: kicker "Instrumen" jadi `<KickerBernomor n={2}>` — user minta
+ * band ini diperlakukan sebagai bab bernomor seperti section lain. `--ink-faint`
+ * pada angka otomatis jadi warna terang di `.ink-band`.
  */
 
 import { persen, ribuan, rupiah } from "@/lib/format";
 import { useBeranda } from "./BerandaData";
+import { KickerBernomor } from "./KickerBernomor";
 
 type Suku = {
   huruf: string;
@@ -70,12 +75,9 @@ export function Persamaan() {
           style={{ rowGap: "var(--s4)", alignItems: "start" }}
         >
           <div style={{ gridColumn: "span 4" }}>
-            <span
-              className="eyebrow-chip eyebrow"
-              style={{ marginBottom: "var(--s2)", display: "inline-flex" }}
-            >
-              Instrumen
-            </span>
+            <div style={{ marginBottom: "var(--s2)" }}>
+              <KickerBernomor n={2} kicker="Instrumen" />
+            </div>
             <h2
               style={{
                 font: `800 var(--t-h2)/1.06 var(--font-inter), system-ui, sans-serif`,

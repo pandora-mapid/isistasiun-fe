@@ -13,11 +13,11 @@
  * jangkar utama dan peta jadi pendukung. Putaran 10 menaruh kartu sorotan
  * INSET di dalam peta; user minta ia mengikuti model kartu overlap Section 2.
  * Putaran 11: kartu sorotan MENGGANTUNG ~separuh keluar sudut kanan-bawah
- * peta, gaya sel garis-rambut + satu sudut tajam (kelas `.kartu`) — persis
- * seperti kartu angka lapangan di Section 2. Sudut kanvas MapLibre tetap
- * dipaksa membulat lewat `isolation: isolate` + prop `borderRadius` ke
- * `MapCanvas`. (Bukan lagi gigitan organik/badge cincin — itu ornamen putaran
- * 5 yang sudah dibuang putaran 6 dan tidak dikembalikan.)
+ * peta, gaya sel garis-rambut (kelas `.kartu`) — persis seperti kartu angka
+ * lapangan di bab 3. Sudut kanvas MapLibre tetap dipaksa membulat lewat
+ * `isolation: isolate` + prop `borderRadius` ke `MapCanvas`. (Bukan lagi
+ * gigitan organik/badge cincin — itu ornamen putaran 5 yang sudah dibuang
+ * putaran 6 dan tidak dikembalikan.)
  *
  * `HeroPeta` sekarang mengembalikan **satu blok**, bukan fragment dua ubin
  * grid — `page.tsx` menaruhnya langsung sebagai kolom kanan sebuah grid dua
