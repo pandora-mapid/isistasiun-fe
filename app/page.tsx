@@ -133,18 +133,22 @@ function Judul({ children }: { children: ReactNode }) {
  * rambut ikut lebar wadahnya — di kolom sempit itu disengaja (gaya Klim).
  *
  * `align="right"` (bab 1) merata-kanankan kicker + judul; garis-rambut tetap
- * selebar wadah.
+ * selebar wadah. `halfRule` (bab 5) memotong garis-rambut jadi setengah kiri
+ * saja — di sisi kanan yang bebas garis, section itu menaikkan kartunya
+ * supaya mulai sejajar garis, bukan di bawahnya.
  */
 function KepalaBab({
   n,
   kicker,
   judul,
   align = "left",
+  halfRule = false,
 }: {
   n: number;
   kicker: string;
   judul: ReactNode;
   align?: "left" | "right";
+  halfRule?: boolean;
 }) {
   return (
     <div style={{ marginBottom: "var(--s4)" }}>
@@ -153,7 +157,15 @@ function KepalaBab({
         <Judul>{judul}</Judul>
       </div>
       <div
-        style={{ marginTop: "var(--s3)", borderBottom: "1px solid var(--rule)" }}
+        style={{
+          marginTop: "var(--s3)",
+          borderBottom: "1px solid var(--rule)",
+          // Setengah kiri: berhenti persis di tepi kolom pertama grid `1fr 1fr`
+          // yang gap-nya `--s5`.
+          ...(halfRule
+            ? { width: "calc(50% - var(--s5) / 2)" }
+            : null),
+        }}
       />
     </div>
   );
@@ -319,7 +331,7 @@ export default function BerandaPage() {
               color: "var(--ink-faint)",
             }}
           >
-            Setiap angka adalah rentang, bukan satu titik — dan setiap
+            Setiap angka adalah rentang, bukan satu titik, dan setiap
             rentang dapat ditelusuri sampai ke foto aslinya.
           </p>
         </section>
@@ -371,10 +383,13 @@ export default function BerandaPage() {
 
         {/* ================================================================
             3 · Cara datanya dikumpulkan — full-bleed `--field-wash`. Header
-            selebar section, lalu badan DUA KOLOM — satu-satunya section yang
-            badannya dua kolom: foto letterbox + kartu angka overlap di KIRI,
-            dua paragraf di KANAN. (Putaran 12: Instrumen jadi bab 2, jadi
-            section ini bab 3.)
+            selebar section, lalu badan DUA KOLOM (satu-satunya section yang
+            badannya dua kolom): foto letterbox (`5/2`, sengaja pendek) + kartu
+            angka overlap di KIRI; dua paragraf + garis-rambut + tautan ke
+            Metodologi di KANAN. Kartu angka memanjang menyamping (`repeat(4,
+            auto)`, label `nowrap`). Tak ada em-dash di teks. Tinggi kedua kolom
+            di 1440 kira-kira imbang. (Putaran 12: Instrumen jadi bab 2, section
+            ini bab 3.)
             ================================================================ */}
         <section className="reveal" style={{ background: "var(--field-wash)" }}>
           <div
@@ -401,7 +416,9 @@ export default function BerandaPage() {
                   style={{
                     padding: 0,
                     overflow: "hidden",
-                    aspectRatio: "16 / 7",
+                    // Letterbox lebar: kolom kanan isinya ringkas, jadi foto
+                    // dibikin pendek supaya kedua kolom kira-kira sama tinggi.
+                    aspectRatio: "5 / 2",
                   }}
                 >
                   <ImagePlaceholder label="Foto pencacahan di pintu stasiun · identitas diredaksi" />
@@ -411,14 +428,19 @@ export default function BerandaPage() {
                    dipisah garis-rambut: pembungkus grid berlatar `--rule`,
                    tiap sel berlatar `--surface`, `gap: 1px` yang menyingkap
                    garis di antaranya. `.kartu` = garis-rambut + sudut membulat
-                   seragam, tanpa bayangan (keluarga kartu Beranda). */}
+                   seragam, tanpa bayangan (keluarga kartu Beranda).
+
+                   `repeat(4, auto)` + `width: max-content` + label `nowrap`:
+                   tiap sel selebar isinya, kartu memanjang menyamping, tak ada
+                   label yang pecah ke bawah (dulu "menit / per / blok"). */}
                 <div
                   className="kartu"
                   style={{
                     position: "absolute",
                     right: -28,
                     bottom: -32,
-                    width: "min(360px, 82%)",
+                    width: "max-content",
+                    maxWidth: "min(94%, 560px)",
                     padding: 0,
                     overflow: "hidden",
                   }}
@@ -426,7 +448,7 @@ export default function BerandaPage() {
                   <div
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "repeat(4, 1fr)",
+                      gridTemplateColumns: "repeat(4, auto)",
                       gap: "1px",
                       background: "var(--rule)",
                     }}
@@ -456,6 +478,7 @@ export default function BerandaPage() {
                             fontSize: "var(--t-micro)",
                             lineHeight: 1.35,
                             color: "var(--ink-muted)",
+                            whiteSpace: "nowrap",
                           }}
                         >
                           {t}
@@ -466,7 +489,11 @@ export default function BerandaPage() {
                 </div>
               </div>
 
-              {/* KANAN — dua paragraf (teks tak berubah). */}
+              {/* KANAN — dua paragraf, ditutup garis-rambut + tautan ke
+                 halaman Metodologi (pola tautan-penutup yang sama dipakai
+                 bab 4 & 5). Tak ada "asset" tempelan: kolom ini pendek karena
+                 isinya memang ringkas, dan foto di kiri dibikin seletterbox
+                 mungkin (`aspectRatio` lebar) supaya tingginya berimbang. */}
               <div>
                 <p
                   style={{
@@ -479,7 +506,7 @@ export default function BerandaPage() {
                   Dua pencacah berdiri di garis pengamatan tiap pintu selama
                   blok menerus 15 menit. Foto struk dari gerai yang bersedia
                   kemudian dibaca ulang oleh AI, dengan aturan yang ditetapkan
-                  sebelum survei dimulai — bukan sesudah datanya terlihat.
+                  sebelum survei dimulai, bukan sesudah datanya terlihat.
                 </p>
                 <p
                   style={{
@@ -493,6 +520,25 @@ export default function BerandaPage() {
                   Kalau setelah diulang tetap berselisih, slot itu tidak
                   dipakai sama sekali.
                 </p>
+                <div
+                  style={{
+                    marginTop: "var(--s4)",
+                    borderTop: "1px solid var(--rule)",
+                    paddingTop: "var(--s3)",
+                    textAlign: "right",
+                  }}
+                >
+                  <Link
+                    href="/metodologi"
+                    style={{
+                      fontSize: "var(--t-small)",
+                      fontWeight: 600,
+                      color: "var(--field)",
+                    }}
+                  >
+                    Aturan pembacaan dan protokol lengkap di Metodologi →
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -527,14 +573,17 @@ export default function BerandaPage() {
                 />
                 <p
                   style={{
-                    margin: "0 0 var(--s3)",
+                    // `KepalaBab` memberi jarak `--s4` di bawah garis-rambutnya;
+                    // di sini disamakan dengan jarak judul→garis (`--s3`) dengan
+                    // menarik naik selisihnya.
+                    margin: "calc(var(--s3) - var(--s4)) 0 var(--s3)",
                     fontSize: "var(--t-small)",
                     lineHeight: 1.6,
                     color: "var(--ink-2)",
                     maxWidth: "36ch",
                   }}
                 >
-                  Ketiga batang memakai skala rupiah yang sama — makin ke
+                  Ketiga batang memakai skala rupiah yang sama, makin ke
                   kanan, makin besar kesenjangannya. Garis tebal = median.
                 </p>
                 <Link
@@ -556,9 +605,12 @@ export default function BerandaPage() {
         {/* ================================================================
             5 · Dari peta ke keputusan — full-bleed `--tile-violet`. Arketipe:
             LIST + HIGHLIGHT SPLIT. Header selebar section, lalu badan dua
-            kolom — KARTU emas "1 hari kerja" di KIRI (satu-satunya elemen
-            ber-isi penuh di halaman) DISANDINGKAN dengan daftar 3 keputusan
-            bernomor di KANAN.
+            kolom — daftar 3 keputusan bernomor di KIRI, KARTU emas "1 hari
+            kerja" (satu-satunya elemen ber-isi penuh di halaman) di KANAN.
+            Kartunya dibesarkan jadi `1fr` (dulu `0.62fr` di kiri) dengan
+            rincian "yang termuat" + kalimat penutup yang menautkan ke ketiga
+            keputusan, supaya kanan tidak melompong. (Sempat dicoba SELURUH
+            section rata-kanan seperti bab 1 lalu dibatalkan user.)
             ================================================================ */}
         <section className="reveal" style={{ background: "var(--tile-violet)" }}>
           <div
@@ -567,66 +619,31 @@ export default function BerandaPage() {
           >
             <KepalaBab
               n={5}
+              halfRule
               kicker="Keputusan yang bisa diambil"
               judul="Dari peta ke keputusan sewa."
             />
 
+            {/* Kolom ditukar (user): daftar keputusan di KIRI, kartu highlight
+               di KANAN. Kartunya kolom `0.62fr` — cukup sempit supaya baris-
+               baris pendek di dalamnya tidak menyisakan ruang kosong lebar di
+               sisi kanan (sempat `1fr`, terlalu lebar untuk isinya). */}
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "minmax(0, 0.62fr) minmax(0, 1fr)",
+                gridTemplateColumns: "minmax(0, 1fr) minmax(0, 0.62fr)",
                 gap: "var(--s5)",
                 alignItems: "start",
               }}
             >
-              {/* KIRI — kartu highlight "1 hari kerja". */}
-              <div
-                className="kartu"
-                style={{
-                  background: "var(--brand-wash)",
-                  padding: "var(--s4)",
-                  alignSelf: "start",
-                  marginTop: 4,
-                }}
-              >
-                <span
-                  className="fig"
-                  style={{
-                    font: "700 clamp(48px, 7vw, 80px)/1 var(--font-mono), ui-monospace, monospace",
-                    letterSpacing: "-0.04em",
-                    color: "var(--brand-strong)",
-                  }}
-                >
-                  1
-                </span>
-                <div style={{ marginTop: 6, fontSize: "var(--t-body)", fontWeight: 700 }}>
-                  hari kerja
-                </div>
-                <p
-                  style={{
-                    margin: "var(--s2) 0 var(--s3)",
-                    fontSize: "var(--t-small)",
-                    lineHeight: 1.6,
-                    color: "var(--ink-2)",
-                  }}
-                >
-                  waktu satu tim mencacah satu simpul dan menghasilkan brief
-                  seperti yang ada di halaman peta.
-                </p>
-                <Link
-                  href="/peta"
-                  style={{
-                    fontSize: "var(--t-small)",
-                    fontWeight: 600,
-                    color: "var(--data)",
-                  }}
-                >
-                  Lihat contoh brief →
-                </Link>
-              </div>
-
-              {/* KANAN — 3 keputusan, nomor mono menggantung di selokan baris. */}
-              <div>
+              {/* KIRI — 3 keputusan, nomor mono menggantung di selokan baris.
+                 Padding baris `--s4` (dulu `--s3`): daftar dibuat lebih lega
+                 supaya tingginya mendekati kartu highlight yang kini besar.
+                 Ditarik naik `-(--s5 - --s2)` — sama dengan padding-atas baris
+                 pertama — supaya jarak garis-rambut → baris pertama tetap
+                 `--s4` (sama seperti bab lain), sementara padding baris yang
+                 lega bikin daftarnya setinggi kartu highlight di kanan. */}
+              <div style={{ marginTop: "calc((var(--s5) - var(--s2)) * -1)" }}>
                 {KEPUTUSAN.map((k, i) => (
                   <div
                     key={k.judul}
@@ -634,7 +651,7 @@ export default function BerandaPage() {
                       display: "grid",
                       gridTemplateColumns: "2.5ch 1fr",
                       gap: "var(--s3)",
-                      padding: "var(--s3) 0",
+                      padding: "calc(var(--s5) - var(--s2)) 0",
                       borderTop:
                         i === 0 ? undefined : "1px solid var(--rule)",
                       borderBottom:
@@ -670,6 +687,140 @@ export default function BerandaPage() {
                     </div>
                   </div>
                 ))}
+                <p
+                  style={{
+                    margin: "var(--s3) 0 0",
+                    fontSize: "var(--t-small)",
+                    lineHeight: 1.6,
+                    color: "var(--ink-muted)",
+                  }}
+                >
+                  Ketiganya keluar dari satu brief per pintu yang sama.
+                </p>
+              </div>
+
+              {/* KANAN — kartu highlight "1 hari kerja". Ditarik naik
+                 `-(--s5 + --s4)` supaya tepi ATASnya sejajar JUDUL (bukan cuma
+                 garis-rambut), dan isinya cukup untuk membentang sampai kira-
+                 kira sejajar dasar daftar di kiri. Garis-rambut KepalaBab di
+                 sisi ini memang dipotong (`halfRule`). */}
+              <div
+                className="kartu"
+                style={{
+                  background: "var(--brand-wash)",
+                  padding: "var(--s4)",
+                  alignSelf: "start",
+                  marginTop: "calc((var(--s5) + var(--s4)) * -1)",
+                }}
+              >
+                {/* "1" raksasa + "hari kerja" sebesar sub-judul di sampingnya,
+                   sejajar garis-dasar — dibaca sebagai satu satuan. */}
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    gap: "var(--s3)",
+                  }}
+                >
+                  <span
+                    className="fig"
+                    style={{
+                      font: "700 clamp(80px, 11vw, 128px)/0.85 var(--font-mono), ui-monospace, monospace",
+                      letterSpacing: "-0.05em",
+                      color: "var(--brand-strong)",
+                    }}
+                  >
+                    1
+                  </span>
+                  <span
+                    className="fig"
+                    style={{
+                      fontSize: "clamp(20px, 2.6vw, 32px)",
+                      fontWeight: 400,
+                      color: "var(--ink)",
+                    }}
+                  >
+                    hari kerja
+                  </span>
+                </div>
+                <p
+                  style={{
+                    margin: "var(--s3) 0 0",
+                    fontSize: "var(--t-small)",
+                    lineHeight: 1.6,
+                    color: "var(--ink-2)",
+                  }}
+                >
+                  Satu tim mencacah satu simpul, lalu menyusun brief-nya.
+                </p>
+
+                {/* Dua daftar sejajar: apa yang MASUK (`--field`, kerja
+                   lapangan) dan apa yang KELUAR (`--data`, isi brief). */}
+                {[
+                  {
+                    warna: "var(--field)",
+                    label: "Yang termuat",
+                    items: [
+                      "empat blok cacah 15 menit di tiap pintu",
+                      "foto struk dari gerai yang bersedia",
+                      "satu pembacaan mesin, aturan ditetapkan lebih dulu",
+                    ],
+                  },
+                  {
+                    warna: "var(--data)",
+                    label: "Hasilnya",
+                    items: [
+                      "peta kesenjangan belanja per pintu",
+                      "rincian F × E × C × V tiap slot",
+                      "rentang P10–P90, bukan satu titik",
+                    ],
+                  },
+                ].map(({ warna, label, items }) => (
+                  <div key={label} style={{ marginTop: "var(--s3)" }}>
+                    <div
+                      className="eyebrow"
+                      style={{ color: warna, marginBottom: "6px" }}
+                    >
+                      {label}
+                    </div>
+                    {items.map((t) => (
+                      <div
+                        key={t}
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "1ch 1fr",
+                          gap: "var(--s2)",
+                          padding: "4px 0",
+                          fontSize: "var(--t-small)",
+                          lineHeight: 1.45,
+                          color: "var(--ink-2)",
+                        }}
+                      >
+                        <span style={{ color: warna }}>–</span>
+                        <span>{t}</span>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+
+                <div
+                  style={{
+                    marginTop: "var(--s4)",
+                    paddingTop: "var(--s3)",
+                    borderTop: "1px solid var(--rule)",
+                  }}
+                >
+                  <Link
+                    href="/peta"
+                    style={{
+                      fontSize: "var(--t-small)",
+                      fontWeight: 600,
+                      color: "var(--data)",
+                    }}
+                  >
+                    Lihat contoh brief →
+                  </Link>
+                </div>
               </div>
             </div>
           </div>

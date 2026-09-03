@@ -35,7 +35,7 @@ const KUTIPAN: Kutipan[] = [
   {
     nilai: "96%",
     keterangan:
-      "pendapatan KAI berasal dari operasi kereta — hanya 4% datang dari luar tiket",
+      "pendapatan KAI berasal dari operasi kereta, hanya 4% datang dari luar tiket",
     sumber: "pernyataan Direktur Utama, Juli 2026",
   },
   {
@@ -66,15 +66,15 @@ export function RelStatistikAngka() {
   const gap = sorotan?.metric.gap ?? null;
   const angka = gap ? rupiahRingkas(gap.p50) : "—";
   const keterangan = sorotan
-    ? `median kesenjangan belanja harian di ${sorotan.namaTitik}, ${sorotan.namaStasiun} — pintu terbesar yang kami cacah`
+    ? `median kesenjangan belanja harian di ${sorotan.namaTitik}, ${sorotan.namaStasiun}. Pintu terbesar yang kami cacah`
     : "median kesenjangan belanja harian pada pintu terbesar yang kami cacah";
 
   const posisi =
     gap &&
-    gap.p10 !== null &&
-    gap.p50 !== null &&
-    gap.p90 !== null &&
-    gap.p90 > gap.p10
+      gap.p10 !== null &&
+      gap.p50 !== null &&
+      gap.p90 !== null &&
+      gap.p90 > gap.p10
       ? (gap.p50 - gap.p10) / (gap.p90 - gap.p10)
       : null;
 

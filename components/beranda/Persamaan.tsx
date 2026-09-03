@@ -11,9 +11,15 @@
  * Bentuk persamaan mengembalikan hubungan itu, dan angkanya diambil dari satu
  * titik pada satu slot yang benar-benar dicacah — bukan rata-rata karangan.
  *
- * Putaran 12: kicker "Instrumen" jadi `<KickerBernomor n={2}>` — user minta
- * band ini diperlakukan sebagai bab bernomor seperti section lain. `--ink-faint`
- * pada angka otomatis jadi warna terang di `.ink-band`.
+ * Putaran 12: kicker "Instrumen" jadi `<KickerBernomor n={2}>`; band ini
+ * diperlakukan sebagai bab bernomor. `--ink-faint` pada angka otomatis jadi
+ * warna terang di `.ink-band`.
+ *
+ * Putaran berikut: kepala bab jadi baris flex (bukan `.g12`) supaya judul
+ * "Empat variabel, satu instrumen." bisa `nowrap` selebar isinya. Paragraf
+ * pengantar dipersingkat, RATA-KANAN (`margin-left: auto` + `text-align:
+ * right`, menempel tepi band), dan ditulis kalimat biasa saja — tanpa em-dash,
+ * titik-dua, atau titik-koma (permintaan user).
  */
 
 import { persen, ribuan, rupiah } from "@/lib/format";
@@ -29,7 +35,8 @@ type Suku = {
   satuan?: string;
 };
 
-const KOSONG = "—";
+/** Ditampilkan kalau nilai contoh belum termuat. Bukan em-dash. */
+const KOSONG = "–";
 
 export function Persamaan() {
   const { contohVariabel } = useBeranda();
@@ -70,12 +77,19 @@ export function Persamaan() {
   return (
     <section className="ink-band" style={{ padding: "var(--s6) 0" }}>
       <div className="wrap">
+        {/* Baris flex, bukan `.g12`: blok judul `flex: 0 0 auto` supaya <h2>
+            `nowrap` menentukan lebarnya sendiri; paragraf mengambil sisa dan
+            `flex-wrap` menjatuhkannya ke bawah kalau ruang tak cukup. */}
         <div
-          className="g12"
-          style={{ rowGap: "var(--s4)", alignItems: "start" }}
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "var(--s5)",
+            flexWrap: "wrap",
+          }}
         >
-          <div style={{ gridColumn: "span 4" }}>
-            <div style={{ marginBottom: "var(--s2)" }}>
+          <div style={{ flex: "0 0 auto" }}>
+            <div style={{ marginBottom: "var(--s3)" }}>
               <KickerBernomor n={2} kicker="Instrumen" />
             </div>
             <h2
@@ -83,25 +97,26 @@ export function Persamaan() {
                 font: `800 var(--t-h2)/1.06 var(--font-inter), system-ui, sans-serif`,
                 letterSpacing: "-0.02em",
                 margin: 0,
+                whiteSpace: "nowrap",
               }}
             >
               Empat variabel, satu instrumen.
             </h2>
           </div>
           <p
-            className="measure"
             style={{
-              gridColumn: "6 / span 6",
-              margin: 0,
+              flex: "1 1 340px",
+              maxWidth: "44ch",
+              margin: "0 0 0 auto",
               fontSize: "var(--t-lead)",
               lineHeight: 1.6,
               color: "var(--ink-muted)",
+              textAlign: "right",
             }}
           >
-            Tiga yang pertama tidak ada di dataset mana pun — ketiganya dicacah
-            sendiri di lapangan. Yang keempat dibaca mesin dari foto struk.
-            Kesenjangan tidak pernah diukur langsung; ia keluar dari perkalian
-            keempatnya.
+            Tiga variabel pertama tidak terdapat di dataset mana pun, kami
+            cacah sendiri. Yang keempat dibaca mesin dari struk. Dari situ didapatkanlah kesenjangan
+            dari perkaliannya, tak pernah diukur langsung.
           </p>
         </div>
 
@@ -113,7 +128,9 @@ export function Persamaan() {
             display: "grid",
             gridTemplateColumns: "repeat(4, 1fr)",
             gap: "var(--s3)",
-            marginTop: "var(--s6)",
+            // Sengaja lebih lega (`--s5`) dari jarak kicker→judul (`--s3`) di
+            // atas — dua jeda itu tidak boleh sama besar.
+            marginTop: "var(--s5)",
           }}
         >
           {suku.map((s, i) => (

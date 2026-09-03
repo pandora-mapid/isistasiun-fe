@@ -424,6 +424,13 @@ h3 {
   background: var(--paper);
   color: var(--ink);
 
+  /* `display: flow-root` menahan margin-atas NavBar (`--nav-margin`, ~24px)
+     supaya TIDAK bocor keluar lewat margin-collapsing dan menyingkap latar
+     `body` yang abu-abu dingin. Tanpa ini ada pita abu tipis di atas nav yang
+     bentrok dengan kertas hangat. Nav tetap mengambang — jaraknya kini
+     diwarnai `--paper`, bukan dihapus. */
+  display: flow-root;
+
   /* Navigasi ikut nada kertas — komponennya sendiri tidak diubah. */
   --nav-brand-bg: var(--ink);
   --nav-brand-fg: var(--paper);
