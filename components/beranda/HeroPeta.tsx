@@ -12,12 +12,16 @@
  * (kolom teks kini lebih lebar, `TINGGI_MIN` turun) supaya tipografi jadi
  * jangkar utama dan peta jadi pendukung. Putaran 10 menaruh kartu sorotan
  * INSET di dalam peta; user minta ia mengikuti model kartu overlap Section 2.
- * Putaran 11: kartu sorotan MENGGANTUNG ~separuh keluar sudut kanan-bawah
- * peta, gaya sel garis-rambut (kelas `.kartu`) — persis seperti kartu angka
- * lapangan di bab 3. Sudut kanvas MapLibre tetap dipaksa membulat lewat
- * `isolation: isolate` + prop `borderRadius` ke `MapCanvas`. (Bukan lagi
- * gigitan organik/badge cincin — itu ornamen putaran 5 yang sudah dibuang
- * putaran 6 dan tidak dikembalikan.)
+ * Putaran 11: kartu sorotan MENGGANTUNG keluar sudut kanan-bawah peta, gaya
+ * sel garis-rambut (kelas `.kartu`). Putaran 14–16: kartu itu pindah ke
+ * kiri-bawah dan menjorok ~40% KELUAR frame peta, duduk di dasar; kredit
+ * MapLibre pindah ke KIRI-ATAS (`attributionPosition`) supaya tak ketiban
+ * kartu; dan satu chip LEGENDA (kunci warna `GAP_RAMP`) menggantung sebagian
+ * keluar tepi KANAN, agak turun dari pojok. Ukuran kartu kembali ringkas
+ * setelah sempat jadi pita 440px yang user nilai kepanjangan. Sudut kanvas
+ * MapLibre tetap dipaksa membulat lewat `isolation: isolate` + prop
+ * `borderRadius` ke `MapCanvas`. (Bukan lagi gigitan organik/badge cincin —
+ * itu ornamen putaran 5 yang sudah dibuang putaran 6 dan tidak dikembalikan.)
  *
  * `HeroPeta` sekarang mengembalikan **satu blok**, bukan fragment dua ubin
  * grid — `page.tsx` menaruhnya langsung sebagai kolom kanan sebuah grid dua
@@ -39,6 +43,7 @@
 import dynamic from "next/dynamic";
 
 import { LAYER } from "@/lib/map/config";
+import { GAP_RAMP } from "@/lib/map/style";
 import { rentangRingkas } from "@/lib/format";
 import { useBeranda } from "./BerandaData";
 
@@ -60,8 +65,11 @@ const MapCanvas = dynamic(
  */
 const LAPISAN_HERO = [LAYER.pointConfidence, LAYER.pointCircle] as const;
 
-/** Padding simetris — tidak ada sudut yang perlu dijauhi. */
-const PADDING_KARTU = { top: 28, bottom: 28, left: 28, right: 28 } as const;
+/** Ruang yang disisakan saat memfokuskan peta. Asimetris: kartu sorotan
+ * menutup pojok KIRI-BAWAH (sebagian sudah keluar frame), kredit ada di
+ * KIRI-ATAS, chip legenda menggantung di KANAN. Angkanya menjauhkan lingkaran
+ * data dari ketiganya. */
+const PADDING_KARTU = { top: 64, bottom: 72, left: 80, right: 44 } as const;
 
 /** Tinggi minimum kalau kolom teks di sebelahnya kebetulan pendek. Diturunkan
  * di putaran 8: peta sengaja jadi lebih kecil dari kolom teks di sebelahnya. */
@@ -108,23 +116,27 @@ export function HeroPeta() {
             interactive={false}
             fitPadding={PADDING_KARTU}
             borderRadius="var(--r-xl)"
+            attributionPosition="top-left"
           />
         )}
       </div>
 
-      {/* Kartu sorotan — MENGGANTUNG ~separuh keluar sudut kanan-bawah peta
-         (model kartu overlap Section 2). Isi dua sel dipisah garis-rambut
-         (`gap: 1px` menyingkap `--rule` di baliknya), satu sudut tajam
-         (`.kartu`). Menggantung ke arah selokan `--page-x` — aman. */}
+      {/* Kartu sorotan — ukuran ringkas (`max-content`, dibatasi), dua sel
+         bertingkat dipisah garis-rambut (`gap: 1px` menyingkap `--rule`), kelas
+         `.kartu`. Duduk di DASAR peta dan menjorok ~20% keluar tepi KIRI (ke
+         celah antar-kolom `--s5`) — cukup untuk terasa "keluar frame" tanpa
+         menabrak kolom teks. Kredit MapLibre dipindah ke kiri-ATAS supaya tidak
+         ketiban kartu ini. */}
       {sorotan && (
         <div
           className="kartu"
           style={{
             position: "absolute",
-            right: -20,
-            bottom: -20,
-            left: "auto",
-            width: "min(288px, 76%)",
+            left: -72,
+            bottom: -18,
+            right: "auto",
+            width: "max-content",
+            maxWidth: "min(88%, 380px)",
             overflow: "hidden",
             boxShadow: "var(--shadow-soft)",
           }}
@@ -173,6 +185,61 @@ export function HeroPeta() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Legenda mini — satu-satunya kunci warna di peta hero (yang sengaja
+         tanpa label). Pita gradiennya DIBANGUN dari `GAP_RAMP` yang sama persis
+         dipakai lingkaran di peta — kalau ramp-nya berubah, legenda ikut, tidak
+         bisa diam-diam berbohong. Ditaruh agak turun dari pojok dan menjorok
+         ~23% keluar tepi KANAN (ke selokan `--page-x`) — user minta ia sebagian
+         keluar frame. */}
+      {peta && (
+        <div
+          className="kartu"
+          style={{
+            position: "absolute",
+            top: 54,
+            right: -40,
+            left: "auto",
+            width: 184,
+            padding: "10px 13px",
+            display: "grid",
+            gap: 7,
+            boxShadow: "var(--shadow-soft)",
+          }}
+        >
+          <span
+            className="eyebrow"
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.12em",
+              color: "var(--ink-muted)",
+            }}
+          >
+            Kesenjangan
+          </span>
+          <span
+            aria-hidden
+            style={{
+              height: 8,
+              borderRadius: 4,
+              border: "1px solid var(--rule)",
+              background: `linear-gradient(90deg, ${GAP_RAMP.join(", ")})`,
+            }}
+          />
+          <span
+            className="fig"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: "var(--t-micro)",
+              color: "var(--ink-faint)",
+            }}
+          >
+            <span>kecil</span>
+            <span>besar</span>
+          </span>
         </div>
       )}
     </div>

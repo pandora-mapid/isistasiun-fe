@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FeatureCollection, Point, Polygon } from "geojson";
 import {
+  AttributionControl,
   LngLatBounds,
   Map as MapLibreMap,
   NavigationControl,
@@ -99,6 +100,18 @@ type Props = {
    * membulat; `/peta` tidak mengopernya → tanpa radius, seperti sebelumnya.
    */
   borderRadius?: number | string;
+  /**
+   * Sudut tempat kredit peta ("© MAPID Maps …") duduk. Bawaannya `bottom-right`
+   * (MapLibre bawaan). Peta hero Beranda memindahnya ke `top-left`: kartu
+   * sorotan menggantung keluar dari sudut kiri-bawah, jadi kredit di bawah
+   * mana pun akan tertutup — dan kredit yang tak terbaca melanggar lisensi
+   * basemap. Nilai lain memakai `AttributionControl` yang dipasang sendiri.
+   */
+  attributionPosition?:
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right";
 };
 
 /** Batas menunggu style basemap sebelum dianggap gagal. */
@@ -218,6 +231,7 @@ export function MapCanvas({
   interactive = true,
   fitPadding = FIT_PADDING,
   borderRadius,
+  attributionPosition = "bottom-right",
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -258,7 +272,11 @@ export function MapCanvas({
       style: resolveBasemapUrl(),
       center: INITIAL_VIEW.center,
       zoom: INITIAL_VIEW.zoom,
-      attributionControl: { compact: true },
+      // MapLibre hanya bisa menaruh kredit bawaan di kanan-bawah; sudut lain
+      // berarti matikan yang bawaan lalu pasang `AttributionControl` sendiri
+      // (di bawah, sesudah peta dibuat).
+      attributionControl:
+        attributionPosition === "bottom-right" ? { compact: true } : false,
       // Di atas 60 derajat pandangan mulai menatap cakrawala dan peta jadi
       // sulit dibaca — sekaligus membuat kendali kemiringan terasa liar.
       maxPitch: CAMERA.maxPitch,
@@ -291,6 +309,16 @@ export function MapCanvas({
       map.addControl(
         new NavigationControl({ showCompass: true, visualizePitch: true }),
         "top-left",
+      );
+    }
+
+    // Kredit peta yang dipindah dari sudut bawaannya (lihat `attributionControl`
+    // di atas). Hero Beranda memakai `top-left` supaya kartu sorotan yang
+    // menggantung di kiri-bawah tidak menutupi "© MAPID Maps".
+    if (attributionPosition !== "bottom-right") {
+      map.addControl(
+        new AttributionControl({ compact: true }),
+        attributionPosition,
       );
     }
 
@@ -352,9 +380,9 @@ export function MapCanvas({
       map.remove();
       mapRef.current = null;
     };
-    // `interactive` sengaja tidak masuk daftar: ia menentukan bagaimana peta
-    // DIBUAT, dan peta hanya dibuat sekali. Memasukkannya justru berarti
-    // membongkar dan membangun ulang seluruh peta kalau nilainya berubah.
+    // `interactive` dan `attributionPosition` sengaja tidak masuk daftar:
+    // keduanya menentukan bagaimana peta DIBUAT, dan peta hanya dibuat sekali.
+    // Memasukkannya berarti membongkar-pasang ulang seluruh peta saat berubah.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
