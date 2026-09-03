@@ -131,20 +131,25 @@ function Judul({ children }: { children: ReactNode }) {
  * garis-rambut. Dipakai full-width (bab 3 & 5) ATAU sebagai satu kolom grid
  * yang berselang-seling kiri/kanan (bab 1 kanan, 4 kiri, 6 kanan). Garis-
  * rambut ikut lebar wadahnya — di kolom sempit itu disengaja (gaya Klim).
+ *
+ * `align="right"` (bab 1) merata-kanankan kicker + judul; garis-rambut tetap
+ * selebar wadah.
  */
 function KepalaBab({
   n,
   kicker,
   judul,
+  align = "left",
 }: {
   n: number;
   kicker: string;
   judul: ReactNode;
+  align?: "left" | "right";
 }) {
   return (
     <div style={{ marginBottom: "var(--s4)" }}>
-      <KickerBernomor n={n} kicker={kicker} />
-      <div style={{ marginTop: "var(--s2)" }}>
+      <KickerBernomor n={n} kicker={kicker} align={align} />
+      <div style={{ marginTop: "var(--s2)", textAlign: align }}>
         <Judul>{judul}</Judul>
       </div>
       <div
@@ -322,9 +327,10 @@ export default function BerandaPage() {
         {/* ================================================================
             1 · Duduk perkara — full-bleed `--tile-sky`. Arketipe: ANGKA
             RAKSASA + catatan tepi. Angka yang KAMI ukur (`Rp 2,9 jt`) berdiri
-            raksasa di KIRI; judul + kicker di KANAN. Dua fakta KAI yang cuma
-            DIKUTIP mengecil jadi catatan di bawah angka raksasa. (Judul KANAN
-            — awal ritme selang-seling: bab 1 kanan, bab 4 kiri, bab 6 kanan.)
+            raksasa di KIRI; kicker + judul di kolom KANAN dan RATA-KANAN
+            (`align="right"`), menghadap balik ke angka. Dua fakta KAI yang cuma
+            DIKUTIP mengecil jadi catatan di bawahnya. (Kolom kanan — awal ritme
+            selang-seling: bab 1 kanan, bab 4 kiri, bab 6 kanan.)
             ================================================================ */}
         <section className="reveal" style={{ background: "var(--tile-sky)" }}>
           <div
@@ -343,6 +349,7 @@ export default function BerandaPage() {
               <div>
                 <KepalaBab
                   n={1}
+                  align="right"
                   kicker="Duduk perkara"
                   judul="Aset paling ramai di kota ini adalah aset yang paling sedikit diukur."
                 />

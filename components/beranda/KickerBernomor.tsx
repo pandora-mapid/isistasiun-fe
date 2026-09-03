@@ -18,6 +18,10 @@
  * Fungsi polos (tanpa `"use client"`) supaya bisa dipakai di server
  * (`page.tsx` → `KepalaBab`) MAUPUN client (`Persamaan.tsx`).
  *
+ * `align="right"` (bab 1) mendorong kelompok ke tepi kanan DAN membalik
+ * urutannya (pil dulu, angka belakangan) supaya angka duduk paling ujung —
+ * jangkar nomor menghadap tepi halaman.
+ *
  * Angka & pil disejajarkan di DASAR (`align-items: flex-end`). `text-box-trim`
  * pada angka memangkas kotak-teksnya ke garis-dasar alfabet — tanpa itu
  * `flex-end` mensejajarkan dasar KOTAK BARIS angka (masih memuat ruang turunan
@@ -26,7 +30,34 @@
  * (Chromium 133+/Safari 18.2+; browser lama jatuh ke perilaku lama — angkanya
  * sedikit naik, tidak rusak.)
  */
-export function KickerBernomor({ n, kicker }: { n: number; kicker: string }) {
+export function KickerBernomor({
+  n,
+  kicker,
+  align = "left",
+}: {
+  n: number;
+  kicker: string;
+  align?: "left" | "right";
+}) {
+  const angka = (
+    <span
+      className="fig"
+      aria-hidden
+      style={{
+        fontSize: "clamp(44px, 6vw, 84px)",
+        fontWeight: 100,
+        lineHeight: 1,
+        letterSpacing: "-0.04em",
+        color: "var(--ink-faint)",
+        textBoxTrim: "trim-both",
+        textBoxEdge: "cap alphabetic",
+      }}
+    >
+      {n}
+    </span>
+  );
+  const pil = <span className="eyebrow-chip eyebrow">{kicker}</span>;
+
   return (
     <div
       style={{
@@ -34,24 +65,20 @@ export function KickerBernomor({ n, kicker }: { n: number; kicker: string }) {
         alignItems: "flex-end",
         gap: "12px",
         flexWrap: "wrap",
+        justifyContent: align === "right" ? "flex-end" : "flex-start",
       }}
     >
-      <span
-        className="fig"
-        aria-hidden
-        style={{
-          fontSize: "clamp(44px, 6vw, 84px)",
-          fontWeight: 100,
-          lineHeight: 1,
-          letterSpacing: "-0.04em",
-          color: "var(--ink-faint)",
-          textBoxTrim: "trim-both",
-          textBoxEdge: "cap alphabetic",
-        }}
-      >
-        {n}
-      </span>
-      <span className="eyebrow-chip eyebrow">{kicker}</span>
+      {align === "right" ? (
+        <>
+          {pil}
+          {angka}
+        </>
+      ) : (
+        <>
+          {angka}
+          {pil}
+        </>
+      )}
     </div>
   );
 }
