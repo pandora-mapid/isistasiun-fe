@@ -55,6 +55,19 @@ test("angka lama yang dikarang tidak ada, cakupan dua simpul terbaca", async ({
   await expect(page.getByText(/3 gerai . 2 blok/).first()).toBeVisible();
 });
 
+test("angka dipetik dari data yang sama dengan halaman Peta", async ({
+  page,
+}) => {
+  await page.goto("/insight", { waitUntil: "domcontentloaded" });
+
+  // Kesenjangan harian terbesar di dua simpul = titik 12 Manggarai, Rp 2,9 jt.
+  await expect(page.getByText("Rp 2,9 jt").first()).toBeVisible();
+  await expect(page.getByText("Koridor Transit Utara").first()).toBeVisible();
+
+  // Jejak asal data ikut disebut, sama seperti di Beranda dan Peta.
+  await expect(page.getByText(/pipeline mock-/)).toBeVisible();
+});
+
 test("tidak ada isi halaman yang tersembunyi sebelum digulung", async ({
   page,
 }) => {
