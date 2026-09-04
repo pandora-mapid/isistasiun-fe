@@ -7,23 +7,23 @@ import { InsightData } from "@/components/insight/InsightData";
 import {
   BatangBersarang,
   DaftarTemuan,
+  HeroKartu,
   JejakInsight,
   KolomSlot,
   MatriksKategori,
-  RingkasInsight,
 } from "@/components/insight/InsightBagian";
 
 /**
  * Insight — layar "membaca". Sistem desain sama dengan Beranda (kertas hangat,
  * palet `--data`/`--field`/`--brand`/`--ink`, tangga tipografi, angka `.fig`,
- * nav pill, reveal scroll), TAPI komposisinya sengaja BEDA.
+ * nav pill, reveal scroll). Tapi KOMPOSISINYA meminjam struktur halaman
+ * Metodologi & Rekomendasi, bukan Beranda: hero dua kolom, lalu section
+ * berisi panel/kartu DATAR di atas satu latar kertas yang seragam — header
+ * section modest + catatan di kanan, grid multi-kolom yang padat. TANPA pita
+ * warna full-bleed, TANPA numeral raksasa. Satu kartu tinta gelap di hero.
  *
- * Beranda = majalah bersection: pita pastel full-bleed, numeral raksasa,
- * tiap section arketipe sendiri, judul selang-seling. Cocok untuk halaman
- * pendaratan. Insight = esai yang MENGALIR: satu kolom baca sempit di tengah
- * kertas, dari atas ke bawah, gerakan dipisah garis-rambut + napas saja,
- * grafik telanjang menyatu dalam alur teks. "Latar section pastel / komposisi
- * beda per section" adalah aturan BERANDA, bukan aturan sistem kertas.
+ * "Majalah bersection (pita pastel + numeral display)" adalah perangkat khusus
+ * BERANDA. Metodologi/Rekomendasi (masih sistem lama) adalah model strukturnya.
  *
  * Tetap **server component**. Sifat client dikurung di komponen daun
  * (`components/insight/InsightBagian.tsx`) yang membaca `InsightData` →
@@ -39,45 +39,65 @@ const garisEmas: CSSProperties = {
   textUnderlineOffset: 6,
 };
 
-/** Kolom baca — sempit, di tengah. Prosa di dalamnya lebih sempit lagi (`.measure`). */
-const KOLOM: CSSProperties = {
-  maxWidth: 960,
-  margin: "0 auto",
-  paddingInline: "var(--page-x)",
-};
-
-/** Awal tiap gerakan: garis-rambut + napas. Cukup itu — tidak ada pita warna. */
-const gerakan: CSSProperties = {
-  marginTop: "var(--s5)",
-  paddingTop: "var(--s5)",
-  borderTop: "1px solid var(--rule)",
-};
-
-const prosa: CSSProperties = {
-  margin: 0,
-  fontSize: "var(--t-body)",
-  lineHeight: 1.68,
-  color: "var(--ink-2)",
-};
-
-/** Kepala gerakan — kicker kecil + judul. Tanpa numeral, tanpa garis sendiri. */
-function Kepala({ kicker, judul }: { kicker: string; judul: string }) {
+/** Header section: kicker + judul modest (BUKAN numeral) + catatan rata kanan. */
+function Kepala({
+  kicker,
+  judul,
+  catatan,
+}: {
+  kicker: string;
+  judul: string;
+  catatan?: string;
+}) {
   return (
-    <div style={{ marginBottom: "var(--s4)" }}>
-      <div className="eyebrow">{kicker}</div>
-      <h2
-        style={{
-          font: "800 var(--t-h3)/1.18 var(--font-inter), system-ui, sans-serif",
-          letterSpacing: "-0.015em",
-          margin: "var(--s2) 0 0",
-          maxWidth: "30ch",
-        }}
-      >
-        {judul}
-      </h2>
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-end",
+        gap: "var(--s4)",
+        marginBottom: "var(--s4)",
+        flexWrap: "wrap",
+      }}
+    >
+      <div>
+        <div className="eyebrow" style={{ marginBottom: "var(--s2)" }}>
+          {kicker}
+        </div>
+        <h2
+          style={{
+            font: "800 clamp(25px, 2.5vw, 32px)/1.12 var(--font-inter), system-ui, sans-serif",
+            letterSpacing: "-0.02em",
+            margin: 0,
+            maxWidth: "22ch",
+          }}
+        >
+          {judul}
+        </h2>
+      </div>
+      {catatan && (
+        <span
+          style={{
+            fontSize: "var(--t-small)",
+            lineHeight: 1.5,
+            color: "var(--ink-muted)",
+            maxWidth: "34ch",
+            textAlign: "right",
+          }}
+        >
+          {catatan}
+        </span>
+      )}
     </div>
   );
 }
+
+/** Panel isian datar (tanpa bayangan). */
+const panel: CSSProperties = {
+  background: "var(--paper-2)",
+  borderRadius: "var(--r-md)",
+  padding: "var(--s4)",
+};
 
 export default function InsightPage() {
   return (
@@ -92,168 +112,198 @@ export default function InsightPage() {
           }
         />
 
-        <div style={KOLOM}>
+        <div className="wrap">
           {/* ============================================================
-              Masthead — kicker chip, judul, lede, panel ringkas. Semua di
-              kolom yang sama, tanpa kolom kedua, tanpa kartu tinta.
+              Hero — dua kolom, alignItems end. Tulisan kiri, kartu tinta
+              ringkasan kanan (satu-satunya elemen gelap di halaman).
               ============================================================ */}
-          <header
+          <section
             className="reveal"
-            style={{ paddingTop: "clamp(40px, 5vw, 72px)" }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) minmax(0, 400px)",
+              gap: "var(--s5)",
+              alignItems: "end",
+              paddingTop: "clamp(40px, 5vw, 72px)",
+            }}
           >
-            <Lencana
-              label="Bacaan lapangan · Manggarai + Sudirman"
-              warna="brand"
-              dot
-            />
-            <h1
-              style={{
-                font: "800 var(--t-h1)/1.05 var(--font-inter), system-ui, sans-serif",
-                letterSpacing: "-0.025em",
-                margin: "var(--s3) 0 0",
-                maxWidth: "16ch",
-              }}
-            >
-              Apa yang <span style={garisEmas}>terbaca</span> dari dua simpul.
-            </h1>
-            <p
-              className="measure"
-              style={{
-                margin: "var(--s4) 0 0",
-                fontSize: "var(--t-lead)",
-                lineHeight: 1.62,
-                color: "var(--ink-2)",
-              }}
-            >
-              Manggarai dan Sudirman sudah dicacah penuh. Halaman ini merangkum
-              yang terbaca dari keduanya — kesenjangan belanja per pintu, profil
-              tiap slot waktu, dan kategori yang permintaannya ada tapi gerainya
-              belum. Temuan yang datanya tipis ditandai, bukan disembunyikan.
-            </p>
+            <div>
+              <Lencana
+                label="Bacaan lapangan · Manggarai + Sudirman"
+                warna="brand"
+                dot
+              />
+              <h1
+                style={{
+                  font: "800 var(--t-h1)/1.04 var(--font-inter), system-ui, sans-serif",
+                  letterSpacing: "-0.025em",
+                  margin: "var(--s3) 0 0",
+                  maxWidth: "18ch",
+                }}
+              >
+                Apa yang <span style={garisEmas}>terbaca</span> dari dua simpul.
+              </h1>
+              <p
+                style={{
+                  margin: "var(--s4) 0 0",
+                  maxWidth: "56ch",
+                  fontSize: "var(--t-lead)",
+                  lineHeight: 1.62,
+                  color: "var(--ink-2)",
+                }}
+              >
+                Manggarai dan Sudirman sudah dicacah penuh. Halaman ini merangkum
+                yang terbaca dari keduanya — kesenjangan belanja per pintu,
+                profil tiap slot waktu, dan kategori yang permintaannya ada tapi
+                gerainya belum. Temuan yang datanya tipis ditandai, bukan
+                disembunyikan.
+              </p>
+            </div>
 
-            <RingkasInsight />
-
-            <p
-              style={{
-                margin: "var(--s4) 0 0",
-                fontSize: "var(--t-small)",
-                lineHeight: 1.6,
-                color: "var(--ink-faint)",
-                maxWidth: "56ch",
-              }}
-            >
-              Setiap angka adalah rentang P10–P90, bukan satu titik, dan bisa
-              ditelusuri sampai ke pintunya di peta.
-            </p>
-          </header>
+            <HeroKartu />
+          </section>
 
           {/* ============================================================
-              Duduk perkara — batang bersarang potensi / tertangkap / gap.
+              Duduk perkara — panel batang bersarang.
               ============================================================ */}
-          <section className="reveal" style={gerakan}>
+          <section className="reveal" style={{ marginTop: "var(--s6)" }}>
             <Kepala
               kicker="Duduk perkara"
               judul="Selisih terbesar ada di pintu yang paling ramai."
+              catatan="Gerai di dalam stasiun menangkap sekitar sepertiga potensi yang lewat pintu terbesar; sisanya batas atas peluang pendapatan non-tiket."
             />
-            <p className="measure" style={prosa}>
-              Gerai di dalam stasiun menangkap sekitar sepertiga dari potensi
-              belanja yang lewat pintu terbesar. Sisanya adalah batas atas
-              peluang pendapatan non-tiket yang belum diambil.
-            </p>
-            <div style={{ marginTop: "var(--s5)" }}>
+            <div style={panel}>
               <BatangBersarang />
             </div>
           </section>
 
           {/* ============================================================
-              Profil per slot — diagram kolom + daftar temuan.
+              Profil per slot — diagram kolom + kartu temuan.
               ============================================================ */}
-          <section className="reveal" style={gerakan}>
+          <section className="reveal" style={{ marginTop: "var(--s5)" }}>
             <Kepala
               kicker="Profil per slot"
               judul="Pagi menahan kesenjangan terbesar."
+              catatan="Kesenjangan per slot di pintu dengan selisih terbesar, pada satu skala rupiah bersama."
             />
-            <p className="measure" style={prosa}>
-              Kesenjangan tidak rata sepanjang hari. Slot pagi menahan bagian
-              terbesarnya di pintu dengan selisih tertinggi, justru saat arus
-              paling deras.
-            </p>
-            <div style={{ marginTop: "var(--s5)" }}>
-              <KolomSlot />
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1.25fr) minmax(0, 1fr)",
+                gap: "var(--s3)",
+                alignItems: "start",
+              }}
+            >
+              <div style={panel}>
+                <KolomSlot />
+              </div>
+              <div className="kartu" style={{ padding: "var(--s4)" }}>
+                <DaftarTemuan />
+              </div>
             </div>
-            <DaftarTemuan />
           </section>
 
           {/* ============================================================
-              Kategori yang belum terisi — matriks tabel editorial polos.
+              Kategori yang belum terisi — matriks baris bertumpuk.
               ============================================================ */}
-          <section className="reveal" style={gerakan}>
+          <section className="reveal" style={{ marginTop: "var(--s5)" }}>
             <Kepala
               kicker="Kategori yang belum terisi"
               judul="Permintaannya terbaca, gerainya belum ada."
+              catatan="Terisi · Kurang · Kosong dibaca dari jumlah gerai yang tercacah terhadap ambang 3 per kategori, bukan dari data sewa."
             />
-            <p className="measure" style={prosa}>
-              Survei lapangan mencatat berapa gerai tiap kategori di pintu
-              terbesar tiap simpul, lalu membandingkannya dengan porsi permintaan
-              kawasan. Beberapa kategori dengan permintaan jelas belum punya
-              gerai sama sekali.
-            </p>
             <MatriksKategori />
-            <p
-              style={{
-                margin: "var(--s3) 0 0",
-                fontSize: "var(--t-small)",
-                lineHeight: 1.55,
-                color: "var(--ink-muted)",
-                maxWidth: "64ch",
-              }}
-            >
-              Terisi · Kurang · Kosong dibaca dari jumlah gerai yang tercacah di
-              lapangan terhadap ambang 3 gerai per kategori, bukan dari data
-              sewa. Permintaan adalah porsi permintaan kawasan untuk kategori
-              itu.
-            </p>
-          </section>
-
-          {/* ============================================================
-              Penutup — di atas kertas, bukan band tinta.
-              ============================================================ */}
-          <section
-            className="reveal"
-            style={{ ...gerakan, paddingBottom: "var(--s6)" }}
-          >
-            <p
-              style={{
-                margin: 0,
-                font: "800 var(--t-h3)/1.2 var(--font-inter), system-ui, sans-serif",
-                letterSpacing: "-0.015em",
-                maxWidth: "28ch",
-              }}
-            >
-              Tiap angka di sini bisa ditelusuri ke pintunya di peta.
-            </p>
             <div
               style={{
                 display: "flex",
-                flexWrap: "wrap",
-                gap: "var(--s1)",
-                marginTop: "var(--s4)",
+                gap: "var(--s2)",
+                alignItems: "flex-start",
+                marginTop: "var(--s3)",
+                maxWidth: "72ch",
               }}
             >
-              <Link
-                href="/peta"
-                className="b bp"
-                style={{ padding: "14px 24px", fontSize: 14 }}
+              <span
+                className="dot"
+                style={{ background: "var(--ink-faint)", marginTop: 6 }}
+              />
+              <span
+                style={{
+                  fontSize: "var(--t-small)",
+                  lineHeight: 1.5,
+                  color: "var(--ink-muted)",
+                }}
               >
-                Buka di peta
-              </Link>
-              <Link
-                href="/metodologi"
-                className="b bs"
-                style={{ padding: "14px 24px", fontSize: 14 }}
-              >
-                Baca metodologi
-              </Link>
+                Dibaca di pintu berkesenjangan terbesar tiap simpul. Kolom
+                Permintaan adalah porsi permintaan kawasan untuk kategori itu.
+              </span>
+            </div>
+          </section>
+
+          {/* ============================================================
+              Penutup — grid 1fr 320px, di atas kertas.
+              ============================================================ */}
+          <section
+            className="reveal"
+            style={{
+              marginTop: "var(--s6)",
+              paddingTop: "var(--s5)",
+              borderTop: "1px solid var(--rule)",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "minmax(0, 1fr) minmax(0, 320px)",
+                gap: "var(--s5)",
+                alignItems: "end",
+              }}
+            >
+              <div>
+                <div className="eyebrow" style={{ marginBottom: "var(--s3)" }}>
+                  Langkah berikutnya
+                </div>
+                <h2
+                  style={{
+                    font: "800 clamp(25px, 2.5vw, 32px)/1.12 var(--font-inter), system-ui, sans-serif",
+                    letterSpacing: "-0.02em",
+                    margin: 0,
+                    maxWidth: "24ch",
+                  }}
+                >
+                  Tiap angka di sini bisa ditelusuri ke pintunya di peta.
+                </h2>
+              </div>
+              <div>
+                <p
+                  style={{
+                    margin: "0 0 var(--s3)",
+                    fontSize: "var(--t-small)",
+                    lineHeight: 1.6,
+                    color: "var(--ink-2)",
+                  }}
+                >
+                  Buka salah satu angka di peta untuk melihat pintunya, slotnya,
+                  dan foto aslinya.
+                </p>
+                <div
+                  style={{ display: "flex", flexWrap: "wrap", gap: "var(--s1)" }}
+                >
+                  <Link
+                    href="/peta"
+                    className="b bp"
+                    style={{ padding: "14px 24px", fontSize: 14 }}
+                  >
+                    Buka di peta
+                  </Link>
+                  <Link
+                    href="/metodologi"
+                    className="b bs"
+                    style={{ padding: "14px 24px", fontSize: 14 }}
+                  >
+                    Baca metodologi
+                  </Link>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -264,6 +314,7 @@ export default function InsightPage() {
               alignItems: "center",
               gap: "var(--s3)",
               flexWrap: "wrap",
+              marginTop: "var(--s5)",
               paddingTop: "var(--s4)",
               paddingBottom: "var(--s5)",
               borderTop: "1px solid var(--rule)",

@@ -367,7 +367,7 @@ Tahap ini **hampir seluruhnya mati**. Layarnya ada, isinya ada, tapi tidak satu 
 > [!tip] Peluang jeda: tautan Insight → peta terfilter
 > Reskin Insight membuang kalimat "setiap angka dapat diklik" karena janji itu tidak ditepati — seluruh tautan lama mendarat di `/peta` keadaan bawaan. Cara menepatinya, **sepenuhnya di frontend**: baca query param di `/peta` (mis. `?titik=24&slot=sore&kategori=apotek`) dan pakai sebagai keadaan awal, lalu jadikan angka Insight tautan sungguhan. Belum tercatat di [[ROADMAP]] — pekerjaan jeda berdampak besar, karena ini yang menyambungkan Tahap 6 kembali ke Tahap 3. Sampai itu ada, angka Insight sengaja bukan tautan.
 
-✅ Selisih lama di `/insight` sudah beres saat reskin: judul jadi "dua simpul", tabel uji hipotesis tipologi lama (hunian/campuran/perkantoran) dibuang, ambang sampel tipis kini "3 gerai × 2 blok" dari data — bukan `n < 30` yang dikarang. Halaman kini membaca `usePetaData()` + `select.ts`, cakupan Manggarai + Sudirman, dan tata letaknya satu kolom esai yang dibaca atas ke bawah (bukan bersection seperti Beranda).
+✅ Selisih lama di `/insight` sudah beres saat reskin: judul jadi "dua simpul", tabel uji hipotesis tipologi lama (hunian/campuran/perkantoran) dibuang, ambang sampel tipis kini "3 gerai × 2 blok" dari data — bukan `n < 30` yang dikarang. Halaman kini membaca `usePetaData()` + `select.ts`, cakupan Manggarai + Sudirman, dan tata letaknya grid kartu kompak bergaya Metodologi/Rekomendasi dengan palet Beranda (bukan bersection pita pastel seperti Beranda).
 
 ⚠️ Teks jawaban contoh di tab "Tanya Data" menyebut "2 dari 3 simpul" dan "Stasiun B" — peninggalan skema 3 stasiun. Copilot sungguhan baru tersambung di [[ROADMAP]] 3.6 lewat `POST /copilot/query` ([[02-BACKEND-SPEC]] §3.4).
 

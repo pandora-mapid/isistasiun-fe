@@ -6,11 +6,14 @@
  * dalam batang/kolom). Dipisah dari `app/insight/page.tsx` supaya halaman itu
  * tetap server component; hanya bagian yang butuh data ini yang client.
  *
- * Rupa: TELANJANG. Insight bukan majalah bersection seperti Beranda — ia satu
- * esai yang mengalir. Grafik duduk langsung di kolom baca, dibatasi garis-
- * rambut atas/bawah, tanpa kotak `.kartu`, tanpa border, tanpa latar. Palet
- * tetap persis Beranda: `--data` untuk mark grafik + pembacaan instrumen,
- * `--ink` untuk angka utama/kesimpulan, `--field` untuk kerja lapangan.
+ * Rupa: kartu/panel kompak, DATAR (tanpa bayangan), di atas kertas hangat yang
+ * seragam — struktur dipinjam dari halaman Metodologi & Rekomendasi, palet dari
+ * Beranda. Tiap daun merender ISI saja; `page.tsx` yang membungkusnya dalam
+ * panel `--paper-2` atau kartu `.kartu`. Kecuali `HeroKartu`, yang memang kartu
+ * tinta gelap sendiri.
+ *
+ * Warna: `--data` untuk mark grafik + pembacaan instrumen (persen permintaan),
+ * `--ink` untuk angka utama/kesimpulan, `--field` untuk catatan kerja lapangan.
  */
 
 import type { CSSProperties } from "react";
@@ -19,10 +22,10 @@ import { persen, ribuan, rupiahRingkas } from "@/lib/format";
 import { useInsight, type IsiSel } from "./InsightData";
 
 /* ---------------------------------------------------------------------------
- * Ringkasan — panel garis-rambut datar di atas kertas (bukan kartu tinta)
+ * Hero — kartu tinta ringkasan (satu-satunya elemen gelap di halaman)
  * ------------------------------------------------------------------------ */
 
-export function RingkasInsight() {
+export function HeroKartu() {
   const { sorotan, ringkas } = useInsight();
 
   const stat: [string, string][] = [
@@ -33,60 +36,58 @@ export function RingkasInsight() {
 
   return (
     <div
-      style={{
-        marginTop: "var(--s5)",
-        borderTop: "1px solid var(--rule)",
-        borderBottom: "1px solid var(--rule)",
-        padding: "var(--s4) 0",
-      }}
+      className="kartu ink-band"
+      style={{ background: "var(--ink)", overflow: "hidden" }}
     >
-      <span className="eyebrow">Kesenjangan terbesar · per hari kerja</span>
-      <div
-        className="fig"
-        style={{
-          font: "400 clamp(40px, 6vw, 68px)/1 var(--font-mono), ui-monospace, monospace",
-          letterSpacing: "-0.03em",
-          color: "var(--ink)",
-          margin: "var(--s2) 0 0",
-        }}
-      >
-        {sorotan ? rupiahRingkas(sorotan.gap.p50) : "—"}
-        <span style={{ fontSize: "var(--t-small)", color: "var(--ink-faint)" }}>
-          {" "}
-          / hari
-        </span>
+      <div style={{ padding: "var(--s4)" }}>
+        <span className="eyebrow">Kesenjangan terbesar</span>
+        <div
+          className="fig"
+          style={{
+            font: "400 clamp(30px, 3.4vw, 42px)/1 var(--font-mono), ui-monospace, monospace",
+            letterSpacing: "-0.03em",
+            color: "var(--data)",
+            margin: "var(--s2) 0 0",
+          }}
+        >
+          {sorotan ? rupiahRingkas(sorotan.gap.p50) : "—"}
+          <span style={{ fontSize: "var(--t-small)", color: "var(--ink-faint)" }}>
+            {" "}
+            / hari
+          </span>
+        </div>
+        <p
+          style={{
+            margin: "var(--s2) 0 0",
+            fontSize: "var(--t-small)",
+            lineHeight: 1.55,
+            color: "var(--ink-muted)",
+          }}
+        >
+          {sorotan
+            ? `${sorotan.namaTitik}, ${sorotan.namaStasiun}. Potensi ${rupiahRingkas(
+                sorotan.potensi.p50,
+              )} lawan ${rupiahRingkas(sorotan.tertangkap.p50)} yang tertangkap.`
+            : "Memuat bacaan lapangan…"}
+        </p>
       </div>
       <div
         style={{
-          marginTop: 6,
-          fontSize: "var(--t-small)",
-          color: "var(--ink-muted)",
-        }}
-      >
-        {sorotan
-          ? `${sorotan.namaTitik}, ${sorotan.namaStasiun}`
-          : "Memuat bacaan lapangan…"}
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "var(--s5)",
-          marginTop: "var(--s4)",
-          paddingTop: "var(--s3)",
-          borderTop: "1px solid var(--rule)",
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: 1,
+          background: "var(--rule)",
         }}
       >
         {stat.map(([k, v]) => (
-          <div key={k}>
-            <div
-              className="fig"
-              style={{ fontSize: "clamp(18px, 2vw, 22px)", color: "var(--ink-2)" }}
-            >
+          <div
+            key={k}
+            style={{ background: "var(--ink)", padding: "var(--s3) var(--s2)" }}
+          >
+            <div className="fig" style={{ fontSize: 18, color: "var(--data)" }}>
               {v}
             </div>
-            <div className="eyebrow" style={{ marginTop: 4 }}>
+            <div className="eyebrow" style={{ fontSize: 9, marginTop: 6 }}>
               {k}
             </div>
           </div>
@@ -97,7 +98,7 @@ export function RingkasInsight() {
 }
 
 /* ---------------------------------------------------------------------------
- * 1 · Batang bersarang — potensi, tertangkap, kesenjangan
+ * 1 · Batang bersarang — potensi, tertangkap, kesenjangan (isi panel --paper-2)
  * ------------------------------------------------------------------------ */
 
 export function BatangBersarang() {
@@ -105,69 +106,50 @@ export function BatangBersarang() {
   const isi = sorotan?.isiPersen ?? 0;
 
   return (
-    <div style={{ borderTop: "1px solid var(--rule)", paddingTop: "var(--s3)" }}>
+    <div>
+      <div style={{ position: "relative", height: 60 }}>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "var(--data-wash)",
+            borderRadius: "var(--r-sm)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: `${isi}%`,
+            background: "var(--data)",
+            borderRadius: "var(--r-sm) 0 0 var(--r-sm)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            left: `${isi}%`,
+            top: -5,
+            bottom: -5,
+            width: 2,
+            background: "var(--ink)",
+          }}
+        />
+      </div>
       <div
+        className="fig"
         style={{
           display: "flex",
-          alignItems: "baseline",
           justifyContent: "space-between",
-          gap: "var(--s2)",
+          marginTop: 8,
+          fontSize: "var(--t-micro)",
+          color: "var(--ink-faint)",
         }}
       >
-        <span className="eyebrow">Potensi lawan yang tertangkap</span>
-        <span
-          className="fig"
-          style={{ fontSize: "var(--t-micro)", color: "var(--ink-faint)" }}
-        >
-          per hari kerja
-        </span>
-      </div>
-
-      <div style={{ marginTop: "var(--s4)" }}>
-        <div style={{ position: "relative", height: 52 }}>
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              background: "var(--data-wash)",
-              borderRadius: "var(--r-sm)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: 0,
-              top: 0,
-              bottom: 0,
-              width: `${isi}%`,
-              background: "var(--data)",
-              borderRadius: "var(--r-sm) 0 0 var(--r-sm)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              left: `${isi}%`,
-              top: -6,
-              bottom: -6,
-              width: 2,
-              background: "var(--ink)",
-            }}
-          />
-        </div>
-        <div
-          className="fig"
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginTop: 8,
-            fontSize: "var(--t-micro)",
-            color: "var(--ink-faint)",
-          }}
-        >
-          <span>Rp 0</span>
-          <span>{sorotan ? rupiahRingkas(sorotan.potensi.p50) : "—"} potensi</span>
-        </div>
+        <span>Rp 0</span>
+        <span>{sorotan ? rupiahRingkas(sorotan.potensi.p50) : "—"} potensi</span>
       </div>
 
       <div
@@ -175,7 +157,7 @@ export function BatangBersarang() {
           display: "grid",
           gridTemplateColumns: "repeat(3, 1fr)",
           gap: "var(--s2)",
-          marginTop: "var(--s4)",
+          marginTop: "var(--s3)",
           borderTop: "1px solid var(--rule)",
           paddingTop: "var(--s3)",
         }}
@@ -203,7 +185,7 @@ function Kaki({
       <div
         className="fig"
         style={{
-          fontSize: sorot ? "clamp(21px, 2.6vw, 29px)" : "clamp(17px, 2vw, 21px)",
+          fontSize: sorot ? "clamp(20px, 2.4vw, 27px)" : "clamp(16px, 1.9vw, 20px)",
           fontWeight: sorot ? 700 : 400,
           color: sorot ? "var(--ink)" : "var(--ink-2)",
           marginTop: 6,
@@ -217,7 +199,7 @@ function Kaki({
 }
 
 /* ---------------------------------------------------------------------------
- * 2 · Diagram kolom — kesenjangan per slot
+ * 2 · Diagram kolom — kesenjangan per slot (isi panel --paper-2)
  * ------------------------------------------------------------------------ */
 
 export function KolomSlot() {
@@ -237,13 +219,13 @@ export function KolomSlot() {
   );
 
   return (
-    <div style={{ borderTop: "1px solid var(--rule)", paddingTop: "var(--s4)" }}>
+    <div>
       <div
         style={{
           display: "flex",
           alignItems: "flex-end",
-          gap: "var(--s3)",
-          height: 200,
+          gap: "var(--s2)",
+          height: 190,
         }}
       >
         {baris.map((s, i) => (
@@ -255,7 +237,7 @@ export function KolomSlot() {
               display: "flex",
               flexDirection: "column",
               justifyContent: "flex-end",
-              gap: 8,
+              gap: 7,
               height: "100%",
             }}
           >
@@ -282,10 +264,10 @@ export function KolomSlot() {
       <div
         style={{
           display: "flex",
-          gap: "var(--s3)",
-          marginTop: 8,
+          gap: "var(--s2)",
+          marginTop: 7,
           borderTop: "1px solid var(--rule)",
-          paddingTop: 8,
+          paddingTop: 7,
         }}
       >
         {baris.map((s) => (
@@ -309,19 +291,17 @@ export function KolomSlot() {
           fontSize: "var(--t-small)",
           lineHeight: 1.55,
           color: "var(--ink-muted)",
-          maxWidth: "60ch",
         }}
       >
-        Kesenjangan per slot di {sorotan?.namaTitik ?? "pintu terbesar"}, pintu
-        dengan selisih terbesar. Keempat batang memakai satu skala rupiah yang
-        sama.
+        Kesenjangan per slot di {sorotan?.namaTitik ?? "pintu terbesar"}. Keempat
+        batang memakai satu skala rupiah yang sama.
       </p>
     </div>
   );
 }
 
 /* ---------------------------------------------------------------------------
- * 2 · Daftar temuan bernomor + catatan pinggir sampel tipis
+ * 2 · Daftar temuan + catatan sampel tipis (isi kartu .kartu putih)
  * ------------------------------------------------------------------------ */
 
 export function DaftarTemuan() {
@@ -331,19 +311,17 @@ export function DaftarTemuan() {
     ? [
         {
           judul: `Kesenjangan terpusat di slot ${temuan.slotPuncak.label}`,
-          isi: `Slot ${temuan.slotPuncak.label} menahan ${rupiahRingkas(
-            temuan.slotPuncak.nilai,
-          )} dari ${rupiahRingkas(
+          isi: `${rupiahRingkas(temuan.slotPuncak.nilai)} dari ${rupiahRingkas(
             temuan.gapHarian,
-          )} kesenjangan harian — slot terbesar dari empat.`,
+          )} kesenjangan harian ada di satu slot — slot terbesar dari empat.`,
         },
         temuan.kategoriKosong
           ? {
               judul: `${temuan.kategoriKosong.label}: permintaannya ada, gerainya nol`,
-              isi: `Permintaan kawasan untuk ${temuan.kategoriKosong.label.toLowerCase()} terbaca ${persen(
+              isi: `Permintaan kawasan ${persen(
                 temuan.kategoriKosong.demandShare,
                 0,
-              )} di pintu terbesar, tapi tidak ada satu pun gerai di sana.`,
+              )} di pintu terbesar, tanpa satu pun gerai di sana.`,
             }
           : {
               judul: "Setiap kategori sudah punya gerai",
@@ -352,17 +330,15 @@ export function DaftarTemuan() {
         temuan.pembanding
           ? {
               judul: "Arus tinggi belum tentu kesenjangan tinggi",
-              isi: `Arus pagi mencapai ${ribuan(
-                temuan.arusTitik ?? 0,
-              )} org/jam, lawan ${ribuan(
+              isi: `Arus pagi ${ribuan(temuan.arusTitik ?? 0)} org/jam lawan ${ribuan(
                 temuan.pembanding.arus ?? 0,
-              )} org/jam di ${temuan.pembanding.namaTitik} ${temuan.pembanding.namaStasiun}. Kesenjangan hariannya ${rupiahRingkas(
+              )} di ${temuan.pembanding.namaTitik} Sudirman — kesenjangan ${rupiahRingkas(
                 temuan.gapHarian,
               )} lawan ${rupiahRingkas(temuan.pembanding.gap)}.`,
             }
           : {
               judul: "Arus dan kesenjangan dibaca terpisah",
-              isi: "Arus pejalan tidak diterjemahkan langsung jadi kesenjangan — keduanya dicacah sendiri.",
+              isi: "Arus pejalan tidak diterjemahkan langsung jadi kesenjangan.",
             },
       ]
     : [
@@ -372,84 +348,89 @@ export function DaftarTemuan() {
       ];
 
   return (
-    <div style={{ marginTop: "var(--s5)" }}>
-      {items.map((t, i) => (
-        <div
-          key={i}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "2.5ch 1fr",
-            gap: "var(--s3)",
-            padding: "var(--s3) 0",
-            borderTop: "1px solid var(--rule)",
-            maxWidth: "64ch",
-          }}
-        >
-          <span
-            className="fig"
-            style={{
-              fontSize: "var(--t-body)",
-              fontWeight: 700,
-              color: "var(--data)",
-            }}
+    <div>
+      <div className="eyebrow" style={{ marginBottom: "var(--s3)" }}>
+        Temuan
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "var(--s3)" }}>
+        {items.map((t, i) => (
+          <div
+            key={i}
+            style={{ display: "flex", gap: "var(--s2)", alignItems: "flex-start" }}
           >
-            {i + 1}
-          </span>
-          <div>
-            <div style={{ fontSize: "var(--t-body)", fontWeight: 700 }}>
-              {t.judul}
-            </div>
-            {t.isi && (
+            <span
+              className="dot"
+              style={{ background: "var(--data)", marginTop: 7 }}
+            />
+            <div>
               <div
                 style={{
-                  marginTop: 4,
-                  fontSize: "var(--t-small)",
-                  lineHeight: 1.6,
-                  color: "var(--ink-muted)",
+                  fontSize: "var(--t-body)",
+                  fontWeight: 600,
+                  lineHeight: 1.35,
                 }}
               >
-                {t.isi}
+                {t.judul}
               </div>
-            )}
+              {t.isi && (
+                <div
+                  style={{
+                    marginTop: 3,
+                    fontSize: "var(--t-small)",
+                    lineHeight: 1.5,
+                    color: "var(--ink-muted)",
+                  }}
+                >
+                  {t.isi}
+                </div>
+              )}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       <div
         style={{
+          display: "flex",
+          gap: "var(--s2)",
+          alignItems: "flex-start",
           marginTop: "var(--s4)",
-          borderLeft: "2px solid var(--field)",
-          paddingLeft: "var(--s3)",
-          maxWidth: "60ch",
+          padding: "var(--s3)",
+          background: "var(--field-wash)",
+          borderRadius: "var(--r-sm)",
         }}
       >
-        <span className="tag tag-field">Estimasi ditahan</span>
-        <p
-          style={{
-            margin: "var(--s2) 0 0",
-            fontSize: "var(--t-small)",
-            lineHeight: 1.55,
-            color: "var(--ink-2)",
-          }}
-        >
-          {sampelTipis
-            ? `${sampelTipis.namaTitik} ${sampelTipis.namaStasiun} baru tercacah ${sampelTipis.geraiCount} gerai pada ${sampelTipis.blokCount} blok — ambangnya 3 gerai × 2 blok. Angkanya ditahan sampai survei putaran kedua, tidak dibaca sebagai nol.`
-            : "Titik yang belum memenuhi ambang 3 gerai × 2 blok ditandai dan tidak diberi estimasi — tidak dibaca sebagai nol."}
-        </p>
+        <span
+          className="dot"
+          style={{ background: "var(--field)", marginTop: 7 }}
+        />
+        <div>
+          <span className="eyebrow" style={{ color: "var(--field)" }}>
+            Estimasi ditahan
+          </span>
+          <p
+            style={{
+              margin: "6px 0 0",
+              fontSize: "var(--t-small)",
+              lineHeight: 1.5,
+              color: "var(--ink-2)",
+            }}
+          >
+            {sampelTipis
+              ? `${sampelTipis.namaTitik} ${sampelTipis.namaStasiun} baru tercacah ${sampelTipis.geraiCount} gerai pada ${sampelTipis.blokCount} blok — ambangnya 3 gerai × 2 blok. Angkanya ditahan sampai survei putaran kedua.`
+              : "Titik yang belum memenuhi ambang 3 gerai × 2 blok ditandai dan tidak diberi estimasi."}
+          </p>
+        </div>
       </div>
     </div>
   );
 }
 
 /* ---------------------------------------------------------------------------
- * 3 · Matriks kategori × pintu terbesar tiap simpul — tabel editorial polos
+ * 3 · Matriks kategori × pintu terbesar tiap simpul — tabel baris bertumpuk
  * ------------------------------------------------------------------------ */
 
-const sel: CSSProperties = {
-  padding: "var(--s3) var(--s3) var(--s3) 0",
-  textAlign: "left",
-  verticalAlign: "baseline",
-};
+const KOLOM = "minmax(0,1.5fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr)";
 
 function Status({ v }: { v: IsiSel }) {
   const gaya: Record<IsiSel, CSSProperties> = {
@@ -461,15 +442,15 @@ function Status({ v }: { v: IsiSel }) {
   return <span style={{ fontSize: "var(--t-small)", ...gaya[v] }}>{v}</span>;
 }
 
-function KepalaKolom({ stasiun, titik }: { stasiun: string; titik?: string }) {
+function KolHead({ stasiun, titik }: { stasiun: string; titik?: string }) {
   return (
-    <>
-      <span className="eyebrow">{stasiun}</span>
+    <span className="eyebrow">
+      {stasiun}
       {titik && (
         <span
           style={{
             display: "block",
-            marginTop: 3,
+            marginTop: 2,
             fontSize: "var(--t-micro)",
             fontWeight: 400,
             letterSpacing: "normal",
@@ -480,15 +461,13 @@ function KepalaKolom({ stasiun, titik }: { stasiun: string; titik?: string }) {
           {titik}
         </span>
       )}
-    </>
+    </span>
   );
 }
 
 export function MatriksKategori() {
   const { matriks } = useInsight();
 
-  const kolA = matriks?.kolomA;
-  const kolB = matriks?.kolomB;
   const baris =
     matriks?.baris ??
     ["F&B", "Ritel", "Apotek", "Jasa", "Lainnya"].map((kategori) => ({
@@ -499,67 +478,90 @@ export function MatriksKategori() {
     }));
 
   return (
-    <table
+    <div
       style={{
-        width: "100%",
-        borderCollapse: "collapse",
-        marginTop: "var(--s4)",
+        borderRadius: "var(--r-md)",
+        overflow: "hidden",
+        border: "1px solid var(--rule)",
       }}
     >
-      <colgroup>
-        <col style={{ width: "26%" }} />
-        <col style={{ width: "27%" }} />
-        <col style={{ width: "27%" }} />
-        <col style={{ width: "20%" }} />
-      </colgroup>
-      <thead>
-        <tr>
-          <th style={{ ...sel, borderBottom: "1px solid var(--rule-strong)" }}>
-            <span className="eyebrow">Kategori</span>
-          </th>
-          <th style={{ ...sel, borderBottom: "1px solid var(--rule-strong)" }}>
-            <KepalaKolom
-              stasiun={kolA?.namaStasiun ?? "Simpul pertama"}
-              titik={kolA?.namaTitik}
-            />
-          </th>
-          <th style={{ ...sel, borderBottom: "1px solid var(--rule-strong)" }}>
-            <KepalaKolom
-              stasiun={kolB?.namaStasiun ?? "Simpul kedua"}
-              titik={kolB?.namaTitik}
-            />
-          </th>
-          <th style={{ ...sel, borderBottom: "1px solid var(--rule-strong)" }}>
-            <span className="eyebrow">Permintaan</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {baris.map((row) => (
-          <tr key={row.kategori}>
-            <td style={{ ...sel, borderBottom: "1px solid var(--rule)" }}>
-              <span style={{ fontSize: "var(--t-small)", fontWeight: 600 }}>
-                {row.kategori}
-              </span>
-            </td>
-            <td style={{ ...sel, borderBottom: "1px solid var(--rule)" }}>
-              <Status v={row.a} />
-            </td>
-            <td style={{ ...sel, borderBottom: "1px solid var(--rule)" }}>
-              <Status v={row.b} />
-            </td>
-            <td style={{ ...sel, borderBottom: "1px solid var(--rule)" }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: KOLOM,
+          gap: "var(--s3)",
+          padding: "var(--s3) var(--s4)",
+          background: "var(--paper-2)",
+        }}
+      >
+        <span className="eyebrow">Kategori</span>
+        <KolHead
+          stasiun={matriks?.kolomA.namaStasiun ?? "Simpul pertama"}
+          titik={matriks?.kolomA.namaTitik}
+        />
+        <KolHead
+          stasiun={matriks?.kolomB.namaStasiun ?? "Simpul kedua"}
+          titik={matriks?.kolomB.namaTitik}
+        />
+        <span className="eyebrow">Permintaan terbaca</span>
+      </div>
+
+      {baris.map((row, i) => (
+        <div
+          key={row.kategori}
+          style={{
+            display: "grid",
+            gridTemplateColumns: KOLOM,
+            gap: "var(--s3)",
+            padding: "var(--s3) var(--s4)",
+            alignItems: "center",
+            background: i % 2 ? "var(--paper-2)" : "var(--surface)",
+            borderTop: "1px solid var(--rule)",
+          }}
+        >
+          <span style={{ fontSize: "var(--t-small)", fontWeight: 600 }}>
+            {row.kategori}
+          </span>
+          <Status v={row.a} />
+          <Status v={row.b} />
+          <span style={{ display: "flex", alignItems: "center", gap: "var(--s2)" }}>
+            <span
+              className="fig"
+              style={{
+                fontSize: "var(--t-small)",
+                color: "var(--data)",
+                minWidth: "4.5ch",
+              }}
+            >
+              {row.permintaan === null ? "—" : persen(row.permintaan, 1)}
+            </span>
+            {row.permintaan !== null && (
               <span
-                className="fig"
-                style={{ fontSize: "var(--t-small)", color: "var(--data)" }}
+                className="pill"
+                style={{
+                  display: "inline-block",
+                  overflow: "hidden",
+                  flex: 1,
+                  maxWidth: 96,
+                  height: 5,
+                  background: "var(--rule)",
+                }}
               >
-                {row.permintaan === null ? "—" : persen(row.permintaan, 1)}
+                <span
+                  className="pill"
+                  style={{
+                    display: "block",
+                    width: `${Math.min(100, row.permintaan * 100)}%`,
+                    height: 5,
+                    background: "var(--data)",
+                  }}
+                />
               </span>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+            )}
+          </span>
+        </div>
+      ))}
+    </div>
   );
 }
 
