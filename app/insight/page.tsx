@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
+import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
 import { InsightData } from "@/components/insight/InsightData";
 import {
@@ -58,59 +59,6 @@ function tint(bg: string): CSSProperties {
     borderRadius: "var(--r-md)",
     padding: "var(--s3)",
   };
-}
-
-/** Header section: kicker + judul modest (BUKAN numeral) + catatan rata kanan. */
-function Kepala({
-  kicker,
-  judul,
-  catatan,
-}: {
-  kicker: string;
-  judul: string;
-  catatan?: string;
-}) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "flex-end",
-        gap: "var(--s4)",
-        marginBottom: "var(--s3)",
-        flexWrap: "wrap",
-      }}
-    >
-      <div>
-        <div className="eyebrow" style={{ marginBottom: "var(--s2)" }}>
-          {kicker}
-        </div>
-        <h2
-          style={{
-            font: "800 clamp(25px, 2.5vw, 32px)/1.12 var(--font-inter), system-ui, sans-serif",
-            letterSpacing: "-0.02em",
-            margin: 0,
-            maxWidth: "24ch",
-          }}
-        >
-          {judul}
-        </h2>
-      </div>
-      {catatan && (
-        <span
-          style={{
-            fontSize: "var(--t-small)",
-            lineHeight: 1.5,
-            color: "var(--ink-muted)",
-            maxWidth: "38ch",
-            textAlign: "right",
-          }}
-        >
-          {catatan}
-        </span>
-      )}
-    </div>
-  );
 }
 
 export default function InsightPage() {

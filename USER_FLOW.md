@@ -32,7 +32,7 @@ terkait:
 > Dokumen ini disusun mengikuti lingkaran itu — **delapan tahap berurutan**, tersedia dalam tiga bentuk: diagram (§2), **daftar langkah dalam kalimat (§2)**, dan rincian per tahap (§3). Daftar per rute ada di §7 untuk keperluan teknis, tapi itu lampiran, bukan kerangkanya.
 
 > [!warning] Dua realita yang belum bertemu
-> Sejak [[00-GROUND-TRUTH-MASTER]] ditetapkan, scope studi resmi adalah **2 stasiun** (Manggarai & Sudirman). Data contoh masih membawa 3 stasiun (yang ketiga placeholder "belum ditentukan"), dan Peta, Beranda, Rekomendasi & Metodologi masih menampilkannya. Insight sudah dikunci ke 2 stasiun sejak reskin; Rekomendasi masih memakai label lama "Stasiun A/B/C".
+> Sejak [[00-GROUND-TRUTH-MASTER]] ditetapkan, scope studi resmi adalah **2 stasiun** (Manggarai & Sudirman). Data contoh masih membawa 3 stasiun (yang ketiga placeholder "belum ditentukan"), dan Peta & Beranda masih menampilkannya. Insight sudah dikunci ke 2 stasiun sejak reskin; Rekomendasi masih memakai label lama "Stasiun A/B/C". Metodologi statis ilustratif — tidak merender data stasiun apa pun.
 >
 > Dokumen ini menulis **apa yang benar-benar muncul di layar**, bukan apa yang seharusnya. Setiap tempat yang terkena selisih ini ditandai ⚠️.
 
