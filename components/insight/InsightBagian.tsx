@@ -5,91 +5,89 @@
  * (`useInsight()`), tidak menghitung angka sendiri (kecuali posisi piksel di
  * dalam batang/kolom). Dipisah dari `app/insight/page.tsx` supaya halaman itu
  * tetap server component; hanya bagian yang butuh data ini yang client.
+ *
+ * Rupa: TELANJANG. Insight bukan majalah bersection seperti Beranda — ia satu
+ * esai yang mengalir. Grafik duduk langsung di kolom baca, dibatasi garis-
+ * rambut atas/bawah, tanpa kotak `.kartu`, tanpa border, tanpa latar. Palet
+ * tetap persis Beranda: `--data` untuk mark grafik + pembacaan instrumen,
+ * `--ink` untuk angka utama/kesimpulan, `--field` untuk kerja lapangan.
  */
 
-import { Fragment, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
 import { persen, ribuan, rupiahRingkas } from "@/lib/format";
 import { useInsight, type IsiSel } from "./InsightData";
 
 /* ---------------------------------------------------------------------------
- * Hero — kartu tinta ringkasan
+ * Ringkasan — panel garis-rambut datar di atas kertas (bukan kartu tinta)
  * ------------------------------------------------------------------------ */
 
-export function HeroKartu() {
+export function RingkasInsight() {
   const { sorotan, ringkas } = useInsight();
 
-  const angka = sorotan ? rupiahRingkas(sorotan.gap.p50) : "—";
-  const ringkasBaris: [string, string][] = [
+  const stat: [string, string][] = [
     ["Simpul diamati", ringkas ? ribuan(ringkas.simpulDiamati) : "—"],
     ["Struk terbaca", ringkas ? ribuan(ringkas.strukTerbaca) : "—"],
-    [
-      "Estimasi ditahan",
-      ringkas ? `${ribuan(ringkas.pintuDitahan)} pintu` : "—",
-    ],
+    ["Estimasi ditahan", ringkas ? `${ribuan(ringkas.pintuDitahan)} pintu` : "—"],
   ];
 
   return (
     <div
-      className="kartu ink-band"
-      style={{ background: "var(--ink)", overflow: "hidden" }}
+      style={{
+        marginTop: "var(--s5)",
+        borderTop: "1px solid var(--rule)",
+        borderBottom: "1px solid var(--rule)",
+        padding: "var(--s4) 0",
+      }}
     >
-      <div style={{ padding: "var(--s3)" }}>
-        <span className="eyebrow">Kesenjangan terbesar</span>
-        <div
-          className="fig"
-          style={{
-            font: "400 clamp(34px, 4.4vw, 50px)/1 var(--font-mono), ui-monospace, monospace",
-            letterSpacing: "-0.03em",
-            color: "var(--data)",
-            margin: "var(--s2) 0 0",
-          }}
-        >
-          {angka}
-          <span style={{ fontSize: "var(--t-small)", color: "var(--ink-faint)" }}>
-            {" "}
-            / hari
-          </span>
-        </div>
-        <p
-          style={{
-            margin: "var(--s2) 0 0",
-            fontSize: "var(--t-small)",
-            lineHeight: 1.55,
-            color: "var(--ink-muted)",
-            minHeight: "3em",
-          }}
-        >
-          {sorotan
-            ? `${sorotan.namaTitik}, ${sorotan.namaStasiun}. Potensi ${rupiahRingkas(
-                sorotan.potensi.p50,
-              )} lawan ${rupiahRingkas(
-                sorotan.tertangkap.p50,
-              )} yang tertangkap gerai di sisi itu.`
-            : "Memuat bacaan lapangan…"}
-        </p>
+      <span className="eyebrow">Kesenjangan terbesar · per hari kerja</span>
+      <div
+        className="fig"
+        style={{
+          font: "400 clamp(40px, 6vw, 68px)/1 var(--font-mono), ui-monospace, monospace",
+          letterSpacing: "-0.03em",
+          color: "var(--ink)",
+          margin: "var(--s2) 0 0",
+        }}
+      >
+        {sorotan ? rupiahRingkas(sorotan.gap.p50) : "—"}
+        <span style={{ fontSize: "var(--t-small)", color: "var(--ink-faint)" }}>
+          {" "}
+          / hari
+        </span>
       </div>
       <div
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: 1,
-          background: "var(--rule)",
+          marginTop: 6,
+          fontSize: "var(--t-small)",
+          color: "var(--ink-muted)",
         }}
       >
-        {ringkasBaris.map(([k, v]) => (
-          <div
-            key={k}
-            style={{ background: "var(--ink)", padding: "var(--s3) var(--s2)" }}
-          >
-            <div className="eyebrow" style={{ fontSize: 9 }}>
-              {k}
-            </div>
+        {sorotan
+          ? `${sorotan.namaTitik}, ${sorotan.namaStasiun}`
+          : "Memuat bacaan lapangan…"}
+      </div>
+
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "var(--s5)",
+          marginTop: "var(--s4)",
+          paddingTop: "var(--s3)",
+          borderTop: "1px solid var(--rule)",
+        }}
+      >
+        {stat.map(([k, v]) => (
+          <div key={k}>
             <div
               className="fig"
-              style={{ fontSize: 20, color: "var(--data)", marginTop: 8 }}
+              style={{ fontSize: "clamp(18px, 2vw, 22px)", color: "var(--ink-2)" }}
             >
               {v}
+            </div>
+            <div className="eyebrow" style={{ marginTop: 4 }}>
+              {k}
             </div>
           </div>
         ))}
@@ -104,11 +102,10 @@ export function HeroKartu() {
 
 export function BatangBersarang() {
   const { sorotan } = useInsight();
-
   const isi = sorotan?.isiPersen ?? 0;
 
   return (
-    <div className="kartu" style={{ padding: "var(--s4)" }}>
+    <div style={{ borderTop: "1px solid var(--rule)", paddingTop: "var(--s3)" }}>
       <div
         style={{
           display: "flex",
@@ -169,9 +166,7 @@ export function BatangBersarang() {
           }}
         >
           <span>Rp 0</span>
-          <span>
-            {sorotan ? rupiahRingkas(sorotan.potensi.p50) : "—"} potensi
-          </span>
+          <span>{sorotan ? rupiahRingkas(sorotan.potensi.p50) : "—"} potensi</span>
         </div>
       </div>
 
@@ -204,17 +199,13 @@ function Kaki({
 }) {
   return (
     <div>
-      <div
-        className="eyebrow"
-        style={sorot ? { color: "var(--data)" } : undefined}
-      >
-        {label}
-      </div>
+      <div className="eyebrow">{label}</div>
       <div
         className="fig"
         style={{
           fontSize: sorot ? "clamp(21px, 2.6vw, 29px)" : "clamp(17px, 2vw, 21px)",
-          color: sorot ? "var(--data)" : "var(--ink-2)",
+          fontWeight: sorot ? 700 : 400,
+          color: sorot ? "var(--ink)" : "var(--ink-2)",
           marginTop: 6,
           whiteSpace: "nowrap",
         }}
@@ -246,7 +237,7 @@ export function KolomSlot() {
   );
 
   return (
-    <div className="kartu" style={{ padding: "var(--s4)" }}>
+    <div style={{ borderTop: "1px solid var(--rule)", paddingTop: "var(--s4)" }}>
       <div
         style={{
           display: "flex",
@@ -273,7 +264,7 @@ export function KolomSlot() {
               style={{
                 fontSize: "var(--t-micro)",
                 textAlign: "center",
-                color: i === puncak ? "var(--data)" : "var(--ink-faint)",
+                color: i === puncak ? "var(--ink-2)" : "var(--ink-faint)",
               }}
             >
               {rupiahRingkas(s.nilai)}
@@ -317,7 +308,8 @@ export function KolomSlot() {
           margin: "var(--s3) 0 0",
           fontSize: "var(--t-small)",
           lineHeight: 1.55,
-          color: "var(--ink-2)",
+          color: "var(--ink-muted)",
+          maxWidth: "60ch",
         }}
       >
         Kesenjangan per slot di {sorotan?.namaTitik ?? "pintu terbesar"}, pintu
@@ -329,7 +321,7 @@ export function KolomSlot() {
 }
 
 /* ---------------------------------------------------------------------------
- * 2 · Daftar temuan bernomor + kartu sampel tipis
+ * 2 · Daftar temuan bernomor + catatan pinggir sampel tipis
  * ------------------------------------------------------------------------ */
 
 export function DaftarTemuan() {
@@ -380,7 +372,7 @@ export function DaftarTemuan() {
       ];
 
   return (
-    <div>
+    <div style={{ marginTop: "var(--s5)" }}>
       {items.map((t, i) => (
         <div
           key={i}
@@ -389,7 +381,8 @@ export function DaftarTemuan() {
             gridTemplateColumns: "2.5ch 1fr",
             gap: "var(--s3)",
             padding: "var(--s3) 0",
-            borderTop: i === 0 ? undefined : "1px solid var(--rule)",
+            borderTop: "1px solid var(--rule)",
+            maxWidth: "64ch",
           }}
         >
           <span
@@ -421,20 +414,19 @@ export function DaftarTemuan() {
           </div>
         </div>
       ))}
+
       <div
-        className="kartu"
         style={{
-          background: "var(--brand-wash)",
-          padding: "var(--s3)",
-          marginTop: "var(--s3)",
+          marginTop: "var(--s4)",
+          borderLeft: "2px solid var(--field)",
+          paddingLeft: "var(--s3)",
+          maxWidth: "60ch",
         }}
       >
-        <div className="eyebrow" style={{ color: "var(--brand-strong)" }}>
-          Estimasi ditahan
-        </div>
+        <span className="tag tag-field">Estimasi ditahan</span>
         <p
           style={{
-            margin: "8px 0 0",
+            margin: "var(--s2) 0 0",
             fontSize: "var(--t-small)",
             lineHeight: 1.55,
             color: "var(--ink-2)",
@@ -450,14 +442,13 @@ export function DaftarTemuan() {
 }
 
 /* ---------------------------------------------------------------------------
- * 3 · Matriks kategori × pintu terbesar tiap simpul
+ * 3 · Matriks kategori × pintu terbesar tiap simpul — tabel editorial polos
  * ------------------------------------------------------------------------ */
 
-const selMatriks: CSSProperties = {
-  background: "var(--surface)",
-  padding: "var(--s3)",
-  display: "flex",
-  alignItems: "center",
+const sel: CSSProperties = {
+  padding: "var(--s3) var(--s3) var(--s3) 0",
+  textAlign: "left",
+  verticalAlign: "baseline",
 };
 
 function Status({ v }: { v: IsiSel }) {
@@ -470,19 +461,34 @@ function Status({ v }: { v: IsiSel }) {
   return <span style={{ fontSize: "var(--t-small)", ...gaya[v] }}>{v}</span>;
 }
 
+function KepalaKolom({ stasiun, titik }: { stasiun: string; titik?: string }) {
+  return (
+    <>
+      <span className="eyebrow">{stasiun}</span>
+      {titik && (
+        <span
+          style={{
+            display: "block",
+            marginTop: 3,
+            fontSize: "var(--t-micro)",
+            fontWeight: 400,
+            letterSpacing: "normal",
+            textTransform: "none",
+            color: "var(--ink-faint)",
+          }}
+        >
+          {titik}
+        </span>
+      )}
+    </>
+  );
+}
+
 export function MatriksKategori() {
   const { matriks } = useInsight();
 
-  const kepala = [
-    "Kategori",
-    matriks
-      ? `${matriks.kolomA.namaStasiun} · ${matriks.kolomA.namaTitik}`
-      : "Simpul pertama",
-    matriks
-      ? `${matriks.kolomB.namaStasiun} · ${matriks.kolomB.namaTitik}`
-      : "Simpul kedua",
-    "Permintaan terbaca",
-  ];
+  const kolA = matriks?.kolomA;
+  const kolB = matriks?.kolomB;
   const baris =
     matriks?.baris ??
     ["F&B", "Ritel", "Apotek", "Jasa", "Lainnya"].map((kategori) => ({
@@ -493,51 +499,67 @@ export function MatriksKategori() {
     }));
 
   return (
-    <div
+    <table
       style={{
-        display: "grid",
-        gridTemplateColumns:
-          "minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1.1fr)",
-        gap: 1,
-        background: "var(--rule)",
-        borderRadius: "var(--r-sm)",
-        overflow: "hidden",
+        width: "100%",
+        borderCollapse: "collapse",
+        marginTop: "var(--s4)",
       }}
     >
-      {kepala.map((h) => (
-        <div
-          key={h}
-          className="eyebrow"
-          style={{ background: "var(--paper)", padding: "var(--s2) var(--s3)" }}
-        >
-          {h}
-        </div>
-      ))}
-
-      {baris.map((row) => (
-        <Fragment key={row.kategori}>
-          <div style={selMatriks}>
-            <span style={{ fontSize: "var(--t-small)", fontWeight: 600 }}>
-              {row.kategori}
-            </span>
-          </div>
-          <div style={selMatriks}>
-            <Status v={row.a} />
-          </div>
-          <div style={selMatriks}>
-            <Status v={row.b} />
-          </div>
-          <div style={selMatriks}>
-            <span
-              className="fig"
-              style={{ fontSize: "var(--t-small)", color: "var(--data)" }}
-            >
-              {row.permintaan === null ? "—" : persen(row.permintaan, 1)}
-            </span>
-          </div>
-        </Fragment>
-      ))}
-    </div>
+      <colgroup>
+        <col style={{ width: "26%" }} />
+        <col style={{ width: "27%" }} />
+        <col style={{ width: "27%" }} />
+        <col style={{ width: "20%" }} />
+      </colgroup>
+      <thead>
+        <tr>
+          <th style={{ ...sel, borderBottom: "1px solid var(--rule-strong)" }}>
+            <span className="eyebrow">Kategori</span>
+          </th>
+          <th style={{ ...sel, borderBottom: "1px solid var(--rule-strong)" }}>
+            <KepalaKolom
+              stasiun={kolA?.namaStasiun ?? "Simpul pertama"}
+              titik={kolA?.namaTitik}
+            />
+          </th>
+          <th style={{ ...sel, borderBottom: "1px solid var(--rule-strong)" }}>
+            <KepalaKolom
+              stasiun={kolB?.namaStasiun ?? "Simpul kedua"}
+              titik={kolB?.namaTitik}
+            />
+          </th>
+          <th style={{ ...sel, borderBottom: "1px solid var(--rule-strong)" }}>
+            <span className="eyebrow">Permintaan</span>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {baris.map((row) => (
+          <tr key={row.kategori}>
+            <td style={{ ...sel, borderBottom: "1px solid var(--rule)" }}>
+              <span style={{ fontSize: "var(--t-small)", fontWeight: 600 }}>
+                {row.kategori}
+              </span>
+            </td>
+            <td style={{ ...sel, borderBottom: "1px solid var(--rule)" }}>
+              <Status v={row.a} />
+            </td>
+            <td style={{ ...sel, borderBottom: "1px solid var(--rule)" }}>
+              <Status v={row.b} />
+            </td>
+            <td style={{ ...sel, borderBottom: "1px solid var(--rule)" }}>
+              <span
+                className="fig"
+                style={{ fontSize: "var(--t-small)", color: "var(--data)" }}
+              >
+                {row.permintaan === null ? "—" : persen(row.permintaan, 1)}
+              </span>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
 
