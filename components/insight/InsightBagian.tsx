@@ -142,7 +142,7 @@ export function KpiStrip() {
     {
       fig: cakupan ? ribuan(cakupan.pintuDitahan) : "—",
       label: "Pintu ditahan · sampel tipis",
-      tint: "var(--paper-2)",
+      tint: "var(--data-wash)",
     },
   ];
 
@@ -877,6 +877,7 @@ export function MatriksKategori() {
         borderRadius: "var(--r-md)",
         overflow: "hidden",
         border: "1px solid var(--rule)",
+        background: "var(--surface)",
       }}
     >
       <div
@@ -885,7 +886,8 @@ export function MatriksKategori() {
           gridTemplateColumns: KOLOM,
           gap: "var(--s2)",
           padding: "var(--s3)",
-          background: "var(--paper-2)",
+          background: "var(--data-wash)",
+          borderBottom: "1px solid var(--rule)",
         }}
       >
         <span className="eyebrow">Kategori</span>
@@ -910,8 +912,8 @@ export function MatriksKategori() {
             gap: "var(--s2)",
             padding: "var(--s2) var(--s3)",
             alignItems: "center",
-            background: i % 2 ? "var(--paper-2)" : "var(--surface)",
-            borderTop: "1px solid var(--rule)",
+            background: i % 2 ? "var(--data-wash)" : "var(--surface)",
+            borderTop: i === 0 ? undefined : "1px solid var(--rule)",
           }}
         >
           <span style={{ fontSize: "var(--t-small)", fontWeight: 600 }}>
