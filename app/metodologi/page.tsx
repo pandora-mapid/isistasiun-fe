@@ -128,15 +128,16 @@ export default function MetodologiPage() {
 
       {/* ============================================================
           Hero — dua kolom. Tulisan kiri, kartu tinta persamaan kanan.
+          Grid, tipografi & jarak disamakan dengan hero Insight.
           ============================================================ */}
       <section
         className="reveal"
         style={{
           display: "grid",
           gridTemplateColumns:
-            "minmax(0, 1fr) minmax(0, clamp(360px, 32vw, 460px))",
+            "minmax(0, 1fr) minmax(0, clamp(340px, 30vw, 430px))",
           gap: "var(--s4)",
-          alignItems: "end",
+          alignItems: "start",
           padding: "clamp(28px, 3.5vw, 52px) var(--page-x) var(--s4)",
         }}
       >
@@ -144,9 +145,10 @@ export default function MetodologiPage() {
           <Lencana label="Protokol pengukuran" warna="brand" dot />
           <h1
             style={{
-              font: "800 clamp(30px, 3.6vw, 52px)/1.08 var(--font-inter), system-ui, sans-serif",
-              letterSpacing: "-0.03em",
+              font: "800 var(--t-h1)/1.04 var(--font-inter), system-ui, sans-serif",
+              letterSpacing: "-0.025em",
               margin: "var(--s3) 0 0",
+              maxWidth: "24ch",
               textWrap: "balance",
             }}
           >
@@ -155,9 +157,9 @@ export default function MetodologiPage() {
           <p
             style={{
               margin: "var(--s3) 0 0",
-              maxWidth: "56ch",
-              fontSize: "var(--t-lead)",
-              lineHeight: 1.62,
+              maxWidth: "54ch",
+              fontSize: "var(--t-body)",
+              lineHeight: 1.6,
               color: "var(--ink-2)",
             }}
           >
@@ -169,75 +171,40 @@ export default function MetodologiPage() {
         </div>
 
         <div
-          className="ink-band"
+          className="kartu ink-band"
           style={{
             background: "var(--ink)",
-            borderRadius: "var(--r-md)",
-            padding: "var(--s4)",
+            padding: "var(--s3)",
+            overflow: "hidden",
           }}
         >
           <span className="eyebrow">Persamaan potensi</span>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: 10,
-              marginTop: "var(--s3)",
-            }}
-          >
-            <Suku>F</Suku>
-            <Operator>×</Operator>
-            <Suku>E</Suku>
-            <Operator>×</Operator>
-            <Suku>C</Suku>
-            <Operator>×</Operator>
-            <Suku>V</Suku>
-            <Operator>=</Operator>
-            <span
-              className="fig"
+          <div style={{ marginTop: "var(--s3)" }}>
+            <Baris>
+              <Suku>F</Suku>
+              <Operator>×</Operator>
+              <Suku>E</Suku>
+              <Operator>×</Operator>
+              <Suku>C</Suku>
+              <Operator>×</Operator>
+              <Suku>V</Suku>
+              <Operator>=</Operator>
+              <Hasil>Potensi</Hasil>
+            </Baris>
+            <div
               style={{
-                padding: "9px 15px",
-                borderRadius: "var(--r-pill)",
-                background: "var(--paper)",
-                color: "var(--ink)",
-                font: "700 13px/1 var(--font-mono), ui-monospace, monospace",
+                height: 1,
+                background: "var(--rule)",
+                margin: "var(--s3) 0",
               }}
-            >
-              Potensi belanja
-            </span>
-          </div>
-          <div
-            style={{
-              height: 1,
-              background: "var(--rule)",
-              margin: "var(--s3) 0",
-            }}
-          />
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: 10,
-            }}
-          >
-            <Pil>Potensi</Pil>
-            <Operator>−</Operator>
-            <Pil>Tertangkap</Pil>
-            <Operator>=</Operator>
-            <span
-              className="fig"
-              style={{
-                padding: "9px 15px",
-                borderRadius: "var(--r-pill)",
-                background: "var(--data)",
-                color: "var(--ink)",
-                font: "700 13px/1 var(--font-mono), ui-monospace, monospace",
-              }}
-            >
-              Kesenjangan
-            </span>
+            />
+            <Baris kiri>
+              <Suku sm>Potensi</Suku>
+              <Operator>−</Operator>
+              <Suku sm>Tertangkap</Suku>
+              <Operator>=</Operator>
+              <Hasil data>Kesenjangan</Hasil>
+            </Baris>
           </div>
           <p
             style={{
@@ -286,10 +253,8 @@ export default function MetodologiPage() {
                 <span
                   className="fig"
                   style={{
-                    fontSize: "clamp(24px, 2.6vw, 34px)",
-                    fontWeight: 200,
-                    lineHeight: 1,
-                    letterSpacing: "-0.03em",
+                    font: "400 clamp(23px, 2.4vw, 30px)/1 var(--font-mono), ui-monospace, monospace",
+                    letterSpacing: "-0.02em",
                     color: "var(--ink-faint)",
                   }}
                 >
@@ -324,7 +289,8 @@ export default function MetodologiPage() {
       </section>
 
       {/* ============================================================
-          Panel transparansi — foto struk → satu angka.
+          Panel transparansi — foto struk → satu angka. Grid kartu datar
+          langsung di atas kertas (bukan panel bersarang) — pola Insight.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <Kepala
@@ -335,11 +301,9 @@ export default function MetodologiPage() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "minmax(0, 300px) minmax(0, 1fr)",
-            gap: "var(--s3)",
-            background: "var(--tile-sky)",
-            borderRadius: "var(--r-md)",
-            padding: "var(--s4)",
+            gridTemplateColumns: "minmax(0, 320px) minmax(0, 1fr)",
+            gap: "var(--s2)",
+            alignItems: "start",
           }}
         >
           {/* KIRI — foto + kontak sheet */}
@@ -347,9 +311,8 @@ export default function MetodologiPage() {
             <div
               className="kartu"
               style={{
-                borderRadius: "var(--r-sm)",
                 overflow: "hidden",
-                height: 280,
+                height: 320,
                 background: "var(--surface)",
               }}
             >
@@ -392,16 +355,14 @@ export default function MetodologiPage() {
 
           {/* KANAN — hasil baca AI */}
           <div>
-            <div className="eyebrow" style={{ marginBottom: "var(--s2)" }}>
-              Hasil baca AI
-            </div>
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
                 gap: 1,
                 background: "var(--rule)",
-                borderRadius: "var(--r-sm)",
+                border: "1px solid var(--rule)",
+                borderRadius: "var(--r-md)",
                 overflow: "hidden",
               }}
             >
@@ -422,7 +383,8 @@ export default function MetodologiPage() {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  padding: "14px 16px",
+                  gap: "var(--s2)",
+                  padding: "var(--s2) var(--s3)",
                   background: "var(--data-wash)",
                   fontSize: "var(--t-small)",
                 }}
@@ -455,12 +417,12 @@ export default function MetodologiPage() {
             <div
               style={{
                 display: "flex",
-                gap: 11,
+                gap: "var(--s2)",
                 alignItems: "flex-start",
                 marginTop: "var(--s2)",
-                borderRadius: "var(--r-sm)",
+                borderRadius: "var(--r-md)",
                 background: "var(--field-wash)",
-                padding: "15px 17px",
+                padding: "var(--s3)",
                 fontSize: "var(--t-small)",
                 lineHeight: 1.55,
                 color: "var(--ink-2)",
@@ -468,7 +430,7 @@ export default function MetodologiPage() {
             >
               <span
                 className="dot"
-                style={{ background: "var(--field)", marginTop: 6 }}
+                style={{ background: "var(--field)", marginTop: 7 }}
               />
               <span>
                 Bila sampel satu kategori terlalu tipis, nilai V{" "}
@@ -481,183 +443,183 @@ export default function MetodologiPage() {
       </section>
 
       {/* ============================================================
-          Mengapa jawabannya rentang — histogram + kartu "yang dibuang".
+          Ketidakpastian & batas — histogram + kartu "yang dibuang".
           ============================================================ */}
-      <section
-        className="reveal"
-        style={{
-          ...seksi,
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)",
-          gap: "var(--s2)",
-        }}
-      >
-        <div style={tint("var(--data-wash)")}>
-          <div className="eyebrow" style={{ marginBottom: "var(--s2)" }}>
-            Sebaran hasil simulasi
-          </div>
-          <h2
-            style={{
-              font: "800 var(--t-h3)/1.12 var(--font-inter), system-ui, sans-serif",
-              letterSpacing: "-0.02em",
-              margin: "0 0 6px",
-            }}
-          >
-            Mengapa jawabannya rentang
-          </h2>
-          <p
-            style={{
-              fontSize: "var(--t-small)",
-              lineHeight: 1.6,
-              color: "var(--ink-muted)",
-              margin: "0 0 var(--s3)",
-              maxWidth: "48ch",
-            }}
-          >
-            Tiap variabel punya ketidakpastian sendiri. Setelah dikalikan,
-            ketidakpastiannya menumpuk — maka yang dilaporkan adalah rentang
-            P10–P90.
-          </p>
-          <svg
-            width="100%"
-            height="180"
-            viewBox="0 0 560 180"
-            preserveAspectRatio="xMidYMid meet"
-            style={{ display: "block", width: "100%", maxWidth: 620, margin: "0 auto" }}
-          >
-            {HISTO.map((b) => (
-              <rect
-                key={b.x}
-                x={b.x}
-                y={180 - b.h}
-                width={18}
-                height={b.h}
-                rx={2}
-                style={{ fill: WARNA_GRUP[b.grup] }}
+      <section className="reveal" style={seksi}>
+        <Kepala
+          kicker="Ketidakpastian & batas"
+          judul="Kenapa jawabannya rentang, dan apa yang dibuang."
+          catatan="Tiap variabel punya ketidakpastiannya sendiri; setelah dikalikan, yang jujur dilaporkan adalah P10–P90 — bukan satu angka."
+        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)",
+            gap: "var(--s2)",
+            alignItems: "start",
+          }}
+        >
+          {/* KIRI — sebaran simulasi */}
+          <div style={tint("var(--data-wash)")}>
+            <div className="eyebrow" style={{ marginBottom: "var(--s3)" }}>
+              Sebaran hasil simulasi
+            </div>
+            <svg
+              width="100%"
+              height="180"
+              viewBox="0 0 560 180"
+              preserveAspectRatio="xMidYMid meet"
+              style={{
+                display: "block",
+                width: "100%",
+                maxWidth: 620,
+                margin: "0 auto",
+              }}
+            >
+              {HISTO.map((b) => (
+                <rect
+                  key={b.x}
+                  x={b.x}
+                  y={180 - b.h}
+                  width={18}
+                  height={b.h}
+                  rx={2}
+                  style={{ fill: WARNA_GRUP[b.grup] }}
+                />
+              ))}
+              <line
+                x1={92}
+                y1={0}
+                x2={92}
+                y2={180}
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                style={{ stroke: "var(--ink)" }}
               />
-            ))}
-            <line
-              x1={92}
-              y1={0}
-              x2={92}
-              y2={180}
-              strokeWidth={1.5}
-              strokeDasharray="4 4"
-              style={{ stroke: "var(--ink)" }}
-            />
-            <line
-              x1={233}
-              y1={0}
-              x2={233}
-              y2={180}
-              strokeWidth={2}
-              style={{ stroke: "var(--ink)" }}
-            />
-            <line
-              x1={396}
-              y1={0}
-              x2={396}
-              y2={180}
-              strokeWidth={1.5}
-              strokeDasharray="4 4"
-              style={{ stroke: "var(--ink)" }}
-            />
-          </svg>
-          <div
-            className="fig"
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: 12,
-              fontSize: "var(--t-micro)",
-            }}
-          >
-            <span style={{ color: "var(--ink-muted)" }}>P10</span>
-            <span style={{ fontWeight: 700, color: "var(--ink)" }}>median</span>
-            <span style={{ color: "var(--ink-muted)" }}>P90</span>
-          </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              marginTop: "var(--s3)",
-              flexWrap: "wrap",
-            }}
-          >
-            {["10.000 iterasi", "per pintu · per slot", "tanpa penghalusan antar jam"].map(
-              (t) => (
+              <line
+                x1={233}
+                y1={0}
+                x2={233}
+                y2={180}
+                strokeWidth={2}
+                style={{ stroke: "var(--ink)" }}
+              />
+              <line
+                x1={396}
+                y1={0}
+                x2={396}
+                y2={180}
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                style={{ stroke: "var(--ink)" }}
+              />
+            </svg>
+            <div
+              className="fig"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "var(--s2)",
+                paddingTop: "var(--s2)",
+                borderTop: "1px solid var(--rule)",
+                fontSize: "var(--t-micro)",
+              }}
+            >
+              <span style={{ color: "var(--ink-muted)" }}>P10</span>
+              <span style={{ fontWeight: 700, color: "var(--ink)" }}>
+                median
+              </span>
+              <span style={{ color: "var(--ink-muted)" }}>P90</span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--s2)",
+                marginTop: "var(--s3)",
+                flexWrap: "wrap",
+              }}
+            >
+              {[
+                "10.000 iterasi",
+                "per pintu · per slot",
+                "tanpa penghalusan antar jam",
+              ].map((t) => (
                 <span key={t} className="eyebrow-chip eyebrow">
                   {t}
                 </span>
-              ),
-            )}
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div
-          className="ink-band"
-          style={{
-            background: "var(--ink)",
-            borderRadius: "var(--r-md)",
-            padding: "var(--s4)",
-            display: "flex",
-            flexDirection: "column",
-          }}
-        >
-          <div className="eyebrow" style={{ marginBottom: "var(--s3)" }}>
-            Yang kami buang, dan alasannya
-          </div>
+          {/* KANAN — yang dibuang */}
           <div
+            className="kartu ink-band"
             style={{
+              background: "var(--ink)",
+              padding: "var(--s3)",
               display: "flex",
               flexDirection: "column",
-              gap: "var(--s3)",
-              flex: 1,
             }}
           >
-            {BUANG.map((b) => (
-              <div
-                key={b.judul}
-                style={{ display: "flex", gap: 14, alignItems: "flex-start" }}
-              >
-                <span
-                  className="dot"
-                  style={{ background: b.warna, marginTop: 7 }}
-                />
-                <div>
-                  <div
-                    style={{
-                      fontSize: "var(--t-small)",
-                      fontWeight: 600,
-                      color: "var(--paper)",
-                    }}
-                  >
-                    {b.judul}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "var(--t-small)",
-                      lineHeight: 1.55,
-                      color: "var(--ink-muted)",
-                      marginTop: 4,
-                    }}
-                  >
-                    {b.isi}
+            <div className="eyebrow" style={{ marginBottom: "var(--s3)" }}>
+              Yang kami buang, dan alasannya
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--s3)",
+                flex: 1,
+              }}
+            >
+              {BUANG.map((b) => (
+                <div
+                  key={b.judul}
+                  style={{
+                    display: "flex",
+                    gap: "var(--s2)",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <span
+                    className="dot"
+                    style={{ background: b.warna, marginTop: 7 }}
+                  />
+                  <div>
+                    <div
+                      style={{
+                        fontSize: "var(--t-small)",
+                        fontWeight: 600,
+                        color: "var(--paper)",
+                      }}
+                    >
+                      {b.judul}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "var(--t-small)",
+                        lineHeight: 1.55,
+                        color: "var(--ink-muted)",
+                        marginTop: 4,
+                      }}
+                    >
+                      {b.isi}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-          <div
-            style={{
-              display: "flex",
-              gap: 10,
-              marginTop: "var(--s4)",
-              flexWrap: "wrap",
-            }}
-          >
-            <button className="b bp">Unduh protokol pencacahan</button>
-            <button className="b bs">Catatan keterbatasan</button>
+              ))}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                marginTop: "var(--s4)",
+                flexWrap: "wrap",
+              }}
+            >
+              <button className="b bp">Unduh protokol pencacahan</button>
+              <button className="b bs">Catatan keterbatasan</button>
+            </div>
           </div>
         </div>
       </section>
@@ -679,11 +641,7 @@ export default function MetodologiPage() {
         </span>
         <Link
           href="/rekomendasi"
-          style={{
-            fontSize: "var(--t-small)",
-            fontWeight: 600,
-            color: "var(--ink)",
-          }}
+          style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink)" }}
         >
           Lanjut ke rekomendasi →
         </Link>
@@ -692,14 +650,56 @@ export default function MetodologiPage() {
   );
 }
 
-/* --- Potongan kecil untuk kartu persamaan di hero -------------------------- */
+/* --- Kartu "Persamaan potensi" di hero ------------------------------------- */
+
+/**
+ * Ukuran font tiap bagian persamaan, dalam px. **Atur di sini** — ini satu-
+ * satunya tempatnya. `suku` = huruf F/E/C/V (baris 1); `sukuBaris2` = kata
+ * "Potensi"/"Tertangkap" (baris 2); `hasil` = pil hasil "Potensi" & "Kesenjangan";
+ * `operator` = tanda × − =.
+ */
+const FONT_PERSAMAAN = {
+  suku: 15,
+  sukuBaris2: 13,
+  hasil: 14,
+  operator: 13,
+};
+
+/**
+ * Satu baris persamaan. Default `space-between` (membentang selebar kartu);
+ * `kiri` mengunci ke kiri (sisi kanan boleh kosong). `flex-wrap` supaya turun
+ * ke bawah — bukan terpotong — kalau kartunya sempit.
+ */
+function Baris({
+  children,
+  kiri = false,
+}: {
+  children: ReactNode;
+  kiri?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: kiri ? "flex-start" : "space-between",
+        alignItems: "center",
+        gap: kiri ? "8px 8px" : "8px 4px",
+        flexWrap: "wrap",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
 function Operator({ children }: { children: string }) {
   return (
     <span
+      className="fig"
       style={{
         color: "var(--ink-faint)",
-        font: "700 15px/1 var(--font-inter), system-ui, sans-serif",
+        fontSize: FONT_PERSAMAAN.operator,
+        flex: "none",
       }}
     >
       {children}
@@ -707,16 +707,17 @@ function Operator({ children }: { children: string }) {
   );
 }
 
-function Suku({ children }: { children: string }) {
+function Suku({ children, sm = false }: { children: string; sm?: boolean }) {
   return (
     <span
       className="fig"
       style={{
-        padding: "9px 15px",
+        flex: "none",
+        padding: sm ? "7px 12px" : "8px 13px",
         borderRadius: "var(--r-pill)",
         background: "rgba(250, 248, 244, 0.1)",
         color: "var(--data-mid)",
-        font: "700 15px/1 var(--font-mono), ui-monospace, monospace",
+        font: `700 ${sm ? FONT_PERSAMAAN.sukuBaris2 : FONT_PERSAMAAN.suku}px/1 var(--font-mono), ui-monospace, monospace`,
       }}
     >
       {children}
@@ -724,15 +725,23 @@ function Suku({ children }: { children: string }) {
   );
 }
 
-function Pil({ children }: { children: string }) {
+function Hasil({
+  children,
+  data = false,
+}: {
+  children: string;
+  data?: boolean;
+}) {
   return (
     <span
+      className="fig"
       style={{
-        padding: "9px 15px",
+        flex: "none",
+        padding: "7px 12px",
         borderRadius: "var(--r-pill)",
-        background: "rgba(250, 248, 244, 0.1)",
-        color: "var(--ink-muted)",
-        font: "600 13px/1 var(--font-inter), system-ui, sans-serif",
+        background: data ? "var(--data)" : "var(--paper)",
+        color: "var(--ink)",
+        font: `700 ${FONT_PERSAMAAN.hasil}px/1 var(--font-mono), ui-monospace, monospace`,
       }}
     >
       {children}
@@ -755,7 +764,7 @@ function BarisAtribut({
         display: "flex",
         justifyContent: "space-between",
         gap: "var(--s2)",
-        padding: "13px 16px",
+        padding: "var(--s2) var(--s3)",
         background: "var(--surface)",
         fontSize: "var(--t-small)",
       }}
@@ -780,13 +789,13 @@ function KartuStat({
   return (
     <div
       style={{
-        borderRadius: "var(--r-sm)",
+        borderRadius: "var(--r-md)",
         background: "var(--surface)",
         border: "1px solid var(--rule)",
-        padding: "var(--s2)",
+        padding: "var(--s2) var(--s3)",
       }}
     >
-      <div className="eyebrow" style={{ fontSize: 9, marginBottom: 9 }}>
+      <div className="eyebrow" style={{ fontSize: 9, marginBottom: 8 }}>
         {label}
       </div>
       <div className="fig" style={{ fontSize: 19, color: "var(--ink)" }}>
@@ -798,7 +807,7 @@ function KartuStat({
           style={{
             display: "block",
             height: 5,
-            marginTop: 10,
+            marginTop: 8,
             background: "var(--rule)",
             overflow: "hidden",
           }}
