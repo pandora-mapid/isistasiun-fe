@@ -23,6 +23,7 @@ import {
   missingCategories,
   pointsOfStation,
   slotOf,
+  totalMetricFor,
   totalMetrics,
 } from "@/lib/analytics/select";
 import { CATEGORIES, DEFAULT_SLOT, SLOTS, slotLabel } from "@/lib/data/dimensions";
@@ -46,11 +47,38 @@ export type IsiInsight = {
     tertangkap: Range;
     /** Bagian potensi yang tertangkap, 0–100 — dipakai mengisi batang. */
     isiPersen: number;
+    /** Porsi potensi yang tertangkap gerai, 0–100. `null` bila tak terhitung. */
+    capturePersen: number | null;
   } | null;
-  ringkas: {
+  /** Angka cakupan pencacahan — dasar bukti di balik seluruh halaman. */
+  cakupan: {
     simpulDiamati: number;
+    pintuDiamati: number;
     strukTerbaca: number;
+    slot: number;
+    kategori: number;
     pintuDitahan: number;
+  } | null;
+  /** Semua titik dalam cakupan, terurut dari kesenjangan harian terbesar. */
+  peringkat: {
+    namaStasiun: string;
+    namaTitik: string;
+    gap: Range;
+    potensi: Range;
+    tertangkap: Range;
+    capturePersen: number | null;
+    sampelTipis: boolean;
+  }[];
+  /** Uraian F × E × C × V pada slot puncak titik sorotan. */
+  instrumen: {
+    F: number;
+    E: number;
+    C: number;
+    V: number;
+    jam: string;
+    slotLabel: string;
+    namaTitik: string;
+    namaStasiun: string;
   } | null;
   /** Kesenjangan p50 tiap slot di titik sorotan, satu skala bersama. */
   profilSlot: {
@@ -87,6 +115,8 @@ export type IsiInsight = {
       a: IsiSel;
       b: IsiSel;
       permintaan: number | null;
+      /** Kesenjangan kategori ini pada slot pagi di pintu kolom pertama. */
+      menahan: number | null;
     }[];
   } | null;
   jejak: { pipeline: string; dibuat: string; jenisHari: string } | null;
@@ -96,7 +126,9 @@ const KOSONG: IsiInsight = {
   siap: false,
   error: null,
   sorotan: null,
-  ringkas: null,
+  cakupan: null,
+  peringkat: [],
+  instrumen: null,
   profilSlot: [],
   sampelTipis: null,
   temuan: null,
@@ -164,6 +196,19 @@ export function InsightData({ children }: { children: ReactNode }) {
           )
         : 0;
 
+    const capturePersen =
+      sorotanMetric &&
+      sorotanMetric.potensi.p50 &&
+      sorotanMetric.tertangkap.p50 !== null
+        ? Math.min(
+            100,
+            Math.max(
+              0,
+              (sorotanMetric.tertangkap.p50 / sorotanMetric.potensi.p50) * 100,
+            ),
+          )
+        : null;
+
     const sorotan =
       sorotanMetric && sorotanPoint
         ? {
@@ -173,19 +218,46 @@ export function InsightData({ children }: { children: ReactNode }) {
             potensi: sorotanMetric.potensi,
             tertangkap: sorotanMetric.tertangkap,
             isiPersen,
+            capturePersen,
           }
         : null;
 
-    // --- Ringkasan hero -----------------------------------------------
+    // --- Cakupan pencacahan ------------------------------------------
     const strukTerbaca = scoped.points.reduce(
       (t, p) => t + p.evidence.struk_terbaca,
       0,
     );
-    const ringkas = {
+    const cakupan = {
       simpulDiamati: new Set(scoped.points.map((p) => p.station_id)).size,
+      pintuDiamati: scoped.points.length,
       strukTerbaca,
+      slot: SLOTS.length,
+      kategori: CATEGORIES.length,
       pintuDitahan: scoped.points.filter((p) => p.sampel_tipis).length,
     };
+
+    // --- Peringkat pintu (semua titik cakupan, kesenjangan harian) ---
+    const peringkat = scoped.points
+      .map((p) => {
+        const m = metrics.get(p.point_id) ?? totalMetricFor(p);
+        const cap =
+          m.potensi.p50 && m.tertangkap.p50 !== null
+            ? Math.min(
+                100,
+                Math.max(0, (m.tertangkap.p50 / m.potensi.p50) * 100),
+              )
+            : null;
+        return {
+          namaStasiun: namaStasiun(p.station_id),
+          namaTitik: labelTitik(p.point_id),
+          gap: m.gap,
+          potensi: m.potensi,
+          tertangkap: m.tertangkap,
+          capturePersen: cap,
+          sampelTipis: p.sampel_tipis,
+        };
+      })
+      .sort((a, b) => (b.gap.p50 ?? -1) - (a.gap.p50 ?? -1));
 
     // --- Profil slot titik sorotan -----------------------------------
     const gapSlot = SLOTS.map((s) => ({
@@ -218,6 +290,26 @@ export function InsightData({ children }: { children: ReactNode }) {
         (g.nilai ?? -1) > (gapSlot[best]?.nilai ?? -1) ? i : best,
       0,
     );
+
+    // --- Instrumen F × E × C × V pada slot puncak titik sorotan ------
+    const puncakSlot = SLOTS[slotPuncakIdx] ?? SLOTS[0];
+    const varPuncak =
+      sorotanPoint && puncakSlot
+        ? (slotOf(sorotanPoint, puncakSlot.key)?.variables ?? null)
+        : null;
+    const instrumen =
+      varPuncak && sorotanPoint && puncakSlot
+        ? {
+            F: varPuncak.F,
+            E: varPuncak.E,
+            C: varPuncak.C,
+            V: varPuncak.V,
+            jam: puncakSlot.jam,
+            slotLabel: puncakSlot.label,
+            namaTitik: labelTitik(sorotanPoint.point_id),
+            namaStasiun: namaStasiun(sorotanPoint.station_id),
+          }
+        : null;
     const kosongCat = sorotanPoint
       ? missingCategories(sorotanPoint, DEFAULT_SLOT).find(
           (c) => c.gerai_count === 0,
@@ -293,6 +385,7 @@ export function InsightData({ children }: { children: ReactNode }) {
                 a: ember(a?.gerai_count),
                 b: ember(b?.gerai_count),
                 permintaan: a?.demand_share ?? b?.demand_share ?? null,
+                menahan: a?.gap.p50 ?? b?.gap.p50 ?? null,
               };
             }),
           }
@@ -302,7 +395,9 @@ export function InsightData({ children }: { children: ReactNode }) {
       siap: true,
       error,
       sorotan,
-      ringkas,
+      cakupan,
+      peringkat,
+      instrumen,
       profilSlot,
       sampelTipis,
       temuan,
