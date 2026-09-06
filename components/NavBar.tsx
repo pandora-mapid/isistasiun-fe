@@ -23,10 +23,10 @@ const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
  * Colours come from `--nav-*` custom properties whose defaults, set in
  * `globals.css`, are the exact literals this file used to hardcode — so every
  * screen that hasn't been restyled renders pixel-identically. A screen that
- * *has* been restyled (Beranda, Insight, Metodologi — every `.paper-canvas`
- * screen) overrides those variables inside its own scope. That is deliberately
- * not a second `NavBar`: one nav, one set of markup, repainted by whatever page
- * it lands on.
+ * *has* been restyled (Beranda, Insight, Metodologi, Rekomendasi — every
+ * `.paper-canvas` screen) overrides those variables inside its own scope. That
+ * is deliberately not a second `NavBar`: one nav, one set of markup, repainted
+ * by whatever page it lands on.
  */
 function Brand() {
   return (
@@ -94,9 +94,9 @@ function NavLinks({ active }: { active: NavKey }) {
  * Shape (radius/margin/background/shadow/border-width) travels through the
  * same `--nav-*` custom-property seam as the colours above, with defaults
  * that reproduce today's plain border-bottom row exactly — so a screen that
- * hasn't opted in (Peta, Rekomendasi) stays pixel-identical. The `.paper-canvas`
- * scope (Beranda, Insight, Metodologi) overrides them, turning this same markup
- * into a floating pill bar without a second NavBar existing anywhere. */
+ * hasn't opted in (Peta) stays pixel-identical. The `.paper-canvas` scope
+ * (Beranda, Insight, Metodologi, Rekomendasi) overrides them, turning this same
+ * markup into a floating pill bar without a second NavBar existing anywhere. */
 export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
   return (
     <div
