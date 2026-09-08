@@ -11,6 +11,8 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { Domain } from "@/lib/analytics/select";
+import type { RetailLocation } from "@/lib/data/retail";
+import { retailCircleLayer, retailLabelLayer } from "@/lib/map/retail-style";
 import type {
   IsochroneProps,
   ObservationPointProps,
@@ -71,6 +73,10 @@ type Props = {
    * bergerak. Dipakai legenda untuk menggambar batang skala yang sungguhan.
    */
   onScaleChange?: (metersPerPixel: number) => void;
+  stationTarget?: { longitude: number; latitude: number; zoom?: number } | null;
+  retailLocations: FeatureCollection<Point, RetailLocation>;
+  selectedRetailId: string | null;
+  onSelectRetail: (location: RetailLocation) => void;
 };
 
 /** Batas menunggu style basemap sebelum dianggap gagal. */
@@ -187,6 +193,10 @@ export function MapCanvas({
   onSelectPoint,
   dataError = null,
   onScaleChange,
+  stationTarget,
+  retailLocations,
+  selectedRetailId,
+  onSelectRetail,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -196,6 +206,7 @@ export function MapCanvas({
   const [layersReady, setLayersReady] = useState(false);
   /** Pesan yang ditampilkan di atas peta: kegagalan keras maupun peringatan. */
   const [notice, setNotice] = useState<string | null>(null);
+  const [analysisAvailable, setAnalysisAvailable] = useState(true);
   /** Titik yang sedang disorot kursor, supaya bisa dibersihkan saat berpindah. */
   const hoveredRef = useRef<number | null>(null);
   /** Apakah glyph label bisa diambil — ikut gagal kalau basemap gagal. */
@@ -323,6 +334,7 @@ export function MapCanvas({
 
     map.addSource(SOURCE.isochrones, { type: "geojson", data: isochrones });
     map.addSource(SOURCE.points, { type: "geojson", data: points });
+    map.addSource(SOURCE.retail, { type: "geojson", data: retailLocations });
     map.addSource(SOURCE.pointLabels, {
       type: "geojson",
       data: labelData ?? { type: "FeatureCollection", features: [] },
@@ -342,6 +354,9 @@ export function MapCanvas({
       map.addLayer(pointLabelLayer());
     }
 
+    map.addLayer(retailCircleLayer());
+    if (glyphsAvailableRef.current) map.addLayer(retailLabelLayer());
+
     // Bawa tampilan ke seluruh kawasan studi, sisakan ruang untuk panel
     // melayang.
     //
@@ -359,7 +374,48 @@ export function MapCanvas({
     // `gapDomain` sengaja tidak masuk daftar: layer dipasang
     // sekali, lalu skalanya diperbarui oleh efek tersendiri di bawah.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleReady, points, isochrones, labelData, layersReady]);
+  }, [styleReady, points, isochrones, labelData, layersReady, retailLocations]);
+
+  // Tunggu pemasangan layer agar fitBounds awal tidak menimpa pencarian.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !stationTarget) return;
+    map.flyTo({
+      center: [stationTarget.longitude, stationTarget.latitude],
+      zoom: stationTarget.zoom ?? 16.5,
+      bearing: 0,
+      pitch: 0,
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+      duration: 1100,
+    });
+  }, [layersReady, stationTarget]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady) return;
+    const select = (event: { features?: { properties?: Record<string, unknown> }[] }) => {
+      const id = event.features?.[0]?.properties?.id;
+      const location = retailLocations.features.find((feature) => feature.properties.id === id)?.properties;
+      if (location) onSelectRetail(location);
+    };
+    const enter = () => { map.getCanvas().style.cursor = "pointer"; };
+    const leave = () => { map.getCanvas().style.cursor = ""; };
+    map.on("click", LAYER.retailCircle, select);
+    map.on("mouseenter", LAYER.retailCircle, enter);
+    map.on("mouseleave", LAYER.retailCircle, leave);
+    return () => {
+      map.off("click", LAYER.retailCircle, select);
+      map.off("mouseenter", LAYER.retailCircle, enter);
+      map.off("mouseleave", LAYER.retailCircle, leave);
+    };
+  }, [layersReady, retailLocations, onSelectRetail]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady) return;
+    map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", ["case", ["==", ["get", "id"], selectedRetailId ?? ""], "#0f172a", "#ffffff"]);
+    map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", ["case", ["==", ["get", "id"], selectedRetailId ?? ""], 3, 2]);
+  }, [layersReady, selectedRetailId]);
 
   // --- interaksi titik: sorot dan pilih -----------------------------------
   //
@@ -505,6 +561,23 @@ export function MapCanvas({
     };
   }, [styleReady, onScaleChange]);
 
+  // Basemap tetap bebas dijelajahi. Status ini hanya menerangkan apakah pusat
+  // kamera masih berada di kotak dua stasiun yang memiliki data prototipe.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !styleReady) return;
+    const update = () => {
+      const center = map.getCenter();
+      setAnalysisAvailable(
+        center.lng >= STUDY_BOUNDS[0] && center.lng <= STUDY_BOUNDS[2] &&
+        center.lat >= STUDY_BOUNDS[1] && center.lat <= STUDY_BOUNDS[3],
+      );
+    };
+    update();
+    map.on("moveend", update);
+    return () => { map.off("moveend", update); };
+  }, [styleReady]);
+
   // --- filter isochrone mengikuti pilihan kawasan tangkapan ---------------
   useEffect(() => {
     const map = mapRef.current;
@@ -568,6 +641,12 @@ export function MapCanvas({
           }}
         >
           {pesan}
+        </div>
+      )}
+      {!analysisAvailable && (
+        <div className="analysis-unavailable" role="status">
+          <strong>Analisis belum tersedia</strong>
+          <span>Peta dapat dijelajahi, tetapi data mock hanya tersedia di Manggarai dan Sudirman.</span>
         </div>
       )}
     </div>

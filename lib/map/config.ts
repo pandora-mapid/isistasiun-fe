@@ -120,6 +120,7 @@ export const SOURCE = {
    * Ongkosnya kecil: isinya hanya sebanyak titik pengamatan (belasan).
    */
   pointLabels: "point-label-values",
+  retail: "retail-locations",
 } as const;
 
 /**
@@ -148,6 +149,8 @@ export const LAYER = {
   pointLabel: "point-label",
   /** Angka arus pintu (F), tulisan kecil di bawah nama titik. */
   pointArus: "point-arus",
+  retailCircle: "retail-circle",
+  retailLabel: "retail-label",
 } as const;
 
 /**
@@ -169,6 +172,8 @@ export const LAYER_ORDER = [
   // yang harus berada di urutan belakang.
   LAYER.pointArus,
   LAYER.pointLabel,
+  LAYER.retailCircle,
+  LAYER.retailLabel,
 ] as const;
 
 /**
@@ -184,6 +189,7 @@ export const LAYER_GROUPS: Record<string, readonly string[]> = {
   gap: [LAYER.pointCircle, LAYER.pointLabel],
   kepercayaan: [LAYER.pointConfidence],
   arus: [LAYER.pointArus],
+  retail: [LAYER.retailCircle, LAYER.retailLabel],
 };
 
 /**

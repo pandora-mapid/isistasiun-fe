@@ -4,13 +4,17 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { NavBar } from "./NavBar";
 import { MapCanvas } from "./MapCanvas";
+import { StationSearch } from "./StationSearch";
+import { RetailLocations } from "./RetailLocations";
+import { ComparisonDialog } from "./ComparisonDialog";
+import { retailGeoJSON, type RetailLocation } from "@/lib/data/retail";
+import { categoryStatusesFor, evidenceFor, pointRank } from "@/lib/analytics/demo-select";
 import {
   biggestGapPoint,
   confidenceDomainOf,
   domainOf,
   findPoint,
   metricsFor,
-  missingCategories,
   pointsOfStation,
   posisiDalamRentang,
   slotOf,
@@ -19,7 +23,6 @@ import {
 import {
   ALL_CATEGORIES,
   CATEGORIES,
-  DEFAULT_SLOT,
   SLOTS,
   categoryLabel,
   slotLabel,
@@ -39,6 +42,14 @@ import {
 import { CATCHMENT_MINUTES, LAYER_GROUPS } from "@/lib/map/config";
 import { scaleBarFor } from "@/lib/map/scale";
 import { gapColorStops, DOMAIN_AWAL, LEGEND_DOT } from "@/lib/map/style";
+
+export type PetaInitialQuery = {
+  stationId: number | null;
+  pointId: number | null;
+  retailId: string | null;
+  slot: SlotKey;
+  category: CategoryFilter;
+};
 
 type LayerRow = {
   key: string;
@@ -62,6 +73,7 @@ type LayerRow = {
  * yang keliru itu membuat panel ini ikut menyesatkan.
  */
 const LAYER_ROWS: LayerRow[] = [
+  { key: "retail", label: "Retail & potensi toko", dot: "#047857", tint: "rgba(4,120,87,.08)" },
   { key: "gap", label: "Kesenjangan belanja", dot: "#1D4ED8", tint: "rgba(29,78,216,.1)" },
   { key: "kepercayaan", label: "Kepercayaan data", dot: "#CBD5E1", tint: "rgba(29,78,216,.08)" },
   { key: "arus", label: "Arus pintu stasiun", dot: "#2563EB", tint: "rgba(37,99,235,.1)" },
@@ -71,7 +83,7 @@ const LAYER_ROWS: LayerRow[] = [
 
 /** Baris yang benar-benar menggerakkan peta. */
 const LAYER_TERSEDIA = LAYER_ROWS.filter((r) => r.key in LAYER_GROUPS);
-const DEFAULT_ACTIVE_LAYERS = ["gap", "kepercayaan"];
+const DEFAULT_ACTIVE_LAYERS = ["gap", "kepercayaan", "retail"];
 
 /** Warna titik kategori pada chip — murni hiasan, sepadan dengan legenda. */
 const CATEGORY_DOT: Record<string, string> = {
@@ -139,18 +151,34 @@ const QUESTIONS = [
   "kawasan mana yang sampelnya masih tipis?",
 ];
 
-export function PetaScreen() {
-  const { points, isochrones, analytics, stations, entrances, error } =
+export function PetaScreen({ initialQuery }: { initialQuery: PetaInitialQuery }) {
+  const { points, isochrones, analytics, stations, entrances, demo, error } =
     usePetaData();
 
   const [tab, setTab] = useState<"brief" | "copilot">("brief");
   const [layersOpen, setLayersOpen] = useState(false);
   const [activeLayers, setActiveLayers] = useState<string[]>(DEFAULT_ACTIVE_LAYERS);
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>(ALL_CATEGORIES);
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>(initialQuery.category);
   const [activeCatchment, setActiveCatchment] = useState<number>(5);
-  const [activeSlot, setActiveSlot] = useState<SlotKey>(DEFAULT_SLOT);
+  const [activeSlot, setActiveSlot] = useState<SlotKey>(initialQuery.slot);
   const [showTransparansi, setShowTransparansi] = useState(false);
   const [showCopilotResult, setShowCopilotResult] = useState(true);
+  const [showComparison, setShowComparison] = useState(false);
+  const [stationTarget, setStationTarget] = useState<{ longitude: number; latitude: number; zoom?: number } | null>(null);
+  const [selectedRetailChoice, setSelectedRetail] = useState<RetailLocation | null | undefined>(undefined);
+  const retailLocations = useMemo(
+    () => (demo?.retail ?? []).filter((location) =>
+      activeCategory === ALL_CATEGORIES || location.category === activeCategory,
+    ),
+    [demo, activeCategory],
+  );
+  const retailData = useMemo(() => retailGeoJSON(retailLocations), [retailLocations]);
+  const selectRetail = useCallback((location: RetailLocation) => {
+    setSelectedRetail(location);
+    setStationTarget({ longitude: location.longitude, latitude: location.latitude, zoom: 19 });
+    setActiveLayers((current) => current.includes("retail") ? current : [...current, "retail"]);
+  }, []);
+
   /**
    * Titik yang dipilih pengguna.
    *
@@ -283,12 +311,25 @@ export function PetaScreen() {
     [activeLayers],
   );
 
+  const linkedRetail = retailLocations.find((item) => item.id === initialQuery.retailId) ?? null;
+  const selectedRetail = selectedRetailChoice === undefined ? linkedRetail : selectedRetailChoice;
+  const linkedStation = stations?.find((item) => item.id === initialQuery.stationId);
+  const effectiveStationTarget = useMemo(() => stationTarget ?? (
+      selectedRetail
+        ? { longitude: selectedRetail.longitude, latitude: selectedRetail.latitude, zoom: 19 }
+        : linkedStation?.longitude !== undefined && linkedStation.latitude !== undefined
+          ? { longitude: linkedStation.longitude, latitude: linkedStation.latitude }
+          : null
+    ), [stationTarget, selectedRetail, linkedStation]);
+
   // Tampilan awal jatuh ke titik dengan kesenjangan terbesar — itu yang paling
   // pantas dilihat lebih dulu, dan menghindari panel kosong saat halaman buka.
   const selectedPointId =
     pilihanTitik === undefined
       ? analytics
-        ? biggestGapPoint(analytics)
+        ? initialQuery.pointId ??
+          analytics.points.find((item) => item.station_id === initialQuery.stationId)?.point_id ??
+          biggestGapPoint(analytics)
         : null
       : pilihanTitik;
 
@@ -303,10 +344,17 @@ export function PetaScreen() {
     1,
     ...stationMetrics.map((m) => m.gap.p50 ?? 0),
   );
-  const kategoriHilang = selectedPoint
-    ? missingCategories(selectedPoint, activeSlot).slice(0, 3)
-    : [];
+  const selectedRank = pointRank(stationMetrics, selectedPointId);
   const station = stations?.find((s) => s.id === selectedPoint?.station_id);
+  const categoryStatuses = categoryStatusesFor(
+    demo?.category_statuses ?? [],
+    selectedPoint?.station_id,
+  );
+  const selectedEvidence = evidenceFor(demo?.evidence ?? [], selectedPointId);
+  const evidenceDate = selectedEvidence
+    ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta" })
+      .format(new Date(selectedEvidence.surveyed_at))
+    : "Belum tersedia";
 
   const tabX = tab === "brief" ? 4 : 190;
   const chev = layersOpen ? 180 : 0;
@@ -339,7 +387,7 @@ export function PetaScreen() {
         active="peta"
         cta={
           <div className="row" style={{ gap: 10 }}>
-            <button className="b bs">Bandingkan</button>
+            <button type="button" className="b bs" onClick={() => setShowComparison(true)}>Bandingkan</button>
             <button className="b bp">Brief PDF</button>
           </div>
         }
@@ -368,7 +416,21 @@ export function PetaScreen() {
           onSelectPoint={setPilihanTitik}
           dataError={error}
           onScaleChange={handleScale}
+          stationTarget={effectiveStationTarget}
+          retailLocations={retailData}
+          selectedRetailId={selectedRetail?.id ?? null}
+          onSelectRetail={selectRetail}
         />
+        <StationSearch stations={stations} error={error} onSelect={(target) => {
+          setSelectedRetail(null);
+          setStationTarget({ ...target });
+          const point = analytics?.points.find((p) => p.station_id === target.id);
+          setPilihanTitik(point?.point_id ?? null);
+          setTab("brief");
+          setLayersOpen(false);
+          setShowTransparansi(false);
+        }} />
+        <RetailLocations locations={retailLocations} selected={selectedRetail} onSelect={selectRetail} onClose={() => setSelectedRetail(null)} />
 
         <div
           className="row"
@@ -909,6 +971,12 @@ export function PetaScreen() {
                       </div>
                     </div>
 
+                    <dl className="point-facts" aria-label="Ringkasan mutu titik">
+                      <div><dt>Peringkat di stasiun</dt><dd>{selectedRank ? `#${selectedRank.rank} dari ${selectedRank.total}` : TIDAK_DIESTIMASI}</dd></div>
+                      <div><dt>Confidence</dt><dd>{desimal(selectedMetric.confidence)}</dd></div>
+                      <div><dt>Jumlah sampel</dt><dd>{selectedPoint ? `${selectedPoint.sample_meta.gerai_count} gerai × ${selectedPoint.sample_meta.blok_count} blok` : "—"}</dd></div>
+                    </dl>
+
                     <div style={{ padding: "28px 0 20px" }}>
                       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
                         <span className="k">Uraian F × E × C × V</span>
@@ -1021,16 +1089,16 @@ export function PetaScreen() {
 
                     <div style={{ padding: "26px 0 4px" }}>
                       <div className="row" style={{ justifyContent: "space-between", marginBottom: 15 }}>
-                        <span className="k">Kategori hilang</span>
-                        <span style={{ fontSize: 10.5, color: "#94A3B8" }}>permintaan kawasan vs gerai</span>
+                        <span className="k">Status kategori</span>
+                        <span style={{ fontSize: 10.5, color: "#94A3B8" }}>data mock · permintaan vs gerai</span>
                       </div>
                       <div style={{ display: "flex", flexDirection: "column" }}>
-                        {kategoriHilang.length === 0 && (
+                        {categoryStatuses.length === 0 && (
                           <div style={{ fontSize: 12, color: "#64748B", padding: "8px 2px" }}>
-                            Seluruh kategori sudah memenuhi ambang 3 gerai pada slot ini.
+                            Status kategori belum tersedia untuk simpul ini.
                           </div>
                         )}
-                        {kategoriHilang.map((c, i) => (
+                        {categoryStatuses.map((c, i) => (
                           <button
                             type="button"
                             key={c.category}
@@ -1040,12 +1108,13 @@ export function PetaScreen() {
                               width: "100%",
                               justifyContent: "space-between",
                               padding: "10px 2px",
-                              borderBottom: i < kategoriHilang.length - 1 ? "1px solid #E2E8F0" : undefined,
+                              borderBottom: i < categoryStatuses.length - 1 ? "1px solid #E2E8F0" : undefined,
                               cursor: "pointer",
                             }}
                           >
-                            <span style={{ fontSize: 13, fontWeight: i === 0 ? 600 : 400 }}>
+                            <span className="row" style={{ gap: 7, fontSize: 13, fontWeight: c.status === "kosong" ? 600 : 400 }}>
                               {categoryLabel(c.category)}
+                              <span className={`category-status category-status-${c.status}`}>{c.status}</span>
                             </span>
                             <span className="mono" style={{ fontSize: 11.5, color: "#475569" }}>
                               {persen(c.demand_share, 0)} · {c.gerai_count} gerai
@@ -1199,9 +1268,9 @@ export function PetaScreen() {
               </div>
               <div style={{ display: "flex", gap: 22, padding: "0 26px 26px" }}>
                 <div style={{ width: 230, flex: "none" }}>
-                  <div className="k" style={{ marginBottom: 9 }}>Foto asli · Struk Go</div>
+                  <div className="k" style={{ marginBottom: 9 }}>Foto sumber · data mock</div>
                   <div style={{ height: 206, borderRadius: 12, background: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, lineHeight: 1.5, color: "#94A3B8", textAlign: "center", padding: "0 16px" }}>
-                    Foto struk<br />identitas diredaksi
+                    {selectedEvidence?.photo_label ?? "Foto sumber belum tersedia"}
                   </div>
                   <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
                     <div style={{ width: 40, height: 40, borderRadius: 12, background: "#F1F5F9", boxShadow: "0 0 0 2px #1D4ED8" }} />
@@ -1238,22 +1307,22 @@ export function PetaScreen() {
                     <div style={{ flex: 1, borderRadius: 12, background: "#F1F5F9", padding: 14 }}>
                       <div className="k" style={{ fontSize: 9, marginBottom: 7 }}>Keyakinan</div>
                       <div className="mono" style={{ font: "700 18px/1 var(--font-inter)" }}>
-                        {desimal(selectedPoint.confidence)}
+                        {desimal(selectedEvidence?.confidence ?? selectedPoint.confidence)}
                       </div>
                       <div className="pill" style={{ height: 5, background: "rgba(15,23,42,.1)", marginTop: 9 }}>
                         <div
                           className="pill"
-                          style={{ width: `${selectedPoint.confidence * 100}%`, height: 5, background: "#1D4ED8" }}
+                          style={{ width: `${(selectedEvidence?.confidence ?? selectedPoint.confidence) * 100}%`, height: 5, background: "#1D4ED8" }}
                         />
                       </div>
                     </div>
                     <div style={{ flex: 1, borderRadius: 12, background: "#F1F5F9", padding: 14 }}>
                       <div className="k" style={{ fontSize: 9, marginBottom: 7 }}>Cakupan</div>
                       <div className="mono" style={{ font: "700 18px/1 var(--font-inter)" }}>
-                        {selectedPoint.evidence.struk_terbaca} / {selectedPoint.evidence.struk_total}
+                        {selectedEvidence?.receipt_readable ?? selectedPoint.evidence.struk_terbaca} / {selectedEvidence?.receipt_total ?? selectedPoint.evidence.struk_total}
                       </div>
                       <div style={{ fontSize: 10, lineHeight: 1.4, color: "#64748B", marginTop: 6 }}>
-                        struk terbaca · {selectedPoint.evidence.struk_ambigu} ambigu dikeluarkan
+                        struk terbaca · {selectedEvidence?.receipt_ambiguous ?? selectedPoint.evidence.struk_ambigu} ambigu dikeluarkan
                       </div>
                     </div>
                   </div>
@@ -1281,10 +1350,36 @@ export function PetaScreen() {
                       kepercayaan {desimal(selectedPoint.confidence)}
                     </div>
                   )}
+                  {selectedEvidence && (
+                    <dl className="evidence-meta">
+                      <div><dt>Jenis bukti</dt><dd>{selectedEvidence.types.join(" · ")}</dd></div>
+                      <div><dt>Dataset</dt><dd>{selectedEvidence.dataset}</dd></div>
+                      <div><dt>Waktu survei</dt><dd>{evidenceDate} WIB</dd></div>
+                      <div><dt>Sumber</dt><dd>{selectedEvidence.sources.join(" · ")}</dd></div>
+                      <div className="evidence-mock"><dt>Status</dt><dd>Data mock untuk demonstrasi antarmuka</dd></div>
+                    </dl>
+                  )}
                 </div>
               </div>
             </div>
           </div>
+        )}
+        {showComparison && analytics && stations && demo && (
+          <ComparisonDialog
+            stations={stations}
+            analytics={analytics}
+            statuses={demo.category_statuses}
+            activeSlot={activeSlot}
+            activeCategory={activeCategory}
+            onClose={() => setShowComparison(false)}
+            onOpenStation={(target) => {
+              if (target.longitude === undefined || target.latitude === undefined) return;
+              setStationTarget({ longitude: target.longitude, latitude: target.latitude });
+              setPilihanTitik(analytics.points.find((point) => point.station_id === target.id)?.point_id ?? null);
+              setSelectedRetail(null);
+              setShowComparison(false);
+            }}
+          />
         )}
       </div>
     </div>
