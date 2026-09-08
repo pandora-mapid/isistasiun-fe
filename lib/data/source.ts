@@ -14,7 +14,12 @@ import type {
   ObservationPointProps,
   SpendingGapPayload,
   Station,
+  MockDemoData,
 } from "./types";
+import { MOCK_DEMO_DATA } from "./demo";
+
+const PROTOTYPE_STATION_IDS = new Set([1, 2]);
+const PROTOTYPE_POINT_IDS = new Set([11, 12, 13, 21, 22, 23, 24]);
 
 /**
  * Alamat sumber data.
@@ -79,24 +84,41 @@ function unwrap<T>(envelope: ApiEnvelope<T>): T {
 export function loadObservationPoints(): Promise<
   FeatureCollection<Point, ObservationPointProps>
 > {
-  return getJson("observation-points.geojson");
+  return getJson<FeatureCollection<Point, ObservationPointProps>>("observation-points.geojson")
+    .then((collection) => ({
+      ...collection,
+      features: collection.features.filter((feature) =>
+        PROTOTYPE_STATION_IDS.has(feature.properties.station_id),
+      ),
+    }));
 }
 
 /** Geometri isochrone. Fase 2: diganti tile vektor. */
 export function loadIsochrones(): Promise<
   FeatureCollection<Polygon, IsochroneProps>
 > {
-  return getJson("isochrones.geojson");
+  return getJson<FeatureCollection<Polygon, IsochroneProps>>("isochrones.geojson")
+    .then((collection) => ({
+      ...collection,
+      features: collection.features.filter((feature) =>
+        PROTOTYPE_POINT_IDS.has(feature.properties.point_id),
+      ),
+    }));
 }
 
 /** Hasil analisis. Fase 2: `GET /api/v1/analytics/spending-gap`. */
 export async function loadSpendingGap(): Promise<SpendingGapPayload> {
-  return unwrap(await getJson<ApiEnvelope<SpendingGapPayload>>("spending-gap.json"));
+  const payload = unwrap(await getJson<ApiEnvelope<SpendingGapPayload>>("spending-gap.json"));
+  return {
+    ...payload,
+    points: payload.points.filter((point) => PROTOTYPE_STATION_IDS.has(point.station_id)),
+  };
 }
 
 /** Daftar stasiun. Fase 2: `GET /api/v1/stations`. */
 export async function loadStations(): Promise<Station[]> {
-  return unwrap(await getJson<ApiEnvelope<Station[]>>("stations.json"));
+  return unwrap(await getJson<ApiEnvelope<Station[]>>("stations.json"))
+    .filter((station) => PROTOTYPE_STATION_IDS.has(station.id));
 }
 
 /**
@@ -114,5 +136,11 @@ export async function loadStations(): Promise<Station[]> {
  * pemanggilnya tidak perlu tahu.
  */
 export async function loadEntrances(): Promise<ObservationPointProps[]> {
-  return unwrap(await getJson<ApiEnvelope<ObservationPointProps[]>>("entrances.json"));
+  return unwrap(await getJson<ApiEnvelope<ObservationPointProps[]>>("entrances.json"))
+    .filter((entrance) => PROTOTYPE_STATION_IDS.has(entrance.station_id));
+}
+
+/** Data presentasi Tahap 1. Fase API mengganti implementasi fungsi ini saja. */
+export async function loadDemoData(): Promise<MockDemoData> {
+  return MOCK_DEMO_DATA;
 }

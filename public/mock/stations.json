@@ -4,12 +4,16 @@
     {
       "id": 1,
       "name": "Manggarai",
+      "longitude": 106.85005,
+      "latitude": -6.2147,
       "typology": "transit",
       "point_count": 3
     },
     {
       "id": 2,
       "name": "Sudirman",
+      "longitude": 106.8224,
+      "latitude": -6.202,
       "typology": "perkantoran",
       "point_count": 4
     },

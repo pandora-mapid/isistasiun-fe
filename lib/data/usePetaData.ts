@@ -19,12 +19,14 @@ import {
   loadObservationPoints,
   loadSpendingGap,
   loadStations,
+  loadDemoData,
 } from "./source";
 import type {
   IsochroneProps,
   ObservationPointProps,
   SpendingGapPayload,
   Station,
+  MockDemoData,
 } from "./types";
 
 export type PetaData = {
@@ -40,6 +42,7 @@ export type PetaData = {
    * harus tersedia untuk seluruh titik. Lihat ROADMAP §4.1.
    */
   entrances: ObservationPointProps[] | null;
+  demo: MockDemoData | null;
   /** Pesan kegagalan yang layak ditampilkan, bukan hanya dicatat di console. */
   error: string | null;
 };
@@ -50,6 +53,7 @@ const KOSONG: PetaData = {
   analytics: null,
   stations: null,
   entrances: null,
+  demo: null,
   error: null,
 };
 
@@ -65,8 +69,9 @@ export function usePetaData(): PetaData {
       loadSpendingGap(),
       loadStations(),
       loadEntrances(),
+      loadDemoData(),
     ])
-      .then(([points, isochrones, analytics, stations, entrances]) => {
+      .then(([points, isochrones, analytics, stations, entrances, demo]) => {
         if (cancelled) return;
         setData({
           points,
@@ -74,6 +79,7 @@ export function usePetaData(): PetaData {
           analytics,
           stations,
           entrances,
+          demo,
           error: null,
         });
       })
