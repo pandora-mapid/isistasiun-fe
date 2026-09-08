@@ -17,6 +17,9 @@ export default defineConfig({
   // lewat env var: `npm run test:visual`.
   testIgnore: process.env.VISUAL ? [] : ["**/*.visual.spec.ts"],
   fullyParallel: false,
+  // Tes browser memakai MapLibre + SwiftShader. Menjalankan beberapa kanvas
+  // WebGL sekaligus membuat event kamera terlambat dan menghasilkan flake.
+  workers: 1,
   reporter: [["list"]],
   timeout: 60_000,
   use: {

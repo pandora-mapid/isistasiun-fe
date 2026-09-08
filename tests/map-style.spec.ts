@@ -2,6 +2,7 @@ import { test, expect } from "@playwright/test";
 import { validateStyleMin } from "@maplibre/maplibre-gl-style-spec";
 
 import { SOURCE } from "../lib/map/config";
+import { retailCircleLayer, retailLabelLayer } from "../lib/map/retail-style";
 import {
   isochroneFillLayer,
   isochroneLineLayer,
@@ -33,6 +34,7 @@ function styleWith(layers: unknown[]) {
       [SOURCE.points]: { type: "geojson", data: EMPTY_FC },
       [SOURCE.isochrones]: { type: "geojson", data: EMPTY_FC },
       [SOURCE.pointLabels]: { type: "geojson", data: EMPTY_FC },
+      [SOURCE.retail]: { type: "geojson", data: EMPTY_FC },
     },
     layers,
   };
@@ -61,6 +63,8 @@ const LAYERS: { nama: string; buat: () => unknown }[] = [
   { nama: "point-circle", buat: () => pointCircleLayer(DOMAIN_UJI) },
   { nama: "point-label", buat: pointLabelLayer },
   { nama: "point-arus", buat: pointArusLayer },
+  { nama: "retail-circle", buat: retailCircleLayer },
+  { nama: "retail-label", buat: retailLabelLayer },
 ];
 
 for (const { nama, buat } of LAYERS) {
