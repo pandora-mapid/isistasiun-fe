@@ -62,11 +62,11 @@ type LayerRow = {
  * yang keliru itu membuat panel ini ikut menyesatkan.
  */
 const LAYER_ROWS: LayerRow[] = [
-  { key: "gap", label: "Kesenjangan belanja", dot: "#1D4ED8", tint: "rgba(29,78,216,.1)" },
-  { key: "kepercayaan", label: "Kepercayaan data", dot: "#CBD5E1", tint: "rgba(29,78,216,.08)" },
-  { key: "arus", label: "Arus pintu stasiun", dot: "#2563EB", tint: "rgba(37,99,235,.1)" },
-  { key: "sewa", label: "Indeks sewa / arus", dot: "#334155", tint: "rgba(51,65,85,.1)" },
-  { key: "event", label: "Event & aktivasi", dot: "#94A3B8", tint: "rgba(148,163,184,.14)" },
+  { key: "gap", label: "Kesenjangan belanja", dot: "var(--data)", tint: "var(--data-wash)" },
+  { key: "kepercayaan", label: "Kepercayaan data", dot: "var(--rule-strong)", tint: "var(--data-wash)" },
+  { key: "arus", label: "Arus pintu stasiun", dot: "var(--data)", tint: "var(--data-wash)" },
+  { key: "sewa", label: "Indeks sewa / arus", dot: "var(--ink-2)", tint: "rgba(22,19,15,.08)" },
+  { key: "event", label: "Event & aktivasi", dot: "var(--ink-faint)", tint: "rgba(22,19,15,.06)" },
 ];
 
 /** Baris yang benar-benar menggerakkan peta. */
@@ -75,11 +75,11 @@ const DEFAULT_ACTIVE_LAYERS = ["gap", "kepercayaan"];
 
 /** Warna titik kategori pada chip — murni hiasan, sepadan dengan legenda. */
 const CATEGORY_DOT: Record<string, string> = {
-  fnb: "#1D4ED8",
-  ritel: "#475569",
-  apotek: "#2563EB",
-  jasa: "#2563EB",
-  lainnya: "#475569",
+  fnb: "var(--data)",
+  ritel: "var(--ink-2)",
+  apotek: "var(--data)",
+  jasa: "var(--data)",
+  lainnya: "var(--ink-2)",
 };
 
 /**
@@ -94,7 +94,7 @@ const SKALA_MAKS_PX = 92;
 /** Satu butir keterangan di legenda: lambang dan tulisannya. */
 const LEGENDA_TEKS: React.CSSProperties = {
   fontSize: 11,
-  color: "#475569",
+  color: "var(--ink-2)",
   whiteSpace: "nowrap",
 };
 
@@ -116,7 +116,7 @@ const LEGENDA_GRUP: React.CSSProperties = {
 const LEGENDA_SEKAT: React.CSSProperties = {
   width: 1,
   alignSelf: "stretch",
-  background: "rgba(15,23,42,.12)",
+  background: "var(--rule)",
   flex: "none",
 };
 
@@ -130,7 +130,7 @@ const LEGENDA_SEKAT: React.CSSProperties = {
 const GARIS_SLOT: React.CSSProperties = {
   flex: 1,
   height: 1,
-  background: "#CBD5E1",
+  background: "var(--rule-strong)",
 };
 
 const QUESTIONS = [
@@ -332,29 +332,18 @@ export function PetaScreen() {
 
   return (
     <div
-      className="page-canvas"
-      style={{ height: "100vh", display: "flex", flexDirection: "column" }}
+      className="page-canvas paper-canvas peta-canvas"
+      style={{ height: "100vh", position: "relative", overflow: "hidden" }}
     >
-      <NavBar
-        active="peta"
-        cta={
-          <div className="row" style={{ gap: 10 }}>
-            <button className="b bs">Bandingkan</button>
-            <button className="b bp">Brief PDF</button>
-          </div>
-        }
-      />
       <div
         style={{
-          position: "relative",
-          flex: 1,
-          minHeight: 0,
-          background: "#F8FAFC",
-          overflow: "hidden",
+          position: "absolute",
+          inset: 0,
+          background: "var(--paper-2)",
         }}
       >
-        {/* Peta sungguhan. Kanvas mengisi kotak berposisi relative ini,
-           dan seluruh panel di bawah melayang di atasnya. */}
+        {/* Peta sungguhan. Kanvas mengisi kotak berposisi absolut ini, dan
+           seluruh panel — termasuk pil nav di bawah — melayang di atasnya. */}
         <MapCanvas
           points={points}
           isochrones={isochrones}
@@ -371,7 +360,7 @@ export function PetaScreen() {
         />
 
         <div
-          className="row"
+          className="row glass"
           style={{
             position: "absolute",
             left: 24,
@@ -384,9 +373,6 @@ export function PetaScreen() {
             flexWrap: "wrap",
             maxWidth: "calc(100% - 500px)",
             padding: "10px 16px 12px",
-            background: "#fff",
-            border: "1px solid #E2E8F0",
-            borderRadius: 14,
           }}
         >
           {/* Legenda mendatar dengan judul kelompok.
@@ -419,14 +405,14 @@ export function PetaScreen() {
                         height: d,
                         borderRadius: 999,
                         background: stop.color,
-                        boxShadow: "0 0 0 1px rgba(15,23,42,.14)",
+                        boxShadow: "0 0 0 1px var(--rule)",
                         flex: "none",
                       }}
                     />
                   );
                 })}
               </span>
-              <span className="mono" style={{ ...LEGENDA_TEKS, fontSize: 9.5, color: "#94A3B8" }}>
+              <span className="fig" style={{ ...LEGENDA_TEKS, fontSize: 9.5, color: "var(--ink-faint)" }}>
                 {rupiahRingkas(gapDomain.min)} → {rupiahRingkas(gapDomain.max)}
               </span>
             </span>
@@ -448,7 +434,9 @@ export function PetaScreen() {
               <span className="row" style={{ ...LEGENDA_TEKS, gap: 8 }}>
                 <span
                   title="halo makin tebal berarti kepercayaan makin rendah"
-                  style={{ width: 12, height: 12, borderRadius: 999, background: "#fff", boxShadow: "0 0 0 1.5px #fff, 0 0 0 4.5px rgba(100,116,139,.55)", flex: "none", marginLeft: 3 }}
+                  // Warna halo (rgba 100,116,139) sengaja tetap — ia cermin
+                  // CONFIDENCE_COLOR di lib/map/style.ts yang tidak disentuh.
+                  style={{ width: 12, height: 12, borderRadius: 999, background: "var(--surface)", boxShadow: "0 0 0 1.5px var(--surface), 0 0 0 4.5px rgba(100,116,139,.55)", flex: "none", marginLeft: 3 }}
                 />
                 Kepercayaan rendah
               </span>
@@ -464,7 +452,8 @@ export function PetaScreen() {
           <span style={LEGENDA_GRUP}>
             <span className="k">Kawasan</span>
             <span className="row" style={{ ...LEGENDA_TEKS, gap: 7 }}>
-              {/* Persegi, bukan bulatan: ini wilayah, bukan tempat. */}
+              {/* Persegi, bukan bulatan: ini wilayah, bukan tempat. Warna
+                 sengaja tetap — cermin ISOCHRONE_COLOR di lib/map/style.ts. */}
               <span
                 style={{ width: 22, height: 13, borderRadius: 3, background: "rgba(37,99,235,.16)", border: "1px dashed #2563EB", flex: "none" }}
               />
@@ -483,13 +472,13 @@ export function PetaScreen() {
               <span style={{ position: "relative", height: 7, width: SKALA_MAKS_PX, flex: "none" }}>
                 {scaleBar && (
                   <>
-                    <span style={{ position: "absolute", left: 0, top: 3, width: scaleBar.widthPx, height: 1.5, background: "#0F172A" }} />
-                    <span style={{ position: "absolute", left: 0, top: 0, width: 1.5, height: 7, background: "#0F172A" }} />
-                    <span style={{ position: "absolute", left: scaleBar.widthPx - 1.5, top: 0, width: 1.5, height: 7, background: "#0F172A" }} />
+                    <span style={{ position: "absolute", left: 0, top: 3, width: scaleBar.widthPx, height: 1.5, background: "var(--ink)" }} />
+                    <span style={{ position: "absolute", left: 0, top: 0, width: 1.5, height: 7, background: "var(--ink)" }} />
+                    <span style={{ position: "absolute", left: scaleBar.widthPx - 1.5, top: 0, width: 1.5, height: 7, background: "var(--ink)" }} />
                   </>
                 )}
               </span>
-              <span className="mono" style={{ ...LEGENDA_TEKS, fontSize: 9.5, color: "#64748B" }}>
+              <span className="fig" style={{ ...LEGENDA_TEKS, fontSize: 9.5, color: "var(--ink-muted)" }}>
                 {scaleBar ? jarak(scaleBar.meters) : "—"}
               </span>
             </span>
@@ -497,8 +486,8 @@ export function PetaScreen() {
         </div>
 
         <div
-          className="mono"
-          style={{ position: "absolute", left: 24, bottom: 206, fontSize: 10.5, color: "rgba(15,23,42,.45)" }}
+          className="fig"
+          style={{ position: "absolute", left: 24, bottom: 206, fontSize: 10.5, color: "var(--ink-faint)" }}
         >
           {analytics
             ? `data contoh · pipeline ${analytics.pipeline_version} · ${
@@ -509,11 +498,11 @@ export function PetaScreen() {
 
         <div
           className="glass"
-          style={{ position: "absolute", left: 24, right: 462, bottom: 24, borderRadius: 14, border: "1px solid #E2E8F0", padding: "14px 18px 16px" }}
+          style={{ position: "absolute", left: 24, right: 462, bottom: 24, padding: "14px 18px 16px" }}
         >
           <div className="row" style={{ gap: 10, marginBottom: 11 }}>
             <span className="k">Slot waktu · hari kerja</span>
-            <span style={{ fontSize: 11, color: "#94A3B8" }}>
+            <span style={{ fontSize: 11, color: "var(--ink-faint)" }}>
               hanya slot yang benar-benar dicacah dapat dipilih — jam di antaranya tidak diinterpolasi
             </span>
           </div>
@@ -544,16 +533,16 @@ export function PetaScreen() {
                       all: "unset",
                       cursor: "pointer",
                       padding: "9px 16px",
-                      background: active ? "#1D4ED8" : "#F1F5F9",
-                      color: active ? "#fff" : "#475569",
+                      background: active ? "var(--ink)" : "var(--paper-2)",
+                      color: active ? "var(--surface)" : "var(--ink-2)",
                       font: `${active ? 600 : 500} 12px/1 var(--font-inter)`,
-                      boxShadow: active ? "0 6px 16px rgba(29,78,216,.2)" : "none",
+                      boxShadow: active ? "var(--shadow-soft)" : "none",
                       borderRadius: 999,
                     }}
                   >
                     {slot.label}
                     {tipis && (
-                      <span className="mono" style={{ opacity: 0.7, fontWeight: 400, marginLeft: 4 }}>
+                      <span className="fig" style={{ opacity: 0.7, fontWeight: 400, marginLeft: 4 }}>
                         tipis
                       </span>
                     )}
@@ -571,14 +560,14 @@ export function PetaScreen() {
                membuatnya terbaca sebagai pilihan waktu yang bisa dipencet,
                padahal bukan keduanya. */}
             <span
-              style={{ width: 1, height: 22, background: "rgba(15,23,42,.12)", margin: "0 6px", flex: "none" }}
+              style={{ width: 1, height: 22, background: "var(--rule)", margin: "0 6px", flex: "none" }}
             />
             <span className="row" style={{ gap: 8, flex: "none" }}>
               <span className="k">Pembanding</span>
               <span
                 className="pill"
                 title="satu sampel pembanding di akhir pekan — dijanjikan proposal, belum dicacah"
-                style={{ padding: "9px 16px", border: "1.5px dashed #CBD5E1", background: "#E2E8F0", color: "#64748B", font: "500 12px/1 var(--font-inter)", cursor: "not-allowed" }}
+                style={{ padding: "9px 16px", border: "1.5px dashed var(--rule-strong)", background: "var(--paper-2)", color: "var(--ink-muted)", font: "500 12px/1 var(--font-inter)", cursor: "not-allowed" }}
               >
                 Akhir pekan
               </span>
@@ -588,10 +577,10 @@ export function PetaScreen() {
 
         <div
           className="glass"
-          style={{ position: "absolute", right: 24, top: 24, bottom: 24, width: 414, borderRadius: 12, display: "flex", flexDirection: "column", overflow: "hidden" }}
+          style={{ position: "absolute", right: 24, top: 112, bottom: 44, width: 414, display: "flex", flexDirection: "column", overflow: "hidden" }}
         >
           <div style={{ flex: "none", padding: "14px 14px 12px" }}>
-            <div className="row pill" style={{ position: "relative", background: "#F1F5F9", padding: 4 }}>
+            <div className="row pill" style={{ position: "relative", background: "var(--paper-2)", padding: 4 }}>
               <div
                 className="pill"
                 style={{
@@ -599,21 +588,21 @@ export function PetaScreen() {
                   top: 4,
                   bottom: 4,
                   width: 186,
-                  background: "#fff",
-                  boxShadow: "0 2px 8px rgba(15,23,42,.1)",
+                  background: "var(--surface)",
+                  boxShadow: "var(--shadow-soft)",
                   transition: "left .18s cubic-bezier(.4,0,.2,1)",
                   left: tabX,
                 }}
               />
               <button
                 onClick={() => setTab("brief")}
-                style={{ all: "unset", position: "relative", flex: 1, textAlign: "center", padding: "9px 0", font: "600 12.5px/1 var(--font-inter)", color: "#0F172A", cursor: "pointer" }}
+                style={{ all: "unset", position: "relative", flex: 1, textAlign: "center", padding: "9px 0", font: "600 12.5px/1 var(--font-inter)", color: "var(--ink)", cursor: "pointer" }}
               >
                 Ringkasan
               </button>
               <button
                 onClick={() => setTab("copilot")}
-                style={{ all: "unset", position: "relative", flex: 1, textAlign: "center", padding: "9px 0", font: "600 12.5px/1 var(--font-inter)", color: "#0F172A", cursor: "pointer" }}
+                style={{ all: "unset", position: "relative", flex: 1, textAlign: "center", padding: "9px 0", font: "600 12.5px/1 var(--font-inter)", color: "var(--ink)", cursor: "pointer" }}
               >
                 Tanya Data
               </button>
@@ -633,7 +622,7 @@ export function PetaScreen() {
                         ? stationNames.get(selectedPoint.station_id) ?? "Simpul"
                         : "Pilih titik"}
                     </div>
-                    <div style={{ fontSize: 12.5, color: "#64748B", marginTop: 12 }}>
+                    <div style={{ fontSize: 12.5, color: "var(--ink-muted)", marginTop: 12 }}>
                       {selectedPoint
                         ? `${pointLabels.get(selectedPoint.point_id) ?? "titik"} · ${
                             station ? `kawasan ${station.typology}` : "kawasan"
@@ -659,7 +648,7 @@ export function PetaScreen() {
               </div>
 
               <div className="sc" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 22px 8px" }}>
-                <div style={{ borderRadius: 12, background: "#F1F5F9", marginBottom: 26, overflow: "hidden" }}>
+                <div style={{ borderRadius: "var(--r-md)", background: "var(--paper-2)", marginBottom: 26, overflow: "hidden" }}>
                   <button
                     type="button"
                     onClick={() => setLayersOpen((v) => !v)}
@@ -672,16 +661,16 @@ export function PetaScreen() {
                       height="14"
                       viewBox="0 0 24 24"
                       fill="none"
-                      stroke="#1D4ED8"
+                      stroke="currentColor"
                       strokeWidth="2.4"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      style={{ flex: "none", transition: "transform .18s cubic-bezier(.4,0,.2,1)", transform: `rotate(${chev}deg)` }}
+                      style={{ flex: "none", color: "var(--ink)", transition: "transform .18s cubic-bezier(.4,0,.2,1)", transform: `rotate(${chev}deg)` }}
                     >
                       <path d="m6 9 6 6 6-6" />
                     </svg>
-                    <span className="k" style={{ flex: 1, color: "#1D4ED8" }}>Lapisan &amp; filter</span>
-                    <span className="mono" style={{ fontSize: 10.5, color: "#94A3B8" }}>{layerCount}</span>
+                    <span className="k" style={{ flex: 1 }}>Lapisan &amp; filter</span>
+                    <span className="fig" style={{ fontSize: 10.5, color: "var(--ink-faint)" }}>{layerCount}</span>
                   </button>
 
                   {!layersOpen && (
@@ -694,8 +683,8 @@ export function PetaScreen() {
                             <span style={{ fontSize: 11.5 }}>{r.label.replace(" belanja", "").replace(" stasiun", "").replace(" data", "")}</span>
                           </span>
                         ))}
-                      <span style={{ width: 1, height: 14, background: "rgba(15,23,42,.14)", flex: "none" }} />
-                      <span className="mono" style={{ fontSize: 11.5, color: "#64748B", flex: "none" }}>
+                      <span style={{ width: 1, height: 14, background: "var(--rule)", flex: "none" }} />
+                      <span className="fig" style={{ fontSize: 11.5, color: "var(--ink-muted)", flex: "none" }}>
                         {categoryLabel(activeCategory)} · {activeCatchment} mnt
                       </span>
                     </div>
@@ -725,19 +714,19 @@ export function PetaScreen() {
                                   : "lapisan ini belum punya data — lihat ROADMAP §6"
                               }
                               style={{
-                                ...(on ? { background: r.tint, color: "#0F172A", fontWeight: 600 } : {}),
+                                ...(on ? { background: r.tint, color: "var(--ink)", fontWeight: 600 } : {}),
                                 ...(tersedia
                                   ? {}
-                                  : { cursor: "not-allowed", color: "#94A3B8" }),
+                                  : { cursor: "not-allowed", color: "var(--ink-faint)" }),
                               }}
                             >
                               <span
                                 className="dot"
-                                style={{ background: tersedia ? r.dot : "#E2E8F0" }}
+                                style={{ background: tersedia ? r.dot : "var(--rule)" }}
                               />
                               <span style={{ flex: 1 }}>{r.label}</span>
                               {!tersedia && (
-                                <span className="mono" style={{ fontSize: 9.5, color: "#94A3B8" }}>
+                                <span className="fig" style={{ fontSize: 9.5, color: "var(--ink-faint)" }}>
                                   belum ada data
                                 </span>
                               )}
@@ -758,7 +747,7 @@ export function PetaScreen() {
                               className="chip btn-reset"
                               aria-pressed={active}
                               onClick={() => setActiveCategory(c.key as CategoryFilter)}
-                              style={active ? { background: "#0F172A", color: "#fff", borderColor: "#0F172A" } : undefined}
+                              style={active ? { background: "var(--ink)", color: "var(--surface)", borderColor: "var(--ink)" } : undefined}
                             >
                               {dot && <span className="dot" style={{ background: dot }} />}
                               {c.label}
@@ -766,14 +755,14 @@ export function PetaScreen() {
                           );
                         })}
                       </div>
-                      <div style={{ fontSize: 10.5, lineHeight: 1.45, color: "#94A3B8", marginTop: 8 }}>
+                      <div style={{ fontSize: 10.5, lineHeight: 1.45, color: "var(--ink-faint)", marginTop: 8 }}>
                         Kategori dan slot tidak menyembunyikan titik — keduanya
                         mengubah warna dan ukurannya, supaya jumlah titik yang
                         dibandingkan selalu sama.
                       </div>
 
                       <div className="k" style={{ margin: "18px 0 10px" }}>Kawasan tangkapan</div>
-                      <div className="row pill" style={{ background: "rgba(255,255,255,.8)", padding: 3 }}>
+                      <div className="row pill" style={{ background: "var(--surface)", padding: 3 }}>
                         {CATCHMENT_MINUTES.map((m) => {
                           const active = activeCatchment === m;
                           return (
@@ -789,8 +778,8 @@ export function PetaScreen() {
                                 padding: "8px 0",
                                 fontSize: 12,
                                 fontWeight: active ? 600 : 400,
-                                background: active ? "#0F172A" : "transparent",
-                                color: active ? "#fff" : "#475569",
+                                background: active ? "var(--ink)" : "transparent",
+                                color: active ? "var(--surface)" : "var(--ink-2)",
                                 cursor: "pointer",
                               }}
                             >
@@ -812,13 +801,15 @@ export function PetaScreen() {
                           />
                         ))}
                       </div>
-                      <div className="mono row" style={{ justifyContent: "space-between", fontSize: 10, color: "#94A3B8", marginTop: 6 }}>
+                      <div className="fig row" style={{ justifyContent: "space-between", fontSize: 10, color: "var(--ink-faint)", marginTop: 6 }}>
                         <span>{rupiah(gapDomain.min)}</span>
                         <span>{rupiah(gapDomain.max)}</span>
                       </div>
                       <div className="row" style={{ alignItems: "flex-start", gap: 9, marginTop: 12 }}>
+                        {/* Garis putus abu (#94A3B8) sengaja tetap — cermin
+                           THIN_SAMPLE_COLOR di lib/map/style.ts. */}
                         <span style={{ width: 13, height: 13, borderRadius: 12, border: "1.5px dashed #94A3B8", flex: "none", marginTop: 1 }} />
-                        <span style={{ fontSize: 11, lineHeight: 1.45, color: "#64748B" }}>
+                        <span style={{ fontSize: 11, lineHeight: 1.45, color: "var(--ink-muted)" }}>
                           Sampel tipis — tidak diestimasi, tidak dibaca aman maupun bermasalah
                         </span>
                       </div>
@@ -831,7 +822,7 @@ export function PetaScreen() {
                 </div>
 
                 {!selectedMetric && (
-                  <div style={{ borderRadius: 12, padding: 24, background: "#EEF2F6", fontSize: 12.5, lineHeight: 1.6, color: "#64748B" }}>
+                  <div style={{ borderRadius: "var(--r-md)", padding: 24, background: "var(--data-wash)", fontSize: 12.5, lineHeight: 1.6, color: "var(--ink-muted)" }}>
                     Belum ada titik yang dipilih. Klik salah satu lingkaran di
                     peta — ukurannya mengikuti besar kesenjangan pada slot dan
                     kategori yang sedang aktif.
@@ -840,27 +831,27 @@ export function PetaScreen() {
 
                 {selectedMetric && (
                   <>
-                    <div style={{ borderRadius: 12, padding: 24, background: "#EEF2F6" }}>
-                      <div className="k" style={{ color: "#1D4ED8", marginBottom: 12 }}>
+                    <div style={{ borderRadius: "var(--r-md)", padding: 24, background: "var(--data-wash)" }}>
+                      <div className="k" style={{ marginBottom: 12 }}>
                         Kesenjangan belanja
                         {activeCategory !== ALL_CATEGORIES && ` · ${categoryLabel(activeCategory)}`}
                       </div>
                       {selectedMetric.gap.p50 === null ? (
                         <>
-                          <div className="mono" style={{ fontWeight: 700, fontSize: 22, lineHeight: 1.15, color: "#64748B" }}>
+                          <div className="fig" style={{ fontWeight: 700, fontSize: 22, lineHeight: 1.15, color: "var(--ink-muted)" }}>
                             Tidak diestimasi
                           </div>
-                          <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 9 }}>
+                          <div style={{ fontSize: 11.5, color: "var(--ink-muted)", marginTop: 9 }}>
                             sampelnya belum memenuhi ambang 3 gerai × 2 blok —
                             titik ini tidak dibaca aman maupun bermasalah
                           </div>
                         </>
                       ) : (
                         <>
-                          <div className="mono" style={{ fontWeight: 700, fontSize: 25, lineHeight: 1.15, letterSpacing: "-.01em", whiteSpace: "nowrap" }}>
+                          <div className="fig" style={{ fontWeight: 700, fontSize: 25, lineHeight: 1.15, letterSpacing: "-.01em", whiteSpace: "nowrap" }}>
                             {rupiah(selectedMetric.gap.p10)} – {ribuan(selectedMetric.gap.p90 ?? 0)}
                           </div>
-                          <div style={{ fontSize: 11.5, color: "#64748B", marginTop: 9 }}>
+                          <div style={{ fontSize: 11.5, color: "var(--ink-muted)", marginTop: 9 }}>
                             per {slotLabel(activeSlot)} hari kerja · rentang P10–P90 · 10.000 iterasi
                           </div>
                           {/* Bar ini ADALAH rentang P10–P90 titik tersebut:
@@ -871,7 +862,7 @@ export function PetaScreen() {
                              mentok di ujung kanan dan tidak memberi tahu apa
                              pun. */}
                           <div style={{ position: "relative", height: 12, margin: "18px 0 8px" }}>
-                            <div className="pill" style={{ position: "absolute", inset: 0, background: "rgba(15,23,42,.08)" }} />
+                            <div className="pill" style={{ position: "absolute", inset: 0, background: "var(--rule-soft)" }} />
                             <div
                               className="pill"
                               style={{
@@ -880,7 +871,7 @@ export function PetaScreen() {
                                 width: `${posisiDalamRentang(selectedMetric.gap, selectedMetric.gap.p50) * 100}%`,
                                 top: 0,
                                 bottom: 0,
-                                background: "#60A5FA",
+                                background: "var(--data-mid)",
                               }}
                             />
                             <div
@@ -891,76 +882,76 @@ export function PetaScreen() {
                                 width: 18,
                                 height: 18,
                                 borderRadius: 12,
-                                background: "#fff",
-                                boxShadow: "0 2px 8px rgba(15,23,42,.16)",
+                                background: "var(--surface)",
+                                boxShadow: "var(--shadow-soft)",
                                 marginLeft: -9,
                               }}
                             />
                           </div>
-                          <div className="mono row" style={{ justifyContent: "space-between", fontSize: 10, color: "#94A3B8" }}>
+                          <div className="fig row" style={{ justifyContent: "space-between", fontSize: 10, color: "var(--ink-faint)" }}>
                             <span>P10 {rupiahRingkas(selectedMetric.gap.p10)}</span>
                             <span>median {rupiahRingkas(selectedMetric.gap.p50)}</span>
                             <span>P90 {rupiahRingkas(selectedMetric.gap.p90)}</span>
                           </div>
                         </>
                       )}
-                      <div style={{ fontSize: 11.5, lineHeight: 1.55, color: "#64748B", marginTop: 14 }}>
-                        Batas atas peluang pendapatan non-tiket, <b style={{ color: "#0F172A" }}>bukan</b> pendapatan yang pasti diperoleh.
+                      <div style={{ fontSize: 11.5, lineHeight: 1.55, color: "var(--ink-muted)", marginTop: 14 }}>
+                        Batas atas peluang pendapatan non-tiket, <b style={{ color: "var(--ink)" }}>bukan</b> pendapatan yang pasti diperoleh.
                       </div>
                     </div>
 
                     <div style={{ padding: "28px 0 20px" }}>
                       <div className="row" style={{ justifyContent: "space-between", marginBottom: 16 }}>
                         <span className="k">Uraian F × E × C × V</span>
-                        <Link href="/metodologi" style={{ fontSize: 11.5, fontWeight: 600 }}>Metodologi →</Link>
+                        <Link href="/metodologi" style={{ fontSize: 11.5, fontWeight: 600, color: "var(--data)" }}>Metodologi →</Link>
                       </div>
-                      <div style={{ border: "1px solid #E2E8F0", borderRadius: 12, overflow: "hidden" }}>
-                        <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderBottom: "1px solid #E2E8F0" }}>
-                          <span style={{ fontSize: 12.5, color: "#475569" }}>F — arus pintu</span>
-                          <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>
+                      <div style={{ border: "1px solid var(--rule)", borderRadius: "var(--r-md)", overflow: "hidden" }}>
+                        <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderBottom: "1px solid var(--rule)" }}>
+                          <span style={{ fontSize: 12.5, color: "var(--ink-2)" }}>F — arus pintu</span>
+                          <span className="fig" style={{ fontSize: 13, fontWeight: 600 }}>
                             {selectedMetric.variables ? ribuan(selectedMetric.variables.F) : "—"}{" "}
-                            <span style={{ color: "#94A3B8", fontWeight: 400 }}>org/jam</span>
+                            <span style={{ color: "var(--ink-faint)", fontWeight: 400 }}>org/jam</span>
                           </span>
                         </div>
-                        <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderBottom: "1px solid #E2E8F0" }}>
-                          <span style={{ fontSize: 12.5, color: "#475569" }}>E — entry ratio</span>
-                          <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>
+                        <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderBottom: "1px solid var(--rule)" }}>
+                          <span style={{ fontSize: 12.5, color: "var(--ink-2)" }}>E — entry ratio</span>
+                          <span className="fig" style={{ fontSize: 13, fontWeight: 600 }}>
                             {persen(selectedMetric.variables?.E)}
                           </span>
                         </div>
-                        <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderBottom: "1px solid #E2E8F0" }}>
-                          <span style={{ fontSize: 12.5, color: "#475569" }}>C — konversi</span>
-                          <span className="mono" style={{ fontSize: 13, fontWeight: 600 }}>
+                        <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderBottom: "1px solid var(--rule)" }}>
+                          <span style={{ fontSize: 12.5, color: "var(--ink-2)" }}>C — konversi</span>
+                          <span className="fig" style={{ fontSize: 13, fontWeight: 600 }}>
                             {persen(selectedMetric.variables?.C, 0)}
                           </span>
                         </div>
-                        <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", background: "#EEF2F6" }}>
-                          <span style={{ fontSize: 12.5, color: "#475569" }}>
+                        <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", background: "var(--data-wash)" }}>
+                          <span style={{ fontSize: 12.5, color: "var(--ink-2)" }}>
                             V — nilai transaksi{" "}
-                            <span style={{ fontSize: 9.5, color: "#94A3B8" }}>
+                            <span style={{ fontSize: 9.5, color: "var(--ink-faint)" }}>
                               {activeCategory === ALL_CATEGORIES ? "AI" : `AI · ${categoryLabel(activeCategory)}`}
                             </span>
                           </span>
-                          <span className="mono" style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8" }}>
+                          <span className="fig" style={{ fontSize: 13, fontWeight: 700, color: "var(--data)" }}>
                             {rupiah(nilaiV)}
                           </span>
                         </div>
                       </div>
                       <div className="row" style={{ justifyContent: "space-between", marginTop: 14 }}>
-                        <span className="mono" style={{ fontSize: 11.5, color: "#64748B" }}>
+                        <span className="fig" style={{ fontSize: 11.5, color: "var(--ink-muted)" }}>
                           Potensi {rupiahRingkas(selectedMetric.potensi.p50)} − tertangkap{" "}
                           {rupiahRingkas(selectedMetric.tertangkap.p50)}
                         </span>
                         <button
                           onClick={() => setShowTransparansi(true)}
-                          style={{ all: "unset", cursor: "pointer", fontSize: 11.5, fontWeight: 600, color: "#1D4ED8" }}
+                          style={{ all: "unset", cursor: "pointer", fontSize: 11.5, fontWeight: 600, color: "var(--data)" }}
                         >
                           Lihat bukti →
                         </button>
                       </div>
                     </div>
 
-                    <div style={{ height: 1, background: "rgba(15,23,42,.1)" }} />
+                    <div style={{ height: 1, background: "var(--rule)" }} />
 
                     <div style={{ padding: "26px 0" }}>
                       <div className="k" style={{ marginBottom: 16 }}>Kesenjangan per titik</div>
@@ -979,10 +970,10 @@ export function PetaScreen() {
                             >
                               <span
                                 style={{
-                                  width: 92,
+                                  width: 100,
                                   fontSize: 12,
                                   fontWeight: aktif ? 600 : 400,
-                                  color: nilai === null ? "#94A3B8" : aktif ? "#0F172A" : "#475569",
+                                  color: nilai === null ? "var(--ink-faint)" : aktif ? "var(--ink)" : "var(--ink-2)",
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
                                   whiteSpace: "nowrap",
@@ -991,23 +982,23 @@ export function PetaScreen() {
                                 {pointLabels.get(m.pointId) ?? `#${m.pointId}`}
                               </span>
                               {nilai === null ? (
-                                <span className="pill" style={{ flex: 1, height: 14, background: "#F1F5F9", border: "1px dashed #CBD5E1" }} />
+                                <span className="pill" style={{ flex: 1, height: 14, background: "var(--paper-2)", border: "1px dashed var(--rule-strong)" }} />
                               ) : (
-                                <span className="pill" style={{ flex: 1, height: 14, background: "rgba(15,23,42,.08)" }}>
+                                <span className="pill" style={{ flex: 1, height: 14, background: "var(--rule-soft)" }}>
                                   <span
                                     className="pill"
                                     style={{
                                       display: "block",
                                       width: `${Math.max(3, (nilai / stationMax) * 100)}%`,
                                       height: 14,
-                                      background: aktif ? "#1D4ED8" : "#475569",
+                                      background: aktif ? "var(--data)" : "var(--ink-2)",
                                     }}
                                   />
                                 </span>
                               )}
                               <span
-                                className="mono"
-                                style={{ width: 92, textAlign: "right", fontSize: nilai === null ? 10.5 : 11, color: nilai === null ? "#94A3B8" : undefined }}
+                                className="fig"
+                                style={{ width: 100, textAlign: "right", fontSize: nilai === null ? 10.5 : 11, color: nilai === null ? "var(--ink-faint)" : undefined }}
                               >
                                 {nilai === null ? "sampel tipis" : rupiah(nilai)}
                               </span>
@@ -1017,16 +1008,16 @@ export function PetaScreen() {
                       </div>
                     </div>
 
-                    <div style={{ height: 1, background: "rgba(15,23,42,.1)" }} />
+                    <div style={{ height: 1, background: "var(--rule)" }} />
 
                     <div style={{ padding: "26px 0 4px" }}>
                       <div className="row" style={{ justifyContent: "space-between", marginBottom: 15 }}>
                         <span className="k">Kategori hilang</span>
-                        <span style={{ fontSize: 10.5, color: "#94A3B8" }}>permintaan kawasan vs gerai</span>
+                        <span style={{ fontSize: 10.5, color: "var(--ink-faint)" }}>permintaan kawasan vs gerai</span>
                       </div>
                       <div style={{ display: "flex", flexDirection: "column" }}>
                         {kategoriHilang.length === 0 && (
-                          <div style={{ fontSize: 12, color: "#64748B", padding: "8px 2px" }}>
+                          <div style={{ fontSize: 12, color: "var(--ink-muted)", padding: "8px 2px" }}>
                             Seluruh kategori sudah memenuhi ambang 3 gerai pada slot ini.
                           </div>
                         )}
@@ -1040,14 +1031,14 @@ export function PetaScreen() {
                               width: "100%",
                               justifyContent: "space-between",
                               padding: "10px 2px",
-                              borderBottom: i < kategoriHilang.length - 1 ? "1px solid #E2E8F0" : undefined,
+                              borderBottom: i < kategoriHilang.length - 1 ? "1px solid var(--rule)" : undefined,
                               cursor: "pointer",
                             }}
                           >
                             <span style={{ fontSize: 13, fontWeight: i === 0 ? 600 : 400 }}>
                               {categoryLabel(c.category)}
                             </span>
-                            <span className="mono" style={{ fontSize: 11.5, color: "#475569" }}>
+                            <span className="fig" style={{ fontSize: 11.5, color: "var(--ink-2)" }}>
                               {persen(c.demand_share, 0)} · {c.gerai_count} gerai
                             </span>
                           </button>
@@ -1058,7 +1049,7 @@ export function PetaScreen() {
                 )}
               </div>
 
-              <div style={{ flex: "none", padding: "16px 22px 20px", display: "flex", gap: 8, boxShadow: "0 -1px 0 rgba(15,23,42,.1)" }}>
+              <div style={{ flex: "none", padding: "16px 22px 20px", display: "flex", gap: 8, boxShadow: "0 -1px 0 var(--rule)" }}>
                 <button className="b bs" style={{ flex: 1 }}>Tabel atribut</button>
                 <button className="b bp" style={{ flex: 1 }}>Unduh brief</button>
               </div>
@@ -1069,16 +1060,16 @@ export function PetaScreen() {
             <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
               <div className="sc" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "4px 22px 12px" }}>
                 <div className="row" style={{ gap: 8, marginBottom: 14 }}>
-                  <span className="dot" style={{ background: "#1D4ED8" }} />
-                  <span className="k" style={{ color: "#1D4ED8" }}>Tanya data peta</span>
+                  <span className="dot" style={{ background: "var(--data)" }} />
+                  <span className="k">Tanya data peta</span>
                 </div>
 
-                {/* User's question — right-aligned, solid accent bubble. */}
+                {/* User's question — right-aligned, solid ink bubble. */}
                 <div style={{ display: "flex", justifyContent: "flex-end" }}>
                   <div style={{ maxWidth: "82%" }}>
-                    <div className="k" style={{ textAlign: "right", color: "#94A3B8", marginBottom: 4 }}>Kamu</div>
+                    <div className="k" style={{ textAlign: "right", color: "var(--ink-faint)", marginBottom: 4 }}>Kamu</div>
                     <div
-                      style={{ borderRadius: 12, borderBottomRightRadius: 4, background: "#1D4ED8", padding: "11px 15px", fontSize: 13, color: "#fff" }}
+                      style={{ borderRadius: "var(--r-md)", borderBottomRightRadius: 4, background: "var(--ink)", padding: "11px 15px", fontSize: 13, color: "var(--surface)" }}
                     >
                       simpul mana yang kekurangan gerai apotek pagi hari?
                     </div>
@@ -1091,28 +1082,28 @@ export function PetaScreen() {
                 {showCopilotResult && (
                   <div className="row" style={{ gap: 8, alignItems: "flex-start", marginTop: 12 }}>
                     <span
-                      style={{ width: 22, height: 22, borderRadius: 999, background: "rgba(29,78,216,.12)", flex: "none", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 17 }}
+                      style={{ width: 22, height: 22, borderRadius: 999, background: "var(--data-wash)", flex: "none", display: "flex", alignItems: "center", justifyContent: "center", marginTop: 17 }}
                     >
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--data)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z" />
                       </svg>
                     </span>
                     <div style={{ maxWidth: "82%" }}>
-                      <div className="k" style={{ color: "#94A3B8", marginBottom: 4 }}>Asisten data</div>
-                      <div style={{ borderRadius: 12, borderTopLeftRadius: 4, background: "#EEF2F6", padding: "16px 18px" }}>
+                      <div className="k" style={{ color: "var(--ink-faint)", marginBottom: 4 }}>Asisten data</div>
+                      <div style={{ borderRadius: "var(--r-md)", borderTopLeftRadius: 4, background: "var(--paper-2)", padding: "16px 18px" }}>
                         <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
                           2 dari 3 simpul. Permintaan apotek di kawasan <b>Stasiun B</b> terbaca 37% tanpa satu pun gerai di dalam stasiun.
                         </div>
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginTop: 14 }}>
-                          <span className="chip" style={{ background: "rgba(29,78,216,.1)", borderColor: "transparent", color: "#1D4ED8" }}>Lapisan → Kategori hilang</span>
-                          <span className="chip" style={{ background: "rgba(29,78,216,.1)", borderColor: "transparent", color: "#1D4ED8" }}>
+                          <span className="chip" style={{ background: "var(--data-wash)", borderColor: "transparent", color: "var(--data)" }}>Lapisan → Kategori hilang</span>
+                          <span className="chip" style={{ background: "var(--data-wash)", borderColor: "transparent", color: "var(--data)" }}>
                             Kategori → {categoryLabel(activeCategory)}
                           </span>
-                          <span className="chip" style={{ background: "rgba(29,78,216,.1)", borderColor: "transparent", color: "#1D4ED8" }}>
+                          <span className="chip" style={{ background: "var(--data-wash)", borderColor: "transparent", color: "var(--data)" }}>
                             Slot → {slotLabel(activeSlot)}
                           </span>
                         </div>
-                        <div style={{ fontSize: 11.5, lineHeight: 1.5, color: "#64748B", marginTop: 14 }}>
+                        <div style={{ fontSize: 11.5, lineHeight: 1.5, color: "var(--ink-muted)", marginTop: 14 }}>
                           Setiap jawaban mengubah lapisan peta, dan menyebut slot waktu yang dipakai. Tidak ada angka di luar slot yang dicacah.
                         </div>
                       </div>
@@ -1127,19 +1118,19 @@ export function PetaScreen() {
                       key={q}
                       onClick={() => setShowCopilotResult(true)}
                       className="lyr btn-reset"
-                      style={{ border: "1px solid rgba(15,23,42,.12)", borderRadius: 12, width: "100%", padding: "10px 15px", fontSize: 12.5 }}
+                      style={{ border: "1px solid var(--rule)", borderRadius: "var(--r-md)", width: "100%", padding: "10px 15px", fontSize: 12.5 }}
                     >
                       {q}
                     </button>
                   ))}
                 </div>
               </div>
-              <div style={{ flex: "none", padding: "12px 16px 18px", boxShadow: "0 -1px 0 rgba(15,23,42,.1)" }}>
-                <div className="pill row" style={{ gap: 10, border: "1px solid rgba(15,23,42,.14)", padding: "5px 5px 5px 16px" }}>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1D4ED8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div style={{ flex: "none", padding: "12px 16px 18px", boxShadow: "0 -1px 0 var(--rule)" }}>
+                <div className="pill row" style={{ gap: 10, border: "1px solid var(--rule)", padding: "5px 5px 5px 16px" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--data)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z" />
                   </svg>
-                  <span style={{ flex: 1, fontSize: 13, color: "#94A3B8" }}>tanya tentang simpul ini…</span>
+                  <span style={{ flex: 1, fontSize: 13, color: "var(--ink-faint)" }}>tanya tentang simpul ini…</span>
                   <button onClick={() => setShowCopilotResult(true)} className="b bp" style={{ padding: "9px 16px", fontSize: 12 }}>
                     Tanya
                   </button>
@@ -1155,7 +1146,7 @@ export function PetaScreen() {
             style={{
               position: "absolute",
               inset: 0,
-              background: "rgba(15,23,42,.55)",
+              background: "rgba(22,19,15,.55)",
               backdropFilter: "blur(4px)",
               display: "flex",
               alignItems: "center",
@@ -1169,11 +1160,11 @@ export function PetaScreen() {
               aria-modal="true"
               aria-labelledby="transparansi-judul"
               onClick={(e) => e.stopPropagation()}
-              style={{ width: "100%", maxWidth: 700, background: "#fff", borderRadius: 12, boxShadow: "0 40px 100px rgba(15,23,42,.3)", overflow: "hidden" }}
+              style={{ width: "100%", maxWidth: 700, background: "var(--surface)", borderRadius: "var(--r-md)", boxShadow: "var(--shadow-lift)", overflow: "hidden" }}
             >
               <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-start", padding: "24px 26px 20px" }}>
                 <div>
-                  <div className="k" style={{ color: "#1D4ED8", marginBottom: 8 }}>
+                  <div className="k" style={{ marginBottom: 8 }}>
                     Panel transparansi · {pointLabels.get(selectedPoint.point_id) ?? "titik"}
                   </div>
                   <div id="transparansi-judul" style={{ font: "800 21px/1.15 var(--font-inter)", letterSpacing: "-.015em" }}>
@@ -1200,14 +1191,14 @@ export function PetaScreen() {
               <div style={{ display: "flex", gap: 22, padding: "0 26px 26px" }}>
                 <div style={{ width: 230, flex: "none" }}>
                   <div className="k" style={{ marginBottom: 9 }}>Foto asli · Struk Go</div>
-                  <div style={{ height: 206, borderRadius: 12, background: "#F1F5F9", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, lineHeight: 1.5, color: "#94A3B8", textAlign: "center", padding: "0 16px" }}>
+                  <div style={{ height: 206, borderRadius: "var(--r-md)", background: "var(--paper-2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, lineHeight: 1.5, color: "var(--ink-faint)", textAlign: "center", padding: "0 16px" }}>
                     Foto struk<br />identitas diredaksi
                   </div>
                   <div style={{ display: "flex", gap: 6, marginTop: 10 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: "#F1F5F9", boxShadow: "0 0 0 2px #1D4ED8" }} />
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: "#F1F5F9" }} />
-                    <div style={{ width: 40, height: 40, borderRadius: 12, background: "#F1F5F9" }} />
-                    <div style={{ width: 40, height: 40, borderRadius: 12, border: "1.5px dashed rgba(15,23,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "#94A3B8" }}>
+                    <div style={{ width: 40, height: 40, borderRadius: "var(--r-md)", background: "var(--paper-2)", boxShadow: "0 0 0 2px var(--data)" }} />
+                    <div style={{ width: 40, height: 40, borderRadius: "var(--r-md)", background: "var(--paper-2)" }} />
+                    <div style={{ width: 40, height: 40, borderRadius: "var(--r-md)", background: "var(--paper-2)" }} />
+                    <div style={{ width: 40, height: 40, borderRadius: "var(--r-md)", border: "1.5px dashed var(--rule-strong)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, color: "var(--ink-faint)" }}>
                       +{Math.max(0, selectedPoint.evidence.struk_terbaca - 3)}
                     </div>
                   </div>
@@ -1215,50 +1206,50 @@ export function PetaScreen() {
                 <div style={{ flex: 1 }}>
                   <div className="k" style={{ marginBottom: 9 }}>Hasil baca AI</div>
                   <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                    <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderRadius: "12px 12px 0 0", background: "#EEF2F6", fontSize: 12 }}>
-                      <span style={{ color: "#64748B" }}>Kategori (dinormalisasi)</span>
+                    <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", borderRadius: "var(--r-md) var(--r-md) 0 0", background: "var(--data-wash)", fontSize: 12 }}>
+                      <span style={{ color: "var(--ink-muted)" }}>Kategori (dinormalisasi)</span>
                       <span>
                         {activeCategory === ALL_CATEGORIES
                           ? "seluruh kategori"
                           : categoryLabel(activeCategory)}
                       </span>
                     </div>
-                    <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", background: "#EEF2F6", fontSize: 12 }}>
-                      <span style={{ color: "#64748B" }}>Slot yang dicacah</span>
+                    <div className="row" style={{ justifyContent: "space-between", padding: "11px 14px", background: "var(--data-wash)", fontSize: 12 }}>
+                      <span style={{ color: "var(--ink-muted)" }}>Slot yang dicacah</span>
                       <span>
                         {SLOTS.find((s) => s.key === activeSlot)?.jam ?? slotLabel(activeSlot)}
                       </span>
                     </div>
-                    <div className="row" style={{ justifyContent: "space-between", padding: "12px 14px", borderRadius: "0 0 12px 12px", background: "rgba(29,78,216,.1)", fontSize: 12 }}>
+                    <div className="row" style={{ justifyContent: "space-between", padding: "12px 14px", borderRadius: "0 0 var(--r-md) var(--r-md)", background: "var(--data-wash)", fontSize: 12 }}>
                       <span style={{ fontWeight: 600 }}>Jumlah dibayarkan</span>
-                      <span className="mono" style={{ fontWeight: 700, color: "#1D4ED8" }}>{rupiah(nilaiV)}</span>
+                      <span className="fig" style={{ fontWeight: 700, color: "var(--data)" }}>{rupiah(nilaiV)}</span>
                     </div>
                   </div>
                   <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-                    <div style={{ flex: 1, borderRadius: 12, background: "#F1F5F9", padding: 14 }}>
+                    <div style={{ flex: 1, borderRadius: "var(--r-md)", background: "var(--paper-2)", padding: 14 }}>
                       <div className="k" style={{ fontSize: 9, marginBottom: 7 }}>Keyakinan</div>
-                      <div className="mono" style={{ font: "700 18px/1 var(--font-inter)" }}>
+                      <div className="fig" style={{ font: "700 18px/1 var(--font-mono)" }}>
                         {desimal(selectedPoint.confidence)}
                       </div>
-                      <div className="pill" style={{ height: 5, background: "rgba(15,23,42,.1)", marginTop: 9 }}>
+                      <div className="pill" style={{ height: 5, background: "var(--rule-soft)", marginTop: 9 }}>
                         <div
                           className="pill"
-                          style={{ width: `${selectedPoint.confidence * 100}%`, height: 5, background: "#1D4ED8" }}
+                          style={{ width: `${selectedPoint.confidence * 100}%`, height: 5, background: "var(--data)" }}
                         />
                       </div>
                     </div>
-                    <div style={{ flex: 1, borderRadius: 12, background: "#F1F5F9", padding: 14 }}>
+                    <div style={{ flex: 1, borderRadius: "var(--r-md)", background: "var(--paper-2)", padding: 14 }}>
                       <div className="k" style={{ fontSize: 9, marginBottom: 7 }}>Cakupan</div>
-                      <div className="mono" style={{ font: "700 18px/1 var(--font-inter)" }}>
+                      <div className="fig" style={{ font: "700 18px/1 var(--font-mono)" }}>
                         {selectedPoint.evidence.struk_terbaca} / {selectedPoint.evidence.struk_total}
                       </div>
-                      <div style={{ fontSize: 10, lineHeight: 1.4, color: "#64748B", marginTop: 6 }}>
+                      <div style={{ fontSize: 10, lineHeight: 1.4, color: "var(--ink-muted)", marginTop: 6 }}>
                         struk terbaca · {selectedPoint.evidence.struk_ambigu} ambigu dikeluarkan
                       </div>
                     </div>
                   </div>
-                  <div className="row" style={{ gap: 10, alignItems: "flex-start", marginTop: 12, borderRadius: 12, background: "rgba(29,78,216,.08)", padding: "13px 15px", fontSize: 11.5, lineHeight: 1.55 }}>
-                    <span className="dot" style={{ background: "#1D4ED8", marginTop: 5 }} />
+                  <div className="row" style={{ gap: 10, alignItems: "flex-start", marginTop: 12, borderRadius: "var(--r-md)", background: "var(--data-wash)", padding: "13px 15px", fontSize: 11.5, lineHeight: 1.55 }}>
+                    <span className="dot" style={{ background: "var(--data)", marginTop: 5 }} />
                     {selectedMetric.sampelTipis ? (
                       <span>
                         Sampel kategori ini masih di bawah ambang{" "}
@@ -1276,7 +1267,7 @@ export function PetaScreen() {
                     )}
                   </div>
                   {selectedSlotRow && (
-                    <div className="mono" style={{ fontSize: 10.5, color: "#94A3B8", marginTop: 10 }}>
+                    <div className="fig" style={{ fontSize: 10.5, color: "var(--ink-faint)", marginTop: 10 }}>
                       slot {slotLabel(activeSlot)} · gap {rupiahRingkas(selectedSlotRow.gap.p50)} ·
                       kepercayaan {desimal(selectedPoint.confidence)}
                     </div>
@@ -1286,6 +1277,28 @@ export function PetaScreen() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Pil nav mengambang di atas peta full-bleed — bahasa yang sama dengan
+         panel brief & legenda yang juga melayang. Di bawah modal transparansi
+         (`zIndex: 30`) supaya modal tetap menutupinya.
+
+         `pointerEvents: none` di pembungkus + `auto` di baris nav: bagian
+         transparan pembungkus (gutter samping, celah di atas pil) meneruskan
+         klik ke peta, hanya baris nav sendiri yang menangkapnya. */}
+      <div
+        className="peta-nav-float"
+        style={{ position: "absolute", top: 0, left: 0, right: 0, zIndex: 20, pointerEvents: "none" }}
+      >
+        <NavBar
+          active="peta"
+          cta={
+            <div className="row" style={{ gap: 10 }}>
+              <button className="b bs">Bandingkan</button>
+              <button className="b bp">Brief PDF</button>
+            </div>
+          }
+        />
       </div>
     </div>
   );

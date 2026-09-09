@@ -698,6 +698,83 @@ a.kartu:focus-visible {
   background: var(--brand-strong);
 }
 
+/* ==========================================================================
+   Peta di atas sistem kertas.
+
+   Peta bersandar pada keluarga kelas warisan (`.glass`, `.lyr`, `.chip`, `.k`,
+   `.ic`, `.sc`, `.layers-toggle`, kontrol MapLibre) yang TIDAK dipakai empat
+   layar kertas lain — jadi menyetel ulang nilainya di dalam scope ini aman:
+   hanya Peta yang membacanya. Seam `--nav-*` dan `.b`/`.bp`/`.bs` di atas sudah
+   menangani navbar + tombol; blok ini menutup sisanya.
+
+   Warna mark yang digambar MapLibre (`GAP_RAMP` dkk. di lib/map/style.ts)
+   sengaja TIDAK ikut — biru gap dikunci ke `--data`, sisanya keputusan tim.
+   ========================================================================== */
+.paper-canvas .glass {
+  border-color: var(--rule);
+  /* Permukaan mengambang besar (panel brief, panel slot, kartu legenda) ikut
+     radius ubin/kartu besar sistem ini, bukan `--r-md` — di panel setinggi
+     layar, 18px terbaca nyaris tajam dibanding kartu kecil di dalamnya. */
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-soft);
+}
+.paper-canvas .k {
+  color: var(--ink-faint);
+}
+.paper-canvas .lyr {
+  color: var(--ink-2);
+}
+.paper-canvas .lyr:hover,
+.paper-canvas .layers-toggle:hover {
+  background: var(--paper-2);
+}
+.paper-canvas .chip {
+  border-color: var(--rule-strong);
+  color: var(--ink-2);
+}
+.paper-canvas .chip:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.paper-canvas .ic {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+.paper-canvas .ic:hover {
+  background: rgba(22, 19, 15, 0.08);
+}
+.paper-canvas .btn-reset:focus-visible {
+  outline-color: var(--brand-strong);
+}
+.paper-canvas .sc::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+}
+.paper-canvas .maplibregl-ctrl-group {
+  border-color: var(--rule);
+  border-radius: var(--r-md);
+}
+.paper-canvas .maplibregl-ctrl-group button {
+  background: var(--surface);
+}
+.paper-canvas .maplibregl-ctrl-group button:hover {
+  background: var(--paper-2);
+}
+.paper-canvas .maplibregl-ctrl-group button + button {
+  border-top-color: var(--rule);
+}
+/* Kolom kontrol MapLibre (`top-left`) digeser turun supaya tidak berdempetan
+   dengan pil nav yang kini mengambang di atas peta. Di-scope ke `.peta-canvas`,
+   bukan `.paper-canvas`: peta hero Beranda juga memakai kontrol `top-left` tapi
+   navnya tidak mengambang di atas peta itu. */
+.peta-canvas .maplibregl-ctrl-top-left {
+  margin-top: 84px;
+}
+/* Pembungkus pil nav mengambang: transparan tembus klik, barisnya sendiri tidak.
+   `pointer-events` itu properti terwarisi, jadi `auto` di anak langsung cukup. */
+.peta-nav-float > * {
+  pointer-events: auto;
+}
+
 /* --- Gerak ---------------------------------------------------------------
    Digerakkan scroll TANPA JavaScript, lewat `animation-timeline: view()`.
 

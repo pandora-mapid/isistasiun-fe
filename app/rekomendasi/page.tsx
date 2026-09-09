@@ -56,7 +56,7 @@ const STAT: { label: string; nilai: string; bg: string; warna: string; dot?: boo
 ];
 
 const KOLOM_PRIORITAS =
-  "40px minmax(0, 1.5fr) minmax(0, 1.2fr) 84px minmax(0, 116px) 124px";
+  "34px minmax(0, 1.55fr) minmax(0, 1.2fr) 76px minmax(0, 118px) 108px";
 
 /** Satu baris tabel urutan prioritas. `tipis` = belum direkomendasikan. */
 type BarisPrioritas = {
@@ -326,7 +326,7 @@ export default function RekomendasiPage() {
         <Kepala
           kicker="Petak kosong"
           judul="Urutan prioritas"
-          catatan="Hanya pintu dan slot dengan sampel memadai yang masuk daftar; urutannya mengikuti besar kesenjangan."
+          catatan="Diambil dari 34 slot yang datanya memadai. Kolom kepercayaan menandai ketebalan sampel di balik tiap estimasi."
         />
 
         <div
@@ -364,7 +364,7 @@ export default function RekomendasiPage() {
             style={{
               display: "grid",
               gridTemplateColumns: KOLOM_PRIORITAS,
-              gap: "var(--s2)",
+              gap: "var(--s3)",
               padding: "var(--s2) var(--s3)",
               background: "var(--data-wash)",
               borderBottom: "1px solid var(--rule)",
@@ -386,7 +386,7 @@ export default function RekomendasiPage() {
               style={{
                 display: "grid",
                 gridTemplateColumns: KOLOM_PRIORITAS,
-                gap: "var(--s2)",
+                gap: "var(--s3)",
                 padding: "var(--s3)",
                 alignItems: "center",
                 background: i % 2 ? "var(--data-wash)" : "var(--surface)",

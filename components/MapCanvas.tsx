@@ -146,8 +146,10 @@ const OFFLINE_STYLE = {
   layers: [
     {
       id: "latar",
+      // Nada kertas hangat (~`--paper-2`), bukan slate dingin — style MapLibre
+      // berupa JSON, jadi ditulis literal, bukan lewat `var()`.
       type: "background" as const,
-      paint: { "background-color": "#F1F5F9" },
+      paint: { "background-color": "#F3EFE7" },
     },
   ],
 };
@@ -642,8 +644,8 @@ export function MapCanvas({
             padding: "12px 16px",
             fontSize: 12,
             lineHeight: 1.5,
-            color: "#475569",
-            borderLeft: "3px solid #94A3B8",
+            color: "var(--ink-2)",
+            borderLeft: "3px solid var(--rule-strong)",
             zIndex: 5,
           }}
         >

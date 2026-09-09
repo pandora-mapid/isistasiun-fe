@@ -320,12 +320,11 @@ test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => 
    * Titik dan posisi layarnya, langsung dari peta.
    *
    * `map.project()` menghasilkan koordinat relatif terhadap kanvas, sedangkan
-   * `page.mouse` memakai koordinat viewport — dan kanvas peta duduk di bawah
-   * navbar. Tanpa menambahkan offset kanvas, kliknya meleset beberapa puluh
-   * piksel ke atas dan tidak mengenai apa pun.
-   *
-   * Titik juga harus dipilih yang tidak tertutup panel melayang, karena panel
-   * itu yang akan menerima kliknya.
+   * `page.mouse` memakai koordinat viewport. Kanvas peta kini penuh satu
+   * viewport (pil nav mengambang di atasnya), jadi offset kanvas ~0 — tapi
+   * titik di bawah pil nav tetap harus dilewati, karena pil itu yang akan
+   * menerima kliknya. Begitu pula sisi kanan (panel ringkasan) dan sisi bawah
+   * (panel slot & legenda).
    */
   const target = await page.evaluate(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -342,9 +341,10 @@ test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => 
       const p = map.project(f.geometry.coordinates);
       const x = rect.left + p.x;
       const y = rect.top + p.y;
-      // Sisi kanan ditempati panel ringkasan, sisi bawah panel slot & legenda.
+      // Sisi kanan ditempati panel ringkasan, sisi bawah panel slot & legenda,
+      // sisi atas pil nav yang mengambang.
       if (x > window.innerWidth - 480) continue;
-      if (y > window.innerHeight - 230 || y < rect.top + 60) continue;
+      if (y > window.innerHeight - 230 || y < rect.top + 110) continue;
 
       return { id: f.id as number, label: f.properties.point_label as string, x, y };
     }
@@ -428,7 +428,7 @@ test("legenda mengikuti skala data yang sedang aktif", async ({ page }) => {
   /** Batas atas legenda, sebagaimana tertulis di layar. */
   const batasAtas = () =>
     page.evaluate(() => {
-      const semua = [...document.querySelectorAll(".mono span")]
+      const semua = [...document.querySelectorAll(".fig span")]
         .map((el) => el.textContent ?? "")
         .filter((t) => t.startsWith("Rp "));
       return semua[semua.length - 1] ?? "";
