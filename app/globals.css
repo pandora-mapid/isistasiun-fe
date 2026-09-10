@@ -768,7 +768,7 @@ a.kartu:focus-visible {
    `.peta-canvas`, bukan `.paper-canvas`: peta hero Beranda juga memakai kontrol
    `top-left` tapi navnya tidak mengambang di atas peta itu. */
 .peta-canvas .maplibregl-ctrl-top-left {
-  margin-top: 170px;
+  margin-top: 196px;
 }
 /* Pembungkus pil nav mengambang: transparan tembus klik, barisnya sendiri tidak.
    `pointer-events` itu properti terwarisi, jadi `auto` di anak langsung cukup. */
@@ -777,17 +777,22 @@ a.kartu:focus-visible {
 }
 
 /* ==========================================================================
-   Pencarian stasiun & panel retail — dua panel mengambang di kiri peta.
+   Kotak "Cari stasiun" — panel mengambang di kiri peta.
    Rel kiri dari atas ke bawah: pil nav → kotak cari → kontrol zoom MapLibre
-   (digeser turun, lihat aturan `.maplibregl-ctrl-top-left` di bawah) → panel
-   retail. Semuanya rata `left: 24px` dengan legenda & panel slot. Nada kertas.
+   (digeser turun, lihat aturan `.maplibregl-ctrl-top-left` di atas). Rata
+   `left: 24px` dengan legenda & panel slot. Nada kertas. Panel Retail &
+   potensi sudah pindah ke tab sidebar — lihat `.retail-*` di bawah.
    ========================================================================== */
 .station-search {
   position: absolute;
-  top: 110px;
-  left: 24px;
+  top: 122px;
+  /* Rata tepi kiri pil nav (yang bermargin `--page-x`), bukan `24px` seperti
+     legenda — supaya kotak cari terbaca "menempel di bawah nav", bukan mencong.
+     `top` cukup untuk lolos bayangan pil nav, tidak lebih — biar terasa satu
+     kesatuan dengan nav, bukan panel terpisah. */
+  left: var(--page-x);
   z-index: 12;
-  width: min(340px, calc(100% - 48px));
+  width: min(360px, calc(100% - 2 * var(--page-x)));
   color: var(--ink);
 }
 .station-search-field {
@@ -872,56 +877,57 @@ a.kartu:focus-visible {
   color: var(--ink-muted);
 }
 
-.retail-locations {
-  position: absolute;
-  top: 286px;
-  left: 24px;
-  z-index: 11;
-  width: min(340px, calc(100% - 48px));
-  max-height: calc(100vh - 320px);
-  overflow-y: auto;
-  font-size: 13px;
-  color: var(--ink);
-}
-.retail-locations details {
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-soft);
-}
-.retail-locations summary {
+/* ==========================================================================
+   Panel Retail & potensi — di dalam tab sidebar (bukan lagi mengambang).
+   `RetailPanel` hidup di `.sc` tab Retail. Dropdown pemilih memakai kelas
+   `.layers-toggle` + pola wadah yang sama dengan "Lapisan & filter".
+   ========================================================================== */
+.retail-search {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 14px;
-  cursor: pointer;
-  list-style: none;
+  margin: 4px 0 10px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-pill);
 }
-.retail-locations summary::-webkit-details-marker {
-  display: none;
+.retail-search:focus-within {
+  border-color: var(--ink);
 }
-.retail-locations summary .retail-count {
-  margin-left: auto;
-  font-size: 10.5px;
+.retail-search svg {
+  flex: none;
   color: var(--ink-faint);
 }
-.retail-locations summary .retail-chevron {
+.retail-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 13px/1.2 var(--font-inter), system-ui, sans-serif;
+  color: var(--ink);
+}
+.retail-search input::placeholder {
+  color: var(--ink-faint);
+}
+.retail-search button {
   flex: none;
+  border: 0;
+  background: transparent;
   color: var(--ink-muted);
-  transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 2px;
 }
-.retail-locations details[open] summary .retail-chevron {
-  transform: rotate(180deg);
+.retail-search button:hover {
+  color: var(--ink);
 }
-.retail-locations summary:focus-visible {
-  outline: 2px solid var(--brand-strong);
-  outline-offset: -2px;
-  border-radius: var(--r-md);
-}
+
 .retail-location-list {
-  max-height: min(240px, 32vh);
-  overflow-y: auto;
-  padding: 0 6px 8px;
+  display: flex;
+  flex-direction: column;
 }
 .retail-group + .retail-group {
   margin-top: 2px;
@@ -930,7 +936,7 @@ a.kartu:focus-visible {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 11px 8px 5px;
+  padding: 11px 4px 5px;
   font: 500 10.5px/1 var(--font-mono), ui-monospace, monospace;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -954,20 +960,21 @@ a.kartu:focus-visible {
   align-items: center;
   gap: 8px;
   width: 100%;
-  padding: 9px 8px;
+  padding: 9px 4px;
   text-align: left;
   background: transparent;
   border: 0;
   border-radius: var(--r-sm);
   cursor: pointer;
   font: inherit;
+  font-size: 13px;
   color: var(--ink-2);
 }
 .retail-location-list button > span:last-child {
   color: var(--ink-faint);
 }
 .retail-location-list button:hover {
-  background: var(--paper-2);
+  background: var(--surface);
   color: var(--ink);
 }
 .retail-location-list button[aria-pressed="true"] {
@@ -981,19 +988,21 @@ a.kartu:focus-visible {
   outline: 2px solid var(--brand-strong);
   outline-offset: -2px;
 }
-.retail-location-detail {
+.retail-picker-empty {
+  padding: 12px 4px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+/* Detail di bawah dropdown — mengalir di panel, bukan kartu bergaris+bayangan. */
+.retail-detail {
   position: relative;
-  margin-top: 8px;
-  padding: 14px 16px 16px;
-  background: var(--surface);
-  border: 1px solid var(--rule);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-soft);
+  padding-top: 4px;
 }
 .retail-detail-close {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 0;
+  right: 0;
   display: flex;
   padding: 4px;
   border-radius: var(--r-sm);
@@ -1013,20 +1022,21 @@ a.kartu:focus-visible {
   text-transform: uppercase;
   color: var(--ink-muted);
 }
-.retail-location-detail h3 {
-  margin: 8px 24px 0 0;
-  font-size: 15px;
+.retail-detail h3 {
+  margin: 10px 28px 0 0;
+  font-size: 17px;
   font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--ink);
 }
 .retail-detail-meta {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
-  margin: 12px 0 0;
+  gap: 8px;
+  margin: 16px 0 0;
 }
 .retail-detail-meta div {
-  padding: 8px 10px;
+  padding: 10px 12px;
   border-radius: var(--r-sm);
   background: var(--paper-2);
 }
@@ -1037,15 +1047,21 @@ a.kartu:focus-visible {
   color: var(--ink-faint);
 }
 .retail-detail-meta dd {
-  margin: 5px 0 0;
-  font-size: 12px;
+  margin: 6px 0 0;
+  font-size: 13px;
   font-weight: 600;
   color: var(--ink);
 }
-.retail-location-detail p {
-  margin: 12px 0 0;
-  font-size: 12px;
-  line-height: 1.5;
+.retail-detail p {
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+.retail-detail-empty {
+  padding: 20px 4px;
+  font-size: 12.5px;
+  line-height: 1.6;
   color: var(--ink-muted);
 }
 

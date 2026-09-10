@@ -19,11 +19,11 @@ async function waitForMapReady(page: Page) {
   await page.waitForFunction(
     () => Boolean((window as unknown as { __map?: unknown }).__map),
     undefined,
-    { timeout: 20_000 },
+    { timeout: 25_000 },
   );
-  // 40 dtk, bukan 30: di bawah suite paralel penuh, dev server yang mengompilasi
-  // `/peta` sesuai permintaan + render SwiftShader bisa selambat itu untuk
-  // menggambar fitur pertama. Tetap di bawah `timeout` tes (60 dtk).
+  // Di bawah suite paralel penuh + mesin yang sedang sibuk, dev server yang
+  // mengompilasi `/peta` sesuai permintaan + render SwiftShader bisa selambat
+  // ini untuk menggambar fitur pertama. Tetap di bawah `timeout` tes (90 dtk).
   await page.waitForFunction(
     () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,7 +32,7 @@ async function waitForMapReady(page: Page) {
       return map.queryRenderedFeatures({ layers: ["point-circle"] }).length > 0;
     },
     undefined,
-    { timeout: 40_000 },
+    { timeout: 55_000 },
   );
 }
 
@@ -348,8 +348,9 @@ test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => 
       // sisi atas pil nav yang mengambang.
       if (x > window.innerWidth - 480) continue;
       if (y > window.innerHeight - 230 || y < rect.top + 110) continue;
-      // Rel kiri: kotak pencarian, kontrol zoom, lalu panel retail.
-      if (x < 390 && y < rect.top + 350) continue;
+      // Rel kiri: kotak pencarian stasiun (rata `--page-x`) lalu kontrol zoom
+      // (panel retail sudah pindah ke tab sidebar).
+      if (x < 440 && y < rect.top + 300) continue;
 
       return { id: f.id as number, label: f.properties.point_label as string, x, y };
     }

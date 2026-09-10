@@ -5,7 +5,7 @@ import Link from "next/link";
 import { NavBar } from "./NavBar";
 import { MapCanvas } from "./MapCanvas";
 import { StationSearch } from "./StationSearch";
-import { RetailLocations } from "./RetailLocations";
+import { RetailPanel } from "./RetailPanel";
 import { ComparisonDialog } from "./ComparisonDialog";
 import { retailGeoJSON, type RetailLocation } from "@/lib/data/retail";
 import { RETAIL_KINDS, RETAIL_LEGEND } from "@/lib/map/retail-style";
@@ -149,7 +149,7 @@ export function PetaScreen() {
   const { points, isochrones, analytics, stations, entrances, demo, error } =
     usePetaData();
 
-  const [tab, setTab] = useState<"brief" | "copilot">("brief");
+  const [tab, setTab] = useState<"brief" | "retail" | "copilot">("brief");
   const [layersOpen, setLayersOpen] = useState(false);
   const [activeLayers, setActiveLayers] = useState<string[]>(DEFAULT_ACTIVE_LAYERS);
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>(ALL_CATEGORIES);
@@ -173,12 +173,9 @@ export function PetaScreen() {
    */
   const retailLocations = useMemo(() => demo?.retail ?? [], [demo]);
   const retailData = useMemo(() => retailGeoJSON(retailLocations), [retailLocations]);
-  const retailStationName = useMemo(() => {
-    const id = retailLocations[0]?.station_id;
-    return stations?.find((s) => s.id === id)?.name ?? "kawasan stasiun";
-  }, [retailLocations, stations]);
   const selectRetail = useCallback((location: RetailLocation) => {
     setSelectedRetail(location);
+    setTab("retail");
     setStationTarget({ longitude: location.longitude, latitude: location.latitude, zoom: 17.5 });
     setActiveLayers((current) =>
       current.includes("retail") ? current : [...current, "retail"],
@@ -341,7 +338,7 @@ export function PetaScreen() {
     : [];
   const station = stations?.find((s) => s.id === selectedPoint?.station_id);
 
-  const tabX = tab === "brief" ? 4 : 190;
+  const tabX = { brief: 4, retail: 130, copilot: 256 }[tab];
   const chev = layersOpen ? 180 : 0;
   const layerCount = layersOpen
     ? `${activeLayers.length} dari ${LAYER_TERSEDIA.length} aktif`
@@ -408,14 +405,6 @@ export function PetaScreen() {
             setLayersOpen(false);
             setShowTransparansi(false);
           }}
-        />
-
-        <RetailLocations
-          locations={retailLocations}
-          stationName={retailStationName}
-          selected={selectedRetail}
-          onSelect={selectRetail}
-          onClose={() => setSelectedRetail(null)}
         />
 
         <div
@@ -501,36 +490,6 @@ export function PetaScreen() {
               </span>
             </span>
           </span>
-
-          {/* Retail hanya muncul di legenda saat lapisannya menyala — ia
-             opsional, tidak seperti kesenjangan. Tiga jenis dibedakan lewat
-             isian bulatan (pejal / berongga tinta / berongga oker), bukan tiga
-             warna baru; lambang di sini persis yang digambar peta. */}
-          {activeLayers.includes("retail") && (
-            <>
-              <span style={LEGENDA_SEKAT} />
-              <span style={LEGENDA_GRUP}>
-                <span className="k">Retail</span>
-                <span className="row" style={{ gap: 12 }}>
-                  {RETAIL_KINDS.map((kind) => (
-                    <span key={kind} className="row" style={{ ...LEGENDA_TEKS, gap: 6 }}>
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: 999,
-                          background: RETAIL_LEGEND[kind].fill,
-                          boxShadow: `0 0 0 1.5px ${RETAIL_LEGEND[kind].stroke}`,
-                          flex: "none",
-                        }}
-                      />
-                      {RETAIL_LEGEND[kind].label}
-                    </span>
-                  ))}
-                </span>
-              </span>
-            </>
-          )}
 
           {/* Lapisan opsional (arus pintu) tidak diberi butir legenda:
              labelnya di peta sudah menulis satuannya sendiri — "380/jam" —
@@ -676,25 +635,29 @@ export function PetaScreen() {
                   position: "absolute",
                   top: 4,
                   bottom: 4,
-                  width: 186,
+                  width: 122,
                   background: "var(--surface)",
                   boxShadow: "var(--shadow-soft)",
                   transition: "left .18s cubic-bezier(.4,0,.2,1)",
                   left: tabX,
                 }}
               />
-              <button
-                onClick={() => setTab("brief")}
-                style={{ all: "unset", position: "relative", flex: 1, textAlign: "center", padding: "9px 0", font: "600 12.5px/1 var(--font-inter)", color: "var(--ink)", cursor: "pointer" }}
-              >
-                Ringkasan
-              </button>
-              <button
-                onClick={() => setTab("copilot")}
-                style={{ all: "unset", position: "relative", flex: 1, textAlign: "center", padding: "9px 0", font: "600 12.5px/1 var(--font-inter)", color: "var(--ink)", cursor: "pointer" }}
-              >
-                Tanya Data
-              </button>
+              {(
+                [
+                  ["brief", "Ringkasan"],
+                  ["retail", "Retail"],
+                  ["copilot", "Tanya Data"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setTab(key)}
+                  aria-pressed={tab === key}
+                  style={{ all: "unset", position: "relative", flex: 1, textAlign: "center", padding: "9px 0", font: "600 12.5px/1 var(--font-inter)", color: "var(--ink)", cursor: "pointer" }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -1141,6 +1104,50 @@ export function PetaScreen() {
               <div style={{ flex: "none", padding: "16px 22px 20px", display: "flex", gap: 8, boxShadow: "0 -1px 0 var(--rule)" }}>
                 <button className="b bs" style={{ flex: 1 }}>Tabel atribut</button>
                 <button className="b bp" style={{ flex: 1 }}>Unduh brief</button>
+              </div>
+            </div>
+          )}
+
+          {tab === "retail" && (
+            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              <div style={{ flex: "none", padding: "4px 22px 16px" }}>
+                <div className="k" style={{ marginBottom: 10 }}>Retail &amp; potensi toko</div>
+                <div style={{ fontSize: 12.5, color: "var(--ink-muted)" }}>
+                  Gerai yang sudah ada, kandidat toko, dan ruko depan stasiun di
+                  kawasan Manggarai. Penanda di peta bisa disembunyikan lewat
+                  Lapisan &amp; filter.
+                </div>
+                {/* Kunci baca penanda retail — di sini, bukan di legenda peta,
+                   supaya legenda peta tetap seperti semula. */}
+                <div className="row" style={{ gap: "8px 16px", flexWrap: "wrap", marginTop: 12 }}>
+                  {RETAIL_KINDS.map((kind) => (
+                    <span
+                      key={kind}
+                      className="row"
+                      style={{ gap: 6, fontSize: 11, color: "var(--ink-2)", whiteSpace: "nowrap" }}
+                    >
+                      <span
+                        style={{
+                          width: 9,
+                          height: 9,
+                          borderRadius: 999,
+                          background: RETAIL_LEGEND[kind].fill,
+                          boxShadow: `0 0 0 1.5px ${RETAIL_LEGEND[kind].stroke}`,
+                          flex: "none",
+                        }}
+                      />
+                      {RETAIL_LEGEND[kind].label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="sc" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 22px 16px" }}>
+                <RetailPanel
+                  locations={retailLocations}
+                  selected={selectedRetail}
+                  onSelect={selectRetail}
+                  onClose={() => setSelectedRetail(null)}
+                />
               </div>
             </div>
           )}

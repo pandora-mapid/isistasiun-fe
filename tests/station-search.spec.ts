@@ -79,14 +79,16 @@ test("cari stasiun lewat keyboard memindahkan kamera dan memilih titik", async (
 });
 
 test("sepuluh lokasi retail dipilih dari daftar dan dari marker, lalu disembunyikan", async ({ page }) => {
-  const panel = page.getByRole("region", { name: "Retail dan potensi Manggarai" });
-  await panel.locator("summary").click();
-  await expect(panel.locator(".retail-location-list button")).toHaveCount(10);
+  await page.getByRole("button", { name: "Retail", exact: true }).click();
 
-  // Pilih dari daftar → kartu detail + kamera mendekat.
-  await panel.getByRole("button", { name: "Famima Manggarai" }).click();
+  // Dropdown pemilih terbuka secara bawaan → daftar langsung terlihat.
+  await expect(page.locator(".retail-location-list button")).toHaveCount(10);
+
+  // Pilih dari daftar → kartu detail + kamera mendekat + dropdown ciut.
+  await page.getByRole("button", { name: "Famima Manggarai" }).click();
   const detail = page.getByRole("article", { name: "Detail lokasi retail" });
   await expect(detail.getByRole("heading")).toHaveText("Famima Manggarai");
+  await expect(page.locator(".retail-location-list")).toBeHidden();
   await expect
     .poll(() =>
       page.evaluate(() => {
@@ -103,7 +105,7 @@ test("sepuluh lokasi retail dipilih dari daftar dan dari marker, lalu disembunyi
   });
   await expect.poll(() => markerCount(page)).toBe(10);
 
-  // Pilih dari marker di peta.
+  // Pilih dari marker di peta → detail berganti, tab Retail tetap aktif.
   const at = await page.evaluate(() => {
     const map = (window as unknown as { __map: MapLibreMap }).__map;
     const p = map.project([106.8502013, -6.2100029]); // Indomaret Manggarai
@@ -113,17 +115,14 @@ test("sepuluh lokasi retail dipilih dari daftar dan dari marker, lalu disembunyi
   await page.mouse.click(at.x, at.y);
   await expect(detail.getByRole("heading")).toHaveText("Indomaret Manggarai");
 
-  // Memilih menutup daftar (panel harus tetap pendek); buka lagi untuk memilih
-  // lokasi berikutnya.
-  await expect(panel.locator(".retail-location-list button").first()).toBeHidden();
-  await panel.locator("summary").click();
-
-  // Lokasi tanpa kategori dan tanpa estimasi menyebut alasannya.
-  await panel.getByRole("button", { name: "Potensi toko 5" }).click();
+  // Buka lagi dropdown untuk memilih lokasi berikutnya.
+  await page.locator(".layers-toggle").click();
+  await page.getByRole("button", { name: "Potensi toko 5" }).click();
   await expect(detail).toContainText("Estimasi potensi pendapatan belum tersedia");
   await expect(detail).toContainText("Belum ditentukan");
 
-  // Sakelar lapisan retail menyembunyikan marker.
+  // Sakelar lapisan retail (dari tab Ringkasan) menyembunyikan marker.
+  await page.getByRole("button", { name: "Ringkasan", exact: true }).click();
   await page.getByRole("button", { name: /Lapisan & filter/ }).click();
   await page.getByRole("button", { name: "Retail & potensi toko", exact: true }).click();
   await expect
@@ -136,6 +135,24 @@ test("sepuluh lokasi retail dipilih dari daftar dan dari marker, lalu disembunyi
       ),
     )
     .toBe("none");
+});
+
+test("kotak cari menyaring daftar retail per nama", async ({ page }) => {
+  await page.getByRole("button", { name: "Retail", exact: true }).click();
+  await expect(page.locator(".retail-location-list button")).toHaveCount(10);
+
+  const cari = page.getByRole("textbox", { name: "Cari retail atau potensi toko" });
+  await cari.fill("ruko");
+  await expect(page.locator(".retail-location-list button")).toHaveCount(3);
+  await expect(page.locator(".retail-location-list button").first()).toContainText(
+    "Ruko depan Stasiun Manggarai",
+  );
+
+  await cari.fill("zzz");
+  await expect(page.locator(".retail-picker-empty")).toBeVisible();
+
+  await page.getByRole("button", { name: "Hapus pencarian retail" }).click();
+  await expect(page.locator(".retail-location-list button")).toHaveCount(10);
 });
 
 test("filter kategori tidak mengubah jumlah marker retail", async ({ page }) => {

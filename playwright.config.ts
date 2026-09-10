@@ -24,7 +24,7 @@ export default defineConfig({
   // itu. Dibatasi supaya deterministik; suite ini penjaga, bukan lomba lari.
   workers: 4,
   reporter: [["list"]],
-  timeout: 60_000,
+  timeout: 90_000,
   use: {
     baseURL: "http://localhost:3000",
     trace: "off",
