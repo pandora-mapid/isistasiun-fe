@@ -41,6 +41,9 @@ yarn-error.log*
 # Kecuali contohnya: berkas ini justru daftar apa saja yang perlu diisi, dan
 # sengaja tidak berisi satu pun nilai rahasia.
 !.env.example
+# Begitu juga contoh untuk deploy: dibaca manusia saat menyiapkan `.env` di
+# VPS, tidak berisi rahasia.
+!.env.deploy.example
 
 # vercel
 .vercel

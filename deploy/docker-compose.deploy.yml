@@ -1,0 +1,64 @@
+# Stack frontend di server. Berdiri sendiri — bukan overlay dari compose lokal.
+#
+# Berkas ini REFERENSI: salin manual ke /opt/isistasiun-fe/ di VPS, sejajar
+# dengan `.env` yang dibuat sekali dari `.env.deploy.example`. Tidak ada satu
+# pun nilai khusus environment di sini; semuanya lewat `.env`.
+#
+#   docker compose -f docker-compose.deploy.yml --env-file .env up -d
+#
+# TLS dan routing ditangani reverse proxy bersama yang sudah ada di box
+# (trackster-nginx-1 di network `shared-web-net`). Stack ini hanya memaparkan
+# `frontend` ke network itu sebagai
+#
+#   ${COMPOSE_PROJECT_NAME}-frontend-1:3000
+#
+# jadi server block di nginx tinggal diarahkan ke upstream tersebut. Tidak ada
+# port yang dipetakan ke host — satu-satunya jalan masuk adalah lewat proxy.
+
+name: ${COMPOSE_PROJECT_NAME:-isistasiun-fe}
+
+networks:
+  shared-web-net:
+    external: true
+
+services:
+  frontend:
+    image: ghcr.io/pandora-mapid/isistasiun-fe:${IMAGE_TAG:-development}
+
+    # CD memakai tag yang bergerak; tanpa ini compose akan memakai image lama
+    # yang sudah ada di lokal kalau namanya kebetulan sama.
+    pull_policy: always
+
+    restart: always
+
+    # Catatan: alamat API dan basemap (NEXT_PUBLIC_*) SUDAH TERSISIP ke dalam
+    # bundel saat image dibangun. Mengubahnya di `.env` tidak mengubah apa pun
+    # yang jalan di browser — perubahan alamat perlu build ulang lewat CI.
+    # `.env` tetap dibaca di sini supaya isinya tercatat di satu tempat.
+    env_file: .env
+
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      # Server standalone harus mendengar di semua interface agar bisa
+      # dijangkau nginx dari container lain.
+      HOSTNAME: "0.0.0.0"
+
+    # `expose`, bukan `ports`: hanya terlihat dari sesama container di
+    # shared-web-net, tidak dari internet lewat IP host.
+    expose:
+      - "3000"
+
+    networks:
+      - shared-web-net
+
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+    logging:
+      driver: json-file
+      options: {max-size: "10m", max-file: "3"}

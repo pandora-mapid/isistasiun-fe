@@ -1,0 +1,83 @@
+# Menaruh image hasil CI ke VPS.
+#
+# Dipicu oleh `workflow_run`, bukan `push`, supaya deploy hanya jalan setelah
+# CI benar-benar sukses — image-nya sudah pasti ada di GHCR saat VPS menariknya.
+#
+# Cabang `development` saja. `main` sengaja tidak ikut: CI tetap membangun dan
+# mendorong image-nya, tapi promosi ke produksi dilakukan manual.
+#
+# Yang dilakukan di server hanya empat hal: tulis IMAGE_TAG baru ke `.env`,
+# `pull`, `up -d`, lalu bersihkan image lama. Tidak ada `git pull`, tidak ada
+# build. Konfigurasi nginx dan SSL tidak disentuh sama sekali.
+
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [development]
+
+concurrency:
+  group: cd-development
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ke VPS (development)
+    runs-on: ubuntu-latest
+
+    # `workflow_run` ikut menyala saat CI gagal atau dibatalkan — jadi
+    # kesuksesannya harus diperiksa sendiri di sini.
+    if: github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      # Tag dihitung dari commit yang MEMICU CI, bukan dari HEAD cabang saat
+      # ini. Kalau ada push baru menyusul, deploy ini tetap memasang image yang
+      # memang dibangun oleh run tersebut — bukan yang lain.
+      - name: Tentukan tag
+        id: meta
+        run: |
+          set -euo pipefail
+          branch="${HEAD_BRANCH//\//-}"
+          echo "tag=${branch}-${HEAD_SHA::7}" >> "$GITHUB_OUTPUT"
+        env:
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1
+        env:
+          IMAGE_TAG: ${{ steps.meta.outputs.tag }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: IMAGE_TAG
+          # Tanpa ini, perintah yang gagal di tengah skrip tidak menggagalkan
+          # langkah — deploy bisa "hijau" padahal container-nya tidak naik.
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            cd /opt/isistasiun-fe
+
+            # `.env` adalah milik server, bukan repo — workflow ini hanya
+            # menyentuh satu baris di dalamnya.
+            if grep -q '^IMAGE_TAG=' .env; then
+              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${IMAGE_TAG}|" .env
+            else
+              echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
+            fi
+            echo "IMAGE_TAG -> ${IMAGE_TAG}"
+
+            compose="docker compose -f docker-compose.deploy.yml --env-file .env"
+
+            $compose pull frontend
+            $compose up -d frontend
+
+            # Image lama yang sudah tidak dirujuk container mana pun. `-f`
+            # supaya tidak menunggu konfirmasi interaktif.
+            docker image prune -f
+
+            $compose ps frontend

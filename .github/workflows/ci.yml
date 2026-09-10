@@ -1,0 +1,115 @@
+# Membangun image frontend dan mendorongnya ke GHCR.
+#
+# Dua tag per commit:
+#   {branch}-{short_sha}  — tetap, menunjuk satu commit; ini yang dipakai CD
+#   {branch}              — bergerak, selalu menunjuk build terakhir cabang itu
+#
+# Auth memakai GITHUB_TOKEN bawaan (bukan PAT): cukup `packages: write` di
+# level job, dan token itu otomatis punya akses ke package milik repo ini.
+
+name: CI
+
+on:
+  push:
+    branches:
+      - development
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: pandora-mapid/isistasiun-fe
+
+# Push beruntun ke cabang yang sama: yang lama dibatalkan, tidak ada gunanya
+# menyelesaikan build untuk commit yang sudah tertimpa.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-push:
+    name: Build & push image
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Nama cabang dan sha pendek dihitung sekali di sini supaya bentuk tag
+      # tinggal dibaca, tidak diulang-ulang di langkah berikutnya.
+      - name: Tentukan tag
+        id: meta
+        run: |
+          set -euo pipefail
+          branch="${GITHUB_REF_NAME//\//-}"
+          short_sha="${GITHUB_SHA::7}"
+          echo "branch=${branch}"           >> "$GITHUB_OUTPUT"
+          echo "sha_tag=${branch}-${short_sha}" >> "$GITHUB_OUTPUT"
+
+      # NEXT_PUBLIC_* disisipkan saat build, jadi alamat API ikut terkunci di
+      # dalam image dan harus ditentukan DI SINI, bukan di `.env` pada VPS.
+      # Itu sebabnya pemetaannya per cabang.
+      #
+      # Nilainya boleh ditimpa lewat Repository variables (Settings →
+      # Secrets and variables → Actions → Variables) tanpa menyentuh berkas ini.
+      - name: Tentukan environment
+        id: env
+        run: |
+          set -euo pipefail
+          if [ "${{ steps.meta.outputs.branch }}" = "main" ]; then
+            api_default="https://api.isistasiun.trackster.cloud/api/v1"
+            basemap_default="https://api.isistasiun.trackster.cloud/api/v1/basemap/style.json"
+          else
+            api_default="https://api.dev.isistasiun.trackster.cloud/api/v1"
+            basemap_default="https://api.dev.isistasiun.trackster.cloud/api/v1/basemap/style.json"
+          fi
+          echo "api_base_url=${API_OVERRIDE:-$api_default}"     >> "$GITHUB_OUTPUT"
+          echo "basemap_url=${BASEMAP_OVERRIDE:-$basemap_default}" >> "$GITHUB_OUTPUT"
+        env:
+          API_OVERRIDE: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
+          BASEMAP_OVERRIDE: ${{ vars.NEXT_PUBLIC_BASEMAP_URL }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login ke GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.sha_tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.branch }}
+          build-args: |
+            NEXT_PUBLIC_API_BASE_URL=${{ steps.env.outputs.api_base_url }}
+            NEXT_PUBLIC_BASEMAP_URL=${{ steps.env.outputs.basemap_url }}
+          # Cache lapisan disimpan di GitHub Actions cache. `mode=max` ikut
+          # menyimpan lapisan antara (termasuk hasil `npm ci`), yang memang
+          # bagian paling mahal dari build ini.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          provenance: false
+
+      - name: Ringkasan
+        run: |
+          {
+            echo "### Image terdorong"
+            echo
+            echo '```'
+            echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.sha_tag }}"
+            echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.branch }}"
+            echo '```'
+            echo
+            echo "NEXT_PUBLIC_API_BASE_URL = \`${{ steps.env.outputs.api_base_url }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
