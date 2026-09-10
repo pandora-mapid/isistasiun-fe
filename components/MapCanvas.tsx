@@ -12,6 +12,7 @@ import {
 import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { Domain } from "@/lib/analytics/select";
+import type { RetailLocation } from "@/lib/data/retail";
 import type {
   IsochroneProps,
   ObservationPointProps,
@@ -36,6 +37,18 @@ import {
   pointLabelLayer,
   scaleDependentPaint,
 } from "@/lib/map/style";
+import {
+  retailCircleLayer,
+  retailLabelLayer,
+  retailStrokeColor,
+  retailStrokeWidth,
+} from "@/lib/map/retail-style";
+
+/** Koleksi retail kosong — dipakai kalau pemanggil tidak mengoper apa pun. */
+const RETAIL_KOSONG: FeatureCollection<Point, RetailLocation> = {
+  type: "FeatureCollection",
+  features: [],
+};
 
 type Props = {
   /** Geometri titik pengamatan. `null` selama data belum termuat. */
@@ -112,6 +125,22 @@ type Props = {
     | "top-right"
     | "bottom-left"
     | "bottom-right";
+  /**
+   * Lokasi retail & potensi toko sebagai GeoJSON. Opsional — peta hero Beranda
+   * tidak menggambar lapisan ini. Difilter/dibangun ulang di `PetaScreen`;
+   * source-nya di-`setData` ulang tiap kali prop ini berubah.
+   */
+  retailLocations?: FeatureCollection<Point, RetailLocation>;
+  /** `id` retail yang sedang dipilih — menebalkan garis tepinya. */
+  selectedRetailId?: string | null;
+  /** Dipanggil saat sebuah bulatan retail diklik. */
+  onSelectRetail?: (location: RetailLocation) => void;
+  /**
+   * Titik yang harus didatangi kamera setelah layer terpasang — dari pencarian
+   * stasiun, daftar retail, atau dialog Bandingkan. `null` = biarkan di kawasan
+   * studi.
+   */
+  stationTarget?: { longitude: number; latitude: number; zoom?: number } | null;
 };
 
 /** Batas menunggu style basemap sebelum dianggap gagal. */
@@ -234,6 +263,10 @@ export function MapCanvas({
   fitPadding = FIT_PADDING,
   borderRadius,
   attributionPosition = "bottom-right",
+  retailLocations = RETAIL_KOSONG,
+  selectedRetailId = null,
+  onSelectRetail,
+  stationTarget = null,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -264,6 +297,16 @@ export function MapCanvas({
   useEffect(() => {
     onSelectRef.current = onSelectPoint;
   }, [onSelectPoint]);
+  /** Sama alasannya untuk retail: pendengar dipasang sekali, closure-nya jangan dibekukan. */
+  const onSelectRetailRef = useRef(onSelectRetail);
+  useEffect(() => {
+    onSelectRetailRef.current = onSelectRetail;
+  }, [onSelectRetail]);
+  /** Daftar retail terbaru, dibaca penangan klik untuk mencocokkan `id` → lokasi. */
+  const retailRef = useRef(retailLocations);
+  useEffect(() => {
+    retailRef.current = retailLocations;
+  }, [retailLocations]);
 
   // --- membuat peta, sekali seumur komponen -------------------------------
   useEffect(() => {
@@ -395,6 +438,7 @@ export function MapCanvas({
 
     map.addSource(SOURCE.isochrones, { type: "geojson", data: isochrones });
     map.addSource(SOURCE.points, { type: "geojson", data: points });
+    map.addSource(SOURCE.retail, { type: "geojson", data: retailRef.current });
     map.addSource(SOURCE.pointLabels, {
       type: "geojson",
       data: labelData ?? { type: "FeatureCollection", features: [] },
@@ -405,9 +449,14 @@ export function MapCanvas({
     map.addLayer(isochroneLineLayer());
     map.addLayer(pointConfidenceLayer(gapDomain, confidenceDomain));
     map.addLayer(pointCircleLayer(gapDomain));
+    // Bulatan retail di atas lingkaran kesenjangan (LAYER_ORDER), di bawah simbol.
+    map.addLayer(retailCircleLayer());
     // Seluruh layer bertulisan butuh glyph dari jaringan; lewati kalau basemap
     // saja gagal dimuat, karena endpoint glyph-nya ikut hilang.
     if (glyphsAvailableRef.current) {
+      // Nama retail dipasang lebih dulu → prioritas tabrakan simbol paling
+      // rendah, jadi nama titik pengamatan tidak pernah tergeser olehnya.
+      map.addLayer(retailLabelLayer());
       // Urutannya mengikuti LAYER_ORDER: arus lebih dulu, nama titik sesudahnya
       // — lihat catatan di sana soal prioritas penempatan simbol.
       map.addLayer(pointArusLayer());
@@ -618,6 +667,90 @@ export function MapCanvas({
       );
     }
   }, [visibleLayers, layersReady]);
+
+  // --- lokasi retail: source di-setData ulang saat datanya berubah -------
+  //
+  // Source retail dipasang sekali di efek pemasangan layer, yang keluar-awal
+  // selamanya sesudah `layersReady`. Tanpa efek ini, retail yang datang
+  // belakangan (mis. `demo` baru selesai dimuat) atau daftar yang berubah
+  // tidak pernah sampai ke peta — panel berubah, marker tidak.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady) return;
+    const src = map.getSource(SOURCE.retail);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(retailLocations);
+    }
+  }, [retailLocations, layersReady]);
+
+  // --- retail terpilih: garis tepi menebal ------------------------------
+  //
+  // Lewat `setPaintProperty`, bukan `feature-state`: nilainya bertahan saat
+  // source retail di-`setData` ulang, sedangkan feature-state ikut terhapus.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !map.getLayer(LAYER.retailCircle)) return;
+    map.setPaintProperty(
+      LAYER.retailCircle,
+      "circle-stroke-color" as never,
+      retailStrokeColor(selectedRetailId) as never,
+    );
+    map.setPaintProperty(
+      LAYER.retailCircle,
+      "circle-stroke-width" as never,
+      retailStrokeWidth(selectedRetailId) as never,
+    );
+  }, [selectedRetailId, layersReady, retailLocations]);
+
+  // --- interaksi retail: sorot dan pilih --------------------------------
+  //
+  // Efek tersendiri (alasannya sama dengan pendengar titik di atas). Peta
+  // non-interaktif tidak mendaftarkannya sama sekali.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !interactive || !map.getLayer(LAYER.retailCircle))
+      return;
+
+    const onClick = (e: { features?: { properties?: Record<string, unknown> }[] }) => {
+      const id = e.features?.[0]?.properties?.id;
+      const location = retailRef.current.features.find(
+        (f) => f.properties.id === id,
+      )?.properties;
+      if (location) onSelectRetailRef.current?.(location);
+    };
+    const onEnter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const onLeave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+
+    map.on("click", LAYER.retailCircle, onClick);
+    map.on("mouseenter", LAYER.retailCircle, onEnter);
+    map.on("mouseleave", LAYER.retailCircle, onLeave);
+    return () => {
+      map.off("click", LAYER.retailCircle, onClick);
+      map.off("mouseenter", LAYER.retailCircle, onEnter);
+      map.off("mouseleave", LAYER.retailCircle, onLeave);
+    };
+  }, [layersReady, interactive]);
+
+  // --- kamera menuju stasiun / retail / hasil banding -------------------
+  //
+  // Menunggu `layersReady` supaya `fitBounds` awal tidak menimpanya. `padding`
+  // nol: target ini permintaan eksplisit pengguna, bawa persis ke tengah.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !stationTarget) return;
+    map.flyTo({
+      center: [stationTarget.longitude, stationTarget.latitude],
+      zoom: stationTarget.zoom ?? 16,
+      bearing: 0,
+      pitch: 0,
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+      duration: 1100,
+    });
+  }, [layersReady, stationTarget]);
 
   const pesan = dataError ?? notice;
 

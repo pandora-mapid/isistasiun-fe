@@ -39,13 +39,21 @@ test("judul terbaca, bukan sekadar hadir di DOM", async ({ page }) => {
   ).toBeVisible();
 });
 
+/**
+ * Angka Insight dipetik dari `usePetaData()` — beberapa asersi menunggu
+ * seluruh rantai fetch data mock selesai. Di bawah suite paralel penuh, dev
+ * server (kompilasi on-demand) bisa lambat menyajikannya, jadi asersi yang
+ * bergantung data diberi tenggang lebih panjang dari bawaan 5 dtk.
+ */
+const TUNGGU_DATA = { timeout: 15_000 };
+
 test("angka lama yang dikarang tidak ada, cakupan dua simpul terbaca", async ({
   page,
 }) => {
   await page.goto("/insight", { waitUntil: "domcontentloaded" });
 
-  await expect(page.getByText("Manggarai").first()).toBeVisible();
-  await expect(page.getByText("Sudirman").first()).toBeVisible();
+  await expect(page.getByText("Manggarai").first()).toBeVisible(TUNGGU_DATA);
+  await expect(page.getByText("Sudirman").first()).toBeVisible(TUNGGU_DATA);
 
   await expect(page.getByText("Stasiun A")).toHaveCount(0);
   await expect(page.getByText("Stasiun C")).toHaveCount(0);
@@ -61,11 +69,11 @@ test("angka dipetik dari data yang sama dengan halaman Peta", async ({
   await page.goto("/insight", { waitUntil: "domcontentloaded" });
 
   // Kesenjangan harian terbesar di dua simpul = titik 12 Manggarai, Rp 2,9 jt.
-  await expect(page.getByText("Rp 2,9 jt").first()).toBeVisible();
-  await expect(page.getByText("Koridor Transit Utara").first()).toBeVisible();
+  await expect(page.getByText("Rp 2,9 jt").first()).toBeVisible(TUNGGU_DATA);
+  await expect(page.getByText("Koridor Transit Utara").first()).toBeVisible(TUNGGU_DATA);
 
   // Jejak asal data ikut disebut, sama seperti di Beranda dan Peta.
-  await expect(page.getByText(/pipeline mock-/)).toBeVisible();
+  await expect(page.getByText(/pipeline mock-/)).toBeVisible(TUNGGU_DATA);
 });
 
 test("tidak ada isi halaman yang tersembunyi sebelum digulung", async ({

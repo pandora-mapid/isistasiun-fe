@@ -120,6 +120,14 @@ export const SOURCE = {
    * Ongkosnya kecil: isinya hanya sebanyak titik pengamatan (belasan).
    */
   pointLabels: "point-label-values",
+  /**
+   * Lokasi retail & potensi toko — pasokan, bukan permintaan.
+   *
+   * Dimuat sebagai GeoJSON dari data presentasi Tahap 1 (`lib/data/demo.ts`).
+   * Fase 2: `GET /stations/:id/retail`. Terpisah dari `points` karena artinya
+   * berbeda — titik pengamatan mengukur kesenjangan, retail menandai gerai.
+   */
+  retail: "retail-locations",
 } as const;
 
 /**
@@ -148,6 +156,10 @@ export const LAYER = {
   pointLabel: "point-label",
   /** Angka arus pintu (F), tulisan kecil di bawah nama titik. */
   pointArus: "point-arus",
+  /** Bulatan retail & potensi toko. */
+  retailCircle: "retail-circle",
+  /** Nama gerai retail — konteks tambahan, prioritas tabrakan paling rendah. */
+  retailLabel: "retail-label",
 } as const;
 
 /**
@@ -162,6 +174,14 @@ export const LAYER_ORDER = [
   LAYER.isochroneLine,
   LAYER.pointConfidence,
   LAYER.pointCircle,
+  // Bulatan retail duduk di atas lingkaran kesenjangan (kecil, jadi tidak
+  // menutupi) tapi di bawah semua simbol tulisan.
+  LAYER.retailCircle,
+  // Nama retail dipasang PALING AWAL di antara simbol → prioritas tabrakan
+  // paling rendah. MapLibre menempatkan simbol dalam urutan terbalik: yang
+  // lebih akhir menang. Nama gerai retail hanya konteks tambahan, jadi ia yang
+  // pertama menyingkir saat ruang sempit — bukan nama titik pengamatan.
+  LAYER.retailLabel,
   // Arus sengaja SEBELUM nama titik. MapLibre menempatkan simbol dalam urutan
   // terbalik — layer yang lebih akhir menang saat kotak teksnya bertabrakan.
   // Waktu arus diletakkan sesudah nama, seluruh nama titik lenyap dari peta
@@ -184,6 +204,7 @@ export const LAYER_GROUPS: Record<string, readonly string[]> = {
   gap: [LAYER.pointCircle, LAYER.pointLabel],
   kepercayaan: [LAYER.pointConfidence],
   arus: [LAYER.pointArus],
+  retail: [LAYER.retailCircle, LAYER.retailLabel],
 };
 
 /**

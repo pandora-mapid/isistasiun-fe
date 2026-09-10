@@ -4,6 +4,11 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { NavBar } from "./NavBar";
 import { MapCanvas } from "./MapCanvas";
+import { StationSearch } from "./StationSearch";
+import { RetailLocations } from "./RetailLocations";
+import { ComparisonDialog } from "./ComparisonDialog";
+import { retailGeoJSON, type RetailLocation } from "@/lib/data/retail";
+import { RETAIL_KINDS, RETAIL_LEGEND } from "@/lib/map/retail-style";
 import {
   biggestGapPoint,
   confidenceDomainOf,
@@ -65,13 +70,14 @@ const LAYER_ROWS: LayerRow[] = [
   { key: "gap", label: "Kesenjangan belanja", dot: "var(--data)", tint: "var(--data-wash)" },
   { key: "kepercayaan", label: "Kepercayaan data", dot: "var(--rule-strong)", tint: "var(--data-wash)" },
   { key: "arus", label: "Arus pintu stasiun", dot: "var(--data)", tint: "var(--data-wash)" },
+  { key: "retail", label: "Retail & potensi toko", dot: "var(--ink)", tint: "rgba(22,19,15,.06)" },
   { key: "sewa", label: "Indeks sewa / arus", dot: "var(--ink-2)", tint: "rgba(22,19,15,.08)" },
   { key: "event", label: "Event & aktivasi", dot: "var(--ink-faint)", tint: "rgba(22,19,15,.06)" },
 ];
 
 /** Baris yang benar-benar menggerakkan peta. */
 const LAYER_TERSEDIA = LAYER_ROWS.filter((r) => r.key in LAYER_GROUPS);
-const DEFAULT_ACTIVE_LAYERS = ["gap", "kepercayaan"];
+const DEFAULT_ACTIVE_LAYERS = ["gap", "kepercayaan", "retail"];
 
 /** Warna titik kategori pada chip — murni hiasan, sepadan dengan legenda. */
 const CATEGORY_DOT: Record<string, string> = {
@@ -140,7 +146,7 @@ const QUESTIONS = [
 ];
 
 export function PetaScreen() {
-  const { points, isochrones, analytics, stations, entrances, error } =
+  const { points, isochrones, analytics, stations, entrances, demo, error } =
     usePetaData();
 
   const [tab, setTab] = useState<"brief" | "copilot">("brief");
@@ -151,6 +157,33 @@ export function PetaScreen() {
   const [activeSlot, setActiveSlot] = useState<SlotKey>(DEFAULT_SLOT);
   const [showTransparansi, setShowTransparansi] = useState(false);
   const [showCopilotResult, setShowCopilotResult] = useState(true);
+  const [showComparison, setShowComparison] = useState(false);
+  /** Titik yang harus didatangi kamera — dari pencarian, daftar retail, banding. */
+  const [stationTarget, setStationTarget] = useState<
+    { longitude: number; latitude: number; zoom?: number } | null
+  >(null);
+  /** Lokasi retail yang sedang dibuka kartunya. `null` = tidak ada. */
+  const [selectedRetail, setSelectedRetail] = useState<RetailLocation | null>(null);
+
+  /**
+   * Retail & potensi toko. Sengaja TIDAK ikut disaring filter kategori:
+   * ia menandai pasokan (gerai), bukan permintaan, jadi jumlahnya tidak boleh
+   * berubah saat kategori digeser — sama semangatnya dengan aturan "kategori
+   * tidak menyembunyikan titik pengamatan". Sakelarnya sendiri di panel lapisan.
+   */
+  const retailLocations = useMemo(() => demo?.retail ?? [], [demo]);
+  const retailData = useMemo(() => retailGeoJSON(retailLocations), [retailLocations]);
+  const retailStationName = useMemo(() => {
+    const id = retailLocations[0]?.station_id;
+    return stations?.find((s) => s.id === id)?.name ?? "kawasan stasiun";
+  }, [retailLocations, stations]);
+  const selectRetail = useCallback((location: RetailLocation) => {
+    setSelectedRetail(location);
+    setStationTarget({ longitude: location.longitude, latitude: location.latitude, zoom: 17.5 });
+    setActiveLayers((current) =>
+      current.includes("retail") ? current : [...current, "retail"],
+    );
+  }, []);
   /**
    * Titik yang dipilih pengguna.
    *
@@ -357,6 +390,32 @@ export function PetaScreen() {
           onSelectPoint={setPilihanTitik}
           dataError={error}
           onScaleChange={handleScale}
+          retailLocations={retailData}
+          selectedRetailId={selectedRetail?.id ?? null}
+          onSelectRetail={selectRetail}
+          stationTarget={stationTarget}
+        />
+
+        <StationSearch
+          stations={stations}
+          error={error}
+          onSelect={(target) => {
+            setSelectedRetail(null);
+            setStationTarget({ longitude: target.longitude, latitude: target.latitude });
+            const point = analytics?.points.find((p) => p.station_id === target.id);
+            setPilihanTitik(point?.point_id ?? null);
+            setTab("brief");
+            setLayersOpen(false);
+            setShowTransparansi(false);
+          }}
+        />
+
+        <RetailLocations
+          locations={retailLocations}
+          stationName={retailStationName}
+          selected={selectedRetail}
+          onSelect={selectRetail}
+          onClose={() => setSelectedRetail(null)}
         />
 
         <div
@@ -442,6 +501,36 @@ export function PetaScreen() {
               </span>
             </span>
           </span>
+
+          {/* Retail hanya muncul di legenda saat lapisannya menyala — ia
+             opsional, tidak seperti kesenjangan. Tiga jenis dibedakan lewat
+             isian bulatan (pejal / berongga tinta / berongga oker), bukan tiga
+             warna baru; lambang di sini persis yang digambar peta. */}
+          {activeLayers.includes("retail") && (
+            <>
+              <span style={LEGENDA_SEKAT} />
+              <span style={LEGENDA_GRUP}>
+                <span className="k">Retail</span>
+                <span className="row" style={{ gap: 12 }}>
+                  {RETAIL_KINDS.map((kind) => (
+                    <span key={kind} className="row" style={{ ...LEGENDA_TEKS, gap: 6 }}>
+                      <span
+                        style={{
+                          width: 10,
+                          height: 10,
+                          borderRadius: 999,
+                          background: RETAIL_LEGEND[kind].fill,
+                          boxShadow: `0 0 0 1.5px ${RETAIL_LEGEND[kind].stroke}`,
+                          flex: "none",
+                        }}
+                      />
+                      {RETAIL_LEGEND[kind].label}
+                    </span>
+                  ))}
+                </span>
+              </span>
+            </>
+          )}
 
           {/* Lapisan opsional (arus pintu) tidak diberi butir legenda:
              labelnya di peta sudah menulis satuannya sendiri — "380/jam" —
@@ -1294,12 +1383,38 @@ export function PetaScreen() {
           active="peta"
           cta={
             <div className="row" style={{ gap: 10 }}>
-              <button className="b bs">Bandingkan</button>
+              <button
+                type="button"
+                className="b bs"
+                onClick={() => setShowComparison(true)}
+              >
+                Bandingkan
+              </button>
               <button className="b bp">Brief PDF</button>
             </div>
           }
         />
       </div>
+
+      {showComparison && analytics && stations && demo && (
+        <ComparisonDialog
+          stations={stations}
+          analytics={analytics}
+          statuses={demo.category_statuses}
+          activeSlot={activeSlot}
+          activeCategory={activeCategory}
+          onClose={() => setShowComparison(false)}
+          onOpenStation={(target) => {
+            if (target.longitude === undefined || target.latitude === undefined) return;
+            setStationTarget({ longitude: target.longitude, latitude: target.latitude });
+            setPilihanTitik(
+              analytics.points.find((point) => point.station_id === target.id)?.point_id ?? null,
+            );
+            setSelectedRetail(null);
+            setShowComparison(false);
+          }}
+        />
+      )}
     </div>
   );
 }

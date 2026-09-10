@@ -106,6 +106,83 @@ export type Station = {
   name: string;
   typology: string;
   point_count: number;
+  /** Titik tujuan pencarian; kosong selama lokasi stasiun belum ditetapkan. */
+  longitude?: number;
+  latitude?: number;
+};
+
+export type MockStation = Station;
+export type MockPointAnalytics = PointAnalytics;
+
+export type RetailKind = "existing" | "potential" | "shopfront";
+
+export type MockRetailLocation = {
+  id: string;
+  name: string;
+  kind: RetailKind;
+  station_id: number;
+  longitude: number;
+  latitude: number;
+  status: "tersedia" | "kandidat" | "perlu_verifikasi";
+  category: CategoryKey | null;
+  note: string;
+};
+
+export type MockCategoryStatus = {
+  station_id: number;
+  category: CategoryKey;
+  status: "terisi" | "kurang" | "kosong";
+  demand_share: number;
+  gerai_count: number;
+};
+
+export type MockRecommendation = {
+  id: string;
+  station_id: number;
+  point_id: number;
+  retail_location_id: string | null;
+  title: string;
+  category: CategoryKey;
+  slot: SlotKey;
+  gap_p50: number | null;
+  confidence: number;
+  sampel_tipis: boolean;
+  reason: string;
+  next_measurement: string;
+};
+
+export type MockComparisonSummary = {
+  station_id: number;
+  station_name: string;
+  potential_p50: number;
+  captured_p50: number;
+  gap_p50: number;
+  capture_rate: number | null;
+  pedestrian_flow: number;
+  confidence_average: number;
+  thin_sample_points: number;
+  missing_categories: CategoryKey[];
+};
+
+export type MockEvidence = {
+  point_id: number;
+  types: Array<"struk" | "gerai" | "properti">;
+  sources: string[];
+  dataset: string;
+  surveyed_at: string;
+  photo_label: string;
+  receipt_total: number;
+  receipt_readable: number;
+  receipt_ambiguous: number;
+  confidence: number;
+  mock: true;
+};
+
+export type MockDemoData = {
+  retail: MockRetailLocation[];
+  category_statuses: MockCategoryStatus[];
+  recommendations: MockRecommendation[];
+  evidence: MockEvidence[];
 };
 
 /**
