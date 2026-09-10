@@ -415,7 +415,6 @@ h3 {
   --r-pill: 999px;
 
   --page-x: clamp(20px, 4.6vw, 68px);
-  --page-max: 1400px;
 }
 
 /* Ground halaman. Ditempel sebagai scope, bukan dengan mengubah `.page-canvas`,
@@ -468,9 +467,13 @@ h3 {
 
 /* --- Tata letak ---------------------------------------------------------- */
 
+/* Selokan halaman — hanya menyisakan `--page-x` di kiri-kanan, TIDAK membatasi
+   lebar. Dulu ada `max-width: 1400px; margin: 0 auto` di sini, tapi itu bikin
+   Beranda (satu-satunya pemakai `.wrap`) memusat dengan pita kosong di monitor
+   lebar, sementara Insight/Metodologi/Rekomendasi mengalir penuh mengikuti
+   viewport. Prosa tetap terbaca karena dibatasi `ch` sendiri (`.measure`,
+   `maxWidth: "NNch"`), bukan oleh wadahnya. */
 .wrap {
-  max-width: var(--page-max);
-  margin: 0 auto;
   padding-inline: var(--page-x);
 }
 
