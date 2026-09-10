@@ -1,0 +1,46 @@
+# Konteks build sekecil mungkin: makin sedikit yang dikirim ke daemon, makin
+# jarang lapisan cache ikut terinvalidasi cuma karena dokumen berubah.
+
+# dependencies — dipasang ulang di dalam image lewat `npm ci`
+node_modules
+.pnp
+.pnp.*
+
+# hasil build lokal — jangan sampai menimpa hasil build di dalam image
+.next
+out
+build
+
+# git
+.git
+.gitignore
+.github
+
+# env — nilai lokal/rahasia tidak boleh masuk image.
+# NEXT_PUBLIC_* disuntikkan lewat build arg, bukan lewat berkas ini.
+.env
+.env.*
+
+# dokumen
+README.md
+*.md
+docs
+
+# test
+tests
+test-results
+playwright-report
+blob-report
+.playwright
+playwright.config.ts
+
+# editor & OS
+.vscode
+.idea
+.DS_Store
+*.pem
+
+# deploy — dipakai di VPS, bukan di dalam image
+deploy
+Dockerfile
+.dockerignore
