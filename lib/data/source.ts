@@ -11,10 +11,12 @@ import type { FeatureCollection, Point, Polygon } from "geojson";
 import type {
   ApiEnvelope,
   IsochroneProps,
+  MockDemoData,
   ObservationPointProps,
   SpendingGapPayload,
   Station,
 } from "./types";
+import { MOCK_DEMO_DATA } from "./demo";
 
 /**
  * Alamat sumber data.
@@ -115,4 +117,15 @@ export async function loadStations(): Promise<Station[]> {
  */
 export async function loadEntrances(): Promise<ObservationPointProps[]> {
   return unwrap(await getJson<ApiEnvelope<ObservationPointProps[]>>("entrances.json"));
+}
+
+/**
+ * Data presentasi Tahap 1 — retail, status kategori, bukti, rekomendasi.
+ *
+ * Untuk sekarang berupa berkas TS tetap (`lib/data/demo.ts`). Fase API cukup
+ * mengganti isi fungsi ini dengan panggilan jaringan; pemanggilnya tidak
+ * berubah. Lihat DATA_CONTRACT.md — bentuknya di `MockDemoData`.
+ */
+export async function loadDemoData(): Promise<MockDemoData> {
+  return MOCK_DEMO_DATA;
 }
