@@ -1,126 +1,668 @@
 @import "tailwindcss";
 
-.retail-locations { position: absolute; top: 88px; left: 64px; width: min(350px, calc(100% - 88px)); z-index: 8; font-size: 13px; }
-.retail-locations details, .retail-location-detail { background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 4px 18px #0f172a14; }
-.retail-locations summary { cursor: pointer; padding: 14px; font-weight: 600; }
-.retail-locations summary > span { margin-left: 8px; color: #64748b; font-size: 11px; font-weight: 400; }
-.retail-location-list { max-height: min(300px, 35vh); overflow-y: auto; padding: 0 8px 8px; }
-.retail-group-title { display: flex; align-items: center; gap: 8px; padding: 12px 8px 6px; color: #475569; font-size: 11px; }
-.retail-group-title > span { width: 9px; height: 9px; border-radius: 50%; }
-.retail-location-list button { display: flex; justify-content: space-between; gap: 8px; width: 100%; padding: 10px 8px; text-align: left; background: transparent; border: 0; border-radius: 8px; cursor: pointer; font: inherit; }
-.retail-location-list button:hover, .retail-location-list button[aria-pressed="true"] { background: #eff6ff; color: #1d4ed8; }
-.retail-location-list button:focus-visible, .retail-locations summary:focus-visible { outline: 2px solid #1d4ed8; outline-offset: -2px; }
-.retail-location-detail { position: relative; margin-top: 8px; padding: 16px; }
-.retail-location-detail h2 { font-size: 16px; margin: 8px 22px 8px 0; }
-.retail-location-detail p { color: #64748b; line-height: 1.5; margin: 8px 0 0; }
-.retail-detail-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
-.retail-detail-meta div { padding: 10px; border-radius: 8px; background: #f1f5f9; }
-.retail-detail-meta dt { color: #64748b; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; }
-.retail-detail-meta dd { margin: 5px 0 0; font-weight: 600; text-transform: capitalize; }
-.retail-detail-kind { font-size: 11px; font-weight: 600; }
-.retail-detail-close { position: absolute; top: 10px; right: 12px; border: 0; background: transparent; font-size: 22px; cursor: pointer; }
-.retail-coordinates { font-variant-numeric: tabular-nums; font-size: 11px; }
+.retail-locations {
+  position: absolute;
+  top: 88px;
+  left: 64px;
+  width: min(350px, calc(100% - 88px));
+  z-index: 8;
+  font-size: 13px;
+}
+.retail-locations details,
+.retail-location-detail {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px #0f172a14;
+}
+.retail-locations summary {
+  cursor: pointer;
+  padding: 14px;
+  font-weight: 600;
+}
+.retail-locations summary > span {
+  margin-left: 8px;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 400;
+}
+.retail-location-list {
+  max-height: min(300px, 35vh);
+  overflow-y: auto;
+  padding: 0 8px 8px;
+}
+.retail-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px 6px;
+  color: #475569;
+  font-size: 11px;
+}
+.retail-group-title > span {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.retail-location-list button {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 8px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+  font: inherit;
+}
+.retail-location-list button:hover,
+.retail-location-list button[aria-pressed="true"] {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.retail-location-list button:focus-visible,
+.retail-locations summary:focus-visible {
+  outline: 2px solid #1d4ed8;
+  outline-offset: -2px;
+}
+.retail-location-detail {
+  position: relative;
+  margin-top: 8px;
+  padding: 16px;
+}
+.retail-location-detail h2 {
+  font-size: 16px;
+  margin: 8px 22px 8px 0;
+}
+.retail-location-detail p {
+  color: #64748b;
+  line-height: 1.5;
+  margin: 8px 0 0;
+}
+.retail-detail-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0;
+}
+.retail-detail-meta div {
+  padding: 10px;
+  border-radius: 8px;
+  background: #f1f5f9;
+}
+.retail-detail-meta dt {
+  color: #64748b;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.retail-detail-meta dd {
+  margin: 5px 0 0;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.retail-detail-kind {
+  font-size: 11px;
+  font-weight: 600;
+}
+.retail-detail-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+.retail-coordinates {
+  font-variant-numeric: tabular-nums;
+  font-size: 11px;
+}
 
-.station-search { position: absolute; top: 24px; left: 64px; width: min(350px, calc(100% - 88px)); z-index: 10; color: #0f172a; }
-.station-search-field { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: white; border: 1px solid #cbd5e1; border-radius: 12px; box-shadow: 0 4px 18px #0f172a14; }
-.station-search-field:focus-within { outline: 2px solid #1d4ed8; outline-offset: 2px; }
-.station-search-field input { width: 100%; min-width: 0; border: 0; outline: 0; font: inherit; font-size: 14px; background: transparent; }
-.station-search-field svg { flex: none; color: #64748b; }
-.station-search-field button { border: 0; background: transparent; cursor: pointer; font-size: 22px; line-height: 1; padding: 2px 6px; }
-.station-search-results:not([hidden]):not(:empty), .station-search-empty { margin-top: 8px; padding: 6px; border: 1px solid #e2e8f0; border-radius: 12px; background: white; box-shadow: 0 8px 24px #0f172a1a; max-height: 280px; overflow-y: auto; }
-.station-search-option { display: flex; flex-direction: column; gap: 5px; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 14px; }
-.station-search-option[aria-selected="true"] { background: #eff6ff; color: #1d4ed8; }
-.station-search-option span { font-size: 12px; color: #64748b; }
-.station-search-empty { padding: 16px; font-size: 13px; color: #64748b; }
+.station-search {
+  position: absolute;
+  top: 24px;
+  left: 64px;
+  width: min(350px, calc(100% - 88px));
+  z-index: 10;
+  color: #0f172a;
+}
+.station-search-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 4px 18px #0f172a14;
+}
+.station-search-field:focus-within {
+  outline: 2px solid #1d4ed8;
+  outline-offset: 2px;
+}
+.station-search-field input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  font: inherit;
+  font-size: 14px;
+  background: transparent;
+}
+.station-search-field svg {
+  flex: none;
+  color: #64748b;
+}
+.station-search-field button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.station-search-results:not([hidden]):not(:empty),
+.station-search-empty {
+  margin-top: 8px;
+  padding: 6px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 8px 24px #0f172a1a;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.station-search-option {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+.station-search-option[aria-selected="true"] {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.station-search-option span {
+  font-size: 12px;
+  color: #64748b;
+}
+.station-search-empty {
+  padding: 16px;
+  font-size: 13px;
+  color: #64748b;
+}
 
-.dialog-backdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 32px; background: #0f172a99; backdrop-filter: blur(4px); }
-.comparison-dialog { width: min(940px, 100%); max-height: calc(100vh - 64px); overflow-y: auto; padding: 28px; border-radius: 18px; background: #f8fafc; box-shadow: 0 28px 80px #0f172a55; }
-.comparison-header { display: flex; justify-content: space-between; gap: 24px; align-items: flex-start; }
-.comparison-header h2 { margin: 8px 0 6px; font-size: 30px; }
-.comparison-header p { margin: 0; color: #64748b; font-size: 13px; }
-.comparison-header > button { border: 0; background: transparent; font-size: 28px; cursor: pointer; }
-.comparison-pickers { display: flex; align-items: end; gap: 14px; margin: 24px 0; padding: 16px; border-radius: 12px; background: #eef2f6; }
-.comparison-pickers label { display: grid; gap: 7px; flex: 1; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
-.comparison-pickers select { padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 9px; background: white; color: #0f172a; font: 600 14px/1 var(--font-inter); }
-.comparison-pickers > span { padding-bottom: 12px; color: #94a3b8; font-size: 11px; }
-.comparison-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.comparison-cards article { padding: 20px; border: 1px solid #e2e8f0; border-radius: 14px; background: white; }
-.comparison-station-title { display: flex; align-items: center; gap: 9px; font-weight: 750; }
-.comparison-station-title span { width: 10px; height: 10px; border-radius: 50%; }
-.comparison-cards dl { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 18px 0; }
-.comparison-cards dl div { padding: 10px; border-radius: 9px; background: #f1f5f9; }
-.comparison-cards dt { color: #64748b; font-size: 10px; }
-.comparison-cards dd { margin: 5px 0 0; font-weight: 700; }
-.comparison-cards .comparison-highlight { background: #eff6ff; color: #1d4ed8; }
-.comparison-missing { display: grid; gap: 6px; margin-bottom: 16px; font-size: 12px; }
-.comparison-missing span { color: #64748b; }
-.comparison-chart { margin-top: 18px; padding: 18px; border-radius: 12px; background: white; }
-.comparison-chart h3 { margin: 0 0 14px; font-size: 15px; }
-.comparison-chart-row { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 12px; margin: 10px 0; color: #64748b; font-size: 12px; }
-.comparison-chart-row > div { display: grid; gap: 4px; }
-.comparison-chart-row > div > div { height: 7px; border-radius: 999px; min-width: 2px; }
-.category-status { padding: 3px 7px; border-radius: 999px; font-size: 9px; font-weight: 650; text-transform: capitalize; }
-.category-status-terisi { color: #047857; background: #d1fae5; }
-.category-status-kurang { color: #b45309; background: #fef3c7; }
-.category-status-kosong { color: #be123c; background: #ffe4e6; }
-.evidence-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0 0; }
-.evidence-meta div { padding: 10px; border-radius: 9px; background: #f1f5f9; }
-.evidence-meta dt { color: #64748b; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
-.evidence-meta dd { margin: 5px 0 0; font-size: 11px; line-height: 1.4; }
-.evidence-meta .evidence-mock { grid-column: 1 / -1; background: #fff7ed; color: #9a3412; }
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: #0f172a99;
+  backdrop-filter: blur(4px);
+}
+.comparison-dialog {
+  width: min(940px, 100%);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  padding: 28px;
+  border-radius: 18px;
+  background: #f8fafc;
+  box-shadow: 0 28px 80px #0f172a55;
+}
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+}
+.comparison-header h2 {
+  margin: 8px 0 6px;
+  font-size: 30px;
+}
+.comparison-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+.comparison-header > button {
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+}
+.comparison-pickers {
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  margin: 24px 0;
+  padding: 16px;
+  border-radius: 12px;
+  background: #eef2f6;
+}
+.comparison-pickers label {
+  display: grid;
+  gap: 7px;
+  flex: 1;
+  color: #64748b;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.comparison-pickers select {
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: white;
+  color: #0f172a;
+  font: 600 14px/1 var(--font-inter);
+}
+.comparison-pickers > span {
+  padding-bottom: 12px;
+  color: #94a3b8;
+  font-size: 11px;
+}
+.comparison-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.comparison-cards article {
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: white;
+}
+.comparison-station-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 750;
+}
+.comparison-station-title span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.comparison-cards dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 18px 0;
+}
+.comparison-cards dl div {
+  padding: 10px;
+  border-radius: 9px;
+  background: #f1f5f9;
+}
+.comparison-cards dt {
+  color: #64748b;
+  font-size: 10px;
+}
+.comparison-cards dd {
+  margin: 5px 0 0;
+  font-weight: 700;
+}
+.comparison-cards .comparison-highlight {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.comparison-missing {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+.comparison-missing span {
+  color: #64748b;
+}
+.comparison-chart {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 12px;
+  background: white;
+}
+.comparison-chart h3 {
+  margin: 0 0 14px;
+  font-size: 15px;
+}
+.comparison-chart-row {
+  display: grid;
+  grid-template-columns: 70px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+  color: #64748b;
+  font-size: 12px;
+}
+.comparison-chart-row > div {
+  display: grid;
+  gap: 4px;
+}
+.comparison-chart-row > div > div {
+  height: 7px;
+  border-radius: 999px;
+  min-width: 2px;
+}
+.category-status {
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 650;
+  text-transform: capitalize;
+}
+.category-status-terisi {
+  color: #047857;
+  background: #d1fae5;
+}
+.category-status-kurang {
+  color: #b45309;
+  background: #fef3c7;
+}
+.category-status-kosong {
+  color: #be123c;
+  background: #ffe4e6;
+}
+.evidence-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 12px 0 0;
+}
+.evidence-meta div {
+  padding: 10px;
+  border-radius: 9px;
+  background: #f1f5f9;
+}
+.evidence-meta dt {
+  color: #64748b;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.evidence-meta dd {
+  margin: 5px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+.evidence-meta .evidence-mock {
+  grid-column: 1 / -1;
+  background: #fff7ed;
+  color: #9a3412;
+}
 
-.recommendation-hero { display: grid; grid-template-columns: 1fr 400px; gap: 48px; align-items: end; padding: 64px 56px 52px; }
-.recommendation-hero h1 { max-width: 18ch; margin: 12px 0 20px; font-size: clamp(38px, 5vw, 58px); line-height: 1.02; letter-spacing: -.04em; }
-.recommendation-hero p { max-width: 62ch; margin: 0; color: #64748b; line-height: 1.65; }
-.recommendation-hero dl { display: grid; gap: 9px; margin: 0; }
-.recommendation-hero dl div { display: flex; justify-content: space-between; padding: 17px 20px; border-radius: 12px; background: #eef2f6; }
-.recommendation-hero dt { color: #64748b; font-size: 12px; }
-.recommendation-hero dd { margin: 0; color: #1d4ed8; font-weight: 800; font-variant-numeric: tabular-nums; }
-.recommendation-main { display: grid; gap: 58px; padding: 0 56px 64px; }
-.recommendation-section-head { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 20px; }
-.recommendation-section-head h2 { margin: 8px 0 0; font-size: 30px; }
-.recommendation-section-head > p { max-width: 40ch; margin: 0; color: #64748b; font-size: 12px; text-align: right; }
-.recommendation-filters { display: flex; gap: 6px; }
-.recommendation-filters button { padding: 7px 12px; border: 1px solid #cbd5e1; border-radius: 999px; background: white; color: #475569; cursor: pointer; }
-.recommendation-filters button[aria-pressed="true"] { border-color: #0f172a; background: #0f172a; color: white; }
-.recommendation-table { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 14px; background: white; }
-.recommendation-table-head, .recommendation-row { display: grid; grid-template-columns: 44px 2fr 1.15fr 85px 110px 125px; gap: 14px; align-items: center; }
-.recommendation-table-head { padding: 12px 20px; background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
-.recommendation-row { padding: 17px 20px; border-top: 1px solid #e2e8f0; color: #0f172a; font-size: 12px; }
-.recommendation-row:hover { background: #eff6ff; color: #1d4ed8; }
-.recommendation-row > span:first-child { color: #1d4ed8; font-weight: 800; }
-.recommendation-row > span:nth-child(5) { font-weight: 750; font-variant-numeric: tabular-nums; }
-.recommendation-row strong, .recommendation-row small { display: block; }
-.recommendation-row small { margin-top: 5px; color: #64748b; font-weight: 400; line-height: 1.4; }
-.recommendation-row-thin { color: #94a3b8; background: #f8fafc; }
-.recommendation-empty, .recommendation-error { padding: 20px; color: #64748b; }
-.recommendation-error { margin: 0 56px 30px; border-left: 3px solid #be123c; background: #fff1f2; }
-.recommendation-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-.recommendation-cards article { display: flex; flex-direction: column; padding: 26px; border-radius: 14px; background: white; border: 1px solid #e2e8f0; }
-.recommendation-cards h3 { margin: 16px 0 10px; font-size: 20px; line-height: 1.2; }
-.recommendation-cards p { flex: 1; margin: 0; color: #64748b; font-size: 13px; line-height: 1.55; }
-.recommendation-cards dl { display: grid; gap: 7px; margin: 20px 0; }
-.recommendation-cards dl div { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; }
-.recommendation-cards dt { color: #64748b; }
-.recommendation-cards dd { margin: 0; font-weight: 700; }
-.recommendation-cards > article > a { font-size: 12px; font-weight: 700; }
-.category-matrix { overflow: hidden; border: 1px solid #e2e8f0; border-radius: 14px; background: white; }
-.category-matrix-head, .category-matrix-row { display: grid; grid-template-columns: 1.4fr repeat(2, 1fr) .7fr; gap: 16px; align-items: center; padding: 14px 22px; }
-.category-matrix-head { background: #f1f5f9; color: #64748b; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; }
-.category-matrix-row { border-top: 1px solid #e2e8f0; font-size: 13px; }
-.category-matrix-row > span:not(:first-child) { display: flex; align-items: center; gap: 8px; }
-.category-matrix-row small { color: #94a3b8; font-size: 10px; }
-.recommendation-footer { display: flex; justify-content: space-between; padding: 22px 56px 28px; border-top: 1px solid #e2e8f0; color: #94a3b8; font-size: 11px; }
+.recommendation-hero {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 48px;
+  align-items: end;
+  padding: 64px 56px 52px;
+}
+.recommendation-hero h1 {
+  max-width: 18ch;
+  margin: 12px 0 20px;
+  font-size: clamp(38px, 5vw, 58px);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+.recommendation-hero p {
+  max-width: 62ch;
+  margin: 0;
+  color: #64748b;
+  line-height: 1.65;
+}
+.recommendation-hero dl {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+}
+.recommendation-hero dl div {
+  display: flex;
+  justify-content: space-between;
+  padding: 17px 20px;
+  border-radius: 12px;
+  background: #eef2f6;
+}
+.recommendation-hero dt {
+  color: #64748b;
+  font-size: 12px;
+}
+.recommendation-hero dd {
+  margin: 0;
+  color: #1d4ed8;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.recommendation-main {
+  display: grid;
+  gap: 58px;
+  padding: 0 56px 64px;
+}
+.recommendation-section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+.recommendation-section-head h2 {
+  margin: 8px 0 0;
+  font-size: 30px;
+}
+.recommendation-section-head > p {
+  max-width: 40ch;
+  margin: 0;
+  color: #64748b;
+  font-size: 12px;
+  text-align: right;
+}
+.recommendation-filters {
+  display: flex;
+  gap: 6px;
+}
+.recommendation-filters button {
+  padding: 7px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: white;
+  color: #475569;
+  cursor: pointer;
+}
+.recommendation-filters button[aria-pressed="true"] {
+  border-color: #0f172a;
+  background: #0f172a;
+  color: white;
+}
+.recommendation-table {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: white;
+}
+.recommendation-table-head,
+.recommendation-row {
+  display: grid;
+  grid-template-columns: 44px 2fr 1.15fr 85px 110px 125px;
+  gap: 14px;
+  align-items: center;
+}
+.recommendation-table-head {
+  padding: 12px 20px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.recommendation-row {
+  padding: 17px 20px;
+  border-top: 1px solid #e2e8f0;
+  color: #0f172a;
+  font-size: 12px;
+}
+.recommendation-row:hover {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.recommendation-row > span:first-child {
+  color: #1d4ed8;
+  font-weight: 800;
+}
+.recommendation-row > span:nth-child(5) {
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+.recommendation-row strong,
+.recommendation-row small {
+  display: block;
+}
+.recommendation-row small {
+  margin-top: 5px;
+  color: #64748b;
+  font-weight: 400;
+  line-height: 1.4;
+}
+.recommendation-row-thin {
+  color: #94a3b8;
+  background: #f8fafc;
+}
+.recommendation-empty,
+.recommendation-error {
+  padding: 20px;
+  color: #64748b;
+}
+.recommendation-error {
+  margin: 0 56px 30px;
+  border-left: 3px solid #be123c;
+  background: #fff1f2;
+}
+.recommendation-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.recommendation-cards article {
+  display: flex;
+  flex-direction: column;
+  padding: 26px;
+  border-radius: 14px;
+  background: white;
+  border: 1px solid #e2e8f0;
+}
+.recommendation-cards h3 {
+  margin: 16px 0 10px;
+  font-size: 20px;
+  line-height: 1.2;
+}
+.recommendation-cards p {
+  flex: 1;
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.recommendation-cards dl {
+  display: grid;
+  gap: 7px;
+  margin: 20px 0;
+}
+.recommendation-cards dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+}
+.recommendation-cards dt {
+  color: #64748b;
+}
+.recommendation-cards dd {
+  margin: 0;
+  font-weight: 700;
+}
+.recommendation-cards > article > a {
+  font-size: 12px;
+  font-weight: 700;
+}
+.category-matrix {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: white;
+}
+.category-matrix-head,
+.category-matrix-row {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(2, 1fr) 0.7fr;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 22px;
+}
+.category-matrix-head {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+.category-matrix-row {
+  border-top: 1px solid #e2e8f0;
+  font-size: 13px;
+}
+.category-matrix-row > span:not(:first-child) {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.category-matrix-row small {
+  color: #94a3b8;
+  font-size: 10px;
+}
+.recommendation-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 22px 56px 28px;
+  border-top: 1px solid #e2e8f0;
+  color: #94a3b8;
+  font-size: 11px;
+}
 
 @media (max-width: 900px) {
-  .recommendation-hero { grid-template-columns: 1fr; padding: 40px 24px; }
-  .recommendation-main { padding: 0 24px 48px; }
-  .recommendation-cards { grid-template-columns: 1fr; }
-  .recommendation-table { overflow-x: auto; }
-  .recommendation-table-head, .recommendation-row { min-width: 820px; }
-  .comparison-cards { grid-template-columns: 1fr; }
-  .recommendation-section-head { align-items: flex-start; flex-direction: column; }
-  .recommendation-section-head > p { text-align: left; }
+  .recommendation-hero {
+    grid-template-columns: 1fr;
+    padding: 40px 24px;
+  }
+  .recommendation-main {
+    padding: 0 24px 48px;
+  }
+  .recommendation-cards {
+    grid-template-columns: 1fr;
+  }
+  .recommendation-table {
+    overflow-x: auto;
+  }
+  .recommendation-table-head,
+  .recommendation-row {
+    min-width: 820px;
+  }
+  .comparison-cards {
+    grid-template-columns: 1fr;
+  }
+  .recommendation-section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .recommendation-section-head > p {
+    text-align: left;
+  }
 }
 
 /* Design tokens — ported from the "Isi Stasiun" hi-fi design (Proposal Aplikasi
@@ -391,10 +933,25 @@ h3 {
   border-radius: 12px;
   overflow: hidden;
 }
-.point-facts > div { padding: 11px 12px; border-right: 1px solid #e2e8f0; }
-.point-facts > div:last-child { border-right: 0; }
-.point-facts dt { color: #64748b; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.point-facts dd { margin: 6px 0 0; color: #0f172a; font: 650 11px/1.3 var(--font-inter); }
+.point-facts > div {
+  padding: 11px 12px;
+  border-right: 1px solid #e2e8f0;
+}
+.point-facts > div:last-child {
+  border-right: 0;
+}
+.point-facts dt {
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.point-facts dd {
+  margin: 6px 0 0;
+  color: #0f172a;
+  font: 650 11px/1.3 var(--font-inter);
+}
 
 .analysis-unavailable {
   position: absolute;
@@ -409,10 +966,607 @@ h3 {
   transform: translateX(-50%);
   border: 1px solid #f59e0b;
   border-radius: 10px;
-  background: rgba(255, 251, 235, .96);
-  box-shadow: 0 8px 24px rgba(15, 23, 42, .12);
+  background: rgba(255, 251, 235, 0.96);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
   color: #92400e;
   font-size: 11px;
   line-height: 1.4;
 }
-.analysis-unavailable strong { color: #78350f; font-size: 12px; }
+.analysis-unavailable strong {
+  color: #78350f;
+  font-size: 12px;
+}
+
+/* ==========================================================================
+   NavBar — warnanya lewat variabel, bukan hex literal.
+
+   Nilai bawaannya PERSIS nilai yang dulu ditulis di dalam komponen, jadi
+   keempat layar yang belum dimigrasi tetap piksel-identik. Yang didapat: satu
+   layar bisa menyetel ulang navigasinya dari dalam scope-nya sendiri, tanpa
+   melahirkan varian NavBar kedua — yang memang dilarang di CLAUDE.md.
+   ========================================================================== */
+:root {
+  --nav-brand-bg: var(--accent-700);
+  --nav-brand-fg: #ffffff;
+  --nav-wordmark: var(--gray-900);
+  --nav-idle: var(--gray-600);
+  --nav-active-fg: var(--accent-700);
+  --nav-active-bg: rgba(29, 78, 216, 0.1);
+  --nav-border: rgba(15, 23, 42, 0.1);
+
+  /* Bentuk baris nav — bukan cuma warnanya. Nilai default di bawah ini
+     PERSIS style inline yang dulu ada langsung di NavBar.tsx, jadi keempat
+     layar yang belum dimigrasi tetap piksel-identik. Beranda (`.paper-canvas`)
+     menyetel ulang di scope-nya sendiri untuk jadi nav pill mengambang. */
+  --nav-radius: 0;
+  --nav-margin: 0;
+  --nav-bg: transparent;
+  --nav-shadow: none;
+  --nav-border-w: 1px;
+  --nav-brand-radius: 12px;
+}
+
+/* ==========================================================================
+   Sistem "laporan instrumen" — dipakai halaman Beranda.
+
+   Ditambahkan DI SAMPING tangga `--gray-*`/`--accent-*` yang lama, tidak
+   menggantikannya: `body`, `.page-canvas`, dan empat layar lain masih membaca
+   yang lama. Mengubah yang lama berarti merombak seluruh aplikasi padahal yang
+   sedang dikerjakan satu halaman.
+   ========================================================================== */
+:root {
+  /* --- Kertas & tinta ---------------------------------------------------
+     Netral lama adalah Tailwind slate apa adanya — dingin, dan persis itu yang
+     membuat halaman terbaca sebagai bawaan. Netral di sini hangat. */
+  --paper: #faf8f4;
+  --paper-2: #f3efe7;
+  --surface: #ffffff;
+  --ink: #16130f;
+  --ink-2: #423b32;
+  --ink-muted: #6b6355;
+  --ink-faint: #a09788;
+
+  /* Sejak putaran kelima ("modern") kartu-kartu kembali — hairline masih ada
+     sebagai pemisah ringan, tapi bukan lagi satu-satunya bahasa permukaan. */
+  --rule: rgba(22, 19, 15, 0.13);
+  --rule-soft: rgba(22, 19, 15, 0.07);
+  --rule-strong: rgba(22, 19, 15, 0.34);
+  --rule-ink: rgba(250, 248, 244, 0.18);
+
+  /* Dua tingkat bayangan. Sistem editorial lama menjadikan bayangan
+     pengecualian tunggal (hanya kartu peta hero); sistem modern menjadikannya
+     kosakata biasa — hampir semua kartu memakai `--shadow-soft`, dan
+     `--shadow-lift` naik satu tingkat lagi untuk elemen paling penting di
+     layar (kartu peta hero). Jangan tulis nilai shadow literal di komponen —
+     dua token ini sudah mencakup seluruh kebutuhan Beranda. */
+  --shadow-soft:
+    0 10px 28px -12px rgba(22, 19, 15, 0.16),
+    0 2px 8px -2px rgba(22, 19, 15, 0.06);
+  --shadow-lift:
+    0 28px 56px -20px rgba(22, 19, 15, 0.24),
+    0 6px 16px -4px rgba(22, 19, 15, 0.1);
+
+  /* --- Data -------------------------------------------------------------
+     ⚠️ Biru WAJIB tetap sama dengan `GAP_RAMP` di lib/map/style.ts. Di peta ia
+     membawa arti — besar kesenjangan — jadi menggesernya di sini akan membuat
+     halaman depan dan peta menjanjikan dua skala yang berbeda.
+
+     Aturannya: biru HANYA untuk angka, peta, dan mark data. Bukan untuk
+     "ini penting". */
+  --data: #1d4ed8;
+  --data-soft: #93c5fd;
+  --data-mid: #60a5fa;
+  --data-wash: rgba(29, 78, 216, 0.08);
+
+  /* Oker HANYA untuk kerja lapangan: pencacahan, survei, foto, struk. Memberi
+     biru satu arti berarti butuh warna kedua untuk arti yang lain. */
+  --field: #b45f33;
+  --field-wash: rgba(180, 95, 51, 0.1);
+
+  /* Emas HANYA untuk chrome merek: tombol aksi, sorot navigasi, badge
+     dekoratif. Satu-satunya hue baru yang ditambahkan putaran kelima —
+     bukan pengganti biru/oker, dan tidak pernah dipakai untuk angka atau
+     mark di peta. Tiga warna, tiga arti; melanggarnya di salah satu arah
+     mengencerkan ketiganya sekaligus. */
+  --brand: #c99a3c;
+  --brand-strong: #a97f2b;
+  --brand-wash: rgba(201, 154, 60, 0.14);
+
+  /* --- Pastel ubin bento --------------------------------------------------
+     Putaran keenam ("bento") rombak KERANGKA halaman, bukan cuma kulitnya —
+     lihat komentar di atas struktur section di `page.tsx`. Empat warna ini
+     KHUSUS latar ubin, dan sengaja tidak berarti apa-apa secara individual:
+     kolektif artinya cuma "ini ubin dekoratif", persis seperti referensi
+     Dribbble yang ditunjuk user (warna ubin di sana tidak mengkodekan makna).
+     Ini LAPISAN TERPISAH dari `--data`/`--field`/`--brand` di atas — aturan
+     "biru hanya angka data, oker hanya lapangan, emas hanya chrome" berlaku
+     di level TEKS/ANGKA dan tidak melonggar sedikit pun; latar ubin boleh
+     pastel apa saja, angka data di dalamnya tetap biru bukan ikut warna ubin.
+     `--tile-sky` sengaja jauh dari `--data` (#1d4ed8) — cukup pucat supaya
+     tidak terbaca sebagai "ini data" walau sama-sama biru. */
+  --tile-sky: #e4f1f6;
+  --tile-violet: #ece7fb;
+  --tile-mint: #e3f3ea;
+  --tile-rose: #fbe9ec;
+
+  /* --- Tangga tipografi, rasio 1.25 -------------------------------------
+     Menggantikan ±17 ukuran ad-hoc yang saling dempet (12/12.5, 13/13.5,
+     14/14.5, 26/32/34). Itu bukan tangga, itu drift. */
+  --t-display: clamp(38px, 4.9vw, 74px);
+  --t-h1: clamp(32px, 4.2vw, 60px);
+  --t-h2: clamp(26px, 2.9vw, 40px);
+  --t-h3: clamp(21px, 2vw, 27px);
+  --t-lead: 18px;
+  --t-body: 15px;
+  --t-small: 13px;
+  --t-micro: 11px;
+
+  /* --- Ruang, basis 8 --------------------------------------------------- */
+  --s1: 8px;
+  --s2: 16px;
+  --s3: 24px;
+  --s4: 40px;
+  --s5: 64px;
+  --s6: 96px;
+  --s7: 128px;
+
+  /* --- Radius yang punya maksud -----------------------------------------
+     Yang lama satu nilai untuk segalanya: `borderRadius: 12` muncul 92 kali,
+     dipakai untuk lingkaran 26px, kotak 44px, kartu 420px, dan bar 5px
+     sekaligus. Sistem editorial (putaran 1–4) menjawabnya dengan sudut nyaris
+     tajam di mana-mana; sistem modern (putaran 5) dengan tangga radius yang
+     naik bersama ukuran elemen. Putaran 6 ("bento") menyederhanakannya sekali
+     lagi: `--r-xs`/`--r-sm` untuk detail kecil (tanda, tick), `--r-md` untuk
+     ubin sedang yang belum sempat dimigrasi ke `--r-xl`, `--r-xl` untuk
+     SEMUA ubin/kartu bento, `--r-pill` untuk tombol dan nav. */
+  --r-none: 0;
+  --r-xs: 2px;
+  --r-sm: 6px;
+  --r-md: 18px;
+  /* Radius seragam untuk SEMUA ubin bento (kartu, tombol tetap `--r-pill`).
+     Riset bento grid 2025/2026 sepakat pada satu titik: radius yang sama di
+     semua ubin adalah yang menyatukan grid asimetris secara visual — beda
+     radius per ubin justru membuatnya terbaca acak, bukan satu sistem. */
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  --page-x: clamp(20px, 4.6vw, 68px);
+  --page-max: 1400px;
+}
+
+/* Ground halaman. Ditempel sebagai scope, bukan dengan mengubah `.page-canvas`,
+   supaya empat layar lain tidak ikut berubah warna. */
+.paper-canvas {
+  background: var(--paper);
+  color: var(--ink);
+
+  /* `display: flow-root` menahan margin-atas NavBar (`--nav-margin`, ~24px)
+     supaya TIDAK bocor keluar lewat margin-collapsing dan menyingkap latar
+     `body` yang abu-abu dingin. Tanpa ini ada pita abu tipis di atas nav yang
+     bentrok dengan kertas hangat. Nav tetap mengambang — jaraknya kini
+     diwarnai `--paper`, bukan dihapus. */
+  display: flow-root;
+
+  /* Navigasi ikut nada kertas — komponennya sendiri tidak diubah. */
+  --nav-brand-bg: var(--ink);
+  --nav-brand-fg: var(--paper);
+  --nav-wordmark: var(--ink);
+  --nav-idle: var(--ink-muted);
+  /* Bukan biru: menandai halaman yang sedang dibuka bukan menampilkan data,
+     dan setiap pemakaian biru di luar angka mengencerkan artinya. Emas
+     dipakai di sini justru karena ia SUDAH berarti "chrome merek" — sorotan
+     nav adalah chrome, bukan data, jadi ini bukan hue keempat, cuma pemakaian
+     yang konsisten dengan tombol. */
+  --nav-active-fg: var(--brand-strong);
+  --nav-active-bg: var(--brand-wash);
+  --nav-border: var(--rule);
+
+  /* Bentuk: nav lepas dari baris bersudut tajam yang menempel ke tepi
+     viewport, jadi pil mengambang dengan bayangan lembut — bahasa yang sama
+     dengan kartu dan tombol di sistem ini. */
+  --nav-radius: var(--r-pill);
+  --nav-margin: var(--s3) var(--page-x) 0;
+  --nav-bg: var(--surface);
+  --nav-shadow: var(--shadow-soft);
+  --nav-border-w: 0px;
+  --nav-brand-radius: var(--r-pill);
+
+  /* Craft pass (putaran 10): rag judul diseimbangkan supaya tidak ada baris
+     terakhir satu kata; tanda kutip & bullet menggantung ke margin supaya
+     tepi kiri tetap lurus. Keduanya diabaikan mulus di peramban yang belum
+     mendukung — tidak ada layout yang pecah. */
+  hanging-punctuation: first;
+}
+.paper-canvas h1,
+.paper-canvas h2 {
+  text-wrap: balance;
+}
+
+/* --- Tata letak ---------------------------------------------------------- */
+
+.wrap {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding-inline: var(--page-x);
+}
+
+/* Grid 12 kolom. Pembagiannya asimetris (5/7, 4/8) — bukan `1fr 1fr` dan
+   `repeat(3,1fr)` di mana-mana, yang membuat tiap section terlihat sama. */
+.g12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  column-gap: var(--s3);
+}
+
+/* Band tinta full-bleed: satu-satunya ketukan kontras nilai di halaman yang
+   selain itu terang dari atas sampai bawah. */
+.ink-band {
+  background: var(--ink);
+  color: var(--paper);
+  --rule: var(--rule-ink);
+  --ink-muted: rgba(250, 248, 244, 0.58);
+  --ink-faint: rgba(250, 248, 244, 0.4);
+  --data: var(--data-mid);
+  --field: #e08b5c;
+}
+
+.rule-t {
+  border-top: 1px solid var(--rule);
+}
+.rule-b {
+  border-bottom: 1px solid var(--rule);
+}
+
+/* --- Tipografi -----------------------------------------------------------
+   `.serif` (Instrument Serif) dipakai sistem editorial putaran 1–4 untuk
+   semua headline Beranda. Putaran kelima ("modern") memindahkan headline ke
+   Inter 800/900 dan melepas font itu sepenuhnya (lihat `layout.tsx`) — kelas
+   ini dihapus di sini juga, bukan dibiarkan merujuk variabel yang sudah tidak
+   ada. */
+
+/* Angka. Monospace sungguhan, bukan Inter ber-tabular-nums seperti `.mono`.
+   `.mono` sengaja DIBIARKAN apa adanya — ia dipakai keempat layar lain, dan
+   beberapa panel peta punya kolom berlebar tetap yang akan pecah kalau lebar
+   angkanya berubah. Migrasinya menyusul, per layar. */
+.fig {
+  font-family: var(--font-mono), ui-monospace, "SF Mono", monospace;
+  font-variant-numeric: tabular-nums slashed-zero;
+  font-feature-settings: "tnum", "zero";
+  letter-spacing: -0.02em;
+}
+
+/* Kicker section: label kapital kecil. */
+.eyebrow {
+  font:
+    500 var(--t-micro) / 1.5 var(--font-mono),
+    ui-monospace,
+    monospace;
+  letter-spacing: 0.17em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Eyebrow yang sama, dibungkus jadi chip pil — dipakai lewat helper
+   `Lencana()` di page.tsx untuk setiap kicker level-section. Latarnya netral
+   (`--paper-2`) secara default; hero memakai `--brand-wash` karena itu satu-
+   satunya kicker yang juga sebuah klaim ("pengukuran langsung"), bukan
+   sekadar nomor urut. */
+.eyebrow-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: var(--r-pill);
+  background: var(--paper-2);
+}
+/* Di atas band tinta, "kertas muda" jadi salah arah — chip-nya jadi
+   terang-di-atas-terang begitu `--ink-faint` ikut dibalik jadi warna terang.
+   Latarnya diganti versi tinta-tembus yang sama nadanya dengan `--rule-ink`. */
+.ink-band .eyebrow-chip {
+  background: rgba(250, 248, 244, 0.12);
+}
+
+.measure {
+  max-width: 64ch;
+}
+.measure-narrow {
+  max-width: 54ch;
+}
+
+/* Tag sumber. Dua warna dari tiga yang ada, masing-masing satu arti tetap —
+   lapangan dan mesin. (Warna ketiga, emas, tidak pernah dipakai di sini: tag
+   ini melaporkan data, dan emas dikunci untuk chrome, bukan data.) */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  font:
+    500 var(--t-micro) / 1.4 var(--font-inter),
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.tag-field {
+  background: var(--field-wash);
+  color: var(--field);
+}
+.tag-data {
+  background: var(--data-wash);
+  color: var(--data);
+}
+
+/* Ubin & kartu — satu bahasa visual bersama.
+ *
+ * `.bento` adalah grid-nya (lihat pola section di `page.tsx`); `.bento-tile`
+ * dan `.card` adalah isinya. Keduanya sengaja berbagi resep persis (radius
+ * `--r-xl` seragam, `--shadow-soft` default) supaya seluruh halaman terbaca
+ * sebagai satu sistem — bedanya cuma semantik: `.card` khusus unit yang
+ * benar-benar `<Link>` (tiga kartu simpul), `.bento-tile` untuk sel grid
+ * lain yang tidak semuanya bisa diklik.
+ *
+ * Sistem editorial (putaran 1–4) menjaga sudut nyaris tajam tanpa bayangan
+ * sama sekali — "hairline menggantikan isi kartu" adalah baris yang dulu
+ * tertulis di sini. Sistem modern (putaran 5) membuat bayangan jadi
+ * kosakata biasa. Putaran keenam ("bento") menaikkan radiusnya sekali lagi
+ * ke `--r-xl` dan menambah pilihan latar pastel (`--tile-*`) — lihat token
+ * di atas untuk kenapa warna ubin dan warna angka di dalamnya dua lapis yang
+ * independen. */
+.bento {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s3);
+}
+@media (max-width: 1100px) {
+  .bento {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.bento-tile,
+.card {
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--r-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow-soft);
+  transition:
+    box-shadow 0.18s ease-out,
+    transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+a.bento-tile:hover,
+a.bento-tile:focus-visible,
+a.card:hover,
+a.card:focus-visible {
+  box-shadow: var(--shadow-lift);
+  transform: translateY(-3px);
+}
+
+/* Keluarga kartu "kreatif" Beranda — kartu overlap hero & bab 3, kartu
+   staggered bab 4, kartu highlight bab 5, tumpukan kartu bab 6. Rata +
+   garis-rambut + sudut membulat SERAGAM `--r-md` (putaran 11 sempat pakai
+   satu sudut tajam; putaran 12 user minta semua sudut sama). TANPA bayangan
+   (sistem kertas-hangat: garis 1px, bukan elevasi). Komponen menambah
+   `background`/`padding` sendiri. */
+.kartu {
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+a.kartu:hover,
+a.kartu:focus-visible {
+  transform: translateY(-2px);
+}
+
+/* Bingkai lembut dipakai jarang, hanya di section 08 — satu ubin lebar untuk
+   bagian kejujuran/keterbatasan, sengaja BUKAN pastel (nadanya beda sengaja
+   dari bento yang playful di section lain). Section bento lain TIDAK dibungkus
+   panel ini — ubinnya sendiri (radius + bayangan) sudah cukup menyatukan
+   grid tanpa perlu bingkai kedua yang bersarang. */
+.bento-panel {
+  background: var(--paper-2);
+  border-radius: var(--r-xl);
+  padding: var(--s4);
+}
+
+/* Tombol bersama (`.b`, `.bp`, `.bs`) disetel ulang DI DALAM scope ini saja —
+   definisinya tidak disentuh, jadi empat layar lain tetap seperti sekarang.
+
+   Sistem editorial membuat tombol bersudut tajam dan berwarna tinta, sengaja
+   menjauh dari biru (dikunci untuk data). Sistem modern (putaran kelima)
+   membuatnya pil penuh dengan bayangan lembut — dan warnanya sekarang emas
+   (`--brand`), bukan tinta: itu warna chrome yang memang dicadangkan untuk
+   "tindakan utama", jadi tombol boleh memakainya tanpa menabrak aturan
+   "biru hanya data". */
+.paper-canvas .b {
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-soft);
+  transition:
+    background 0.15s ease-out,
+    border-color 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    transform 0.15s ease-out;
+}
+.paper-canvas .b:hover {
+  transform: translateY(-1px);
+}
+.paper-canvas .bp {
+  background: var(--brand);
+  color: var(--ink);
+}
+.paper-canvas .bp:hover {
+  background: var(--brand-strong);
+}
+.paper-canvas .bs {
+  background: var(--surface);
+  border-color: var(--rule-strong);
+  color: var(--ink);
+  box-shadow: none;
+}
+.paper-canvas .bs:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+/* Di atas band tinta, tombol utama tetap emas — satu bahasa "aksen = tindakan
+   utama" di terang maupun gelap, bukan lagi kertas/tinta yang dibalik.
+   Specificity-nya sengaja lebih tinggi dari aturan di atas. */
+.ink-band .b.bp {
+  background: var(--brand);
+  color: var(--ink);
+  box-shadow: none;
+}
+.ink-band .b.bp:hover {
+  background: var(--brand-strong);
+}
+
+/* ==========================================================================
+   Peta di atas sistem kertas.
+
+   Peta bersandar pada keluarga kelas warisan (`.glass`, `.lyr`, `.chip`, `.k`,
+   `.ic`, `.sc`, `.layers-toggle`, kontrol MapLibre) yang TIDAK dipakai empat
+   layar kertas lain — jadi menyetel ulang nilainya di dalam scope ini aman:
+   hanya Peta yang membacanya. Seam `--nav-*` dan `.b`/`.bp`/`.bs` di atas sudah
+   menangani navbar + tombol; blok ini menutup sisanya.
+
+   Warna mark yang digambar MapLibre (`GAP_RAMP` dkk. di lib/map/style.ts)
+   sengaja TIDAK ikut — biru gap dikunci ke `--data`, sisanya keputusan tim.
+   ========================================================================== */
+.paper-canvas .glass {
+  border-color: var(--rule);
+  /* Permukaan mengambang besar (panel brief, panel slot, kartu legenda) ikut
+     radius ubin/kartu besar sistem ini, bukan `--r-md` — di panel setinggi
+     layar, 18px terbaca nyaris tajam dibanding kartu kecil di dalamnya. */
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-soft);
+}
+.paper-canvas .k {
+  color: var(--ink-faint);
+}
+.paper-canvas .lyr {
+  color: var(--ink-2);
+}
+.paper-canvas .lyr:hover,
+.paper-canvas .layers-toggle:hover {
+  background: var(--paper-2);
+}
+.paper-canvas .chip {
+  border-color: var(--rule-strong);
+  color: var(--ink-2);
+}
+.paper-canvas .chip:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+.paper-canvas .ic {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+.paper-canvas .ic:hover {
+  background: rgba(22, 19, 15, 0.08);
+}
+.paper-canvas .btn-reset:focus-visible {
+  outline-color: var(--brand-strong);
+}
+.paper-canvas .sc::-webkit-scrollbar-thumb {
+  background: var(--rule-strong);
+}
+.paper-canvas .maplibregl-ctrl-group {
+  border-color: var(--rule);
+  border-radius: var(--r-md);
+}
+.paper-canvas .maplibregl-ctrl-group button {
+  background: var(--surface);
+}
+.paper-canvas .maplibregl-ctrl-group button:hover {
+  background: var(--paper-2);
+}
+.paper-canvas .maplibregl-ctrl-group button + button {
+  border-top-color: var(--rule);
+}
+/* Kolom kontrol MapLibre (`top-left`) digeser turun supaya tidak berdempetan
+   dengan pil nav yang kini mengambang di atas peta. Di-scope ke `.peta-canvas`,
+   bukan `.paper-canvas`: peta hero Beranda juga memakai kontrol `top-left` tapi
+   navnya tidak mengambang di atas peta itu. */
+.peta-canvas .maplibregl-ctrl-top-left {
+  margin-top: 84px;
+}
+/* Pembungkus pil nav mengambang: transparan tembus klik, barisnya sendiri tidak.
+   `pointer-events` itu properti terwarisi, jadi `auto` di anak langsung cukup. */
+.peta-nav-float > * {
+  pointer-events: auto;
+}
+
+/* --- Gerak ---------------------------------------------------------------
+   Digerakkan scroll TANPA JavaScript, lewat `animation-timeline: view()`.
+
+   Sengaja bukan IntersectionObserver: observer menuntut markup yang tersembunyi
+   sejak server, jadi kalau hidrasi telat atau gagal, isinya tidak pernah
+   muncul. Dengan cara ini peramban yang belum mendukung `view()` — Safari dan
+   Firefox hari ini — cukup menampilkan segalanya seperti biasa. Tidak ada
+   keadaan di mana teks hilang.
+   -------------------------------------------------------------------------- */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal-in linear both;
+      animation-timeline: view();
+      animation-range: entry 4% cover 26%;
+    }
+  }
+}
+/* Sengaja HANYA `transform`, tanpa opacity.
+   Versi pertama memudarkan dari `opacity: 0`, dan itu berarti ada keadaan sah
+   di mana seluruh isi halaman tidak terlihat — tangkapan layar satu halaman
+   penuh membuktikannya: hero dan penutup tergambar, seluruh bagian tengah
+   kosong. Untuk halaman yang akan dinilai juri, "bisa ter-capture kosong"
+   adalah kegagalan diam-diam, persis kelas bug yang paling dijaga di repo ini.
+   Menggeser posisi saja tetap terasa sebagai gerak, dan tidak punya satu pun
+   keadaan di mana teksnya hilang. */
+@keyframes reveal-in {
+  from {
+    transform: translateY(26px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+/* Cetak dan ekspor PDF tidak punya gulungan; matikan seluruhnya. */
+@media print {
+  .reveal,
+  .draw,
+  .draw-dot {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
+
+/* Momen tanda tangan: bar rentang P10–P90 di hero menggambar dirinya sendiri,
+   sekali, saat halaman dibuka. Rentang adalah klaim epistemik produk ini —
+   jadi yang bergerak sebaiknya justru itu, bukan hiasan. */
+@media (prefers-reduced-motion: no-preference) {
+  .draw {
+    animation: draw-in 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+  }
+  .draw-dot {
+    animation: fade-in 0.5s ease-out 1.15s both;
+  }
+}
+@keyframes draw-in {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

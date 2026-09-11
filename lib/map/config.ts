@@ -198,7 +198,7 @@ export const LAYER_GROUPS: Record<string, readonly string[]> = {
  * Angkanya mengikuti tata letak di PetaScreen.
  */
 export const FIT_PADDING = {
-  top: 72,
+  top: 104, // pil nav yang mengambang di atas peta
   bottom: 200, // panel slot waktu + legenda
   left: 96, // kontrol zoom
   right: 470, // panel ringkasan (lebar 414 + jarak 24)

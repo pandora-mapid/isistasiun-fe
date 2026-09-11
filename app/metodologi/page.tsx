@@ -1,212 +1,840 @@
+import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
+
 import { NavBar } from "@/components/NavBar";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
+import { Kepala } from "@/components/paper/Kepala";
+import { Lencana } from "@/components/paper/Lencana";
+
+/**
+ * Metodologi — layar "bagaimana angkanya dibuat".
+ *
+ * Layout-nya tidak berubah (hero + persamaan, lima langkah, panel transparansi,
+ * histogram + kartu "yang dibuang", footer) — yang berubah cuma KULITNYA:
+ * dipindah dari sistem slate lama ke `.paper-canvas` yang sama dengan Beranda
+ * dan Insight, dan rupanya disamakan dengan Insight — section full-width di
+ * `--page-x`, kartu DATAR bertint yang bergilir menempuh palet (`--tile-*`,
+ * `--data-wash`, `--field-wash`) di atas satu latar `--paper` seragam, dua
+ * kartu `.ink-band` gelap, angka `.fig`, kicker `.eyebrow`, kepala `Kepala`,
+ * nav pil emas, reveal scroll.
+ *
+ * Masih **server component** dan masih mockup ilustratif — belum baca data
+ * hidup (itu pekerjaan terpisah; footer tetap menyatakan "angka ilustratif").
+ */
+
+const seksi: CSSProperties = { padding: "0 var(--page-x) var(--s4)" };
+
+function tint(bg: string): CSSProperties {
+  return { background: bg, borderRadius: "var(--r-md)", padding: "var(--s3)" };
+}
+
+/** Satu langkah dari alur pencacahan. */
+type Langkah = { n: string; judul: string; isi: string; tint: string };
+
+const LANGKAH: Langkah[] = [
+  {
+    n: "01",
+    judul: "Tetapkan simpul & pintu",
+    isi: "Garis pengamatan digambar di setiap pintu, lalu dibekukan sebelum survei agar tidak berubah antar slot.",
+    tint: "var(--tile-sky)",
+  },
+  {
+    n: "02",
+    judul: "Cacah F, E, C",
+    isi: "Blok menerus 15 menit per slot, dua pencacah per pintu, hitungan dibandingkan di akhir blok.",
+    tint: "var(--tile-mint)",
+  },
+  {
+    n: "03",
+    judul: "Baca struk dengan AI",
+    isi: "Yang diambil hanya jumlah dibayarkan dan kategori. Identitas diredaksi sebelum foto diunggah.",
+    tint: "var(--tile-violet)",
+  },
+  {
+    n: "04",
+    judul: "Simulasi rentang",
+    isi: "10.000 iterasi atas ketidakpastian tiap variabel, dilaporkan sebagai P10–P90, bukan angka tunggal.",
+    tint: "var(--tile-rose)",
+  },
+  {
+    n: "05",
+    judul: "Publikasi lapisan",
+    isi: "Lapisan, protokol, dan catatan keterbatasan diterbitkan bersamaan agar dapat diperiksa ulang.",
+    tint: "var(--data-wash)",
+  },
+];
+
+const BUANG: { warna: string; judul: string; isi: string }[] = [
+  {
+    warna: "var(--data)",
+    judul: "Blok dengan selisih antar pencacah > 15%",
+    isi: "Blok diulang; bila tetap berselisih, slot itu tidak dipakai.",
+  },
+  {
+    warna: "var(--data)",
+    judul: "Struk yang tidak terbaca utuh",
+    isi: "Tidak ditebak. Dikeluarkan dari perhitungan dan dilaporkan jumlahnya.",
+  },
+  {
+    warna: "var(--field)",
+    judul: "Kawasan dengan sampel di bawah ambang",
+    isi: "Ditandai sebagai sampel tipis, tidak diberi estimasi, dan tidak dibaca aman maupun bermasalah.",
+  },
+  {
+    warna: "var(--field)",
+    judul: "Hari dengan gangguan operasi",
+    isi: "Rekayasa lalu lintas atau gangguan perjalanan membuat arus tidak mewakili hari biasa.",
+  },
+];
+
+/** Deret tinggi batang histogram simulasi (ekor kiri, naik, puncak, turun, ekor kanan). */
+const HISTO: { x: number; h: number; grup: 0 | 1 | 2 }[] = [
+  { x: 4, h: 20, grup: 0 },
+  { x: 26, h: 30, grup: 0 },
+  { x: 48, h: 46, grup: 0 },
+  { x: 70, h: 64, grup: 0 },
+  { x: 92, h: 84, grup: 1 },
+  { x: 114, h: 104, grup: 1 },
+  { x: 136, h: 122, grup: 1 },
+  { x: 158, h: 138, grup: 1 },
+  { x: 180, h: 150, grup: 1 },
+  { x: 202, h: 160, grup: 2 },
+  { x: 224, h: 166, grup: 2 },
+  { x: 246, h: 162, grup: 2 },
+  { x: 268, h: 154, grup: 2 },
+  { x: 290, h: 142, grup: 1 },
+  { x: 312, h: 126, grup: 1 },
+  { x: 334, h: 108, grup: 1 },
+  { x: 356, h: 88, grup: 1 },
+  { x: 378, h: 68, grup: 1 },
+  { x: 400, h: 50, grup: 0 },
+  { x: 422, h: 36, grup: 0 },
+  { x: 444, h: 26, grup: 0 },
+  { x: 466, h: 18, grup: 0 },
+  { x: 488, h: 12, grup: 0 },
+  { x: 510, h: 8, grup: 0 },
+  { x: 532, h: 5, grup: 0 },
+];
+
+const WARNA_GRUP = ["var(--rule)", "var(--data-mid)", "var(--data)"];
 
 export default function MetodologiPage() {
   return (
-    <div className="page-canvas">
-      <NavBar active="metodologi" cta={<button className="b bs">Unduh protokol</button>} />
+    <div className="page-canvas paper-canvas">
+      <NavBar
+        active="metodologi"
+        cta={<button className="b bs">Unduh protokol</button>}
+      />
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 500px", gap: 48, padding: "60px 56px 52px", alignItems: "end" }}>
+      {/* ============================================================
+          Hero — dua kolom. Tulisan kiri, kartu tinta persamaan kanan.
+          Grid, tipografi & jarak disamakan dengan hero Insight.
+          ============================================================ */}
+      <section
+        className="reveal"
+        style={{
+          display: "grid",
+          gridTemplateColumns:
+            "minmax(0, 1fr) minmax(0, clamp(340px, 30vw, 430px))",
+          gap: "var(--s4)",
+          alignItems: "start",
+          padding: "clamp(28px, 3.5vw, 52px) var(--page-x) var(--s4)",
+        }}
+      >
         <div>
-          <h1 style={{ font: "800 56px/1.02 var(--font-inter)", letterSpacing: "-.035em", margin: "24px 0 0", maxWidth: "20ch", textWrap: "pretty" }}>
+          <Lencana label="Protokol pengukuran" warna="brand" dot />
+          <h1
+            style={{
+              font: "800 var(--t-h1)/1.04 var(--font-inter), system-ui, sans-serif",
+              letterSpacing: "-0.025em",
+              margin: "var(--s3) 0 0",
+              maxWidth: "24ch",
+              textWrap: "balance",
+            }}
+          >
             Bagaimana angkanya dibuat, dan di mana batasnya.
           </h1>
-          <p style={{ fontSize: 16, lineHeight: 1.62, color: "#475569", maxWidth: "56ch", margin: "24px 0 0" }}>
-            Tiga variabel dicacah manusia di lapangan, satu variabel dibaca AI dari foto struk, dan hasilnya disajikan sebagai rentang. Halaman ini memuat aturan yang dipakai — termasuk aturan untuk membuang data yang tidak layak dipakai.
+          <p
+            style={{
+              margin: "var(--s3) 0 0",
+              maxWidth: "54ch",
+              fontSize: "var(--t-body)",
+              lineHeight: 1.6,
+              color: "var(--ink-2)",
+            }}
+          >
+            Tiga variabel dicacah manusia di lapangan, satu variabel dibaca AI
+            dari foto struk, dan hasilnya disajikan sebagai rentang. Halaman ini
+            memuat aturan yang dipakai — termasuk aturan untuk membuang data
+            yang tidak layak dipakai.
           </p>
         </div>
-        <div style={{ borderRadius: 12, background: "#0F172A", padding: 34, position: "relative", overflow: "hidden" }}>
-          <div className="k" style={{ color: "#2563EB", position: "relative" }}>Persamaan potensi</div>
-          <div className="row" style={{ gap: 10, marginTop: 22, position: "relative", flexWrap: "wrap" }}>
-            <span className="pill" style={{ padding: "9px 15px", background: "rgba(37,99,235,.14)", color: "#93C5FD", font: "800 15px/1 var(--font-inter)" }}>F</span>
-            <span style={{ color: "#94A3B8", font: "700 15px/1 var(--font-inter)" }}>×</span>
-            <span className="pill" style={{ padding: "9px 15px", background: "rgba(37,99,235,.16)", color: "#93C5FD", font: "800 15px/1 var(--font-inter)" }}>E</span>
-            <span style={{ color: "#94A3B8", font: "700 15px/1 var(--font-inter)" }}>×</span>
-            <span className="pill" style={{ padding: "9px 15px", background: "rgba(168,85,247,.2)", color: "#93C5FD", font: "800 15px/1 var(--font-inter)" }}>C</span>
-            <span style={{ color: "#94A3B8", font: "700 15px/1 var(--font-inter)" }}>×</span>
-            <span className="pill" style={{ padding: "9px 15px", background: "rgba(236,72,153,.2)", color: "#93C5FD", font: "800 15px/1 var(--font-inter)" }}>V</span>
-            <span style={{ color: "#94A3B8", font: "700 15px/1 var(--font-inter)" }}>=</span>
-            <span className="pill" style={{ padding: "9px 15px", background: "#fff", color: "#0F172A", font: "800 15px/1 var(--font-inter)" }}>Potensi belanja</span>
+
+        <div
+          className="kartu ink-band"
+          style={{
+            background: "var(--ink)",
+            padding: "var(--s3)",
+            overflow: "hidden",
+          }}
+        >
+          <span className="eyebrow">Persamaan potensi</span>
+          <div style={{ marginTop: "var(--s3)" }}>
+            <Baris>
+              <Suku>F</Suku>
+              <Operator>×</Operator>
+              <Suku>E</Suku>
+              <Operator>×</Operator>
+              <Suku>C</Suku>
+              <Operator>×</Operator>
+              <Suku>V</Suku>
+              <Operator>=</Operator>
+              <Hasil>Potensi</Hasil>
+            </Baris>
+            <div
+              style={{
+                height: 1,
+                background: "var(--rule)",
+                margin: "var(--s3) 0",
+              }}
+            />
+            <Baris kiri>
+              <Suku sm>Potensi</Suku>
+              <Operator>−</Operator>
+              <Suku sm>Tertangkap</Suku>
+              <Operator>=</Operator>
+              <Hasil data>Kesenjangan</Hasil>
+            </Baris>
           </div>
-          <div style={{ height: 1, background: "rgba(255,255,255,.12)", margin: "26px 0", position: "relative" }} />
-          <div className="row" style={{ gap: 10, position: "relative", flexWrap: "wrap" }}>
-            <span className="pill" style={{ padding: "9px 15px", background: "rgba(255,255,255,.1)", color: "#94A3B8", font: "600 13px/1 var(--font-inter)" }}>Potensi</span>
-            <span style={{ color: "#94A3B8", font: "700 15px/1 var(--font-inter)" }}>−</span>
-            <span className="pill" style={{ padding: "9px 15px", background: "rgba(255,255,255,.1)", color: "#94A3B8", font: "600 13px/1 var(--font-inter)" }}>Tertangkap</span>
-            <span style={{ color: "#94A3B8", font: "700 15px/1 var(--font-inter)" }}>=</span>
-            <span className="pill" style={{ padding: "9px 15px", background: "#1D4ED8", color: "#fff", font: "800 13px/1 var(--font-inter)" }}>Kesenjangan</span>
-          </div>
-          <p style={{ fontSize: 12.5, lineHeight: 1.6, color: "rgba(255,255,255,.6)", margin: "24px 0 0", position: "relative" }}>
-            Keduanya diukur pada pintu yang sama, slot waktu yang sama, dan instrumen yang sama — sehingga selisihnya dapat dibandingkan antar simpul.
+          <p
+            style={{
+              margin: "var(--s3) 0 0",
+              fontSize: "var(--t-small)",
+              lineHeight: 1.6,
+              color: "var(--ink-muted)",
+            }}
+          >
+            Keduanya diukur pada pintu yang sama, slot waktu yang sama, dan
+            instrumen yang sama — sehingga selisihnya dapat dibandingkan antar
+            simpul.
           </p>
         </div>
-      </div>
+      </section>
 
-      <div style={{ padding: "0 56px 56px" }}>
-        <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end", marginBottom: 30 }}>
-          <h2 style={{ font: "800 32px/1.1 var(--font-inter)", letterSpacing: "-.025em", margin: 0 }}>Lima langkah, dari lapangan ke lapisan peta</h2>
-          <span className="mono" style={{ fontSize: 12, color: "#94A3B8" }}>satu simpul · satu hari kerja</span>
-        </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 14 }}>
-          <div style={{ borderRadius: 12, background: "rgba(37,99,235,.09)", padding: 24 }}>
-            <div className="row" style={{ justifyContent: "space-between" }}><span className="mono" style={{ font: "800 13px/1 var(--font-inter)", color: "#1D4ED8" }}>01</span><span className="dot" style={{ background: "#2563EB" }} /></div>
-            <div style={{ font: "700 15px/1.2 var(--font-inter)", margin: "16px 0 8px" }}>Tetapkan simpul &amp; pintu</div>
-            <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "#64748B", margin: 0 }}>Garis pengamatan digambar di setiap pintu, lalu dibekukan sebelum survei agar tidak berubah antar slot.</p>
-          </div>
-          <div style={{ borderRadius: 12, background: "rgba(37,99,235,.09)", padding: 24 }}>
-            <div className="row" style={{ justifyContent: "space-between" }}><span className="mono" style={{ font: "800 13px/1 var(--font-inter)", color: "#1D4ED8" }}>02</span><span className="dot" style={{ background: "#2563EB" }} /></div>
-            <div style={{ font: "700 15px/1.2 var(--font-inter)", margin: "16px 0 8px" }}>Cacah F, E, C</div>
-            <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "#64748B", margin: 0 }}>Blok menerus 15 menit per slot, dua pencacah per pintu, hitungan dibandingkan di akhir blok.</p>
-          </div>
-          <div style={{ borderRadius: 12, background: "rgba(71,85,105,.08)", padding: 24 }}>
-            <div className="row" style={{ justifyContent: "space-between" }}><span className="mono" style={{ font: "800 13px/1 var(--font-inter)", color: "#334155" }}>03</span><span className="dot" style={{ background: "#475569" }} /></div>
-            <div style={{ font: "700 15px/1.2 var(--font-inter)", margin: "16px 0 8px" }}>Baca struk dengan AI</div>
-            <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "#64748B", margin: 0 }}>Yang diambil hanya jumlah dibayarkan dan kategori. Identitas diredaksi sebelum foto diunggah.</p>
-          </div>
-          <div style={{ borderRadius: 12, background: "rgba(29,78,216,.08)", padding: 24 }}>
-            <div className="row" style={{ justifyContent: "space-between" }}><span className="mono" style={{ font: "800 13px/1 var(--font-inter)", color: "#334155" }}>04</span><span className="dot" style={{ background: "#1D4ED8" }} /></div>
-            <div style={{ font: "700 15px/1.2 var(--font-inter)", margin: "16px 0 8px" }}>Simulasi rentang</div>
-            <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "#64748B", margin: 0 }}>10.000 iterasi atas ketidakpastian tiap variabel, dilaporkan sebagai P10–P90, bukan angka tunggal.</p>
-          </div>
-          <div style={{ borderRadius: 12, background: "rgba(29,78,216,.08)", padding: 24 }}>
-            <div className="row" style={{ justifyContent: "space-between" }}><span className="mono" style={{ font: "800 13px/1 var(--font-inter)", color: "#1D4ED8" }}>05</span><span className="dot" style={{ background: "#CBD5E1" }} /></div>
-            <div style={{ font: "700 15px/1.2 var(--font-inter)", margin: "16px 0 8px" }}>Publikasi lapisan</div>
-            <p style={{ fontSize: 12.5, lineHeight: 1.55, color: "#64748B", margin: 0 }}>Lapisan, protokol, dan catatan keterbatasan diterbitkan bersamaan agar dapat diperiksa ulang.</p>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ padding: "0 56px 56px" }}>
-        <div style={{ borderRadius: 12, background: "#EEF2F6", padding: 40 }}>
-          <div className="row" style={{ justifyContent: "space-between", alignItems: "flex-end", marginBottom: 28 }}>
-            <div>
-              <div className="k" style={{ color: "#1D4ED8", marginBottom: 12 }}>Panel transparansi</div>
-              <h2 style={{ font: "800 30px/1.1 var(--font-inter)", letterSpacing: "-.025em", margin: 0 }}>Dari foto struk ke satu angka</h2>
+      {/* ============================================================
+          Lima langkah — kartu bertint bergilir.
+          ============================================================ */}
+      <section className="reveal" style={seksi}>
+        <Kepala
+          kicker="Alur pencacahan"
+          judul="Lima langkah, dari lapangan ke lapisan peta."
+          catatan={
+            <span className="fig" style={{ fontSize: "var(--t-micro)" }}>
+              satu simpul · satu hari kerja
+            </span>
+          }
+        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+            gap: "var(--s2)",
+          }}
+        >
+          {LANGKAH.map((l) => (
+            <div key={l.n} style={tint(l.tint)}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "flex-start",
+                }}
+              >
+                <span
+                  className="fig"
+                  style={{
+                    font: "400 clamp(23px, 2.4vw, 30px)/1 var(--font-mono), ui-monospace, monospace",
+                    letterSpacing: "-0.02em",
+                    color: "var(--ink-faint)",
+                  }}
+                >
+                  {l.n}
+                </span>
+                <span
+                  className="dot"
+                  style={{ background: "var(--data)", marginTop: 6 }}
+                />
+              </div>
+              <div
+                style={{
+                  font: "700 var(--t-body)/1.25 var(--font-inter), system-ui, sans-serif",
+                  margin: "var(--s3) 0 var(--s1)",
+                }}
+              >
+                {l.judul}
+              </div>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "var(--t-small)",
+                  lineHeight: 1.55,
+                  color: "var(--ink-muted)",
+                }}
+              >
+                {l.isi}
+              </p>
             </div>
-            <span style={{ fontSize: 12.5, color: "#64748B", maxWidth: "40ch", textAlign: "right" }}>Setiap nilai V pada peta dapat dibuka sampai foto aslinya, lengkap dengan keyakinan bacaan dan alasan bila datanya dibuang.</span>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "300px 1fr", gap: 24 }}>
-            <div>
-              <div style={{ borderRadius: 12, overflow: "hidden", height: 290, background: "#F1F5F9" }}>
-                <ImagePlaceholder label="Foto struk (identitas diredaksi)" />
-              </div>
-              <div className="row" style={{ gap: 7, marginTop: 10 }}>
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E9EEF3", boxShadow: "0 0 0 2px #1D4ED8" }} />
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E9EEF3" }} />
-                <div style={{ width: 44, height: 44, borderRadius: 12, background: "#E9EEF3" }} />
-                <div style={{ width: 44, height: 44, borderRadius: 12, border: "1.5px dashed rgba(15,23,42,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10.5, color: "#94A3B8" }}>+18</div>
+          ))}
+        </div>
+      </section>
+
+      {/* ============================================================
+          Panel transparansi — foto struk → satu angka. Grid kartu datar
+          langsung di atas kertas (bukan panel bersarang) — pola Insight.
+          ============================================================ */}
+      <section className="reveal" style={seksi}>
+        <Kepala
+          kicker="Panel transparansi"
+          judul="Dari foto struk ke satu angka."
+          catatan="Setiap nilai V pada peta dapat dibuka sampai foto aslinya, lengkap dengan keyakinan bacaan dan alasan bila datanya dibuang."
+        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 320px) minmax(0, 1fr)",
+            gap: "var(--s2)",
+            alignItems: "start",
+          }}
+        >
+          {/* KIRI — foto + kontak sheet */}
+          <div>
+            <div
+              className="kartu"
+              style={{
+                overflow: "hidden",
+                height: 320,
+                background: "var(--surface)",
+              }}
+            >
+              <ImagePlaceholder
+                label="Foto struk (identitas diredaksi)"
+                style={{ color: "var(--ink-faint)" }}
+              />
+            </div>
+            <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
+              {[0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: "var(--r-sm)",
+                    background: "var(--paper-2)",
+                    boxShadow: i === 0 ? "0 0 0 2px var(--data)" : undefined,
+                  }}
+                />
+              ))}
+              <div
+                className="fig"
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: "var(--r-sm)",
+                  border: "1.5px dashed var(--rule-strong)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 10.5,
+                  color: "var(--ink-faint)",
+                }}
+              >
+                +18
               </div>
             </div>
-            <div>
-              <div className="k" style={{ marginBottom: 11 }}>Hasil baca AI</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                <div className="row" style={{ justifyContent: "space-between", padding: "13px 16px", borderRadius: "12px 12px 0 0", background: "#fff", fontSize: 13 }}><span style={{ color: "#64748B" }}>Kategori (dinormalisasi)</span><span style={{ fontWeight: 600 }}>F&amp;B siap saji</span></div>
-                <div className="row" style={{ justifyContent: "space-between", padding: "13px 16px", background: "#fff", fontSize: 13 }}><span style={{ color: "#64748B" }}>Subtotal sebelum pajak</span><span style={{ color: "#94A3B8" }}>Rp 47.500 — tidak dipakai</span></div>
-                <div className="row" style={{ justifyContent: "space-between", padding: "13px 16px", background: "#fff", fontSize: 13 }}><span style={{ color: "#64748B" }}>Waktu transaksi</span><span className="mono">07.42 · slot 06–09</span></div>
-                <div className="row" style={{ justifyContent: "space-between", padding: "14px 16px", borderRadius: "0 0 14px 14px", background: "rgba(29,78,216,.1)", fontSize: 13 }}><span style={{ fontWeight: 600 }}>Jumlah dibayarkan → V</span><span className="mono" style={{ fontWeight: 700, color: "#1D4ED8" }}>Rp 42.000</span></div>
+          </div>
+
+          {/* KANAN — hasil baca AI */}
+          <div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 1,
+                background: "var(--rule)",
+                border: "1px solid var(--rule)",
+                borderRadius: "var(--r-md)",
+                overflow: "hidden",
+              }}
+            >
+              <BarisAtribut label="Kategori (dinormalisasi)">
+                <span style={{ fontWeight: 600, color: "var(--ink)" }}>
+                  F&amp;B siap saji
+                </span>
+              </BarisAtribut>
+              <BarisAtribut label="Subtotal sebelum pajak">
+                <span style={{ color: "var(--ink-faint)" }}>
+                  Rp 47.500 — tidak dipakai
+                </span>
+              </BarisAtribut>
+              <BarisAtribut label="Waktu transaksi">
+                <span className="fig">07.42 · slot 06–09</span>
+              </BarisAtribut>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: "var(--s2)",
+                  padding: "var(--s2) var(--s3)",
+                  background: "var(--data-wash)",
+                  fontSize: "var(--t-small)",
+                }}
+              >
+                <span style={{ fontWeight: 600, color: "var(--ink)" }}>
+                  Jumlah dibayarkan → V
+                </span>
+                <span
+                  className="fig"
+                  style={{ fontWeight: 700, color: "var(--data)" }}
+                >
+                  Rp 42.000
+                </span>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginTop: 14 }}>
-                <div style={{ borderRadius: 12, background: "#fff", padding: 16 }}>
-                  <div className="k" style={{ fontSize: 9, marginBottom: 9 }}>Keyakinan bacaan</div>
-                  <div className="mono" style={{ font: "700 20px/1 var(--font-inter)" }}>0,91</div>
-                  <div className="pill" style={{ height: 5, background: "rgba(15,23,42,.1)", marginTop: 10 }}><div className="pill" style={{ width: "84%", height: 5, background: "#1D4ED8" }} /></div>
-                </div>
-                <div style={{ borderRadius: 12, background: "#fff", padding: 16 }}>
-                  <div className="k" style={{ fontSize: 9, marginBottom: 9 }}>Cakupan</div>
-                  <div className="mono" style={{ font: "700 20px/1 var(--font-inter)" }}>182 / 196</div>
-                  <div style={{ fontSize: 10.5, lineHeight: 1.4, color: "#64748B", marginTop: 7 }}>struk terbaca</div>
-                </div>
-                <div style={{ borderRadius: 12, background: "#fff", padding: 16 }}>
-                  <div className="k" style={{ fontSize: 9, marginBottom: 9 }}>Dibuang</div>
-                  <div className="mono" style={{ font: "700 20px/1 var(--font-inter)" }}>4</div>
-                  <div style={{ fontSize: 10.5, lineHeight: 1.4, color: "#64748B", marginTop: 7 }}>bacaan ambigu</div>
-                </div>
-              </div>
-              <div className="row" style={{ gap: 11, alignItems: "flex-start", marginTop: 14, borderRadius: 12, background: "rgba(29,78,216,.08)", padding: "15px 17px", fontSize: 12.5, lineHeight: 1.55 }}>
-                <span className="dot" style={{ background: "#1D4ED8", marginTop: 6 }} />
-                <span>Bila sampel satu kategori terlalu tipis, nilai V <b>dialihkan</b> dari kawasan sejenis dan simpul itu ditandai pada lapisan kepercayaan data — bukan diisi diam-diam.</span>
-              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(3, 1fr)",
+                gap: "var(--s2)",
+                marginTop: "var(--s2)",
+              }}
+            >
+              <KartuStat label="Keyakinan bacaan" nilai="0,91" isi={84} />
+              <KartuStat label="Cakupan" nilai="182 / 196" catatan="struk terbaca" />
+              <KartuStat label="Dibuang" nilai="4" catatan="bacaan ambigu" />
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--s2)",
+                alignItems: "flex-start",
+                marginTop: "var(--s2)",
+                borderRadius: "var(--r-md)",
+                background: "var(--field-wash)",
+                padding: "var(--s3)",
+                fontSize: "var(--t-small)",
+                lineHeight: 1.55,
+                color: "var(--ink-2)",
+              }}
+            >
+              <span
+                className="dot"
+                style={{ background: "var(--field)", marginTop: 7 }}
+              />
+              <span>
+                Bila sampel satu kategori terlalu tipis, nilai V{" "}
+                <b>dialihkan</b> dari kawasan sejenis dan simpul itu ditandai
+                pada lapisan kepercayaan data — bukan diisi diam-diam.
+              </span>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1.1fr 1fr", gap: 18, padding: "0 56px 56px" }}>
-        <div style={{ borderRadius: 12, background: "#EEF2F6", padding: 34 }}>
-          <div className="k" style={{ marginBottom: 14 }}>Sebaran hasil simulasi</div>
-          <h2 style={{ font: "800 26px/1.12 var(--font-inter)", letterSpacing: "-.02em", margin: "0 0 6px" }}>Mengapa jawabannya rentang</h2>
-          <p style={{ fontSize: 13, lineHeight: 1.6, color: "#64748B", margin: "0 0 26px", maxWidth: "48ch" }}>Tiap variabel punya ketidakpastian sendiri. Setelah dikalikan, ketidakpastiannya menumpuk — maka yang dilaporkan adalah rentang P10–P90.</p>
-          <svg width="100%" height="180" viewBox="0 0 560 180" preserveAspectRatio="none" style={{ display: "block" }}>
-            <g fill="rgba(15,23,42,.14)">
-              <rect x="4" y="160" width="18" height="20" rx="2" />
-              <rect x="26" y="150" width="18" height="30" rx="2" />
-              <rect x="48" y="134" width="18" height="46" rx="2" />
-              <rect x="70" y="116" width="18" height="64" rx="2" />
-            </g>
-            <g fill="#2563EB">
-              <rect x="92" y="96" width="18" height="84" rx="2" />
-              <rect x="114" y="76" width="18" height="104" rx="2" />
-              <rect x="136" y="58" width="18" height="122" rx="2" />
-              <rect x="158" y="42" width="18" height="138" rx="2" />
-              <rect x="180" y="30" width="18" height="150" rx="2" />
-            </g>
-            <g fill="#60A5FA">
-              <rect x="202" y="20" width="18" height="160" rx="2" />
-              <rect x="224" y="14" width="18" height="166" rx="2" />
-              <rect x="246" y="18" width="18" height="162" rx="2" />
-              <rect x="268" y="26" width="18" height="154" rx="2" />
-            </g>
-            <g fill="#1D4ED8">
-              <rect x="290" y="38" width="18" height="142" rx="2" />
-              <rect x="312" y="54" width="18" height="126" rx="2" />
-              <rect x="334" y="72" width="18" height="108" rx="2" />
-              <rect x="356" y="92" width="18" height="88" rx="2" />
-              <rect x="378" y="112" width="18" height="68" rx="2" />
-            </g>
-            <g fill="rgba(15,23,42,.14)">
-              <rect x="400" y="130" width="18" height="50" rx="2" />
-              <rect x="422" y="144" width="18" height="36" rx="2" />
-              <rect x="444" y="154" width="18" height="26" rx="2" />
-              <rect x="466" y="162" width="18" height="18" rx="2" />
-              <rect x="488" y="168" width="18" height="12" rx="2" />
-              <rect x="510" y="172" width="18" height="8" rx="2" />
-              <rect x="532" y="175" width="18" height="5" rx="2" />
-            </g>
-            <line x1="92" y1="0" x2="92" y2="180" stroke="#0F172A" strokeWidth="1.5" strokeDasharray="4 4" />
-            <line x1="233" y1="0" x2="233" y2="180" stroke="#0F172A" strokeWidth="2" />
-            <line x1="396" y1="0" x2="396" y2="180" stroke="#0F172A" strokeWidth="1.5" strokeDasharray="4 4" />
-          </svg>
-          <div className="row" style={{ justifyContent: "space-between", marginTop: 12 }}>
-            <span className="mono" style={{ fontSize: 11, color: "#64748B" }}>P10</span>
-            <span className="mono" style={{ fontSize: 11, fontWeight: 700 }}>median</span>
-            <span className="mono" style={{ fontSize: 11, color: "#64748B" }}>P90</span>
+      {/* ============================================================
+          Ketidakpastian & batas — histogram + kartu "yang dibuang".
+          ============================================================ */}
+      <section className="reveal" style={seksi}>
+        <Kepala
+          kicker="Ketidakpastian & batas"
+          judul="Kenapa jawabannya rentang, dan apa yang dibuang."
+          catatan="Tiap variabel punya ketidakpastiannya sendiri; setelah dikalikan, yang jujur dilaporkan adalah P10–P90 — bukan satu angka."
+        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)",
+            gap: "var(--s2)",
+            alignItems: "start",
+          }}
+        >
+          {/* KIRI — sebaran simulasi */}
+          <div style={tint("var(--data-wash)")}>
+            <div className="eyebrow" style={{ marginBottom: "var(--s3)" }}>
+              Sebaran hasil simulasi
+            </div>
+            <svg
+              width="100%"
+              height="180"
+              viewBox="0 0 560 180"
+              preserveAspectRatio="xMidYMid meet"
+              style={{
+                display: "block",
+                width: "100%",
+                maxWidth: 620,
+                margin: "0 auto",
+              }}
+            >
+              {HISTO.map((b) => (
+                <rect
+                  key={b.x}
+                  x={b.x}
+                  y={180 - b.h}
+                  width={18}
+                  height={b.h}
+                  rx={2}
+                  style={{ fill: WARNA_GRUP[b.grup] }}
+                />
+              ))}
+              <line
+                x1={92}
+                y1={0}
+                x2={92}
+                y2={180}
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                style={{ stroke: "var(--ink)" }}
+              />
+              <line
+                x1={233}
+                y1={0}
+                x2={233}
+                y2={180}
+                strokeWidth={2}
+                style={{ stroke: "var(--ink)" }}
+              />
+              <line
+                x1={396}
+                y1={0}
+                x2={396}
+                y2={180}
+                strokeWidth={1.5}
+                strokeDasharray="4 4"
+                style={{ stroke: "var(--ink)" }}
+              />
+            </svg>
+            <div
+              className="fig"
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: "var(--s2)",
+                paddingTop: "var(--s2)",
+                borderTop: "1px solid var(--rule)",
+                fontSize: "var(--t-micro)",
+              }}
+            >
+              <span style={{ color: "var(--ink-muted)" }}>P10</span>
+              <span style={{ fontWeight: 700, color: "var(--ink)" }}>
+                median
+              </span>
+              <span style={{ color: "var(--ink-muted)" }}>P90</span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: "var(--s2)",
+                marginTop: "var(--s3)",
+                flexWrap: "wrap",
+              }}
+            >
+              {[
+                "10.000 iterasi",
+                "per pintu · per slot",
+                "tanpa penghalusan antar jam",
+              ].map((t) => (
+                <span key={t} className="eyebrow-chip eyebrow">
+                  {t}
+                </span>
+              ))}
+            </div>
           </div>
-          <div className="row" style={{ gap: 14, marginTop: 20, flexWrap: "wrap" }}>
-            <span className="chip" style={{ cursor: "default" }}>10.000 iterasi</span>
-            <span className="chip" style={{ cursor: "default" }}>per pintu · per slot</span>
-            <span className="chip" style={{ cursor: "default" }}>tanpa penghalusan antar jam</span>
+
+          {/* KANAN — yang dibuang */}
+          <div
+            className="kartu ink-band"
+            style={{
+              background: "var(--ink)",
+              padding: "var(--s3)",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <div className="eyebrow" style={{ marginBottom: "var(--s3)" }}>
+              Yang kami buang, dan alasannya
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "var(--s3)",
+                flex: 1,
+              }}
+            >
+              {BUANG.map((b) => (
+                <div
+                  key={b.judul}
+                  style={{
+                    display: "flex",
+                    gap: "var(--s2)",
+                    alignItems: "flex-start",
+                  }}
+                >
+                  <span
+                    className="dot"
+                    style={{ background: b.warna, marginTop: 7 }}
+                  />
+                  <div>
+                    <div
+                      style={{
+                        fontSize: "var(--t-small)",
+                        fontWeight: 600,
+                        color: "var(--paper)",
+                      }}
+                    >
+                      {b.judul}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "var(--t-small)",
+                        lineHeight: 1.55,
+                        color: "var(--ink-muted)",
+                        marginTop: 4,
+                      }}
+                    >
+                      {b.isi}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: 10,
+                marginTop: "var(--s4)",
+                flexWrap: "wrap",
+              }}
+            >
+              <button className="b bp">Unduh protokol pencacahan</button>
+              <button className="b bs">Catatan keterbatasan</button>
+            </div>
           </div>
         </div>
-        <div style={{ borderRadius: 12, background: "#0F172A", padding: 34, position: "relative", overflow: "hidden" }}>
-          <div className="k" style={{ color: "#93C5FD", position: "relative", marginBottom: 22 }}>Yang kami buang, dan alasannya</div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 16, position: "relative" }}>
-            <div className="row" style={{ gap: 14, alignItems: "flex-start" }}><span className="dot" style={{ background: "#1D4ED8", marginTop: 7 }} /><div><div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Blok dengan selisih antar pencacah &gt; 15%</div><div style={{ fontSize: 12.5, lineHeight: 1.55, color: "rgba(255,255,255,.62)", marginTop: 4 }}>Blok diulang; bila tetap berselisih, slot itu tidak dipakai.</div></div></div>
-            <div className="row" style={{ gap: 14, alignItems: "flex-start" }}><span className="dot" style={{ background: "#475569", marginTop: 7 }} /><div><div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Struk yang tidak terbaca utuh</div><div style={{ fontSize: 12.5, lineHeight: 1.55, color: "rgba(255,255,255,.62)", marginTop: 4 }}>Tidak ditebak. Dikeluarkan dari perhitungan dan dilaporkan jumlahnya.</div></div></div>
-            <div className="row" style={{ gap: 14, alignItems: "flex-start" }}><span className="dot" style={{ background: "#2563EB", marginTop: 7 }} /><div><div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Kawasan dengan sampel di bawah ambang</div><div style={{ fontSize: 12.5, lineHeight: 1.55, color: "rgba(255,255,255,.62)", marginTop: 4 }}>Ditandai sebagai sampel tipis, tidak diberi estimasi, dan tidak dibaca aman maupun bermasalah.</div></div></div>
-            <div className="row" style={{ gap: 14, alignItems: "flex-start" }}><span className="dot" style={{ background: "#2563EB", marginTop: 7 }} /><div><div style={{ fontSize: 14, fontWeight: 600, color: "#fff" }}>Hari dengan gangguan operasi</div><div style={{ fontSize: 12.5, lineHeight: 1.55, color: "rgba(255,255,255,.62)", marginTop: 4 }}>Rekayasa lalu lintas atau gangguan perjalanan membuat arus tidak mewakili hari biasa.</div></div></div>
-          </div>
-          <div className="row" style={{ gap: 10, marginTop: 28, position: "relative" }}>
-            <button className="b bw">Unduh protokol pencacahan</button>
-            <button className="b bs" style={{ background: "rgba(255,255,255,.12)", color: "#fff" }}>Catatan keterbatasan</button>
-          </div>
-        </div>
-      </div>
+      </section>
 
-      <div className="row" style={{ justifyContent: "space-between", padding: "20px 56px 28px", borderTop: "1px solid rgba(15,23,42,.1)" }}>
-        <span style={{ fontSize: 11.5, color: "#94A3B8" }}>Isi Stasiun · seluruh angka pada halaman ini bersifat ilustratif</span>
-        <Link href="/rekomendasi" style={{ fontSize: 11.5, fontWeight: 600 }}>Lanjut ke rekomendasi →</Link>
+      <footer
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: "var(--s3)",
+          flexWrap: "wrap",
+          padding: "var(--s3) var(--page-x) var(--s4)",
+          borderTop: "1px solid var(--rule)",
+        }}
+      >
+        <span style={{ fontSize: 11.5, color: "var(--ink-faint)" }}>
+          Isi Stasiun · dibangun di atas GEO MAPID · seluruh angka pada halaman
+          ini bersifat ilustratif
+        </span>
+        <Link
+          href="/rekomendasi"
+          style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink)" }}
+        >
+          Lanjut ke rekomendasi →
+        </Link>
+      </footer>
+    </div>
+  );
+}
+
+/* --- Kartu "Persamaan potensi" di hero ------------------------------------- */
+
+/**
+ * Ukuran font tiap bagian persamaan, dalam px. **Atur di sini** — ini satu-
+ * satunya tempatnya. `suku` = huruf F/E/C/V (baris 1); `sukuBaris2` = kata
+ * "Potensi"/"Tertangkap" (baris 2); `hasil` = pil hasil "Potensi" & "Kesenjangan";
+ * `operator` = tanda × − =.
+ */
+const FONT_PERSAMAAN = {
+  suku: 15,
+  sukuBaris2: 13,
+  hasil: 14,
+  operator: 13,
+};
+
+/**
+ * Satu baris persamaan. Default `space-between` (membentang selebar kartu);
+ * `kiri` mengunci ke kiri (sisi kanan boleh kosong). `flex-wrap` supaya turun
+ * ke bawah — bukan terpotong — kalau kartunya sempit.
+ */
+function Baris({
+  children,
+  kiri = false,
+}: {
+  children: ReactNode;
+  kiri?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: kiri ? "flex-start" : "space-between",
+        alignItems: "center",
+        gap: kiri ? "8px 8px" : "8px 4px",
+        flexWrap: "wrap",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Operator({ children }: { children: string }) {
+  return (
+    <span
+      className="fig"
+      style={{
+        color: "var(--ink-faint)",
+        fontSize: FONT_PERSAMAAN.operator,
+        flex: "none",
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Suku({ children, sm = false }: { children: string; sm?: boolean }) {
+  return (
+    <span
+      className="fig"
+      style={{
+        flex: "none",
+        padding: sm ? "7px 12px" : "8px 13px",
+        borderRadius: "var(--r-pill)",
+        background: "rgba(250, 248, 244, 0.1)",
+        color: "var(--data-mid)",
+        font: `700 ${sm ? FONT_PERSAMAAN.sukuBaris2 : FONT_PERSAMAAN.suku}px/1 var(--font-mono), ui-monospace, monospace`,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+function Hasil({
+  children,
+  data = false,
+}: {
+  children: string;
+  data?: boolean;
+}) {
+  return (
+    <span
+      className="fig"
+      style={{
+        flex: "none",
+        padding: "7px 12px",
+        borderRadius: "var(--r-pill)",
+        background: data ? "var(--data)" : "var(--paper)",
+        color: "var(--ink)",
+        font: `700 ${FONT_PERSAMAAN.hasil}px/1 var(--font-mono), ui-monospace, monospace`,
+      }}
+    >
+      {children}
+    </span>
+  );
+}
+
+/* --- Baris atribut & kartu stat di panel transparansi --------------------- */
+
+function BarisAtribut({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+        gap: "var(--s2)",
+        padding: "var(--s2) var(--s3)",
+        background: "var(--surface)",
+        fontSize: "var(--t-small)",
+      }}
+    >
+      <span style={{ color: "var(--ink-muted)" }}>{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function KartuStat({
+  label,
+  nilai,
+  isi,
+  catatan,
+}: {
+  label: string;
+  nilai: string;
+  isi?: number;
+  catatan?: string;
+}) {
+  return (
+    <div
+      style={{
+        borderRadius: "var(--r-md)",
+        background: "var(--surface)",
+        border: "1px solid var(--rule)",
+        padding: "var(--s2) var(--s3)",
+      }}
+    >
+      <div className="eyebrow" style={{ fontSize: 9, marginBottom: 8 }}>
+        {label}
       </div>
+      <div className="fig" style={{ fontSize: 19, color: "var(--ink)" }}>
+        {nilai}
+      </div>
+      {isi !== undefined && (
+        <span
+          className="pill"
+          style={{
+            display: "block",
+            height: 5,
+            marginTop: 8,
+            background: "var(--rule)",
+            overflow: "hidden",
+          }}
+        >
+          <span
+            className="pill"
+            style={{
+              display: "block",
+              width: `${isi}%`,
+              height: 5,
+              background: "var(--data)",
+            }}
+          />
+        </span>
+      )}
+      {catatan && (
+        <div
+          style={{
+            fontSize: 10.5,
+            lineHeight: 1.4,
+            color: "var(--ink-muted)",
+            marginTop: 7,
+          }}
+        >
+          {catatan}
+        </div>
+      )}
     </div>
   );
 }

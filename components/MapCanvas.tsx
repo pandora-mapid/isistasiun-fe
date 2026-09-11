@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { FeatureCollection, Point, Polygon } from "geojson";
 import {
+  AttributionControl,
   LngLatBounds,
   Map as MapLibreMap,
   NavigationControl,
@@ -77,6 +78,46 @@ type Props = {
   retailLocations: FeatureCollection<Point, RetailLocation>;
   selectedRetailId: string | null;
   onSelectRetail: (location: RetailLocation) => void;
+  /**
+   * Boleh digeser, di-zoom, dan diklik. Bawaannya ya.
+   *
+   * Dimatikan untuk peta hero di Beranda: di sana peta adalah gambar yang
+   * hidup, bukan alat. Membiarkannya interaktif berarti gulungan halaman
+   * tertelan peta begitu kursor melintasinya — pengunjung terjebak di tengah
+   * halaman tanpa tahu kenapa.
+   *
+   * Saat mati, kendali navigasi tidak dipasang dan pendengar sorot/klik tidak
+   * didaftarkan sama sekali — bukan sekadar disembunyikan.
+   */
+  interactive?: boolean;
+  /**
+   * Ruang yang dikosongkan saat menyesuaikan tampilan ke kawasan studi.
+   *
+   * Bawaannya `FIT_PADDING`, yang angkanya mengikuti panel-panel melayang di
+   * halaman Peta. Peta hero tidak punya panel itu, jadi ia mengirim padding
+   * sendiri — kalau tidak, petanya menyusut ke tengah menyisakan ruang untuk
+   * sesuatu yang tidak ada di sana.
+   */
+  fitPadding?: { top: number; bottom: number; left: number; right: number };
+  /**
+   * Radius kliping DOM untuk pembungkus peta — chrome embed, bukan gaya peta
+   * (`lib/map/style.ts` tetap satu-satunya sumber warna/ukuran layer). Dipakai
+   * peta hero Beranda supaya sudut kanvas MapLibre benar-benar terpotong
+   * membulat; `/peta` tidak mengopernya → tanpa radius, seperti sebelumnya.
+   */
+  borderRadius?: number | string;
+  /**
+   * Sudut tempat kredit peta ("© MAPID Maps …") duduk. Bawaannya `bottom-right`
+   * (MapLibre bawaan). Peta hero Beranda memindahnya ke `top-left`: kartu
+   * sorotan menggantung keluar dari sudut kiri-bawah, jadi kredit di bawah
+   * mana pun akan tertutup — dan kredit yang tak terbaca melanggar lisensi
+   * basemap. Nilai lain memakai `AttributionControl` yang dipasang sendiri.
+   */
+  attributionPosition?:
+    | "top-left"
+    | "top-right"
+    | "bottom-left"
+    | "bottom-right";
 };
 
 /** Batas menunggu style basemap sebelum dianggap gagal. */
@@ -111,8 +152,10 @@ const OFFLINE_STYLE = {
   layers: [
     {
       id: "latar",
+      // Nada kertas hangat (~`--paper-2`), bukan slate dingin — style MapLibre
+      // berupa JSON, jadi ditulis literal, bukan lewat `var()`.
       type: "background" as const,
-      paint: { "background-color": "#F1F5F9" },
+      paint: { "background-color": "#F3EFE7" },
     },
   ],
 };
@@ -197,6 +240,10 @@ export function MapCanvas({
   retailLocations,
   selectedRetailId,
   onSelectRetail,
+  interactive = true,
+  fitPadding = FIT_PADDING,
+  borderRadius,
+  attributionPosition = "bottom-right",
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -238,10 +285,19 @@ export function MapCanvas({
       style: resolveBasemapUrl(),
       center: INITIAL_VIEW.center,
       zoom: INITIAL_VIEW.zoom,
-      attributionControl: { compact: true },
+      // MapLibre hanya bisa menaruh kredit bawaan di kanan-bawah; sudut lain
+      // berarti matikan yang bawaan lalu pasang `AttributionControl` sendiri
+      // (di bawah, sesudah peta dibuat).
+      attributionControl:
+        attributionPosition === "bottom-right" ? { compact: true } : false,
       // Di atas 60 derajat pandangan mulai menatap cakrawala dan peta jadi
       // sulit dibaca — sekaligus membuat kendali kemiringan terasa liar.
       maxPitch: CAMERA.maxPitch,
+      // Mematikan ini melepas SELURUH penangan bawaan sekaligus — geser, zoom,
+      // putar, gulung. Itu yang dibutuhkan peta hero: ia gambar yang hidup,
+      // bukan alat, dan peta yang menelan gulungan halaman di tengah landing
+      // page adalah jebakan, bukan fitur.
+      interactive,
     });
     mapRef.current = map;
 
@@ -262,10 +318,22 @@ export function MapCanvas({
     // meratakan bearing DAN pitch ke nol tanpa memindahkan pusat peta. Itulah
     // sebabnya tidak ada tombol "ratakan" buatan sendiri — compass sudah
     // melakukannya persis.
-    map.addControl(
-      new NavigationControl({ showCompass: true, visualizePitch: true }),
-      "top-left",
-    );
+    if (interactive) {
+      map.addControl(
+        new NavigationControl({ showCompass: true, visualizePitch: true }),
+        "top-left",
+      );
+    }
+
+    // Kredit peta yang dipindah dari sudut bawaannya (lihat `attributionControl`
+    // di atas). Hero Beranda memakai `top-left` supaya kartu sorotan yang
+    // menggantung di kiri-bawah tidak menutupi "© MAPID Maps".
+    if (attributionPosition !== "bottom-right") {
+      map.addControl(
+        new AttributionControl({ compact: true }),
+        attributionPosition,
+      );
+    }
 
     // MapLibre melaporkan kegagalan style/tile lewat event ini. Tanpa
     // pendengar, kegagalannya hanya muncul di console dan peta diam membisu.
@@ -325,6 +393,10 @@ export function MapCanvas({
       map.remove();
       mapRef.current = null;
     };
+    // `interactive` dan `attributionPosition` sengaja tidak masuk daftar:
+    // keduanya menentukan bagaimana peta DIBUAT, dan peta hanya dibuat sekali.
+    // Memasukkannya berarti membongkar-pasang ulang seluruh peta saat berubah.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // --- memasang source, layer, dan penangan interaksi ---------------------
@@ -366,7 +438,7 @@ export function MapCanvas({
     // begitu geometri pindah ke tile vektor: yang diterima hanya fitur di
     // dalam layar, dan peta akan terbuka di tempat acak. Lihat ROADMAP §4.1.
     map.fitBounds(new LngLatBounds(STUDY_BOUNDS), {
-      padding: FIT_PADDING,
+      padding: fitPadding,
       duration: 0,
     });
 
@@ -393,13 +465,21 @@ export function MapCanvas({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !layersReady) return;
-    const select = (event: { features?: { properties?: Record<string, unknown> }[] }) => {
+    const select = (event: {
+      features?: { properties?: Record<string, unknown> }[];
+    }) => {
       const id = event.features?.[0]?.properties?.id;
-      const location = retailLocations.features.find((feature) => feature.properties.id === id)?.properties;
+      const location = retailLocations.features.find(
+        (feature) => feature.properties.id === id,
+      )?.properties;
       if (location) onSelectRetail(location);
     };
-    const enter = () => { map.getCanvas().style.cursor = "pointer"; };
-    const leave = () => { map.getCanvas().style.cursor = ""; };
+    const enter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const leave = () => {
+      map.getCanvas().style.cursor = "";
+    };
     map.on("click", LAYER.retailCircle, select);
     map.on("mouseenter", LAYER.retailCircle, enter);
     map.on("mouseleave", LAYER.retailCircle, leave);
@@ -413,8 +493,18 @@ export function MapCanvas({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !layersReady) return;
-    map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", ["case", ["==", ["get", "id"], selectedRetailId ?? ""], "#0f172a", "#ffffff"]);
-    map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", ["case", ["==", ["get", "id"], selectedRetailId ?? ""], 3, 2]);
+    map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
+      "case",
+      ["==", ["get", "id"], selectedRetailId ?? ""],
+      "#0f172a",
+      "#ffffff",
+    ]);
+    map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
+      "case",
+      ["==", ["get", "id"], selectedRetailId ?? ""],
+      3,
+      2,
+    ]);
   }, [layersReady, selectedRetailId]);
 
   // --- interaksi titik: sorot dan pilih -----------------------------------
@@ -427,7 +517,10 @@ export function MapCanvas({
   // sempurna tapi tidak menanggapi satu klik pun.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !layersReady) return;
+    // Peta non-interaktif tidak mendaftarkan pendengar sama sekali — bukan
+    // memasangnya lalu mengabaikannya. Kursor "pointer" di atas sesuatu yang
+    // tidak bisa diklik adalah janji yang tidak ditepati.
+    if (!map || !layersReady || !interactive) return;
 
     const clearHover = () => {
       if (hoveredRef.current === null) return;
@@ -466,7 +559,7 @@ export function MapCanvas({
       map.off("mouseleave", LAYER.pointCircle, onLeave);
       map.off("click", LAYER.pointCircle, onClick);
     };
-  }, [layersReady]);
+  }, [layersReady, interactive]);
 
   // --- menempelkan seluruh keadaan fitur ke peta --------------------------
   //
@@ -569,13 +662,17 @@ export function MapCanvas({
     const update = () => {
       const center = map.getCenter();
       setAnalysisAvailable(
-        center.lng >= STUDY_BOUNDS[0] && center.lng <= STUDY_BOUNDS[2] &&
-        center.lat >= STUDY_BOUNDS[1] && center.lat <= STUDY_BOUNDS[3],
+        center.lng >= STUDY_BOUNDS[0] &&
+          center.lng <= STUDY_BOUNDS[2] &&
+          center.lat >= STUDY_BOUNDS[1] &&
+          center.lat <= STUDY_BOUNDS[3],
       );
     };
     update();
     map.on("moveend", update);
-    return () => { map.off("moveend", update); };
+    return () => {
+      map.off("moveend", update);
+    };
   }, [styleReady]);
 
   // --- filter isochrone mengikuti pilihan kawasan tangkapan ---------------
@@ -620,7 +717,14 @@ export function MapCanvas({
   const pesan = dataError ?? notice;
 
   return (
-    <div style={{ position: "absolute", inset: 0 }}>
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        borderRadius,
+        overflow: borderRadius ? "hidden" : undefined,
+      }}
+    >
       <div ref={containerRef} style={{ position: "absolute", inset: 0 }} />
 
       {pesan && (
@@ -635,8 +739,8 @@ export function MapCanvas({
             padding: "12px 16px",
             fontSize: 12,
             lineHeight: 1.5,
-            color: "#475569",
-            borderLeft: "3px solid #94A3B8",
+            color: "var(--ink-2)",
+            borderLeft: "3px solid var(--rule-strong)",
             zIndex: 5,
           }}
         >
@@ -646,7 +750,10 @@ export function MapCanvas({
       {!analysisAvailable && (
         <div className="analysis-unavailable" role="status">
           <strong>Analisis belum tersedia</strong>
-          <span>Peta dapat dijelajahi, tetapi data mock hanya tersedia di Manggarai dan Sudirman.</span>
+          <span>
+            Peta dapat dijelajahi, tetapi data mock hanya tersedia di Manggarai
+            dan Sudirman.
+          </span>
         </div>
       )}
     </div>

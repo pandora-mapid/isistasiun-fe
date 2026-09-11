@@ -32,7 +32,7 @@ terkait:
 > Dokumen ini disusun mengikuti lingkaran itu — **delapan tahap berurutan**, tersedia dalam tiga bentuk: diagram (§2), **daftar langkah dalam kalimat (§2)**, dan rincian per tahap (§3). Daftar per rute ada di §7 untuk keperluan teknis, tapi itu lampiran, bukan kerangkanya.
 
 > [!warning] Dua realita yang belum bertemu
-> Sejak [[00-GROUND-TRUTH-MASTER]] ditetapkan, scope studi resmi adalah **2 stasiun** (Manggarai & Sudirman). Namun data contoh dan empat halaman statis di kode **masih menampilkan 3 stasiun** ("Stasiun A/B/C", "tiga simpul, tiga tipe kawasan").
+> Sejak [[00-GROUND-TRUTH-MASTER]] ditetapkan, scope studi resmi adalah **2 stasiun** (Manggarai & Sudirman). Data contoh masih membawa 3 stasiun (yang ketiga placeholder "belum ditentukan"), dan Peta & Beranda masih menampilkannya. Insight sudah dikunci ke 2 stasiun sejak reskin; Rekomendasi masih memakai label lama "Stasiun A/B/C". Metodologi statis ilustratif — tidak merender data stasiun apa pun.
 >
 > Dokumen ini menulis **apa yang benar-benar muncul di layar**, bukan apa yang seharusnya. Setiap tempat yang terkena selisih ini ditandai ⚠️.
 
@@ -357,19 +357,17 @@ Tahap ini **hampir seluruhnya mati**. Layarnya ada, isinya ada, tapi tidak satu 
 | Tiga rekomendasi utama + urutan pelaksanaan | `/rekomendasi` | ✅ tampil, statis |
 | "Unduh paket rekomendasi" (2 tempat) | `/rekomendasi` | 🟡 |
 | Chip Stasiun A/B/C | `/rekomendasi` | 🟡 ⚠️ masih skema 3 stasiun |
-| Tiga kartu temuan | `/insight` | ✅ pindah ke `/peta` — **tanpa membawa filter apa pun** |
-| Chip "Uji tipologi / Kategori hilang / Sewa / Event" | `/insight` | 🟡 |
+| Daftar temuan bernomor | `/insight` | ✅ tampil, dipetik dari data — **sengaja bukan tautan** (dulu tiga kartu yang mendarat di `/peta` tanpa filter; dibuang karena menjanjikan filter yang tidak dibawa) |
+| ~~Chip "Uji tipologi / Kategori hilang / Sewa / Event"~~ | `/insight` | ✅ dibuang saat reskin — tab palsu, tidak pernah berfungsi |
 | **Bandingkan** | navigasi Peta | 🟡 [[ROADMAP]] 3.5 — kebutuhan inti Persona 2 |
 | **Brief PDF** / **Unduh brief** | navigasi + kaki panel | 🟡 [[ROADMAP]] 3.3 |
 | **Tabel atribut** | kaki panel | 🟡 [[ROADMAP]] 3.4 |
 | Tab "Tanya Data" | panel Peta | ✅ tab berpindah, tapi 🟡 kolomnya tidak menerima ketikan dan jawabannya tertulis di kode |
 
-> [!danger] Insight menjanjikan sesuatu yang tidak ditepatinya
-> Kalimat pembukanya berbunyi: *"Setiap angka di halaman ini dapat diklik dan membuka peta yang sudah terfilter ke lapisan, pintu, dan slot yang dimaksud."* Kenyataannya seluruh tautan mendarat di `/peta` keadaan bawaan — slot 06–09, kategori Semua, titik gap terbesar.
->
-> Bisa diperbaiki **sepenuhnya di frontend**: baca query param di `/peta` (mis. `?titik=24&slot=sore&kategori=apotek`) dan pakai sebagai keadaan awal. Belum tercatat di [[ROADMAP]] — kandidat pekerjaan jeda yang berdampak besar, karena ini yang menyambungkan Tahap 6 kembali ke Tahap 3.
+> [!tip] Peluang jeda: tautan Insight → peta terfilter
+> Reskin Insight membuang kalimat "setiap angka dapat diklik" karena janji itu tidak ditepati — seluruh tautan lama mendarat di `/peta` keadaan bawaan. Cara menepatinya, **sepenuhnya di frontend**: baca query param di `/peta` (mis. `?titik=24&slot=sore&kategori=apotek`) dan pakai sebagai keadaan awal, lalu jadikan angka Insight tautan sungguhan. Belum tercatat di [[ROADMAP]] — pekerjaan jeda berdampak besar, karena ini yang menyambungkan Tahap 6 kembali ke Tahap 3. Sampai itu ada, angka Insight sengaja bukan tautan.
 
-⚠️ Selisih lain di `/insight`: judul masih "tiga simpul", tabel hipotesis masih menguji tipologi lama (hunian/campuran/perkantoran) yang sudah diganti [[04-VALUE-PROP-AND-MONETIZATION]] §1, dan ambang sampel tipis masih tertulis `n < 30` padahal aturan sebenarnya **3 gerai × 2 blok**.
+✅ Selisih lama di `/insight` sudah beres saat reskin: judul jadi "dua simpul", tabel uji hipotesis tipologi lama (hunian/campuran/perkantoran) dibuang, ambang sampel tipis kini "3 gerai × 2 blok" dari data — bukan `n < 30` yang dikarang. Halaman kini membaca `usePetaData()` + `select.ts`, cakupan Manggarai + Sudirman, dan tata letaknya grid kartu **full-width dan padat** bergaya Metodologi/Rekomendasi (tanpa batas lebar, tiap section beberapa kartu, strip KPI + peringkat batang per pintu + pembacaan F×E×C×V) dengan latar kartu yang bergilir menempuh mayoritas palet Beranda di atas satu latar kertas seragam — bukan pita pastel bersection seperti Beranda.
 
 ⚠️ Teks jawaban contoh di tab "Tanya Data" menyebut "2 dari 3 simpul" dan "Stasiun B" — peninggalan skema 3 stasiun. Copilot sungguhan baru tersambung di [[ROADMAP]] 3.6 lewat `POST /copilot/query` ([[02-BACKEND-SPEC]] §3.4).
 
@@ -543,7 +541,7 @@ flowchart LR
 > 1. **Langkah 38 → 45 tidak tersambung.** Orang menemukan "tidak diestimasi" dan tidak punya cara membantu memperbaikinya. Ini putus yang paling penting, karena di situlah kedua sisi aplikasi seharusnya bertemu.
 > 2. **Langkah 42 buntu.** Tidak satu pun ekspor berfungsi, padahal keputusan sewa diambil di rapat, bukan di depan layar.
 > 3. **Langkah 39 buntu.** Persona 2 tidak bisa membandingkan — kebutuhan intinya justru tombol yang mati.
-> 4. **Langkah 41 dan tautan Insight tidak membawa keadaan.** Keduanya menyebut titik & slot tertentu tapi mendarat di peta keadaan bawaan. Bisa diperbaiki tanpa backend.
+> 4. **Langkah 41 (Rekomendasi) tidak membawa keadaan ke peta.** Menyebut titik & slot tertentu tapi mendarat di peta keadaan bawaan. Bisa diperbaiki tanpa backend. (Insight dulu punya masalah yang sama; setelah reskin, angkanya sengaja bukan tautan sampai query param `/peta` ada.)
 > 5. **Langkah 36: belum ada foto sama sekali** — Tahap 5 menjanjikan bukti visual dan menampilkan kotak abu.
 > 6. **Langkah 44–61 belum ada** — pintu masuk model community driven belum dibangun.
 

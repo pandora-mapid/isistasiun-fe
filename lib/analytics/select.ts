@@ -119,6 +119,44 @@ export function metricFor(
   };
 }
 
+/**
+ * Angka satu titik pada tingkat **hari**, bukan pada satu potongan slot.
+ *
+ * Halaman Beranda berbicara dalam satuan "per hari", jadi ia harus membaca
+ * `total` yang memang ada di payload — bukan menjumlahkan keempat slot sendiri.
+ * Menjumlahkan berarti melahirkan angka yang tidak ada di data, dan itu persis
+ * yang dilarang ROADMAP §9 nomor 4: setiap angka di layar harus bisa dilacak
+ * asalnya. Sama seperti `metricFor`, fungsi ini hanya **memilih**.
+ *
+ * `variables` dan `arus` sengaja `null`: F × E × C × V hanya dicacah per slot,
+ * jadi tidak ada nilai setingkat hari yang jujur untuk keduanya.
+ */
+export function totalMetricFor(point: PointAnalytics): PointMetric {
+  return {
+    pointId: point.point_id,
+    stationId: point.station_id,
+    gap: point.total.gap,
+    potensi: point.total.potensi,
+    tertangkap: point.total.tertangkap,
+    variables: null,
+    sampelTipis: point.sampel_tipis,
+    confidence: point.confidence,
+    kategori: null,
+    arus: null,
+  };
+}
+
+/** Angka seluruh titik pada tingkat hari, terkunci berdasarkan id. */
+export function totalMetrics(
+  payload: SpendingGapPayload,
+): Map<number, PointMetric> {
+  const out = new Map<number, PointMetric>();
+  for (const point of payload.points) {
+    out.set(point.point_id, totalMetricFor(point));
+  }
+  return out;
+}
+
 /** Angka seluruh titik pada potongan yang sama, terkunci berdasarkan id. */
 export function metricsFor(
   payload: SpendingGapPayload,

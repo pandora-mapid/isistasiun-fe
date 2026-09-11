@@ -8,6 +8,8 @@
  * dijaga di sini supaya tidak ada satu pun tempat yang diam-diam
  * menampilkannya sebagai "Rp 0" — lihat DATA_CONTRACT §C1.
  */
+import type { Range } from "./data/types";
+
 /** Tulisan yang dipakai konsisten untuk nilai yang memang tidak diestimasi. */
 export const TIDAK_DIESTIMASI = "tidak diestimasi";
 
@@ -36,6 +38,28 @@ export function rupiahRingkas(value: number | null | undefined): string {
     return `Rp ${teks} jt`;
   }
   return `Rp ${RIBUAN.format(Math.round(value / 1000))} rb`;
+}
+
+/**
+ * Rentang P10–P90 dengan satuan ditulis sekali: `Rp 2,3 – 4,0 jt`.
+ *
+ * Menulis `rupiahRingkas()` dua kali menghasilkan "Rp 2,3 jt – Rp 4 jt", yang
+ * pada ukuran display terbaca sebagai dua harga terpisah, bukan sebagai satu
+ * rentang. Hanya digabung kalau kedua ujungnya memang berada pada satuan yang
+ * sama; kalau tidak, keduanya ditulis penuh supaya tidak menyesatkan.
+ */
+export function rentangRingkas(range: Range | null | undefined): string {
+  if (!range || range.p10 === null || range.p90 === null) return TIDAK_DIESTIMASI;
+  const juta = (v: number) =>
+    new Intl.NumberFormat("id-ID", {
+      minimumFractionDigits: Math.abs(v) / 1_000_000 >= 10 ? 0 : 1,
+      maximumFractionDigits: Math.abs(v) / 1_000_000 >= 10 ? 0 : 1,
+    }).format(v / 1_000_000);
+
+  if (Math.abs(range.p10) >= 1_000_000 && Math.abs(range.p90) >= 1_000_000) {
+    return `Rp ${juta(range.p10)} – ${juta(range.p90)} jt`;
+  }
+  return `${rupiahRingkas(range.p10)} – ${rupiahRingkas(range.p90)}`;
 }
 
 /** Pecahan 0–1 menjadi persen. `0.064` → `6,4%`. */

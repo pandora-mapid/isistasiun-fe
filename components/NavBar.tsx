@@ -16,8 +16,18 @@ const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
   { key: "rekomendasi", href: "/rekomendasi", label: "Rekomendasi" },
 ];
 
-/** Brand mark ("IS" square + wordmark) — shared by both nav variants so the
- * two look identical wherever the nav appears. */
+/**
+ * Brand mark ("IS" square + wordmark) — shared by both nav variants so the
+ * two look identical wherever the nav appears.
+ *
+ * Colours come from `--nav-*` custom properties whose defaults, set in
+ * `globals.css`, are the exact literals this file used to hardcode — so every
+ * screen that hasn't been restyled renders pixel-identically. A screen that
+ * *has* been restyled (Beranda, Insight, Metodologi, Rekomendasi — every
+ * `.paper-canvas` screen) overrides those variables inside its own scope. That
+ * is deliberately not a second `NavBar`: one nav, one set of markup, repainted
+ * by whatever page it lands on.
+ */
 function Brand() {
   return (
     <div className="row" style={{ gap: 10, marginRight: 8 }}>
@@ -25,13 +35,13 @@ function Brand() {
         style={{
           width: 22,
           height: 22,
-          borderRadius: 12,
-          background: "#1D4ED8",
+          borderRadius: "var(--nav-brand-radius, 12px)",
+          background: "var(--nav-brand-bg)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           font: "800 11px/1 var(--font-inter)",
-          color: "#fff",
+          color: "var(--nav-brand-fg)",
         }}
       >
         IS
@@ -40,6 +50,7 @@ function Brand() {
         style={{
           font: "800 16px/1 var(--font-inter)",
           letterSpacing: "-.01em",
+          color: "var(--nav-wordmark)",
         }}
       >
         Isi Stasiun
@@ -65,8 +76,8 @@ function NavLinks({ active }: { active: NavKey }) {
               padding: "8px 14px",
               fontSize: 13,
               fontWeight: isActive ? 600 : 400,
-              background: isActive ? "rgba(29,78,216,.1)" : "transparent",
-              color: isActive ? "#1D4ED8" : "#475569",
+              background: isActive ? "var(--nav-active-bg)" : "transparent",
+              color: isActive ? "var(--nav-active-fg)" : "var(--nav-idle)",
             }}
           >
             {item.label}
@@ -78,7 +89,14 @@ function NavLinks({ active }: { active: NavKey }) {
 }
 
 /** Border-bottom nav row used on the content pages (Beranda, Insight,
- * Metodologi, Rekomendasi). `cta` is the page-specific action button. */
+ * Metodologi, Rekomendasi). `cta` is the page-specific action button.
+ *
+ * Shape (radius/margin/background/shadow/border-width) travels through the
+ * same `--nav-*` custom-property seam as the colours above, with defaults
+ * that reproduce today's plain border-bottom row exactly — so a screen that
+ * hasn't opted in (Peta) stays pixel-identical. The `.paper-canvas` scope
+ * (Beranda, Insight, Metodologi, Rekomendasi) overrides them, turning this same
+ * markup into a floating pill bar without a second NavBar existing anywhere. */
 export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
   return (
     <div
@@ -86,7 +104,11 @@ export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
       style={{
         gap: 22,
         padding: "20px 28px",
-        borderBottom: "1px solid rgba(15,23,42,.1)",
+        margin: "var(--nav-margin, 0)",
+        background: "var(--nav-bg, transparent)",
+        borderRadius: "var(--nav-radius, 0)",
+        borderBottom: "var(--nav-border-w, 1px) solid var(--nav-border)",
+        boxShadow: "var(--nav-shadow, none)",
       }}
     >
       <Brand />
