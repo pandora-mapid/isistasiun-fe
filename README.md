@@ -4,8 +4,9 @@ WebGIS UI for Isi Stasiun (MAPID WebGIS Competition #2 2026, Tim List Pandora).
 Next.js 16 (App Router) + MapLibre GL JS. Five screens: Beranda `/`, Peta `/peta`,
 Insight `/insight`, Metodologi `/metodologi`, Rekomendasi `/rekomendasi`.
 
-Peta is a fully interactive map over mock data (`public/mock/`); the other screens
-are static. Backend wiring is pending — see [`ROADMAP.md`](ROADMAP.md).
+Peta is the fully interactive map; Beranda and Insight read mock data, while
+Metodologi and Rekomendasi are static. Backend wiring is pending — see
+[`ROADMAP.md`](ROADMAP.md).
 
 ```bash
 npm install

@@ -272,7 +272,7 @@ function KartuSimpul({
           color: "var(--ink-faint)",
         }}
       >
-        {row.pintu_dicacah} pintu dicacah
+        {row.pintu_dicacah} titik pengamatan
         {row.pintu_ditahan > 0 ? ` · ${row.pintu_ditahan} ditahan` : ""} ·{" "}
         {ribuan(row.struk_terbaca)} struk · simulasi setingkat simpul
       </div>
