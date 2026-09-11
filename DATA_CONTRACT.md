@@ -135,6 +135,46 @@ Semuanya pertanyaan, bukan permintaan:
 >
 > Kalau backend memakai bentuk lain, yang berubah hanya `lib/data/types.ts` dan `lib/data/source.ts`. **Yang benar-benar dibutuhkan cuma dua:** angka gap tersedia per slot **dan** per kategori (kalau hanya agregat, filter kategori tidak bisa berfungsi), serta ada flag yang membedakan "tidak diestimasi" dari "hasilnya nol" (lihat C1).
 
+## B4. Ringkasan simpul — `GET /analytics/station-summary` *(baru, milik Arzaka)*
+
+Satu tingkat di atas B2: B2 per **pintu**, ini per **stasiun sebagai kawasan** —
+bahan strip "Ringkasan simpul" di `/insight` dan (nanti) fitur "Bandingkan"
+(ROADMAP 3.5). Endpoint ini dipegang Arzaka, di paket Go sendiri
+(`internal/summary/`), bukan `internal/analytics/` milik Priyapta —
+`02-BACKEND-SPEC §2` sudah di-update. **Open**, tanpa token.
+
+Bentuk (satu baris per stasiun, urut kesenjangan harian terbesar): `station_id`,
+`station_name`, `typology` (= `stations.area_type`), `day_type`, `pintu_dicacah`,
+`pintu_ditahan`, `potensi`/`tertangkap`/`gap` (masing-masing `{p10,p50,p90}`),
+`capture_rate` (= `tertangkap.p50 / potensi.p50`, boleh `null`), `confidence`
+(`{min,max}` atau `null`), `struk_terbaca`, `peak` (`point_label`, `time_slot`,
+`f`/`e`/`c`/`v`, `gap`), `composition[]` (`category`, `demand_share`,
+`gerai_count`, `is_missing`), `basis`, `computed_at`.
+
+**Aturan agregasi (supaya "setiap angka bisa dilacak" tidak dilanggar):**
+
+| Angka | Dari mana | Bukan |
+|---|---|---|
+| `gap`/`potensi`/`tertangkap` P10–P90 | simulasi Monte Carlo **setingkat simpul** (`basis: "monte-carlo-simpul"`) — angka yang memang dihitung pipeline | penjumlahan P10/P50/P90 titik di layar (dilarang — ROADMAP §9.4) |
+| `capture_rate` | rasio `tertangkap.p50 / potensi.p50` — rasio dari angka yang ada, seperti `capturePersen` di Insight | — |
+| `peak.f/e/c/v` + `peak.gap` | titik berkesenjangan terbesar simpul, slot puncaknya, **sama persis** dengan `spending-gap` | rata-rata "sehari" (F×E×C×V cuma dicacah per slot) |
+| `composition[].gerai_count` | jumlah gerai kategori di titik puncak — titik yang sama yang dibaca matriks Insight | inventaris yang dikarang terpisah |
+| `is_missing` | `gerai_count < 3` (ambang §5.2, sama dengan `select.ts` `AMBANG_GERAI`) | — |
+
+Data contoh: `public/mock/station-summary.json`, dikunci konsisten dengan
+`spending-gap.json` oleh `tests/summary.spec.ts` (titik puncak, F/E/C/V, jumlah
+gerai, struk). Fase 2 tukar `loadStationSummary()` ke endpoint — komponen tak
+tersentuh.
+
+**Pertanyaan yang masih menganggur** (sama untuk endpoint per-titik, dikumpulkan di sini):
+
+| # | Hal | Catatan |
+|---|---|---|
+| a | Envelope backend `{success, message, data}`, frontend `unwrap()` cek `{success, data, error}` | `error` tidak pernah dikirim backend. Perlu disamakan — ubah `unwrap()` atau tambah `error` di envelope |
+| b | Kunci kategori | backend `makanan_minuman`/`ritel_kemasan`/`apotek_kesehatan`/`jasa`/`lainnya`; frontend `fnb`/`ritel`/`apotek`/`jasa`/`lainnya`. Butuh satu peta terjemahan di `source.ts` |
+| c | Kunci slot | backend `morning`/`midday`/`evening`/`night`; frontend `pagi`/`siang`/`sore`/`malam` |
+| d | ID stasiun | backend UUID, mock frontend integer (`1`,`2`). Lihat §A2 nomor 1 — `setFeatureState` butuh integer, jadi butuh `numeric_id` atau peta id di `source.ts` |
+
 ---
 
 # BAGIAN C — Usulan opsional

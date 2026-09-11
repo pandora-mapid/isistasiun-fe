@@ -15,6 +15,7 @@ import type {
   ObservationPointProps,
   SpendingGapPayload,
   Station,
+  StationSummaryPayload,
 } from "./types";
 import { MOCK_DEMO_DATA } from "./demo";
 
@@ -94,6 +95,19 @@ export function loadIsochrones(): Promise<
 /** Hasil analisis. Fase 2: `GET /api/v1/analytics/spending-gap`. */
 export async function loadSpendingGap(): Promise<SpendingGapPayload> {
   return unwrap(await getJson<ApiEnvelope<SpendingGapPayload>>("spending-gap.json"));
+}
+
+/**
+ * Ringkasan per stasiun + bahan perbandingan antarsimpul.
+ *
+ * Fase 2: `GET /api/v1/analytics/station-summary`. Bentuknya di
+ * `DATA_CONTRACT.md` §B "Ringkasan simpul"; angkanya adalah hasil simulasi
+ * Monte Carlo setingkat simpul, bukan penjumlahan titik.
+ */
+export async function loadStationSummary(): Promise<StationSummaryPayload> {
+  return unwrap(
+    await getJson<ApiEnvelope<StationSummaryPayload>>("station-summary.json"),
+  );
 }
 
 /** Daftar stasiun. Fase 2: `GET /api/v1/stations`. */
