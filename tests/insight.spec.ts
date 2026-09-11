@@ -76,6 +76,26 @@ test("angka dipetik dari data yang sama dengan halaman Peta", async ({
   await expect(page.getByText(/pipeline mock-/)).toBeVisible(TUNGGU_DATA);
 });
 
+test("strip ringkasan antarsimpul menyandingkan dua simpul", async ({
+  page,
+}) => {
+  await page.goto("/insight", { waitUntil: "domcontentloaded" });
+
+  await expect(
+    page.getByRole("heading", {
+      name: /Manggarai memikul kesenjangan harian yang lebih besar/i,
+    }),
+  ).toBeVisible();
+
+  // Kesenjangan harian setingkat simpul (Monte Carlo simpul), bukan angka pintu.
+  await expect(page.getByText("Rp 5,7 jt").first()).toBeVisible();
+  await expect(page.getByText("Rp 3,5 jt").first()).toBeVisible();
+
+  // Baris pembacaan selisih muncul.
+  await expect(page.getByText(/kesenjangan harian Manggarai sekitar/i)).toBeVisible();
+  await expect(page.getByText(/permintaannya terbaca di kedua simpul/i)).toBeVisible();
+});
+
 test("tidak ada isi halaman yang tersembunyi sebelum digulung", async ({
   page,
 }) => {

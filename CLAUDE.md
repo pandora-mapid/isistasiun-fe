@@ -4,6 +4,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 @AGENTS.md
 
+## Product context
+
+Cross-team product truth (scope, model, personas, backend spec, PRD status) lives
+in `../Context/` — start at [`../Context/INDEX.md`](../Context/INDEX.md). Citations
+in this repo's docs like `04-VALUE-PROP-AND-MONETIZATION §3` or `02-BACKEND-SPEC §1`
+resolve to `../Context/04-VALUE-PROP-AND-MONETIZATION.md` etc. Those files used to be
+duplicated here; they now live only in `../Context/`. Do not auto-load
+`../Context/source-docs/` (~500k tokens of embedded images).
+
+Load-bearing invariants (full list in `../Context/`): scope is **2 stations**
+(Manggarai & Sudirman — "tiga simpul" copy is stale); `/peta` stays open, no login;
+base analytics layers are free (premium locks depth/freshness/scale only); every
+on-screen number must trace to a source.
+
 ## Project state
 
 This started as a bare `create-next-app` scaffold and now implements **Isi Stasiun**, a 5-screen WebGIS proposal UI (Beranda `/`, Peta `/peta`, Insight `/insight`, Metodologi `/metodologi`, Rekomendasi `/rekomendasi`), recreated from a Claude Design hi-fi mockup (`Isi Stasiun Hifi v2.dc.html`, pulled via the design-system sync tool from the "Proposal Aplikasi Pemetaan Stasiun" project). Peta is a fully interactive MapLibre map over mock data (ROADMAP Fase 0 and Fase 1 are both done). Beranda has since been redesigned onto a second, deliberately different visual system (see "Two design systems" below) and now reads the same live mock data Peta does; **Insight followed the same migration** — it is on the paper system and reads live mock data through its own `InsightData` provider. **Metodologi and Rekomendasi have since been migrated onto the paper system too, but as a restyle only** — their layout and content are unchanged, they are still static illustrative mockups (no live data), and Rekomendasi keeps its old "Stasiun A/B/C" / "tiga simpul" copy (real 2-station wiring is a separate future task). Peta is the last screen still on the original slate system, and it is left there deliberately — it is the interactive map screen, not a restyle candidate.
@@ -36,7 +50,7 @@ Note the `@AGENTS.md` import above: `AGENTS.md` is auto-generated and rewritten 
 
 ## Commands
 
-Run from `fe/` (the actual project root — the repo lives at `D:\Lomba\MAPID\fe`, not the outer `D:\Lomba\MAPID`):
+Run from this repo root (`isistasiun-fe/`, sibling to `../Context/` and `../isistasiun-be/`):
 
 ```bash
 npm run dev        # start dev server (http://localhost:3000)

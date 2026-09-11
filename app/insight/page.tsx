@@ -5,6 +5,7 @@ import { NavBar } from "@/components/NavBar";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
 import { InsightData } from "@/components/insight/InsightData";
+import { RingkasanSimpul } from "@/components/insight/RingkasanSimpul";
 import {
   BatangBersarang,
   DaftarTemuan,
@@ -131,6 +132,19 @@ export default function InsightPage() {
           <div style={{ marginTop: "var(--s4)" }}>
             <KpiStrip />
           </div>
+        </section>
+
+        {/* ============================================================
+            Ringkasan & perbandingan antarsimpul — potret per kawasan,
+            satu tingkat di atas panel per-pintu. Kebutuhan Persona 2.
+            ============================================================ */}
+        <section className="reveal" style={seksi}>
+          <Kepala
+            kicker="Dua simpul, berdampingan"
+            judul="Manggarai memikul kesenjangan harian yang lebih besar."
+            catatan="Angka simpul adalah hasil simulasi Monte Carlo setingkat kawasan — bukan penjumlahan angka pintu di bawahnya. Porsi tertangkap dua simpul praktis sama; pembedanya skala arus dan entry ratio."
+          />
+          <RingkasanSimpul />
         </section>
 
         {/* ============================================================
