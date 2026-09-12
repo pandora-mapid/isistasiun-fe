@@ -56,6 +56,44 @@ test("hasil kosong, navigasi panah, dan Escape", async ({ page }) => {
   await expect(search).toHaveAttribute("aria-expanded", "false");
 });
 
+test("retail mengikuti stasiun aktif dan tidak menjadi daftar global", async ({
+  page,
+}) => {
+  const search = page.getByRole("combobox", { name: "Cari stasiun" });
+  await search.fill("Sudirman");
+  await expect(page.getByRole("option")).toHaveCount(1);
+  await search.press("Enter");
+
+  const panel = page.getByRole("region", {
+    name: "Retail dan potensi Sudirman",
+  });
+  await expect(panel).toBeVisible();
+  await expect(panel.locator("summary")).toContainText("Tidak ada asset");
+  await panel.locator("summary").click();
+  await expect(panel).toContainText("Tidak ada asset untuk Sudirman.");
+  await expect(panel).not.toContainText("Famima Manggarai");
+});
+
+test("stasiun aktif tersimpan di URL dan pulih setelah refresh", async ({
+  page,
+}) => {
+  const search = page.getByRole("combobox", { name: "Cari stasiun" });
+  await search.fill("Sudirman");
+  await expect(page.getByRole("option")).toHaveCount(1);
+  await search.press("Enter");
+
+  await expect
+    .poll(() => new URL(page.url()).searchParams.get("station"))
+    .toBe("2");
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("combobox", { name: "Cari stasiun" })).toHaveValue(
+    "Sudirman",
+  );
+  await expect(
+    page.getByRole("region", { name: "Retail dan potensi Sudirman" }),
+  ).toBeVisible();
+});
+
 test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembunyikan", async ({ page }) => {
   const panel = page.getByRole("region", { name: "Retail dan potensi Manggarai" });
   await panel.locator("summary").click();

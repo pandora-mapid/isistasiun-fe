@@ -51,8 +51,8 @@ export const GAP_RADIUS = { min: 7, max: 22 } as const;
  * MapLibre menolak seluruh layer — tanpa pesan error.
  */
 export const CONFIDENCE_RADIUS = {
-  min: GAP_RADIUS.min + 10,
-  max: GAP_RADIUS.max + 15,
+  min: GAP_RADIUS.min + 13,
+  max: GAP_RADIUS.max + 20,
 } as const;
 
 /**
@@ -77,6 +77,14 @@ export const THIN_SAMPLE_COLOR = "#94A3B8";
  * benar-benar terlihat.
  */
 export const CONFIDENCE_COLOR = "#64748B";
+
+/** Warna sel grid: merah = data tipis, hijau = data memadai. */
+export const CONFIDENCE_GRID_RAMP = {
+  thin: "#E76570",
+  medium: "#E8BE55",
+  strong: "#65A98A",
+  empty: "#CBD5E1",
+} as const;
 
 /** Warna sorot dan pilih. Sengaja berbeda supaya keduanya tidak tertukar. */
 export const HOVER_COLOR = "#1D4ED8";
@@ -114,10 +122,10 @@ export const ISOCHRONE_FILL_OPACITY: Record<number, number> = {
  * terlihat halonya. Yang perlu diperiksa pembaca adalah angka yang lemah,
  * bukan yang kuat.
  */
-export const CONFIDENCE_OPACITY = { lemah: 0.6, kuat: 0.06 } as const;
+export const CONFIDENCE_OPACITY = { lemah: 0.72, kuat: 0.2 } as const;
 
 /** Kepekatan halo untuk titik yang memang tidak diestimasi sama sekali. */
-export const THIN_HALO_OPACITY = 0.62;
+export const THIN_HALO_OPACITY = 0.82;
 
 /**
  * Rentang cadangan sebelum data termuat. Layer harus tetap sah dipasang
@@ -273,6 +281,46 @@ export function isochroneLineLayer(): LineLayerSpecification {
   };
 }
 
+/** Sel grid confidence per kawasan. */
+export function confidenceFillLayer(): FillLayerSpecification {
+  return {
+    id: LAYER.confidenceFill,
+    type: "fill",
+    source: SOURCE.confidenceGrid,
+    paint: {
+      "fill-color": [
+        "case",
+        ["==", ["get", "sample_count"], 0],
+        CONFIDENCE_GRID_RAMP.empty,
+        [
+          "step",
+          ["coalesce", ["get", "confidence_score"], 0],
+          CONFIDENCE_GRID_RAMP.thin,
+          0.65,
+          CONFIDENCE_GRID_RAMP.medium,
+          0.8,
+          CONFIDENCE_GRID_RAMP.strong,
+        ],
+      ] as unknown as string,
+      "fill-opacity": 0.38,
+    },
+  };
+}
+
+/** Garis batas antar-zona, seperti peta grid contoh. */
+export function confidenceBoundaryLayer(): LineLayerSpecification {
+  return {
+    id: LAYER.confidenceBoundary,
+    type: "line",
+    source: SOURCE.confidenceGrid,
+    paint: {
+      "line-color": "#334155",
+      "line-opacity": 0.72,
+      "line-width": 1,
+    },
+  };
+}
+
 /**
  * Lapisan "Kepercayaan data" — halo abu di belakang titik.
  *
@@ -299,7 +347,12 @@ export function pointConfidenceLayer(
       "circle-opacity": confidenceOpacityExpression(
         confidenceDomain,
       ) as unknown as number,
-      "circle-blur": 0.22,
+      "circle-stroke-color": CONFIDENCE_COLOR,
+      "circle-stroke-width": 1.5,
+      "circle-stroke-opacity": confidenceOpacityExpression(
+        confidenceDomain,
+      ) as unknown as number,
+      "circle-blur": 0.08,
     },
   };
 }

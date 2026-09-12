@@ -13,11 +13,16 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { Domain } from "@/lib/analytics/select";
 import type { RetailLocation } from "@/lib/data/retail";
+import { rentalCircleLayer, rentalLabelLayer } from "@/lib/map/rental-style";
 import { retailCircleLayer, retailLabelLayer } from "@/lib/map/retail-style";
+import { stationCircleLayer, stationLabelLayer } from "@/lib/map/station-style";
 import type {
+  ConfidenceGridProps,
   IsochroneProps,
   ObservationPointProps,
   PointFeatureState,
+  RentalAsset,
+  Station,
 } from "@/lib/data/types";
 import {
   resolveBasemapUrl,
@@ -32,12 +37,29 @@ import {
 import {
   isochroneFillLayer,
   isochroneLineLayer,
+  confidenceBoundaryLayer,
+  confidenceFillLayer,
   pointArusLayer,
   pointCircleLayer,
   pointConfidenceLayer,
   pointLabelLayer,
   scaleDependentPaint,
 } from "@/lib/map/style";
+
+const EMPTY_RETAIL: FeatureCollection<Point, RetailLocation> = {
+  type: "FeatureCollection",
+  features: [],
+};
+
+const EMPTY_STATIONS: FeatureCollection<Point, Station> = {
+  type: "FeatureCollection",
+  features: [],
+};
+
+const EMPTY_RENTALS: FeatureCollection<Point, RentalAsset> = {
+  type: "FeatureCollection",
+  features: [],
+};
 
 type Props = {
   /** Geometri titik pengamatan. `null` selama data belum termuat. */
@@ -61,6 +83,8 @@ type Props = {
   gapDomain: Domain;
   /** Sebaran skor kepercayaan yang sedang aktif — menentukan kepekatan halo. */
   confidenceDomain: Domain;
+  /** Grid polygon mutu data; titik pintu tetap berada di atasnya dan interaktif. */
+  confidenceGrid?: FeatureCollection<Polygon, ConfidenceGridProps> | null;
   /** Kawasan tangkapan yang sedang dipilih: 3, 5, atau 10 menit. */
   catchmentMinutes: number;
   /** ID layer peta yang boleh terlihat. Selebihnya disembunyikan. */
@@ -75,9 +99,15 @@ type Props = {
    */
   onScaleChange?: (metersPerPixel: number) => void;
   stationTarget?: { longitude: number; latitude: number; zoom?: number } | null;
-  retailLocations: FeatureCollection<Point, RetailLocation>;
-  selectedRetailId: string | null;
-  onSelectRetail: (location: RetailLocation) => void;
+  retailLocations?: FeatureCollection<Point, RetailLocation>;
+  selectedRetailId?: string | null;
+  onSelectRetail?: (location: RetailLocation) => void;
+  stationLocations?: FeatureCollection<Point, Station>;
+  selectedStationId?: number | null;
+  onSelectStation?: (station: Station) => void;
+  rentalLocations?: FeatureCollection<Point, RentalAsset>;
+  selectedRentalId?: string | null;
+  onSelectRental?: (asset: RentalAsset) => void;
   /**
    * Boleh digeser, di-zoom, dan diklik. Bawaannya ya.
    *
@@ -230,6 +260,7 @@ export function MapCanvas({
   featureStates,
   gapDomain,
   confidenceDomain,
+  confidenceGrid = null,
   catchmentMinutes,
   visibleLayers,
   selectedPointId,
@@ -237,9 +268,15 @@ export function MapCanvas({
   dataError = null,
   onScaleChange,
   stationTarget,
-  retailLocations,
-  selectedRetailId,
+  retailLocations = EMPTY_RETAIL,
+  selectedRetailId = null,
   onSelectRetail,
+  stationLocations = EMPTY_STATIONS,
+  selectedStationId = null,
+  onSelectStation,
+  rentalLocations = EMPTY_RENTALS,
+  selectedRentalId = null,
+  onSelectRental,
   interactive = true,
   fitPadding = FIT_PADDING,
   borderRadius,
@@ -406,6 +443,18 @@ export function MapCanvas({
 
     map.addSource(SOURCE.isochrones, { type: "geojson", data: isochrones });
     map.addSource(SOURCE.points, { type: "geojson", data: points });
+    map.addSource(SOURCE.confidenceGrid, {
+      type: "geojson",
+      data: confidenceGrid ?? { type: "FeatureCollection", features: [] },
+    });
+    map.addSource(SOURCE.rental, {
+      type: "geojson",
+      data: rentalLocations,
+    });
+    map.addSource(SOURCE.stationMarkers, {
+      type: "geojson",
+      data: stationLocations,
+    });
     map.addSource(SOURCE.retail, { type: "geojson", data: retailLocations });
     map.addSource(SOURCE.pointLabels, {
       type: "geojson",
@@ -415,6 +464,12 @@ export function MapCanvas({
     // Urutan mengikuti LAYER_ORDER: isochrone paling bawah, label paling atas.
     map.addLayer(isochroneFillLayer());
     map.addLayer(isochroneLineLayer());
+    map.addLayer(confidenceFillLayer());
+    map.addLayer(confidenceBoundaryLayer());
+    map.addLayer(stationCircleLayer());
+    if (glyphsAvailableRef.current) map.addLayer(stationLabelLayer());
+    map.addLayer(rentalCircleLayer());
+    if (glyphsAvailableRef.current) map.addLayer(rentalLabelLayer());
     map.addLayer(pointConfidenceLayer(gapDomain, confidenceDomain));
     map.addLayer(pointCircleLayer(gapDomain));
     // Seluruh layer bertulisan butuh glyph dari jaringan; lewati kalau basemap
@@ -446,7 +501,17 @@ export function MapCanvas({
     // `gapDomain` sengaja tidak masuk daftar: layer dipasang
     // sekali, lalu skalanya diperbarui oleh efek tersendiri di bawah.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleReady, points, isochrones, labelData, layersReady, retailLocations]);
+  }, [
+    styleReady,
+    points,
+    isochrones,
+    labelData,
+    layersReady,
+    retailLocations,
+    stationLocations,
+    confidenceGrid,
+    rentalLocations,
+  ]);
 
   // Tunggu pemasangan layer agar fitBounds awal tidak menimpa pencarian.
   useEffect(() => {
@@ -464,7 +529,7 @@ export function MapCanvas({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !layersReady) return;
+    if (!map || !layersReady || !interactive || !onSelectRetail) return;
     const select = (event: {
       features?: { properties?: Record<string, unknown> }[];
     }) => {
@@ -472,7 +537,7 @@ export function MapCanvas({
       const location = retailLocations.features.find(
         (feature) => feature.properties.id === id,
       )?.properties;
-      if (location) onSelectRetail(location);
+      if (location && onSelectRetail) onSelectRetail(location);
     };
     const enter = () => {
       map.getCanvas().style.cursor = "pointer";
@@ -488,7 +553,7 @@ export function MapCanvas({
       map.off("mouseenter", LAYER.retailCircle, enter);
       map.off("mouseleave", LAYER.retailCircle, leave);
     };
-  }, [layersReady, retailLocations, onSelectRetail]);
+  }, [layersReady, interactive, retailLocations, onSelectRetail]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -506,6 +571,177 @@ export function MapCanvas({
       2,
     ]);
   }, [layersReady, selectedRetailId]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !interactive || !onSelectStation) return;
+    const select = (event: {
+      features?: { properties?: Record<string, unknown> }[];
+      point?: { x: number; y: number };
+    }) => {
+      // Entrance and retail markers have click priority when their small
+      // circles overlap an asset marker at this zoom level.
+      if (event.point) {
+        const blockingLayers = [
+          LAYER.pointCircle,
+          LAYER.retailCircle,
+          LAYER.stationCircle,
+        ];
+        const blocked = blockingLayers.some(
+          (layer) =>
+            map.getLayer(layer) &&
+            map.queryRenderedFeatures(event.point as never, { layers: [layer] })
+              .length > 0,
+        );
+        if (blocked) return;
+      }
+      const id = event.features?.[0]?.properties?.id;
+      const st = stationLocations.features.find(
+        (feature) => feature.properties.id === id,
+      )?.properties;
+      if (st && onSelectStation) onSelectStation(st);
+    };
+    const enter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const leave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+    map.on("click", LAYER.stationCircle, select);
+    map.on("mouseenter", LAYER.stationCircle, enter);
+    map.on("mouseleave", LAYER.stationCircle, leave);
+    if (map.getLayer(LAYER.stationLabel)) {
+      map.on("click", LAYER.stationLabel, select);
+      map.on("mouseenter", LAYER.stationLabel, enter);
+      map.on("mouseleave", LAYER.stationLabel, leave);
+    }
+    return () => {
+      map.off("click", LAYER.stationCircle, select);
+      map.off("mouseenter", LAYER.stationCircle, enter);
+      map.off("mouseleave", LAYER.stationCircle, leave);
+      if (map.getLayer(LAYER.stationLabel)) {
+        map.off("click", LAYER.stationLabel, select);
+        map.off("mouseenter", LAYER.stationLabel, enter);
+        map.off("mouseleave", LAYER.stationLabel, leave);
+      }
+    };
+  }, [layersReady, interactive, stationLocations, onSelectStation]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !map.getLayer(LAYER.stationCircle)) return;
+    map.setPaintProperty(LAYER.stationCircle, "circle-color", [
+      "case",
+      ["==", ["get", "id"], selectedStationId ?? 0],
+      "#2563eb",
+      "#0f172a",
+    ]);
+    map.setPaintProperty(LAYER.stationCircle, "circle-stroke-width", [
+      "case",
+      ["==", ["get", "id"], selectedStationId ?? 0],
+      4,
+      2.5,
+    ]);
+  }, [layersReady, selectedStationId]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !interactive || !onSelectRental) return;
+    const select = (event: {
+      features?: { properties?: Record<string, unknown> }[];
+      point?: { x: number; y: number };
+    }) => {
+      // Entrance and retail markers have click priority when their small
+      // circles overlap an asset marker at this zoom level.
+      if (event.point) {
+        const blockingLayers = [
+          LAYER.pointCircle,
+          LAYER.retailCircle,
+          LAYER.stationCircle,
+        ];
+        const blocked = blockingLayers.some(
+          (layer) =>
+            map.getLayer(layer) &&
+            map.queryRenderedFeatures(event.point as never, { layers: [layer] })
+              .length > 0,
+        );
+        if (blocked) return;
+      }
+      const id = event.features?.[0]?.properties?.id;
+      const asset = rentalLocations.features.find(
+        (feature) => feature.properties.id === id,
+      )?.properties;
+      if (asset) onSelectRental(asset);
+    };
+    const enter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const leave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+    map.on("click", LAYER.rentalCircle, select);
+    map.on("mouseenter", LAYER.rentalCircle, enter);
+    map.on("mouseleave", LAYER.rentalCircle, leave);
+    if (map.getLayer(LAYER.rentalLabel)) {
+      map.on("click", LAYER.rentalLabel, select);
+      map.on("mouseenter", LAYER.rentalLabel, enter);
+      map.on("mouseleave", LAYER.rentalLabel, leave);
+    }
+    return () => {
+      map.off("click", LAYER.rentalCircle, select);
+      map.off("mouseenter", LAYER.rentalCircle, enter);
+      map.off("mouseleave", LAYER.rentalCircle, leave);
+      if (map.getLayer(LAYER.rentalLabel)) {
+        map.off("click", LAYER.rentalLabel, select);
+        map.off("mouseenter", LAYER.rentalLabel, enter);
+        map.off("mouseleave", LAYER.rentalLabel, leave);
+      }
+    };
+  }, [layersReady, interactive, rentalLocations, onSelectRental]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !map.getLayer(LAYER.rentalCircle)) return;
+    map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-color", [
+      "case",
+      ["==", ["get", "id"], selectedRentalId ?? ""],
+      "#0f172a",
+      "#ffffff",
+    ]);
+    map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", [
+      "case",
+      ["==", ["get", "id"], selectedRentalId ?? ""],
+      3,
+      2,
+    ]);
+  }, [layersReady, selectedRentalId]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !stationLocations) return;
+    const src = map.getSource(SOURCE.stationMarkers);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(stationLocations);
+    }
+  }, [stationLocations, layersReady]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady) return;
+    const src = map.getSource(SOURCE.rental);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(rentalLocations);
+    }
+  }, [rentalLocations, layersReady]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !confidenceGrid) return;
+    const src = map.getSource(SOURCE.confidenceGrid);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(confidenceGrid);
+    }
+  }, [confidenceGrid, layersReady]);
 
   // --- interaksi titik: sorot dan pilih -----------------------------------
   //
@@ -703,9 +939,16 @@ export function MapCanvas({
 
     for (const id of LAYER_ORDER) {
       if (!map.getLayer(id)) continue;
-      // Isochrone tidak diatur panel lapisan — kemunculannya ditentukan
-      // filter kawasan tangkapan, jadi dibiarkan apa adanya.
-      if (id === LAYER.isochroneFill || id === LAYER.isochroneLine) continue;
+      // Isochrone dan station markers tidak diatur panel lapisan — kemunculannya
+      // selalu aktif sebagai referensi navigasi spasial.
+      if (
+        id === LAYER.isochroneFill ||
+        id === LAYER.isochroneLine ||
+        id === LAYER.stationCircle ||
+        id === LAYER.stationLabel
+      ) {
+        continue;
+      }
       map.setLayoutProperty(
         id,
         "visibility",

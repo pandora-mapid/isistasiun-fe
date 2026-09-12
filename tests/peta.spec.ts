@@ -312,6 +312,35 @@ test("filter slot waktu mengubah angka yang ditempel ke peta", async ({
   await expect(page.getByText("Brief simpul · 16–19")).toBeVisible();
 });
 
+test("confidence mock mengikuti slot dan sakelar layer", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await expect
+    .poll(async () => (await featureState(page, 12)).confidence)
+    .toBe(0.82);
+
+  await page.getByRole("button", { name: "16–19" }).click();
+  await expect
+    .poll(async () => (await featureState(page, 12)).confidence)
+    .toBe(0.88);
+
+  await expect(page.getByText("Mutu data", { exact: true })).toBeVisible();
+  await page.locator(".layers-toggle").click();
+  await page.locator(".lyr").filter({ hasText: "Kepercayaan data" }).click();
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const map = (window as unknown as { __map?: any }).__map;
+        return map.getLayoutProperty("confidence-fill", "visibility");
+      }),
+    )
+    .toBe("none");
+  await expect(page.getByText("Mutu data", { exact: true })).toBeHidden();
+});
+
 test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => {
   await page.goto("/peta", { waitUntil: "domcontentloaded" });
   await waitForMapReady(page);

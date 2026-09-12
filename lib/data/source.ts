@@ -10,13 +10,17 @@
 import type { FeatureCollection, Point, Polygon } from "geojson";
 import type {
   ApiEnvelope,
+  ConfidenceGridProps,
+  ConfidenceLayerEntry,
   IsochroneProps,
   ObservationPointProps,
   SpendingGapPayload,
   Station,
   MockDemoData,
+  RentalAsset,
 } from "./types";
 import { MOCK_DEMO_DATA } from "./demo";
+import { MOCK_RENTAL_ASSETS } from "./rental-demo";
 
 const PROTOTYPE_STATION_IDS = new Set([1, 2]);
 const PROTOTYPE_POINT_IDS = new Set([11, 12, 13, 21, 22, 23, 24]);
@@ -32,6 +36,7 @@ const PROTOTYPE_POINT_IDS = new Set([11, 12, 13, 21, 22, 23, 24]);
  * teks, jadi rujukan dinamis tidak akan tergantikan dan hasilnya `undefined`.
  */
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "/mock";
+const USING_LOCAL_MOCK = BASE === "/mock";
 
 /**
  * Token yang disisipkan ke setiap permintaan, kalau ada.
@@ -115,6 +120,30 @@ export async function loadSpendingGap(): Promise<SpendingGapPayload> {
   };
 }
 
+/** Mutu data per titik dan slot. Fase API: `GET /api/v1/confidence-layer`. */
+export async function loadConfidenceLayer(): Promise<ConfidenceLayerEntry[]> {
+  const rows = unwrap(
+    await getJson<ApiEnvelope<ConfidenceLayerEntry[]>>(
+      USING_LOCAL_MOCK ? "confidence-layer.json" : "confidence-layer",
+    ),
+  );
+  return rows
+    .filter((row) => PROTOTYPE_POINT_IDS.has(row.point_id))
+    .map((row) => ({
+      ...row,
+      confidence_score: Math.max(0, Math.min(1, row.confidence_score)),
+    }));
+}
+
+/** Geometri grid mock. Fase API: ikut tile/GeoJSON zona confidence. */
+export async function loadConfidenceGrid(): Promise<
+  FeatureCollection<Polygon, ConfidenceGridProps>
+> {
+  return getJson<FeatureCollection<Polygon, ConfidenceGridProps>>(
+    "confidence-grid.geojson",
+  );
+}
+
 /** Daftar stasiun. Fase 2: `GET /api/v1/stations`. */
 export async function loadStations(): Promise<Station[]> {
   return unwrap(await getJson<ApiEnvelope<Station[]>>("stations.json"))
@@ -138,6 +167,27 @@ export async function loadStations(): Promise<Station[]> {
 export async function loadEntrances(): Promise<ObservationPointProps[]> {
   return unwrap(await getJson<ApiEnvelope<ObservationPointProps[]>>("entrances.json"))
     .filter((entrance) => PROTOTYPE_STATION_IDS.has(entrance.station_id));
+}
+
+type ApiRentalAsset = Omit<RentalAsset, "station_id"> & {
+  station_id: string;
+};
+
+const STATION_ID_BY_CODE: Record<string, number> = { MRI: 1, SUD: 2 };
+
+/** Inventaris titik sewa; atribut datang dari `/analytics/rental-assets`. */
+export async function loadRentalAssets(): Promise<RentalAsset[]> {
+  if (USING_LOCAL_MOCK) return MOCK_RENTAL_ASSETS;
+
+  const rows = unwrap(
+    await getJson<ApiEnvelope<ApiRentalAsset[]>>("analytics/rental-assets"),
+  );
+  return rows
+    .map((row) => ({
+      ...row,
+      station_id: STATION_ID_BY_CODE[row.station_code] ?? 0,
+    }))
+    .filter((asset) => asset.station_id !== 0);
 }
 
 /** Data presentasi Tahap 1. Fase API mengganti implementasi fungsi ini saja. */

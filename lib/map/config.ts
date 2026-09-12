@@ -24,8 +24,7 @@
  * `building-3d`. Karena itu keduanya tampak nyaris serupa, dan berpindah di
  * antara keduanya tidak mengubah tampilan secara mencolok.
  */
-export const BASEMAP_STYLE_URL =
-  "https://tiles.openfreemap.org/styles/liberty";
+export const BASEMAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 
 /**
  * Pilihan basemap yang sudah diperiksa: gratis, tanpa API key, dan bisa
@@ -121,6 +120,9 @@ export const SOURCE = {
    */
   pointLabels: "point-label-values",
   retail: "retail-locations",
+  confidenceGrid: "confidence-grid",
+  stationMarkers: "station-markers",
+  rental: "rental-assets",
 } as const;
 
 /**
@@ -145,12 +147,18 @@ export const LAYER = {
   isochroneFill: "isochrone-fill",
   isochroneLine: "isochrone-line",
   pointConfidence: "point-confidence",
+  confidenceFill: "confidence-fill",
+  confidenceBoundary: "confidence-boundary",
   pointCircle: "point-circle",
   pointLabel: "point-label",
   /** Angka arus pintu (F), tulisan kecil di bawah nama titik. */
   pointArus: "point-arus",
   retailCircle: "retail-circle",
   retailLabel: "retail-label",
+  stationCircle: "station-circle",
+  stationLabel: "station-label",
+  rentalCircle: "rental-circle",
+  rentalLabel: "rental-label",
 } as const;
 
 /**
@@ -163,6 +171,12 @@ export const LAYER = {
 export const LAYER_ORDER = [
   LAYER.isochroneFill,
   LAYER.isochroneLine,
+  LAYER.confidenceFill,
+  LAYER.confidenceBoundary,
+  LAYER.stationCircle,
+  LAYER.stationLabel,
+  LAYER.rentalCircle,
+  LAYER.rentalLabel,
   LAYER.pointConfidence,
   LAYER.pointCircle,
   // Arus sengaja SEBELUM nama titik. MapLibre menempatkan simbol dalam urutan
@@ -187,9 +201,14 @@ export const LAYER_ORDER = [
  */
 export const LAYER_GROUPS: Record<string, readonly string[]> = {
   gap: [LAYER.pointCircle, LAYER.pointLabel],
-  kepercayaan: [LAYER.pointConfidence],
+  kepercayaan: [
+    LAYER.confidenceFill,
+    LAYER.confidenceBoundary,
+    LAYER.pointConfidence,
+  ],
   arus: [LAYER.pointArus],
   retail: [LAYER.retailCircle, LAYER.retailLabel],
+  rental: [LAYER.rentalCircle, LAYER.rentalLabel],
 };
 
 /**
@@ -198,7 +217,7 @@ export const LAYER_GROUPS: Record<string, readonly string[]> = {
  * Angkanya mengikuti tata letak di PetaScreen.
  */
 export const FIT_PADDING = {
-  top: 104, // pil nav yang mengambang di atas peta
+  top: 180, // pil nav + ruang untuk titik Sudirman di tepi utara
   bottom: 200, // panel slot waktu + legenda
   left: 96, // kontrol zoom
   right: 470, // panel ringkasan (lebar 414 + jarak 24)

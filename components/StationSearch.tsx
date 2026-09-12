@@ -5,8 +5,9 @@ import type { Station } from "@/lib/data/types";
 
 export type LocatedStation = Station & { longitude: number; latitude: number };
 
-export function StationSearch({ stations, error, onSelect }: {
+export function StationSearch({ stations, selectedStationId, error, onSelect }: {
   stations: Station[] | null;
+  selectedStationId?: number | null;
   error: string | null;
   onSelect: (station: LocatedStation) => void;
 }) {
@@ -14,6 +15,15 @@ export function StationSearch({ stations, error, onSelect }: {
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  const [prevSelectedId, setPrevSelectedId] = useState(selectedStationId);
+
+  if (selectedStationId !== prevSelectedId) {
+    setPrevSelectedId(selectedStationId);
+    const selected = stations?.find((station) => station.id === selectedStationId);
+    if (selected) {
+      setQuery(selected.name);
+    }
+  }
   const results = (stations ?? []).filter((station): station is LocatedStation =>
     typeof station.longitude === "number" && Number.isFinite(station.longitude) &&
     typeof station.latitude === "number" && Number.isFinite(station.latitude) &&
