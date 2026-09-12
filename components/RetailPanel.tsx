@@ -496,7 +496,7 @@ export function RetailPanel({
                   : `Tidak ada lokasi atau aset bernama “${query.trim()}”.`}
               </div>
             ) : (
-              <div className="retail-location-list">
+              <div className="retail-sections">
                 {/* 1. KELOMPOK SEWA TEMPAT (Space KAI & Kios) */}
                 {showSewa && (
                   <section
@@ -615,8 +615,15 @@ export function RetailPanel({
                   </section>
                 )}
 
-                {/* 2. KELOMPOK POTENSI TOKO BARU */}
-                {showPotensi && (
+                {/* DAFTAR LOKASI RETAIL & POTENSI TOKO */}
+                {locations.length === 0 ? (
+                  <div className="retail-picker-empty">
+                    Tidak ada asset untuk stasiun ini.
+                  </div>
+                ) : (
+                  <div className="retail-location-list">
+                    {/* 2. KELOMPOK POTENSI TOKO BARU */}
+                    {showPotensi && (
                   <div className="retail-group">
                     <div className="retail-group-header">
                       <div className="retail-group-label">
@@ -847,6 +854,8 @@ export function RetailPanel({
           </div>
         )}
       </div>
+    )}
+  </div>
 
       {/* DETAIL VIEW KARTU TERPILIH (RetailLocation ATAU RentalAsset) */}
       {selected ? (
