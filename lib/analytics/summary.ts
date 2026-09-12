@@ -11,6 +11,13 @@
  * Insight — rasio dari angka yang memang ada, bukan angka baru yang dikarang.
  * Tidak ada penjumlahan titik di sini: angka simpul datang sudah jadi dari
  * `StationSummaryPayload` (hasil Monte Carlo setingkat simpul).
+ *
+ * Bukan satu-satunya "perbandingan" di repo ini — `ComparisonDialog` (tombol
+ * "Bandingkan" di peta) punya jalur sendiri: `comparisonSummary`/
+ * `comparisonBySlot` di `./demo-select.ts`, yang MENJUMLAH p50 titik-titik
+ * pada slot × kategori aktif, bukan membaca rollup simpul ini. Dua fitur,
+ * dua sumber angka — jangan kaget kalau nilainya beda untuk stasiun yang
+ * sama; itu memang dua hitungan yang berbeda, bukan bug.
  */
 import { AMBANG_GERAI } from "@/lib/analytics/select";
 import type {
