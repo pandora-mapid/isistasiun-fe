@@ -64,14 +64,12 @@ test("retail mengikuti stasiun aktif dan tidak menjadi daftar global", async ({
   await expect(page.getByRole("option")).toHaveCount(1);
   await search.press("Enter");
 
-  const panel = page.getByRole("region", {
-    name: "Retail dan potensi Sudirman",
-  });
-  await expect(panel).toBeVisible();
-  await expect(panel.locator("summary")).toContainText("Tidak ada asset");
-  await panel.locator("summary").click();
-  await expect(panel).toContainText("Tidak ada asset untuk Sudirman.");
-  await expect(panel).not.toContainText("Famima Manggarai");
+  await page.getByRole("button", { name: "Retail", exact: true }).click();
+  const panel = page.locator(".retail-picker-empty");
+  await expect(panel).toContainText("Tidak ada asset untuk stasiun ini.");
+  await expect(page.getByText("Famima Manggarai", { exact: true })).toHaveCount(
+    0,
+  );
 });
 
 test("stasiun aktif tersimpan di URL dan pulih setelah refresh", async ({
@@ -89,14 +87,15 @@ test("stasiun aktif tersimpan di URL dan pulih setelah refresh", async ({
   await expect(page.getByRole("combobox", { name: "Cari stasiun" })).toHaveValue(
     "Sudirman",
   );
-  await expect(
-    page.getByRole("region", { name: "Retail dan potensi Sudirman" }),
-  ).toBeVisible();
+  await page.getByRole("button", { name: "Retail", exact: true }).click();
+  await expect(page.locator(".retail-picker-empty")).toContainText(
+    "Tidak ada asset untuk stasiun ini.",
+  );
 });
 
 test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembunyikan", async ({ page }) => {
-  const panel = page.getByRole("region", { name: "Retail dan potensi Manggarai" });
-  await panel.locator("summary").click();
+  await page.getByRole("button", { name: "Retail", exact: true }).click();
+  const panel = page.locator(".retail-location-list");
   await expect(panel.getByRole("button")).toHaveCount(10);
   await panel.getByRole("button", { name: "Famima Manggarai", exact: true }).click();
   const detail = page.getByRole("article", { name: "Detail lokasi retail" });
@@ -115,7 +114,6 @@ test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembun
     const map = (window as unknown as { __map: MapLibreMap }).__map;
     return new Set(map.queryRenderedFeatures({ layers: ["retail-circle"] }).map((feature) => feature.properties.id)).size;
   })).toBe(10);
-  await panel.locator("summary").click();
   const point = await page.evaluate(() => {
     const map = (window as unknown as { __map: MapLibreMap }).__map;
     const p = map.project([106.8502013, -6.2100029]);
@@ -124,10 +122,11 @@ test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembun
   });
   await page.mouse.click(point.x, point.y);
   await expect(detail.getByRole("heading")).toHaveText("Indomaret Manggarai");
-  await panel.locator("summary").click();
-  await panel.getByRole("button", { name: "Potensi toko 5", exact: true }).click();
+  await page.getByRole("button", { name: "Indomaret Manggarai", exact: true }).click();
+  await page.locator(".retail-location-list").getByRole("button", { name: "Potensi toko 5", exact: true }).click();
   await expect(detail).toContainText("Estimasi potensi pendapatan belum tersedia");
   await expect(detail).toContainText("-6.2105015, 106.8508356");
+  await page.getByRole("button", { name: "Ringkasan", exact: true }).click();
   await page.getByRole("button", { name: /Lapisan & filter/ }).click();
   await page.getByRole("button", { name: "Retail & potensi toko", exact: true }).click();
   await expect.poll(() => page.evaluate(() => (window as unknown as { __map: MapLibreMap }).__map.getLayoutProperty("retail-circle", "visibility"))).toBe("none");

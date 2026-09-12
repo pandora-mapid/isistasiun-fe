@@ -152,7 +152,9 @@ export function RetailPanel({
 
             {groups.length === 0 ? (
               <div className="retail-picker-empty">
-                Tidak ada lokasi bernama &ldquo;{query.trim()}&rdquo;.
+                {locations.length === 0
+                  ? "Tidak ada asset untuk stasiun ini."
+                  : `Tidak ada lokasi bernama “${query.trim()}”.`}
               </div>
             ) : (
               <div className="retail-location-list">

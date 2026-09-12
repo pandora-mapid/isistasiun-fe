@@ -6,7 +6,6 @@ import Link from "next/link";
 import { NavBar } from "./NavBar";
 import { MapCanvas } from "./MapCanvas";
 import { StationSearch } from "./StationSearch";
-import { RetailLocations } from "./RetailLocations";
 import { RentalAssets } from "./RentalAssets";
 import { ComparisonDialog } from "./ComparisonDialog";
 import { buildStationConfidenceGrid } from "@/lib/data/confidence";
@@ -702,13 +701,6 @@ export function PetaScreen({
               );
             })}
         </div>
-        <RetailLocations
-          locations={retailLocations}
-          stationName={currentStation?.name ?? "Stasiun"}
-          selected={selectedRetail}
-          onSelect={selectRetail}
-          onClose={() => setSelectedRetail(null)}
-        />
         <RentalAssets
           assets={rentalAssets}
           selected={selectedRental}
