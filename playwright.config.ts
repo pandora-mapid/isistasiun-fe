@@ -17,12 +17,9 @@ export default defineConfig({
   // lewat env var: `npm run test:visual`.
   testIgnore: process.env.VISUAL ? [] : ["**/*.visual.spec.ts"],
   fullyParallel: false,
-  // Tes peta merender WebGL lewat SwiftShader (perangkat lunak) dan berbagi
-  // satu dev server yang mengompilasi rute sesuai permintaan. Bawaan Playwright
-  // (`cpu/2` — di mesin 16-core berarti 8) membuat delapan render peta + kompilasi
-  // Next bersaing sekaligus, dan `waitForMapReady` kehabisan waktu di bawah beban
-  // itu. Dibatasi supaya deterministik; suite ini penjaga, bukan lomba lari.
-  workers: 4,
+  // Tes browser memakai MapLibre + SwiftShader. Menjalankan beberapa kanvas
+  // WebGL sekaligus membuat event kamera terlambat dan menghasilkan flake.
+  workers: 1,
   reporter: [["list"]],
   timeout: 90_000,
   use: {

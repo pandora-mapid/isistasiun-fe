@@ -33,7 +33,13 @@ function tint(bg: string): CSSProperties {
 /* --- Data ilustratif (tidak berubah dari versi slate) --------------------- */
 
 /** Tiga ringkasan di hero. */
-const STAT: { label: string; nilai: string; bg: string; warna: string; dot?: boolean }[] = [
+const STAT: {
+  label: string;
+  nilai: string;
+  bg: string;
+  warna: string;
+  dot?: boolean;
+}[] = [
   {
     label: "Total kesenjangan tiga simpul",
     nilai: "Rp 6.400.000",
@@ -178,7 +184,13 @@ const REKOMENDASI: KartuRekomendasi[] = [
 ];
 
 /** Tiga fase pelaksanaan (kartu gelap). */
-const FASE: { dot: string; kicker: string; judul: string; isi: string; garis: boolean }[] = [
+const FASE: {
+  dot: string;
+  kicker: string;
+  judul: string;
+  isi: string;
+  garis: boolean;
+}[] = [
   {
     dot: "var(--data)",
     kicker: "Fase 1 · Kuartal ini",
@@ -337,19 +349,21 @@ export default function RekomendasiPage() {
             margin: "0 0 var(--s3)",
           }}
         >
-          {["Semua simpul", "Stasiun A", "Stasiun B", "Stasiun C"].map((c, i) => (
-            <span
-              key={c}
-              className="eyebrow-chip eyebrow"
-              style={
-                i === 0
-                  ? { background: "var(--ink)", color: "var(--paper)" }
-                  : undefined
-              }
-            >
-              {c}
-            </span>
-          ))}
+          {["Semua simpul", "Stasiun A", "Stasiun B", "Stasiun C"].map(
+            (c, i) => (
+              <span
+                key={c}
+                className="eyebrow-chip eyebrow"
+                style={
+                  i === 0
+                    ? { background: "var(--ink)", color: "var(--paper)" }
+                    : undefined
+                }
+              >
+                {c}
+              </span>
+            ),
+          )}
         </div>
 
         <div
@@ -747,7 +761,11 @@ export default function RekomendasiPage() {
             Risiko dan penanganannya
           </h2>
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "var(--s2)" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--s2)",
+            }}
           >
             {RISIKO.map((r) => (
               <div key={r.judul}>
@@ -760,9 +778,7 @@ export default function RekomendasiPage() {
                   }}
                 >
                   <span className="dot" style={{ background: r.dot }} />
-                  <span
-                    style={{ fontSize: "var(--t-body)", fontWeight: 600 }}
-                  >
+                  <span style={{ fontSize: "var(--t-body)", fontWeight: 600 }}>
                     {r.judul}
                   </span>
                 </div>

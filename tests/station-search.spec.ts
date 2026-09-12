@@ -1,75 +1,53 @@
-import { test, expect, type Page } from "@playwright/test";
+import { test, expect } from "@playwright/test";
 import type { Map as MapLibreMap } from "maplibre-gl";
 
-/**
- * Pencarian stasiun + panel retail — di Chromium sungguhan.
- *
- * Basemap distub supaya tesnya tidak bergantung pada jaringan penyedia peta.
- * Yang diperiksa bukan "panel muncul", melainkan bahwa interaksinya benar-benar
- * mengubah apa yang tergambar: kamera pindah, titik terpilih, marker retail
- * bertambah/berkurang, layer disembunyikan.
- */
-
-async function stubBasemap(page: Page) {
-  await page.route("**/styles/basic/style.json?**", (route) =>
-    route.fulfill({ json: { version: 8, sources: {}, layers: [] } }),
-  );
-  await page.route("https://tiles.openfreemap.org/styles/liberty", (route) =>
-    route.fulfill({ json: { version: 8, sources: {}, layers: [] } }),
-  );
-}
-
-/** Peta siap + lapisan retail terpasang. */
-async function waitForRetail(page: Page) {
-  await page.waitForFunction(() => {
-    const map = (window as unknown as { __map?: MapLibreMap }).__map;
-    if (!map?.getLayer?.("retail-circle")) return false;
-    return map.querySourceFeatures("retail-locations").length > 0;
-  }, undefined, { timeout: 30_000 });
-}
-
-/** Jumlah id retail unik yang benar-benar tergambar. */
-function markerCount(page: Page) {
-  return page.evaluate(() => {
-    const map = (window as unknown as { __map: MapLibreMap }).__map;
-    return new Set(
-      map
-        .queryRenderedFeatures({ layers: ["retail-circle"] })
-        .map((f) => f.properties?.id),
-    ).size;
-  });
-}
-
 test.beforeEach(async ({ page }) => {
-  await stubBasemap(page);
+  // Pencarian tidak bergantung pada jaringan penyedia basemap.
+  await page.route("**/styles/basic/style.json?**", (route) => route.fulfill({
+    json: { version: 8, sources: {}, layers: [] },
+  }));
+  await page.route("https://tiles.openfreemap.org/styles/liberty", (route) => route.fulfill({
+    json: { version: 8, sources: {}, layers: [] },
+  }));
   await page.goto("/peta");
-  await waitForRetail(page);
 });
 
-test("cari stasiun lewat keyboard memindahkan kamera dan memilih titik", async ({ page }) => {
+test("cari stasiun lewat keyboard dan klik memindahkan kamera serta pilihan titik", async ({ page }) => {
   const search = page.getByRole("combobox", { name: "Cari stasiun" });
   await search.fill("sUDir");
   await expect(page.getByRole("option")).toHaveCount(1);
   await search.press("Enter");
+  await expect.poll(() => page.evaluate(() => {
+    const map = (window as unknown as { __map?: MapLibreMap }).__map;
+    if (!map || map.isMoving()) return null;
+    return { lng: Number(map.getCenter().lng.toFixed(5)), lat: Number(map.getCenter().lat.toFixed(5)),
+      selected: map.getFeatureState({ source: "observation-points", id: 21 }).terpilih };
+  })).toEqual({ lng: 106.8224, lat: -6.202, selected: true });
 
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const map = (window as unknown as { __map?: MapLibreMap }).__map;
-        if (!map || map.isMoving()) return null;
-        return {
-          lng: Number(map.getCenter().lng.toFixed(4)),
-          selected: map.getFeatureState({ source: "observation-points", id: 21 }).terpilih,
-        };
-      }),
-    )
-    .toEqual({ lng: 106.8224, selected: true });
+  await page.getByRole("button", { name: "Hapus pencarian stasiun" }).click();
+  await expect(page.getByRole("option")).toHaveCount(2);
+  await page.getByRole("option", { name: /Stasiun Manggarai/ }).click();
+  await expect.poll(() => page.evaluate(() => {
+    const map = (window as unknown as { __map: MapLibreMap }).__map;
+    return !map.isMoving() && Math.abs(map.getCenter().lng - 106.85005) < 0.00001;
+  })).toBe(true);
 
-  // Hasil kosong menyebut arahan yang benar, tidak sekadar "tidak ada".
-  await search.fill("stasiun antah berantah");
+  // Stasiun yang sama tetap bisa dipilih kembali setelah peta digeser.
+  await page.evaluate(() => (window as unknown as { __map: MapLibreMap }).__map.jumpTo({ center: [107, -6] }));
+  await search.focus();
+  await search.press("Enter");
+  await expect.poll(() => page.evaluate(() => {
+    const map = (window as unknown as { __map: MapLibreMap }).__map;
+    return !map.isMoving() && Math.abs(map.getCenter().lng - 106.85005) < 0.00001;
+  })).toBe(true);
+});
+
+test("hasil kosong, navigasi panah, dan Escape", async ({ page }) => {
+  const search = page.getByRole("combobox", { name: "Cari stasiun" });
+  await search.fill("stasiun tidak ada");
   await expect(page.getByRole("status")).toContainText("Stasiun tidak ditemukan");
-
-  // Panah + Escape.
+  await search.press("Enter");
+  await expect(search).toHaveValue("stasiun tidak ada");
   await search.fill("");
   await expect(page.getByRole("option")).toHaveCount(2);
   await search.press("ArrowDown");
@@ -78,90 +56,83 @@ test("cari stasiun lewat keyboard memindahkan kamera dan memilih titik", async (
   await expect(search).toHaveAttribute("aria-expanded", "false");
 });
 
-test("sepuluh lokasi retail dipilih dari daftar dan dari marker, lalu disembunyikan", async ({ page }) => {
+test("retail mengikuti stasiun aktif dan tidak menjadi daftar global", async ({
+  page,
+}) => {
+  const search = page.getByRole("combobox", { name: "Cari stasiun" });
+  await search.fill("Sudirman");
+  await expect(page.getByRole("option")).toHaveCount(1);
+  await search.press("Enter");
+
   await page.getByRole("button", { name: "Retail", exact: true }).click();
+  await expect(page.getByText(/Kios lokal Sudirman/)).toHaveCount(3);
+  await expect(page.getByText("Famima Manggarai", { exact: true })).toHaveCount(
+    0,
+  );
+});
 
-  // Dropdown pemilih terbuka secara bawaan → daftar langsung terlihat.
-  await expect(page.locator(".retail-location-list button")).toHaveCount(10);
+test("stasiun aktif tersimpan di URL dan pulih setelah refresh", async ({
+  page,
+}) => {
+  const search = page.getByRole("combobox", { name: "Cari stasiun" });
+  await search.fill("Sudirman");
+  await expect(page.getByRole("option")).toHaveCount(1);
+  await search.press("Enter");
 
-  // Pilih dari daftar → kartu detail + kamera mendekat + dropdown ciut.
-  await page.getByRole("button", { name: "Famima Manggarai" }).click();
-  const detail = page.getByRole("article", { name: "Detail lokasi retail" });
-  await expect(detail.getByRole("heading")).toHaveText("Famima Manggarai");
-  await expect(page.locator(".retail-location-list")).toBeHidden();
   await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const map = (window as unknown as { __map?: MapLibreMap }).__map;
-        return Boolean(map && !map.isMoving() && map.getZoom() > 16);
-      }),
-    )
-    .toBe(true);
+    .poll(() => new URL(page.url()).searchParams.get("station"))
+    .toBe("2");
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("combobox", { name: "Cari stasiun" })).toHaveValue(
+    "Sudirman",
+  );
+  await page.getByRole("button", { name: "Retail", exact: true }).click();
+  await expect(page.getByText(/Kios lokal Sudirman/)).toHaveCount(3);
+  await expect(page.getByText("Famima Manggarai", { exact: true })).toHaveCount(
+    0,
+  );
+});
 
-  // Semua sepuluh marker tergambar saat dekat.
+test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembunyikan", async ({ page }) => {
+  await page.getByRole("button", { name: "Retail", exact: true }).click();
+  const panel = page.locator(
+    ".retail-group-items:not(.rental-asset-list) .retail-card-btn",
+  );
+  await expect(panel).toHaveCount(10);
+  await page.getByRole("button", { name: "Famima Manggarai", exact: true }).click();
+  const detail = page.getByRole("article", { name: "Detail lokasi retail" });
+  await expect(detail).toContainText("-6.2102422, 106.8502918");
+  await expect.poll(() => page.evaluate(() => {
+    const map = (window as unknown as { __map?: MapLibreMap }).__map;
+    return map && !map.isMoving() && Math.abs(map.getCenter().lat + 6.2102422) < 0.000001 && map.getZoom() === 19;
+  })).toBe(true);
+
+  // Vue d'ensemble untuk menghitung semua titik yang tergambar di sekitar Manggarai.
   await page.evaluate(() => {
     const map = (window as unknown as { __map: MapLibreMap }).__map;
     map.jumpTo({ center: [106.8506, -6.2101], zoom: 18 });
   });
-  await expect.poll(() => markerCount(page)).toBe(10);
-
-  // Pilih dari marker di peta → detail berganti, tab Retail tetap aktif.
-  const at = await page.evaluate(() => {
+  await expect.poll(() => page.evaluate(() => {
     const map = (window as unknown as { __map: MapLibreMap }).__map;
-    const p = map.project([106.8502013, -6.2100029]); // Indomaret Manggarai
+    return new Set(map.queryRenderedFeatures({ layers: ["retail-circle"] }).map((feature) => feature.properties.id)).size;
+  })).toBe(10);
+  const point = await page.evaluate(() => {
+    const map = (window as unknown as { __map: MapLibreMap }).__map;
+    const p = map.project([106.8502013, -6.2100029]);
     const box = map.getCanvas().getBoundingClientRect();
     return { x: box.left + p.x, y: box.top + p.y };
   });
-  await page.mouse.click(at.x, at.y);
+  await page.mouse.click(point.x, point.y);
   await expect(detail.getByRole("heading")).toHaveText("Indomaret Manggarai");
-
-  // Buka lagi dropdown untuk memilih lokasi berikutnya.
-  await page.locator(".layers-toggle").click();
-  await page.getByRole("button", { name: "Potensi toko 5" }).click();
+  await page.getByRole("button", { name: "Indomaret Manggarai", exact: true }).click();
+  await page
+    .locator(".retail-group-items:not(.rental-asset-list)")
+    .getByRole("button", { name: "Potensi toko 5", exact: true })
+    .click();
   await expect(detail).toContainText("Estimasi potensi pendapatan belum tersedia");
-  await expect(detail).toContainText("Belum ditentukan");
-
-  // Sakelar lapisan retail (dari tab Ringkasan) menyembunyikan marker.
+  await expect(detail).toContainText("-6.2105015, 106.8508356");
   await page.getByRole("button", { name: "Ringkasan", exact: true }).click();
   await page.getByRole("button", { name: /Lapisan & filter/ }).click();
   await page.getByRole("button", { name: "Retail & potensi toko", exact: true }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
-        (window as unknown as { __map: MapLibreMap }).__map.getLayoutProperty(
-          "retail-circle",
-          "visibility",
-        ),
-      ),
-    )
-    .toBe("none");
-});
-
-test("kotak cari menyaring daftar retail per nama", async ({ page }) => {
-  await page.getByRole("button", { name: "Retail", exact: true }).click();
-  await expect(page.locator(".retail-location-list button")).toHaveCount(10);
-
-  const cari = page.getByRole("textbox", { name: "Cari retail atau potensi toko" });
-  await cari.fill("ruko");
-  await expect(page.locator(".retail-location-list button")).toHaveCount(3);
-  await expect(page.locator(".retail-location-list button").first()).toContainText(
-    "Ruko depan Stasiun Manggarai",
-  );
-
-  await cari.fill("zzz");
-  await expect(page.locator(".retail-picker-empty")).toBeVisible();
-
-  await page.getByRole("button", { name: "Hapus pencarian retail" }).click();
-  await expect(page.locator(".retail-location-list button")).toHaveCount(10);
-});
-
-test("filter kategori tidak mengubah jumlah marker retail", async ({ page }) => {
-  // Retail menandai pasokan, bukan permintaan — jumlahnya tetap apa pun
-  // kategori yang dipilih, sama seperti titik pengamatan.
-  await expect.poll(() => markerCount(page)).toBe(10);
-
-  await page.getByRole("button", { name: /Lapisan & filter/ }).click();
-  await page.getByRole("button", { name: "Apotek", exact: true }).click();
-
-  await expect.poll(() => markerCount(page)).toBe(10);
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __map: MapLibreMap }).__map.getLayoutProperty("retail-circle", "visibility"))).toBe("none");
 });

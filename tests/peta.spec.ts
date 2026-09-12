@@ -315,6 +315,35 @@ test("filter slot waktu mengubah angka yang ditempel ke peta", async ({
   await expect(page.getByText("Brief simpul · 16–19")).toBeVisible();
 });
 
+test("confidence mock mengikuti slot dan sakelar layer", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await expect
+    .poll(async () => (await featureState(page, 12)).confidence)
+    .toBe(0.82);
+
+  await page.getByRole("button", { name: "16–19" }).click();
+  await expect
+    .poll(async () => (await featureState(page, 12)).confidence)
+    .toBe(0.88);
+
+  await expect(page.getByText("Mutu data", { exact: true })).toBeVisible();
+  await page.locator(".layers-toggle").click();
+  await page.locator(".lyr").filter({ hasText: "Kepercayaan data" }).click();
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const map = (window as unknown as { __map?: any }).__map;
+        return map.getLayoutProperty("confidence-fill", "visibility");
+      }),
+    )
+    .toBe("none");
+  await expect(page.getByText("Mutu data", { exact: true })).toBeHidden();
+});
+
 test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => {
   await page.goto("/peta", { waitUntil: "domcontentloaded" });
   await waitForMapReady(page);
@@ -572,17 +601,33 @@ test("baris lapisan tanpa data tetap terbaca, tapi tidak mengubah apa pun", asyn
   await expect(event).toHaveAttribute("aria-pressed", "false");
 });
 
-test("lapisan indeks sewa menyala dan menggambar petak", async ({ page }) => {
+/**
+ * Satu baris panel, satu himpunan petak, dua layer di atasnya.
+ *
+ * Inventaris petak (`rental-circle`) dan indeks sewa/arus (`rental-index`)
+ * sempat dibangun sebagai dua lapisan yang berdiri sendiri, masing-masing
+ * dengan source dan sakelar panelnya sendiri — dan keduanya menggambar petak
+ * Space KAI yang sama, dengan `source_id` yang sama pula. Hasilnya satu petak
+ * fisik tergambar dua kali. Tes ini mengunci hasil penyatuannya: satu baris
+ * panel, dan angka indeks yang menumpang source petak yang sama.
+ */
+test("lapisan aset sewa menyala, menggambar petak, dan membawa indeksnya", async ({
+  page,
+}) => {
   await page.goto("/peta", { waitUntil: "domcontentloaded" });
   await waitForMapReady(page);
 
   await page.locator(".layers-toggle").click();
-  const sewa = page.locator(".lyr").filter({ hasText: "Indeks sewa" });
-  // Barisnya sudah punya layer, jadi sakelarnya harus benar-benar bekerja —
-  // bukan lagi ditandai "belum ada data".
+  const sewa = page.locator(".lyr").filter({ hasText: "Aset sewa" });
+  // Satu baris saja — bukan "Indeks sewa / arus" DAN "Aset sewa stasiun".
+  await expect(sewa).toHaveCount(1);
   await expect(sewa).toHaveAttribute("aria-disabled", "false");
-  await expect(sewa).toHaveAttribute("aria-pressed", "false");
 
+  // Baris ini menyala sejak awal (DEFAULT_ACTIVE_LAYERS), jadi yang diuji
+  // adalah sakelarnya benar-benar menggerakkan peta: matikan, lalu nyalakan.
+  await expect(sewa).toHaveAttribute("aria-pressed", "true");
+  await sewa.click();
+  await expect(sewa).toHaveAttribute("aria-pressed", "false");
   await sewa.click();
   await expect(sewa).toHaveAttribute("aria-pressed", "true");
 
@@ -591,7 +636,7 @@ test("lapisan indeks sewa menyala dan menggambar petak", async ({ page }) => {
       page.evaluate(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const map = (window as unknown as { __map?: any }).__map;
-        return map.getLayoutProperty("sewa-petak", "visibility");
+        return map.getLayoutProperty("rental-circle", "visibility");
       }),
     )
     .toBe("visible");
@@ -602,10 +647,33 @@ test("lapisan indeks sewa menyala dan menggambar petak", async ({ page }) => {
       page.evaluate(() => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const map = (window as unknown as { __map?: any }).__map;
-        return map.queryRenderedFeatures({ layers: ["sewa-petak"] }).length;
+        return map.queryRenderedFeatures({ layers: ["rental-circle"] }).length;
       }),
     )
     .toBeGreaterThan(0);
+
+  // Indeksnya menumpang source yang sama — itu inti penyatuannya. Diperiksa
+  // lewat properti fitur, bukan lewat label tergambar: layer `rental-index`
+  // baru muncul dari zoom 16, dan memaksa kamera ke sana membuat tes ini
+  // menguji posisi kamera alih-alih data.
+  const berindeks = await page.evaluate(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (window as unknown as { __map?: any }).__map;
+    const fitur = map.queryRenderedFeatures({
+      layers: ["rental-circle"],
+    }) as { properties: Record<string, unknown> }[];
+    return {
+      total: fitur.length,
+      berlabel: fitur.filter((f) => f.properties.index_label != null).length,
+      nol: fitur.filter((f) => f.properties.index === 0).length,
+    };
+  });
+  expect(berindeks.total).toBeGreaterThan(0);
+  // Setidaknya satu petak membawa indeksnya — itu yang membuktikan kedua
+  // sumber benar-benar bertemu di satu fitur, bukan di dua lapisan.
+  expect(berindeks.berlabel).toBeGreaterThan(0);
+  // Petak yang arusnya belum terukur TIDAK diisi nol — nol berarti gratis.
+  expect(berindeks.nol).toBe(0);
 });
 
 test("panel transparansi menerima fokus dan ditutup dengan Esc", async ({

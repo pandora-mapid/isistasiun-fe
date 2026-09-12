@@ -15,6 +15,8 @@ import type { FeatureCollection, Point, Polygon } from "geojson";
 
 import {
   loadEntrances,
+  loadConfidenceLayer,
+  loadConfidenceGrid,
   loadIsochrones,
   loadObservationPoints,
   loadRentalAssets,
@@ -25,8 +27,9 @@ import {
 } from "./source";
 import type {
   IsochroneProps,
+  ConfidenceLayerEntry,
+  ConfidenceGridProps,
   ObservationPointProps,
-  RentalAssetPayload,
   SpendingGapPayload,
   Station,
   MockDemoData,
@@ -37,6 +40,8 @@ export type PetaData = {
   points: FeatureCollection<Point, ObservationPointProps> | null;
   isochrones: FeatureCollection<Polygon, IsochroneProps> | null;
   analytics: SpendingGapPayload | null;
+  confidence: ConfidenceLayerEntry[] | null;
+  confidenceGrid: FeatureCollection<Polygon, ConfidenceGridProps> | null;
   stations: Station[] | null;
   /**
    * Nama tiap titik pengamatan — atribut, bukan geometri.
@@ -48,14 +53,15 @@ export type PetaData = {
   entrances: ObservationPointProps[] | null;
   demo: MockDemoData | null;
   /**
-   * Petak sewa: inventaris aset digabung dengan indeks sewa/arus.
+   * Petak sewa: inventaris aset dengan indeks sewa/arus sudah menempel.
    *
-   * Digabung di sini, sekali, karena backend menyajikan keduanya terpisah dan
-   * peta perlu satu fitur per petak. `rentalAssets` ikut dibawa mentah karena
-   * hanya ia yang punya koordinat.
+   * Digabung di sini, sekali, karena backend menyajikan keduanya terpisah
+   * sementara peta perlu satu fitur per petak — dan karena dua koleksi petak
+   * yang berdiri sendiri pernah membuat peta menggambar petak yang sama dua
+   * kali. `RentPlot` memperluas `RentalAsset`, jadi pemakai yang cuma butuh
+   * atribut petak (panel retail, misalnya) tetap bisa menerimanya apa adanya.
    */
-  rentPlots: RentPlot[] | null;
-  rentalAssets: RentalAssetPayload[] | null;
+  rentals: RentPlot[] | null;
   /** Pesan kegagalan yang layak ditampilkan, bukan hanya dicatat di console. */
   error: string | null;
 };
@@ -64,11 +70,12 @@ const KOSONG: PetaData = {
   points: null,
   isochrones: null,
   analytics: null,
+  confidence: null,
+  confidenceGrid: null,
   stations: null,
   entrances: null,
   demo: null,
-  rentPlots: null,
-  rentalAssets: null,
+  rentals: null,
   error: null,
 };
 
@@ -82,23 +89,40 @@ export function usePetaData(): PetaData {
       loadObservationPoints(),
       loadIsochrones(),
       loadSpendingGap(),
+      loadConfidenceLayer(),
+      loadConfidenceGrid(),
       loadStations(),
       loadEntrances(),
       loadDemoData(),
       loadRentalAssets(),
       loadRentFlowIndex(),
     ])
-      .then(([points, isochrones, analytics, stations, entrances, demo, rentalAssets, rentFlowIndex]) => {
+      .then((hasil) => {
         if (cancelled) return;
-        setData({
+        const [
           points,
           isochrones,
           analytics,
+          confidence,
+          confidenceGrid,
           stations,
           entrances,
           demo,
           rentalAssets,
-          rentPlots: gabungSewa(rentalAssets, rentFlowIndex),
+          rentFlowIndex,
+        ] = hasil;
+        setData({
+          points,
+          isochrones,
+          analytics,
+          confidence,
+          confidenceGrid,
+          stations,
+          entrances,
+          demo,
+          // Indeks sewa/arus ditempelkan ke inventaris petak DI SINI, bukan di
+          // komponen: satu petak fisik harus jadi satu fitur peta.
+          rentals: gabungSewa(rentalAssets, rentFlowIndex),
           error: null,
         });
       })

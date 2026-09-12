@@ -101,6 +101,39 @@ export type SpendingGapPayload = {
   points: PointAnalytics[];
 };
 
+/** Alasan terstruktur mengapa data satu titik belum cukup kuat. */
+export type ConfidenceReason =
+  | "missing_flow_blocks"
+  | "insufficient_stores"
+  | "insufficient_conversion_blocks"
+  | "missing_denominator";
+
+/** Mutu data satu titik pada satu slot dari `GET /confidence-layer`. */
+export type ConfidenceLayerEntry = {
+  station_id: number;
+  point_id: number;
+  time_slot: SlotKey;
+  /** Skor absolut 0-1. */
+  confidence_score: number;
+  is_thin_sample: boolean;
+  sample_count: number;
+  sample_meta: {
+    flow_blocks: number;
+    store_count: number;
+    valid_store_blocks: number;
+  };
+  reasons: ConfidenceReason[];
+};
+
+/** Geometri grid kawasan untuk visual confidence layer. */
+export type ConfidenceGridProps = {
+  zone_id: string;
+  station_id: number | null;
+  confidence_score: number;
+  sample_count: number;
+  is_thin_sample: boolean;
+};
+
 export type Station = {
   id: number;
   name: string;
@@ -128,6 +161,30 @@ export type MockRetailLocation = {
   note: string;
 };
 
+export type RentalAssetStatus = "occupied" | "available" | "needs_verification";
+export type RentalAssetSource = "space_kai" | "field_survey";
+
+export type RentalAsset = {
+  id: string;
+  station_id: number;
+  station_code: string;
+  station_name: string;
+  source_id: string;
+  data_source: RentalAssetSource;
+  location_name: string;
+  plot_name: string;
+  area_name: string | null;
+  latitude: number;
+  longitude: number;
+  land_area: number | null;
+  building_area: number | null;
+  rented: boolean;
+  availability_status: RentalAssetStatus;
+  commercial_value: number | null;
+  commercial_value_visible: boolean;
+  source_updated_at: string | null;
+  note: string | null;
+};
 export type MockCategoryStatus = {
   station_id: number;
   category: CategoryKey;
@@ -271,58 +328,27 @@ export type StationSummaryPayload = {
 };
 
 /* -------------------------------------------------------------------------
- * Sewa: aset & indeks sewa/arus
+ * Indeks sewa/arus
  *
- * Dua bentuk, dua pemilik, dua pertanyaan berbeda:
+ * Inventaris petaknya sendiri sudah punya bentuk di atas: `RentalAsset` —
+ * di mana, seberapa luas, terisi atau kosong, dari Space KAI + survei
+ * lapangan. Yang di sini cuma skornya: harga sewa ditawarkan dibagi arus
+ * terukur, jadi "rupiah per orang lewat".
  *
- *   `RentalAssetPayload`   — inventaris petak: di mana, seberapa luas, terisi
- *                            atau kosong. Sumbernya Space KAI + survei lapangan.
- *   `RentFlowIndexPayload` — skor analitis: harga sewa ditawarkan dibagi arus
- *                            terukur, jadi "rupiah per orang lewat".
+ * Sempat ada bentuk kedua di sini (`RentalAssetPayload`) yang menduplikasi
+ * `RentalAsset` medan demi medan — dua cabang membangun lapisan sewa masing-
+ * masing, lalu peta menggambar petak Space KAI yang sama dua kali. Bentuk
+ * duplikatnya dibuang; keduanya kini bertemu di `lib/data/rent.ts` lewat
+ * `source_id` yang sama.
  *
- * Nama medannya MENIRU PERSIS response Go (`internal/rental/dto.go`
- * `AssetResponse` dan `internal/analytics/dto.go` `RentFlowIndexResponse`) —
- * termasuk `index` yang bukan bahasa Indonesia dan `snake_case`-nya. Jangan
- * diterjemahkan: Fase 2 hanya menukar isi `source.ts`, dan tiap medan yang
- * di-rename di sini berarti satu lapisan pemetaan tambahan yang harus ditulis
- * dan dijaga.
+ * Nama medannya MENIRU PERSIS response Go (`internal/analytics/dto.go`
+ * `RentFlowIndexResponse`) — termasuk `index` yang bukan bahasa Indonesia dan
+ * `snake_case`-nya. Jangan diterjemahkan: Fase 2 hanya menukar isi
+ * `source.ts`, dan tiap medan yang di-rename di sini berarti satu lapisan
+ * pemetaan tambahan yang harus ditulis dan dijaga.
  *
- * Fase 2: `GET /api/v1/analytics/rental-assets` dan
- * `GET /api/v1/analytics/rent-flow-index`.
+ * Fase 2: `GET /api/v1/analytics/rent-flow-index`.
  * ---------------------------------------------------------------------- */
-
-/** Status ketersediaan satu petak. */
-export type AvailabilityStatus = "occupied" | "available" | "needs_verification";
-
-/** Satu petak sewa — inventaris, bukan skor. */
-export type RentalAssetPayload = {
-  id: string;
-  station_id: string;
-  station_name: string;
-  station_code: string;
-  source_id: string;
-  /** `space_kai` = API resmi KAI; `field_survey` = koordinat survei sendiri. */
-  data_source: "space_kai" | "field_survey";
-  location_name: string;
-  plot_name: string;
-  area_name: string | null;
-  latitude: number;
-  longitude: number;
-  land_area: number | null;
-  building_area: number | null;
-  rented: boolean;
-  availability_status: AvailabilityStatus;
-  /**
-   * Nilai kontrak sewa. Hampir selalu `null` di tier publik: KAI menandai
-   * nilai komersial tenant tidak untuk ditampilkan (`nilaikomersialvis:
-   * false`), dan backend menghapusnya dari response saat flag itu mati.
-   * Jangan menambalnya dengan angka dari sumber lain.
-   */
-  commercial_value: number | null;
-  commercial_value_visible: boolean;
-  source_updated_at: string | null;
-  note: string | null;
-};
 
 /**
  * Sewa ditawarkan dibanding arus terukur, per petak.

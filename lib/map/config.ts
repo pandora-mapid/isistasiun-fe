@@ -24,8 +24,7 @@
  * `building-3d`. Karena itu keduanya tampak nyaris serupa, dan berpindah di
  * antara keduanya tidak mengubah tampilan secara mencolok.
  */
-export const BASEMAP_STYLE_URL =
-  "https://tiles.openfreemap.org/styles/liberty";
+export const BASEMAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 
 /**
  * Pilihan basemap yang sudah diperiksa: gratis, tanpa API key, dan bisa
@@ -120,14 +119,9 @@ export const SOURCE = {
    * Ongkosnya kecil: isinya hanya sebanyak titik pengamatan (belasan).
    */
   pointLabels: "point-label-values",
-  /**
-   * Lokasi retail & potensi toko — pasokan, bukan permintaan.
-   *
-   * Dimuat sebagai GeoJSON dari data presentasi Tahap 1 (`lib/data/demo.ts`).
-   * Fase 2: `GET /stations/:id/retail`. Terpisah dari `points` karena artinya
-   * berbeda — titik pengamatan mengukur kesenjangan, retail menandai gerai.
-   */
   retail: "retail-locations",
+  confidenceGrid: "confidence-grid",
+  stationMarkers: "station-markers",
   /**
    * Petak sewa — inventaris ruang, bukan pengamatan.
    *
@@ -136,10 +130,13 @@ export const SOURCE = {
    * harganya. Satu petak kosong adalah peluang; satu gerai yang ada adalah
    * pasokan yang sudah terpakai.
    *
-   * Fase 2: `GET /analytics/rental-assets` + `GET /analytics/rent-flow-index`,
-   * digabung jadi satu koleksi di `lib/data/rent.ts`.
+   * SATU source untuk dua hal yang sempat dibangun terpisah: atribut petak
+   * (`GET /analytics/rental-assets`) dan indeks sewa/arus
+   * (`GET /analytics/rent-flow-index`). Keduanya memberi kunci `source_id`
+   * yang sama, jadi digabung di `lib/data/rent.ts` sebelum jadi GeoJSON —
+   * kalau tidak, peta menggambar petak yang sama dua kali.
    */
-  sewa: "rental-assets",
+  rental: "rental-assets",
 } as const;
 
 /**
@@ -164,18 +161,26 @@ export const LAYER = {
   isochroneFill: "isochrone-fill",
   isochroneLine: "isochrone-line",
   pointConfidence: "point-confidence",
+  confidenceFill: "confidence-fill",
+  confidenceBoundary: "confidence-boundary",
   pointCircle: "point-circle",
   pointLabel: "point-label",
   /** Angka arus pintu (F), tulisan kecil di bawah nama titik. */
   pointArus: "point-arus",
-  /** Bulatan retail & potensi toko. */
   retailCircle: "retail-circle",
-  /** Nama gerai retail — konteks tambahan, prioritas tabrakan paling rendah. */
   retailLabel: "retail-label",
-  /** Petak sewa — kotak, dibedakan dari bulatan retail & titik pengamatan. */
-  sewaPetak: "sewa-petak",
-  /** Indeks sewa/arus petak terpilih — angka kecil di bawah kotaknya. */
-  sewaIndeks: "sewa-indeks",
+  stationCircle: "station-circle",
+  stationLabel: "station-label",
+  rentalCircle: "rental-circle",
+  rentalLabel: "rental-label",
+  /**
+   * Indeks sewa/arus — angka Rp/orang di bawah petak.
+   *
+   * Layer sendiri, bukan tambahan pada `rentalLabel`: nama petak selalu ada,
+   * indeksnya hanya ada untuk petak yang arusnya terukur. Satu layer untuk
+   * keduanya berarti petak tanpa indeks menulis label kosong.
+   */
+  rentalIndex: "rental-index",
 } as const;
 
 /**
@@ -188,6 +193,12 @@ export const LAYER = {
 export const LAYER_ORDER = [
   LAYER.isochroneFill,
   LAYER.isochroneLine,
+  LAYER.confidenceFill,
+  LAYER.confidenceBoundary,
+  LAYER.stationCircle,
+  LAYER.stationLabel,
+  LAYER.rentalCircle,
+  LAYER.rentalLabel,
   LAYER.pointConfidence,
   LAYER.pointCircle,
   // Bulatan retail duduk di atas lingkaran kesenjangan (kecil, jadi tidak
@@ -197,14 +208,10 @@ export const LAYER_ORDER = [
   // paling rendah. MapLibre menempatkan simbol dalam urutan terbalik: yang
   // lebih akhir menang. Nama gerai retail hanya konteks tambahan, jadi ia yang
   // pertama menyingkir saat ruang sempit — bukan nama titik pengamatan.
-  // Kotak sewa duduk di atas bulatan retail: keduanya kecil dan sering
-  // bertumpuk di emplasemen yang sama, dan petak kosong adalah yang sedang
-  // dicari pembaca panel sewa.
-  LAYER.sewaPetak,
   LAYER.retailLabel,
   // Angka indeks sewa ikut kelompok simbol berprioritas rendah — sama seperti
   // nama retail, ia konteks tambahan dan harus menyingkir sebelum nama titik.
-  LAYER.sewaIndeks,
+  LAYER.rentalIndex,
   // Arus sengaja SEBELUM nama titik. MapLibre menempatkan simbol dalam urutan
   // terbalik — layer yang lebih akhir menang saat kotak teksnya bertabrakan.
   // Waktu arus diletakkan sesudah nama, seluruh nama titik lenyap dari peta
@@ -225,10 +232,14 @@ export const LAYER_ORDER = [
  */
 export const LAYER_GROUPS: Record<string, readonly string[]> = {
   gap: [LAYER.pointCircle, LAYER.pointLabel],
-  kepercayaan: [LAYER.pointConfidence],
+  kepercayaan: [
+    LAYER.confidenceFill,
+    LAYER.confidenceBoundary,
+    LAYER.pointConfidence,
+  ],
   arus: [LAYER.pointArus],
   retail: [LAYER.retailCircle, LAYER.retailLabel],
-  sewa: [LAYER.sewaPetak, LAYER.sewaIndeks],
+  rental: [LAYER.rentalCircle, LAYER.rentalLabel, LAYER.rentalIndex],
 };
 
 /**
@@ -237,7 +248,7 @@ export const LAYER_GROUPS: Record<string, readonly string[]> = {
  * Angkanya mengikuti tata letak di PetaScreen.
  */
 export const FIT_PADDING = {
-  top: 104, // pil nav yang mengambang di atas peta
+  top: 180, // pil nav + ruang untuk titik Sudirman di tepi utara
   bottom: 200, // panel slot waktu + legenda
   left: 96, // kontrol zoom
   right: 470, // panel ringkasan (lebar 414 + jarak 24)

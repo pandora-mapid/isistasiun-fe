@@ -177,8 +177,8 @@ tersentuh.
 
 ## B5. Sewa — `GET /analytics/rental-assets` + `GET /analytics/rent-flow-index` *(baru)*
 
-Lapisan "Indeks sewa / arus" di panel `/peta`. **Dua endpoint, dua arti, dua
-pemilik** — sengaja tidak disatukan:
+Baris **"Aset sewa & indeks arus"** di panel `/peta`. **Dua endpoint, dua arti,
+dua pemilik** — sengaja tidak disatukan *di backend*:
 
 | Endpoint | Pemilik | Menjawab | Paket Go |
 |---|---|---|---|
@@ -203,6 +203,16 @@ bukan bahasa Indonesia. Frontend sengaja tidak menerjemahkannya: tiap medan yang
 di-rename berarti satu lapisan pemetaan tambahan yang harus ditulis dan dijaga,
 padahal Fase 2 seharusnya cuma menukar isi `source.ts`.
 
+> **Dua endpoint, satu lapisan peta.** Terpisah di backend tidak berarti terpisah
+> di peta. Keduanya sempat dibangun sebagai dua lapisan yang berdiri sendiri —
+> dua source, dua sakelar panel — dan karena keduanya menggambar petak Space KAI
+> yang sama, satu petak fisik tergambar **dua kali**, dua bulatan bertumpuk di
+> koordinat yang identik. Penggabungan terjadi sekali di `lib/data/rent.ts`
+> (`gabungSewa`), menghasilkan satu koleksi `RentPlot` yang jadi satu-satunya
+> source petak (`rental-assets`). Inventarisnya satu, jadi sumbernya juga satu;
+> indeks menumpang sebagai atribut, bukan sebagai lapisan kedua. Kalau nanti ada
+> endpoint sewa ketiga, tempatnya di `gabungSewa` — bukan source baru.
+
 **Aturan yang harus dijaga kedua sisi:**
 
 | Hal | Aturan | Alasan |
@@ -210,13 +220,16 @@ padahal Fase 2 seharusnya cuma menukar isi `source.ts`.
 | Penggabungan | `rent_flow_index.plot_id` cocok ke `rental_assets.source_id`, **bukan** `id` | `plot_id` adalah id petak dari sumbernya (blokid Space KAI), bukan primary key baris aset |
 | Petak tanpa indeks | `index: null`, dan di peta **tanpa label sama sekali** | "Rp 0" berarti gratis; yang benar adalah "belum terukur". Sewa in-station Sudirman memang tidak ada di API KAI (sudah diperiksa per koordinat) |
 | `commercial_value` | hampir selalu `null` di tier publik | KAI menandai nilai komersial tenant tidak untuk ditampilkan (`nilaikomersialvis: false`); backend menghapusnya dari response saat flag itu mati. Jangan ditambal dari sumber lain |
-| `is_outlier` | ditandai backend, frontend hanya menggambar | supaya ambang pencilan tidak pernah punya dua definisi |
+| `is_outlier` | ditandai backend; frontend menyebutnya di panel, **tidak** menggambarnya di peta | supaya ambang pencilan tidak pernah punya dua definisi. Sempat jadi tepi tebal di peta dan dicabut: efek pemilihan menulis ulang `circle-stroke-width`, dan lambang tanpa baris legenda tidak menjelaskan dirinya |
 | Petak tanpa koordinat | tidak digambar | listing pasar sekitar (99.co) seluruhnya level kawasan tanpa titik presisi; menaruhnya di koordinat karangan melanggar janji keterlacakan |
 
-Data contoh: `public/mock/rental-assets.json` (8 petak Space KAI Manggarai + 3
-kios survei Sudirman) dan `public/mock/rent-flow-index.json` (8 petak Manggarai;
-`measured_flow` = arus masuk terukur kedua pintu Manggarai pada blok pagi).
-Angkanya nyata, bukan karangan — sumbernya `isistasiun-ai/data/source/rent/`.
+Data contoh: inventaris petaknya `lib/data/rental-demo.ts`
+(`MOCK_RENTAL_ASSETS` — Space KAI Manggarai + kios survei Sudirman), indeksnya
+`public/mock/rent-flow-index.json` (petak Manggarai; `measured_flow` = arus masuk
+terukur kedua pintu Manggarai pada blok pagi). Angkanya nyata, bukan karangan —
+sumbernya `isistasiun-ai/data/source/rent/`. (Sempat ada `public/mock/
+rental-assets.json` kedua dengan petak yang sama; dibuang saat kedua lapisan
+disatukan.)
 Pertanyaan menganggur a–d di §B4 berlaku sama di sini (envelope, id stasiun).
 
 ---
