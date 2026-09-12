@@ -8,6 +8,8 @@ import { StationSearch } from "./StationSearch";
 import { RetailPanel } from "./RetailPanel";
 import { ComparisonDialog } from "./ComparisonDialog";
 import { retailGeoJSON, type RetailLocation } from "@/lib/data/retail";
+import { sewaGeoJSON, type RentPlot } from "@/lib/data/rent";
+import { SewaCard } from "@/components/SewaCard";
 import { RETAIL_KINDS, RETAIL_LEGEND } from "@/lib/map/retail-style";
 import {
   biggestGapPoint,
@@ -146,8 +148,17 @@ const QUESTIONS = [
 ];
 
 export function PetaScreen() {
-  const { points, isochrones, analytics, stations, entrances, demo, error } =
-    usePetaData();
+  const {
+    points,
+    isochrones,
+    analytics,
+    stations,
+    entrances,
+    demo,
+    rentPlots,
+    rentalAssets,
+    error,
+  } = usePetaData();
 
   const [tab, setTab] = useState<"brief" | "retail" | "copilot">("brief");
   const [layersOpen, setLayersOpen] = useState(false);
@@ -164,6 +175,20 @@ export function PetaScreen() {
   >(null);
   /** Lokasi retail yang sedang dibuka kartunya. `null` = tidak ada. */
   const [selectedRetail, setSelectedRetail] = useState<RetailLocation | null>(null);
+  /** Petak sewa yang sedang dipilih. `null` = tidak ada. */
+  const [selectedRentPlot, setSelectedRentPlot] = useState<RentPlot | null>(null);
+
+  /**
+   * Petak sewa. Seperti retail, TIDAK ikut disaring filter kategori — petak
+   * adalah ruang yang disewakan, bukan permintaan per kategori usaha.
+   */
+  const rentData = useMemo(
+    () => sewaGeoJSON(rentalAssets ?? [], rentPlots ?? []),
+    [rentalAssets, rentPlots],
+  );
+  const selectRentPlot = useCallback((plot: RentPlot) => {
+    setSelectedRentPlot(plot);
+  }, []);
 
   /**
    * Retail & potensi toko. Sengaja TIDAK ikut disaring filter kategori:
@@ -390,8 +415,15 @@ export function PetaScreen() {
           retailLocations={retailData}
           selectedRetailId={selectedRetail?.id ?? null}
           onSelectRetail={selectRetail}
+          rentPlots={rentData}
+          selectedRentPlotId={selectedRentPlot?.id ?? null}
+          onSelectRentPlot={selectRentPlot}
           stationTarget={stationTarget}
         />
+
+        {selectedRentPlot && (
+          <SewaCard plot={selectedRentPlot} onClose={() => setSelectedRentPlot(null)} />
+        )}
 
         <StationSearch
           stations={stations}

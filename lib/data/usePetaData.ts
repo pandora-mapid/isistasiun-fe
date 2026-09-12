@@ -17,6 +17,8 @@ import {
   loadEntrances,
   loadIsochrones,
   loadObservationPoints,
+  loadRentalAssets,
+  loadRentFlowIndex,
   loadSpendingGap,
   loadStations,
   loadDemoData,
@@ -24,10 +26,12 @@ import {
 import type {
   IsochroneProps,
   ObservationPointProps,
+  RentalAssetPayload,
   SpendingGapPayload,
   Station,
   MockDemoData,
 } from "./types";
+import { gabungSewa, type RentPlot } from "./rent";
 
 export type PetaData = {
   points: FeatureCollection<Point, ObservationPointProps> | null;
@@ -43,6 +47,15 @@ export type PetaData = {
    */
   entrances: ObservationPointProps[] | null;
   demo: MockDemoData | null;
+  /**
+   * Petak sewa: inventaris aset digabung dengan indeks sewa/arus.
+   *
+   * Digabung di sini, sekali, karena backend menyajikan keduanya terpisah dan
+   * peta perlu satu fitur per petak. `rentalAssets` ikut dibawa mentah karena
+   * hanya ia yang punya koordinat.
+   */
+  rentPlots: RentPlot[] | null;
+  rentalAssets: RentalAssetPayload[] | null;
   /** Pesan kegagalan yang layak ditampilkan, bukan hanya dicatat di console. */
   error: string | null;
 };
@@ -54,6 +67,8 @@ const KOSONG: PetaData = {
   stations: null,
   entrances: null,
   demo: null,
+  rentPlots: null,
+  rentalAssets: null,
   error: null,
 };
 
@@ -70,8 +85,10 @@ export function usePetaData(): PetaData {
       loadStations(),
       loadEntrances(),
       loadDemoData(),
+      loadRentalAssets(),
+      loadRentFlowIndex(),
     ])
-      .then(([points, isochrones, analytics, stations, entrances, demo]) => {
+      .then(([points, isochrones, analytics, stations, entrances, demo, rentalAssets, rentFlowIndex]) => {
         if (cancelled) return;
         setData({
           points,
@@ -80,6 +97,8 @@ export function usePetaData(): PetaData {
           stations,
           entrances,
           demo,
+          rentalAssets,
+          rentPlots: gabungSewa(rentalAssets, rentFlowIndex),
           error: null,
         });
       })

@@ -12,6 +12,7 @@ import {
   scaleDependentPaint,
 } from "../lib/map/style";
 import { retailCircleLayer, retailLabelLayer } from "../lib/map/retail-style";
+import { sewaIndeksLayer, sewaPetakLayer } from "../lib/map/rent-style";
 import type { Domain } from "../lib/analytics/select";
 
 /**
@@ -35,6 +36,7 @@ function styleWith(layers: unknown[]) {
       [SOURCE.isochrones]: { type: "geojson", data: EMPTY_FC },
       [SOURCE.pointLabels]: { type: "geojson", data: EMPTY_FC },
       [SOURCE.retail]: { type: "geojson", data: EMPTY_FC },
+      [SOURCE.sewa]: { type: "geojson", data: EMPTY_FC },
     },
     layers,
   };
@@ -65,6 +67,8 @@ const LAYERS: { nama: string; buat: () => unknown }[] = [
   { nama: "point-arus", buat: pointArusLayer },
   { nama: "retail-circle", buat: retailCircleLayer },
   { nama: "retail-label", buat: retailLabelLayer },
+  { nama: "sewa-petak", buat: sewaPetakLayer },
+  { nama: "sewa-indeks", buat: sewaIndeksLayer },
 ];
 
 for (const { nama, buat } of LAYERS) {

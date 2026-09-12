@@ -557,16 +557,55 @@ test("baris lapisan tanpa data tetap terbaca, tapi tidak mengubah apa pun", asyn
   await waitForMapReady(page);
 
   await page.locator(".layers-toggle").click();
-  const sewa = page.locator(".lyr").filter({ hasText: "Indeks sewa" });
+  // "Event & aktivasi" adalah satu-satunya baris yang masih benar-benar tanpa
+  // data. Baris "Indeks sewa" dulu dipakai di sini dan sudah pindah ke sisi
+  // yang berfungsi — lihat tes di bawahnya.
+  const event = page.locator(".lyr").filter({ hasText: "Event & aktivasi" });
   // `aria-disabled`, bukan `disabled`: barisnya tetap bisa dijangkau supaya
   // keterangan "belum ada data" ikut terbaca pembaca layar. Playwright sendiri
   // menolak mengkliknya — bukti bahwa atributnya memang terbaca sebagai "tidak
   // tersedia" — jadi dicoba lewat jalur yang benar-benar tersisa: fokus + Enter.
-  await expect(sewa).toHaveAttribute("aria-disabled", "true");
-  await sewa.focus();
-  await expect(sewa).toBeFocused();
+  await expect(event).toHaveAttribute("aria-disabled", "true");
+  await event.focus();
+  await expect(event).toBeFocused();
   await page.keyboard.press("Enter");
+  await expect(event).toHaveAttribute("aria-pressed", "false");
+});
+
+test("lapisan indeks sewa menyala dan menggambar petak", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.locator(".layers-toggle").click();
+  const sewa = page.locator(".lyr").filter({ hasText: "Indeks sewa" });
+  // Barisnya sudah punya layer, jadi sakelarnya harus benar-benar bekerja —
+  // bukan lagi ditandai "belum ada data".
+  await expect(sewa).toHaveAttribute("aria-disabled", "false");
   await expect(sewa).toHaveAttribute("aria-pressed", "false");
+
+  await sewa.click();
+  await expect(sewa).toHaveAttribute("aria-pressed", "true");
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const map = (window as unknown as { __map?: any }).__map;
+        return map.getLayoutProperty("sewa-petak", "visibility");
+      }),
+    )
+    .toBe("visible");
+
+  // Bukan cuma layernya menyala: petaknya harus benar-benar tergambar.
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const map = (window as unknown as { __map?: any }).__map;
+        return map.queryRenderedFeatures({ layers: ["sewa-petak"] }).length;
+      }),
+    )
+    .toBeGreaterThan(0);
 });
 
 test("panel transparansi menerima fokus dan ditutup dengan Esc", async ({

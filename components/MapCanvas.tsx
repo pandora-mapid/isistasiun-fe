@@ -13,6 +13,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { Domain } from "@/lib/analytics/select";
 import type { RetailLocation } from "@/lib/data/retail";
+import type { RentPlot } from "@/lib/data/rent";
 import type {
   IsochroneProps,
   ObservationPointProps,
@@ -43,6 +44,18 @@ import {
   retailStrokeColor,
   retailStrokeWidth,
 } from "@/lib/map/retail-style";
+import {
+  sewaIndeksLayer,
+  sewaPetakLayer,
+  sewaStrokeColor,
+  sewaStrokeWidth,
+} from "@/lib/map/rent-style";
+
+/** Koleksi sewa kosong — peta hero Beranda tidak menggambar lapisan ini. */
+const SEWA_KOSONG: FeatureCollection<Point, RentPlot> = {
+  type: "FeatureCollection",
+  features: [],
+};
 
 /** Koleksi retail kosong — dipakai kalau pemanggil tidak mengoper apa pun. */
 const RETAIL_KOSONG: FeatureCollection<Point, RetailLocation> = {
@@ -131,6 +144,15 @@ type Props = {
    * source-nya di-`setData` ulang tiap kali prop ini berubah.
    */
   retailLocations?: FeatureCollection<Point, RetailLocation>;
+  /**
+   * Petak sewa sebagai GeoJSON. Opsional, sama seperti `retailLocations` —
+   * source-nya di-`setData` ulang tiap kali prop ini berubah.
+   */
+  rentPlots?: FeatureCollection<Point, RentPlot>;
+  /** `id` petak sewa yang sedang dipilih — menebalkan garis tepinya. */
+  selectedRentPlotId?: string | null;
+  /** Dipanggil saat sebuah kotak petak sewa diklik. */
+  onSelectRentPlot?: (plot: RentPlot) => void;
   /** `id` retail yang sedang dipilih — menebalkan garis tepinya. */
   selectedRetailId?: string | null;
   /** Dipanggil saat sebuah bulatan retail diklik. */
@@ -264,6 +286,9 @@ export function MapCanvas({
   borderRadius,
   attributionPosition = "bottom-right",
   retailLocations = RETAIL_KOSONG,
+  rentPlots = SEWA_KOSONG,
+  selectedRentPlotId = null,
+  onSelectRentPlot,
   selectedRetailId = null,
   onSelectRetail,
   stationTarget = null,
@@ -302,6 +327,17 @@ export function MapCanvas({
   useEffect(() => {
     onSelectRetailRef.current = onSelectRetail;
   }, [onSelectRetail]);
+  /** Sama alasannya untuk petak sewa. */
+  const onSelectRentPlotRef = useRef(onSelectRentPlot);
+  useEffect(() => {
+    onSelectRentPlotRef.current = onSelectRentPlot;
+  }, [onSelectRentPlot]);
+  /** Daftar petak sewa terbaru, dibaca penangan klik untuk mencocokkan `id`. */
+  const rentRef = useRef(rentPlots);
+  useEffect(() => {
+    rentRef.current = rentPlots;
+  }, [rentPlots]);
+
   /** Daftar retail terbaru, dibaca penangan klik untuk mencocokkan `id` → lokasi. */
   const retailRef = useRef(retailLocations);
   useEffect(() => {
@@ -439,6 +475,7 @@ export function MapCanvas({
     map.addSource(SOURCE.isochrones, { type: "geojson", data: isochrones });
     map.addSource(SOURCE.points, { type: "geojson", data: points });
     map.addSource(SOURCE.retail, { type: "geojson", data: retailRef.current });
+    map.addSource(SOURCE.sewa, { type: "geojson", data: rentRef.current });
     map.addSource(SOURCE.pointLabels, {
       type: "geojson",
       data: labelData ?? { type: "FeatureCollection", features: [] },
@@ -451,12 +488,15 @@ export function MapCanvas({
     map.addLayer(pointCircleLayer(gapDomain));
     // Bulatan retail di atas lingkaran kesenjangan (LAYER_ORDER), di bawah simbol.
     map.addLayer(retailCircleLayer());
+    // Kotak sewa di atas bulatan retail — lihat catatan di LAYER_ORDER.
+    map.addLayer(sewaPetakLayer());
     // Seluruh layer bertulisan butuh glyph dari jaringan; lewati kalau basemap
     // saja gagal dimuat, karena endpoint glyph-nya ikut hilang.
     if (glyphsAvailableRef.current) {
       // Nama retail dipasang lebih dulu → prioritas tabrakan simbol paling
       // rendah, jadi nama titik pengamatan tidak pernah tergeser olehnya.
       map.addLayer(retailLabelLayer());
+      map.addLayer(sewaIndeksLayer());
       // Urutannya mengikuti LAYER_ORDER: arus lebih dulu, nama titik sesudahnya
       // — lihat catatan di sana soal prioritas penempatan simbol.
       map.addLayer(pointArusLayer());
@@ -682,6 +722,65 @@ export function MapCanvas({
       (src as { setData: (d: unknown) => void }).setData(retailLocations);
     }
   }, [retailLocations, layersReady]);
+
+  // --- petak sewa: source di-setData ulang saat datanya berubah ----------
+  //
+  // Alasannya sama dengan retail di atas: source-nya dipasang sekali di efek
+  // pemasangan layer, yang keluar-awal selamanya sesudah `layersReady`.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady) return;
+    const src = map.getSource(SOURCE.sewa);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(rentPlots);
+    }
+  }, [rentPlots, layersReady]);
+
+  // --- petak sewa terpilih: garis tepi menebal ---------------------------
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !map.getLayer(LAYER.sewaPetak)) return;
+    map.setPaintProperty(
+      LAYER.sewaPetak,
+      "circle-stroke-color",
+      sewaStrokeColor(selectedRentPlotId) as never,
+    );
+    map.setPaintProperty(
+      LAYER.sewaPetak,
+      "circle-stroke-width",
+      sewaStrokeWidth(selectedRentPlotId) as never,
+    );
+  }, [selectedRentPlotId, layersReady]);
+
+  // --- petak sewa: klik dan sorot ----------------------------------------
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !interactive || !map.getLayer(LAYER.sewaPetak))
+      return;
+
+    const onClick = (e: { features?: { properties?: Record<string, unknown> }[] }) => {
+      const id = e.features?.[0]?.properties?.id;
+      const plot = rentRef.current.features.find(
+        (f) => f.properties.id === id,
+      )?.properties;
+      if (plot) onSelectRentPlotRef.current?.(plot);
+    };
+    const onEnter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const onLeave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+
+    map.on("click", LAYER.sewaPetak, onClick);
+    map.on("mouseenter", LAYER.sewaPetak, onEnter);
+    map.on("mouseleave", LAYER.sewaPetak, onLeave);
+    return () => {
+      map.off("click", LAYER.sewaPetak, onClick);
+      map.off("mouseenter", LAYER.sewaPetak, onEnter);
+      map.off("mouseleave", LAYER.sewaPetak, onLeave);
+    };
+  }, [layersReady, interactive]);
 
   // --- retail terpilih: garis tepi menebal ------------------------------
   //

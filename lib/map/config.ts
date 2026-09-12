@@ -128,6 +128,18 @@ export const SOURCE = {
    * berbeda — titik pengamatan mengukur kesenjangan, retail menandai gerai.
    */
   retail: "retail-locations",
+  /**
+   * Petak sewa — inventaris ruang, bukan pengamatan.
+   *
+   * Terpisah dari `retail` walau sama-sama "tempat usaha": retail menandai
+   * gerai yang beroperasi, sewa menandai petak yang disewakan beserta
+   * harganya. Satu petak kosong adalah peluang; satu gerai yang ada adalah
+   * pasokan yang sudah terpakai.
+   *
+   * Fase 2: `GET /analytics/rental-assets` + `GET /analytics/rent-flow-index`,
+   * digabung jadi satu koleksi di `lib/data/rent.ts`.
+   */
+  sewa: "rental-assets",
 } as const;
 
 /**
@@ -160,6 +172,10 @@ export const LAYER = {
   retailCircle: "retail-circle",
   /** Nama gerai retail — konteks tambahan, prioritas tabrakan paling rendah. */
   retailLabel: "retail-label",
+  /** Petak sewa — kotak, dibedakan dari bulatan retail & titik pengamatan. */
+  sewaPetak: "sewa-petak",
+  /** Indeks sewa/arus petak terpilih — angka kecil di bawah kotaknya. */
+  sewaIndeks: "sewa-indeks",
 } as const;
 
 /**
@@ -181,7 +197,14 @@ export const LAYER_ORDER = [
   // paling rendah. MapLibre menempatkan simbol dalam urutan terbalik: yang
   // lebih akhir menang. Nama gerai retail hanya konteks tambahan, jadi ia yang
   // pertama menyingkir saat ruang sempit — bukan nama titik pengamatan.
+  // Kotak sewa duduk di atas bulatan retail: keduanya kecil dan sering
+  // bertumpuk di emplasemen yang sama, dan petak kosong adalah yang sedang
+  // dicari pembaca panel sewa.
+  LAYER.sewaPetak,
   LAYER.retailLabel,
+  // Angka indeks sewa ikut kelompok simbol berprioritas rendah — sama seperti
+  // nama retail, ia konteks tambahan dan harus menyingkir sebelum nama titik.
+  LAYER.sewaIndeks,
   // Arus sengaja SEBELUM nama titik. MapLibre menempatkan simbol dalam urutan
   // terbalik — layer yang lebih akhir menang saat kotak teksnya bertabrakan.
   // Waktu arus diletakkan sesudah nama, seluruh nama titik lenyap dari peta
@@ -205,6 +228,7 @@ export const LAYER_GROUPS: Record<string, readonly string[]> = {
   kepercayaan: [LAYER.pointConfidence],
   arus: [LAYER.pointArus],
   retail: [LAYER.retailCircle, LAYER.retailLabel],
+  sewa: [LAYER.sewaPetak, LAYER.sewaIndeks],
 };
 
 /**

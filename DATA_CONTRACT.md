@@ -175,6 +175,50 @@ tersentuh.
 | c | Kunci slot | backend `morning`/`midday`/`evening`/`night`; frontend `pagi`/`siang`/`sore`/`malam` |
 | d | ID stasiun | backend UUID, mock frontend integer (`1`,`2`). Lihat §A2 nomor 1 — `setFeatureState` butuh integer, jadi butuh `numeric_id` atau peta id di `source.ts` |
 
+## B5. Sewa — `GET /analytics/rental-assets` + `GET /analytics/rent-flow-index` *(baru)*
+
+Lapisan "Indeks sewa / arus" di panel `/peta`. **Dua endpoint, dua arti, dua
+pemilik** — sengaja tidak disatukan:
+
+| Endpoint | Pemilik | Menjawab | Paket Go |
+|---|---|---|---|
+| `/analytics/rental-assets` | Arzaka | "petak apa saja yang ada, di mana, terisi atau kosong" | `internal/rental/` (`AssetResponse`) |
+| `/analytics/rent-flow-index` | **Priyapta** | "berapa mahal tiap orang yang lewat" | `internal/analytics/` (`RentFlowIndexResponse`) |
+
+Keduanya **open**, tanpa token — lapisan analitik dasar tetap gratis
+(`04-VALUE-PROP-AND-MONETIZATION §3`).
+
+**Bentuk `rental-assets`** (satu baris per petak): `id`, `station_id`,
+`station_name`, `station_code`, `source_id`, `data_source`
+(`space_kai` | `field_survey`), `location_name`, `plot_name`, `area_name`,
+`latitude`, `longitude`, `land_area`, `building_area`, `rented`,
+`availability_status` (`occupied` | `available` | `needs_verification`),
+`commercial_value`, `commercial_value_visible`, `source_updated_at`, `note`.
+
+**Bentuk `rent-flow-index`** (satu baris per petak yang terukur): `plot_id`,
+`station_id`, `offered_rent`, `measured_flow`, `index`, `is_outlier`.
+
+Nama medannya ditiru **persis**, `snake_case` dan semua — termasuk `index` yang
+bukan bahasa Indonesia. Frontend sengaja tidak menerjemahkannya: tiap medan yang
+di-rename berarti satu lapisan pemetaan tambahan yang harus ditulis dan dijaga,
+padahal Fase 2 seharusnya cuma menukar isi `source.ts`.
+
+**Aturan yang harus dijaga kedua sisi:**
+
+| Hal | Aturan | Alasan |
+|---|---|---|
+| Penggabungan | `rent_flow_index.plot_id` cocok ke `rental_assets.source_id`, **bukan** `id` | `plot_id` adalah id petak dari sumbernya (blokid Space KAI), bukan primary key baris aset |
+| Petak tanpa indeks | `index: null`, dan di peta **tanpa label sama sekali** | "Rp 0" berarti gratis; yang benar adalah "belum terukur". Sewa in-station Sudirman memang tidak ada di API KAI (sudah diperiksa per koordinat) |
+| `commercial_value` | hampir selalu `null` di tier publik | KAI menandai nilai komersial tenant tidak untuk ditampilkan (`nilaikomersialvis: false`); backend menghapusnya dari response saat flag itu mati. Jangan ditambal dari sumber lain |
+| `is_outlier` | ditandai backend, frontend hanya menggambar | supaya ambang pencilan tidak pernah punya dua definisi |
+| Petak tanpa koordinat | tidak digambar | listing pasar sekitar (99.co) seluruhnya level kawasan tanpa titik presisi; menaruhnya di koordinat karangan melanggar janji keterlacakan |
+
+Data contoh: `public/mock/rental-assets.json` (8 petak Space KAI Manggarai + 3
+kios survei Sudirman) dan `public/mock/rent-flow-index.json` (8 petak Manggarai;
+`measured_flow` = arus masuk terukur kedua pintu Manggarai pada blok pagi).
+Angkanya nyata, bukan karangan — sumbernya `isistasiun-ai/data/source/rent/`.
+Pertanyaan menganggur a–d di §B4 berlaku sama di sini (envelope, id stasiun).
+
 ---
 
 # BAGIAN C — Usulan opsional
