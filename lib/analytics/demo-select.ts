@@ -37,6 +37,19 @@ export function evidenceFor(rows: MockEvidence[], pointId: number | null): MockE
   return rows.find((row) => row.point_id === pointId) ?? null;
 }
 
+/**
+ * Powers `ComparisonDialog` (the peta "Bandingkan" button) — sums the p50 of
+ * every point at `station`, at the slot × category filter currently active
+ * on the map. This is an on-the-fly point rollup, **not** the same thing as
+ * `lib/analytics/summary.ts`'s `bandingkanSimpul`: that one reads a
+ * station-scoped Monte Carlo run from `GET /analytics/station-summary`
+ * (`StationSummaryPayload`), carries a P10–P90 range, and flags its `basis`
+ * so a summed number can never pass for a simulated one
+ * (`../../../Context/02-BACKEND-SPEC.md §3.5b`). This function has no such
+ * flag — it only ever sums, and only ever at p50 — so don't reach for it as
+ * a substitute for the station-summary comparison, and don't assume the two
+ * dialogs will show matching numbers for the same two stations.
+ */
 export function comparisonSummary(
   station: Station,
   analytics: SpendingGapPayload,
