@@ -829,3 +829,71 @@ test("peta tetap terbaca di lebar sempit", async ({ page }) => {
   );
   expect(meluber).toBe(false);
 });
+
+/**
+ * Panel mengambang `/peta` tidak boleh saling menindih di layar sempit.
+ *
+ * Ini penjaga yang lahir dari kegagalan nyata, dan gejalanya tidak terlihat
+ * oleh pemeriksaan overflow: waktu cabang `development` menambah pencarian
+ * stasiun dan chip stasiun di kiri atas, aturan responsif `/peta` yang sudah
+ * ada tidak tahu keduanya ada. Halaman tetap tidak bisa digeser mendatar —
+ * lolos tes di atas — tapi enam panel menumpuk jadi satu tumpukan tak terbaca
+ * di sepertiga layar teratas.
+ *
+ * Karena itu yang diperiksa posisinya, bukan lebarnya: keenam panel harus
+ * mengantre tegak, satu di bawah yang lain, dan harus masih menyisakan peta
+ * yang terlihat di antaranya. Peta yang tertutup habis bukan versi kecil
+ * halaman ini.
+ */
+const PANEL_PETA = [
+  ".peta-nav-float",
+  ".station-search",
+  ".peta-chip-stasiun",
+  ".peta-kontrol-kiri",
+  ".peta-bawah",
+  ".peta-panel",
+] as const;
+
+for (const { lebar, tinggi } of [
+  { lebar: 1024, tinggi: 900 },
+  { lebar: 760, tinggi: 900 },
+  { lebar: 390, tinggi: 844 },
+]) {
+  test(`panel /peta mengantre tanpa menindih di ${lebar}px`, async ({ page }) => {
+    await page.setViewportSize({ width: lebar, height: tinggi });
+    await page.goto("/peta", { waitUntil: "domcontentloaded" });
+    await waitForMapReady(page);
+
+    const kotak = await page.evaluate((selektor) => {
+      return selektor.map((q) => {
+        const el = document.querySelector(q);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { q, top: Math.round(r.top), bottom: Math.round(r.bottom), lebar: Math.round(r.width) };
+      });
+    }, PANEL_PETA as unknown as string[]);
+
+    for (const k of kotak) expect(k, `panel hilang: ${JSON.stringify(kotak)}`).not.toBeNull();
+    const ada = kotak as { q: string; top: number; bottom: number; lebar: number }[];
+
+    // Tidak ada yang menyusut jadi sisa piksel — pernah terjadi saat
+    // `max-width: calc(100% - 500px)` (jatah panel kanan) masih berlaku
+    // padahal panelnya sudah jadi lembar bawah: legenda tinggal 34px.
+    for (const k of ada) {
+      expect(k.lebar, `${k.q} terlalu sempit`).toBeGreaterThan(lebar * 0.4);
+    }
+
+    const urut = [...ada].sort((a, b) => a.top - b.top);
+    for (let i = 1; i < urut.length; i++) {
+      expect(
+        urut[i].top,
+        `${urut[i - 1].q} (…${urut[i - 1].bottom}) menindih ${urut[i].q} (${urut[i].top}…)`,
+      ).toBeGreaterThanOrEqual(urut[i - 1].bottom);
+    }
+
+    // Harus masih ada peta yang terlihat di antara chip stasiun dan legenda.
+    const chip = ada.find((k) => k.q === ".peta-chip-stasiun")!;
+    const legenda = ada.find((k) => k.q === ".peta-kontrol-kiri")!;
+    expect(legenda.top - chip.bottom, "peta tidak tersisa di antara panel").toBeGreaterThan(40);
+  });
+}

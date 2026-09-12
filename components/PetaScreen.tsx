@@ -719,6 +719,7 @@ export function PetaScreen({
           onSelect={handleSelectStation}
         />
         <div
+          className="peta-chip-stasiun"
           style={{
             position: "absolute",
             top: 158,
