@@ -78,11 +78,17 @@ const TINGGI_MIN = 360;
 /** Tidak ada yang bisa dipilih di sini — peta ini bacaan, bukan alat. */
 const abaikan = () => {};
 
-export function HeroPeta() {
+export function HeroPeta({
+  showOverlayCards = true,
+}: {
+  showOverlayCards?: boolean;
+} = {}) {
   const { peta, sorotan, error } = useBeranda();
 
   return (
-    <div style={{ position: "relative", height: "100%", minHeight: TINGGI_MIN }}>
+    <div
+      style={{ position: "relative", height: "100%", minHeight: TINGGI_MIN }}
+    >
       <div
         style={{
           position: "absolute",
@@ -127,7 +133,7 @@ export function HeroPeta() {
          celah antar-kolom `--s5`) — cukup untuk terasa "keluar frame" tanpa
          menabrak kolom teks. Kredit MapLibre dipindah ke kiri-ATAS supaya tidak
          ketiban kartu ini. */}
-      {sorotan && (
+      {showOverlayCards && sorotan && (
         <div
           className="kartu"
           style={{
@@ -194,7 +200,7 @@ export function HeroPeta() {
          bisa diam-diam berbohong. Ditaruh agak turun dari pojok dan menjorok
          ~23% keluar tepi KANAN (ke selokan `--page-x`) — user minta ia sebagian
          keluar frame. */}
-      {peta && (
+      {showOverlayCards && peta && (
         <div
           className="kartu"
           style={{
