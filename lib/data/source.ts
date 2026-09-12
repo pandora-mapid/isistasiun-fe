@@ -13,11 +13,12 @@ import type {
   ConfidenceGridProps,
   ConfidenceLayerEntry,
   IsochroneProps,
+  MockDemoData,
   ObservationPointProps,
   SpendingGapPayload,
   Station,
-  MockDemoData,
   RentalAsset,
+  StationSummaryPayload,
 } from "./types";
 import { MOCK_DEMO_DATA } from "./demo";
 import { MOCK_RENTAL_ASSETS } from "./rental-demo";
@@ -141,6 +142,19 @@ export async function loadConfidenceGrid(): Promise<
 > {
   return getJson<FeatureCollection<Polygon, ConfidenceGridProps>>(
     "confidence-grid.geojson",
+  );
+}
+
+/**
+ * Ringkasan per stasiun + bahan perbandingan antarsimpul.
+ *
+ * Fase 2: `GET /api/v1/analytics/station-summary`. Bentuknya di
+ * `DATA_CONTRACT.md` §B "Ringkasan simpul"; angkanya adalah hasil simulasi
+ * Monte Carlo setingkat simpul, bukan penjumlahan titik.
+ */
+export async function loadStationSummary(): Promise<StationSummaryPayload> {
+  return unwrap(
+    await getJson<ApiEnvelope<StationSummaryPayload>>("station-summary.json"),
   );
 }
 

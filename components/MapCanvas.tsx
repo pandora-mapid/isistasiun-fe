@@ -14,7 +14,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Domain } from "@/lib/analytics/select";
 import type { RetailLocation } from "@/lib/data/retail";
 import { rentalCircleLayer, rentalLabelLayer } from "@/lib/map/rental-style";
-import { retailCircleLayer, retailLabelLayer } from "@/lib/map/retail-style";
 import { stationCircleLayer, stationLabelLayer } from "@/lib/map/station-style";
 import type {
   ConfidenceGridProps,
@@ -45,6 +44,12 @@ import {
   pointLabelLayer,
   scaleDependentPaint,
 } from "@/lib/map/style";
+import {
+  retailCircleLayer,
+  retailLabelLayer,
+  retailStrokeColor,
+  retailStrokeWidth,
+} from "@/lib/map/retail-style";
 
 const EMPTY_RETAIL: FeatureCollection<Point, RetailLocation> = {
   type: "FeatureCollection",
@@ -280,7 +285,7 @@ export function MapCanvas({
   interactive = true,
   fitPadding = FIT_PADDING,
   borderRadius,
-  attributionPosition = "bottom-right",
+   attributionPosition = "bottom-right",
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -312,6 +317,16 @@ export function MapCanvas({
   useEffect(() => {
     onSelectRef.current = onSelectPoint;
   }, [onSelectPoint]);
+  /** Sama alasannya untuk retail: pendengar dipasang sekali, closure-nya jangan dibekukan. */
+  const onSelectRetailRef = useRef(onSelectRetail);
+  useEffect(() => {
+    onSelectRetailRef.current = onSelectRetail;
+  }, [onSelectRetail]);
+  /** Daftar retail terbaru, dibaca penangan klik untuk mencocokkan `id` → lokasi. */
+  const retailRef = useRef(retailLocations);
+  useEffect(() => {
+    retailRef.current = retailLocations;
+  }, [retailLocations]);
 
   // --- membuat peta, sekali seumur komponen -------------------------------
   useEffect(() => {
@@ -472,17 +487,19 @@ export function MapCanvas({
     if (glyphsAvailableRef.current) map.addLayer(rentalLabelLayer());
     map.addLayer(pointConfidenceLayer(gapDomain, confidenceDomain));
     map.addLayer(pointCircleLayer(gapDomain));
+    // Bulatan retail di atas lingkaran kesenjangan (LAYER_ORDER), di bawah simbol.
+    map.addLayer(retailCircleLayer());
     // Seluruh layer bertulisan butuh glyph dari jaringan; lewati kalau basemap
     // saja gagal dimuat, karena endpoint glyph-nya ikut hilang.
     if (glyphsAvailableRef.current) {
+      // Nama retail dipasang lebih dulu → prioritas tabrakan simbol paling
+      // rendah, jadi nama titik pengamatan tidak pernah tergeser olehnya.
+      map.addLayer(retailLabelLayer());
       // Urutannya mengikuti LAYER_ORDER: arus lebih dulu, nama titik sesudahnya
       // — lihat catatan di sana soal prioritas penempatan simbol.
       map.addLayer(pointArusLayer());
       map.addLayer(pointLabelLayer());
     }
-
-    map.addLayer(retailCircleLayer());
-    if (glyphsAvailableRef.current) map.addLayer(retailLabelLayer());
 
     // Bawa tampilan ke seluruh kawasan studi, sisakan ruang untuk panel
     // melayang.
@@ -956,6 +973,90 @@ export function MapCanvas({
       );
     }
   }, [visibleLayers, layersReady]);
+
+  // --- lokasi retail: source di-setData ulang saat datanya berubah -------
+  //
+  // Source retail dipasang sekali di efek pemasangan layer, yang keluar-awal
+  // selamanya sesudah `layersReady`. Tanpa efek ini, retail yang datang
+  // belakangan (mis. `demo` baru selesai dimuat) atau daftar yang berubah
+  // tidak pernah sampai ke peta — panel berubah, marker tidak.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady) return;
+    const src = map.getSource(SOURCE.retail);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(retailLocations);
+    }
+  }, [retailLocations, layersReady]);
+
+  // --- retail terpilih: garis tepi menebal ------------------------------
+  //
+  // Lewat `setPaintProperty`, bukan `feature-state`: nilainya bertahan saat
+  // source retail di-`setData` ulang, sedangkan feature-state ikut terhapus.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !map.getLayer(LAYER.retailCircle)) return;
+    map.setPaintProperty(
+      LAYER.retailCircle,
+      "circle-stroke-color" as never,
+      retailStrokeColor(selectedRetailId) as never,
+    );
+    map.setPaintProperty(
+      LAYER.retailCircle,
+      "circle-stroke-width" as never,
+      retailStrokeWidth(selectedRetailId) as never,
+    );
+  }, [selectedRetailId, layersReady, retailLocations]);
+
+  // --- interaksi retail: sorot dan pilih --------------------------------
+  //
+  // Efek tersendiri (alasannya sama dengan pendengar titik di atas). Peta
+  // non-interaktif tidak mendaftarkannya sama sekali.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !interactive || !map.getLayer(LAYER.retailCircle))
+      return;
+
+    const onClick = (e: { features?: { properties?: Record<string, unknown> }[] }) => {
+      const id = e.features?.[0]?.properties?.id;
+      const location = retailRef.current.features.find(
+        (f) => f.properties.id === id,
+      )?.properties;
+      if (location) onSelectRetailRef.current?.(location);
+    };
+    const onEnter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const onLeave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+
+    map.on("click", LAYER.retailCircle, onClick);
+    map.on("mouseenter", LAYER.retailCircle, onEnter);
+    map.on("mouseleave", LAYER.retailCircle, onLeave);
+    return () => {
+      map.off("click", LAYER.retailCircle, onClick);
+      map.off("mouseenter", LAYER.retailCircle, onEnter);
+      map.off("mouseleave", LAYER.retailCircle, onLeave);
+    };
+  }, [layersReady, interactive]);
+
+  // --- kamera menuju stasiun / retail / hasil banding -------------------
+  //
+  // Menunggu `layersReady` supaya `fitBounds` awal tidak menimpanya. `padding`
+  // nol: target ini permintaan eksplisit pengguna, bawa persis ke tengah.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !stationTarget) return;
+    map.flyTo({
+      center: [stationTarget.longitude, stationTarget.latitude],
+      zoom: stationTarget.zoom ?? 16,
+      bearing: 0,
+      pitch: 0,
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+      duration: 1100,
+    });
+  }, [layersReady, stationTarget]);
 
   const pesan = dataError ?? notice;
 

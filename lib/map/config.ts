@@ -179,6 +179,14 @@ export const LAYER_ORDER = [
   LAYER.rentalLabel,
   LAYER.pointConfidence,
   LAYER.pointCircle,
+  // Bulatan retail duduk di atas lingkaran kesenjangan (kecil, jadi tidak
+  // menutupi) tapi di bawah semua simbol tulisan.
+  LAYER.retailCircle,
+  // Nama retail dipasang PALING AWAL di antara simbol → prioritas tabrakan
+  // paling rendah. MapLibre menempatkan simbol dalam urutan terbalik: yang
+  // lebih akhir menang. Nama gerai retail hanya konteks tambahan, jadi ia yang
+  // pertama menyingkir saat ruang sempit — bukan nama titik pengamatan.
+  LAYER.retailLabel,
   // Arus sengaja SEBELUM nama titik. MapLibre menempatkan simbol dalam urutan
   // terbalik — layer yang lebih akhir menang saat kotak teksnya bertabrakan.
   // Waktu arus diletakkan sesudah nama, seluruh nama titik lenyap dari peta
@@ -186,8 +194,6 @@ export const LAYER_ORDER = [
   // yang harus berada di urutan belakang.
   LAYER.pointArus,
   LAYER.pointLabel,
-  LAYER.retailCircle,
-  LAYER.retailLabel,
 ] as const;
 
 /**

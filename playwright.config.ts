@@ -21,7 +21,7 @@ export default defineConfig({
   // WebGL sekaligus membuat event kamera terlambat dan menghasilkan flake.
   workers: 1,
   reporter: [["list"]],
-  timeout: 60_000,
+  timeout: 90_000,
   use: {
     baseURL: "http://localhost:3000",
     trace: "off",

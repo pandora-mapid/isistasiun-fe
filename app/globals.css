@@ -1235,7 +1235,6 @@ h3 {
   --r-pill: 999px;
 
   --page-x: clamp(20px, 4.6vw, 68px);
-  --page-max: 1400px;
 }
 
 /* Ground halaman. Ditempel sebagai scope, bukan dengan mengubah `.page-canvas`,
@@ -1288,9 +1287,13 @@ h3 {
 
 /* --- Tata letak ---------------------------------------------------------- */
 
+/* Selokan halaman — hanya menyisakan `--page-x` di kiri-kanan, TIDAK membatasi
+   lebar. Dulu ada `max-width: 1400px; margin: 0 auto` di sini, tapi itu bikin
+   Beranda (satu-satunya pemakai `.wrap`) memusat dengan pita kosong di monitor
+   lebar, sementara Insight/Metodologi/Rekomendasi mengalir penuh mengikuti
+   viewport. Prosa tetap terbaca karena dibatasi `ch` sendiri (`.measure`,
+   `maxWidth: "NNch"`), bukan oleh wadahnya. */
 .wrap {
-  max-width: var(--page-max);
-  margin: 0 auto;
   padding-inline: var(--page-x);
 }
 
@@ -1589,16 +1592,516 @@ a.kartu:focus-visible {
   border-top-color: var(--rule);
 }
 /* Kolom kontrol MapLibre (`top-left`) digeser turun supaya tidak berdempetan
-   dengan pil nav yang kini mengambang di atas peta. Di-scope ke `.peta-canvas`,
-   bukan `.paper-canvas`: peta hero Beranda juga memakai kontrol `top-left` tapi
-   navnya tidak mengambang di atas peta itu. */
+   dengan pil nav yang mengambang DAN dengan kotak pencarian stasiun di
+   bawahnya — kontrol zoom duduk di rel kiri sesudah keduanya. Di-scope ke
+   `.peta-canvas`, bukan `.paper-canvas`: peta hero Beranda juga memakai kontrol
+   `top-left` tapi navnya tidak mengambang di atas peta itu. */
 .peta-canvas .maplibregl-ctrl-top-left {
-  margin-top: 84px;
+  margin-top: 196px;
 }
 /* Pembungkus pil nav mengambang: transparan tembus klik, barisnya sendiri tidak.
    `pointer-events` itu properti terwarisi, jadi `auto` di anak langsung cukup. */
 .peta-nav-float > * {
   pointer-events: auto;
+}
+
+/* ==========================================================================
+   Kotak "Cari stasiun" — panel mengambang di kiri peta.
+   Rel kiri dari atas ke bawah: pil nav → kotak cari → kontrol zoom MapLibre
+   (digeser turun, lihat aturan `.maplibregl-ctrl-top-left` di atas). Rata
+   `left: 24px` dengan legenda & panel slot. Nada kertas. Panel Retail &
+   potensi sudah pindah ke tab sidebar — lihat `.retail-*` di bawah.
+   ========================================================================== */
+.station-search {
+  position: absolute;
+  top: 122px;
+  /* Rata tepi kiri pil nav (yang bermargin `--page-x`), bukan `24px` seperti
+     legenda — supaya kotak cari terbaca "menempel di bawah nav", bukan mencong.
+     `top` cukup untuk lolos bayangan pil nav, tidak lebih — biar terasa satu
+     kesatuan dengan nav, bukan panel terpisah. */
+  left: var(--page-x);
+  z-index: 12;
+  width: min(360px, calc(100% - 2 * var(--page-x)));
+  color: var(--ink);
+}
+.station-search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-pill);
+  box-shadow: var(--shadow-soft);
+}
+.station-search-field:focus-within {
+  border-color: var(--ink);
+}
+.station-search-field svg {
+  flex: none;
+  color: var(--ink-faint);
+}
+.station-search-field input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 14px/1.2 var(--font-inter), system-ui, sans-serif;
+  color: var(--ink);
+}
+.station-search-field input::placeholder {
+  color: var(--ink-faint);
+}
+.station-search-field button {
+  flex: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 0 4px;
+}
+.station-search-field button:hover {
+  color: var(--ink);
+}
+.station-search-results:not([hidden]):not(:empty),
+.station-search-empty {
+  margin-top: 6px;
+  padding: 5px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-soft);
+  max-height: 260px;
+  overflow-y: auto;
+}
+.station-search-option {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 9px 11px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-size: 13.5px;
+}
+.station-search-option strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+.station-search-option span {
+  font-size: 11.5px;
+  color: var(--ink-muted);
+}
+.station-search-option[aria-selected="true"] {
+  background: var(--data-wash);
+}
+.station-search-option[aria-selected="true"] strong {
+  color: var(--data);
+}
+.station-search-empty {
+  padding: 14px;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+
+/* ==========================================================================
+   Panel Retail & potensi — di dalam tab sidebar (bukan lagi mengambang).
+   `RetailPanel` hidup di `.sc` tab Retail. Dropdown pemilih memakai kelas
+   `.layers-toggle` + pola wadah yang sama dengan "Lapisan & filter".
+   ========================================================================== */
+.retail-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0 10px;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-pill);
+}
+.retail-search:focus-within {
+  border-color: var(--ink);
+}
+.retail-search svg {
+  flex: none;
+  color: var(--ink-faint);
+}
+.retail-search input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font: 400 13px/1.2 var(--font-inter), system-ui, sans-serif;
+  color: var(--ink);
+}
+.retail-search input::placeholder {
+  color: var(--ink-faint);
+}
+.retail-search button {
+  flex: none;
+  border: 0;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 0 2px;
+}
+.retail-search button:hover {
+  color: var(--ink);
+}
+
+.retail-location-list {
+  display: flex;
+  flex-direction: column;
+}
+.retail-group + .retail-group {
+  margin-top: 2px;
+}
+.retail-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 4px 5px;
+  font: 500 10.5px/1 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.retail-group-title .fig {
+  margin-left: auto;
+  color: var(--ink-faint);
+}
+.retail-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid;
+  flex: none;
+  box-sizing: border-box;
+}
+.retail-location-list button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 4px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink-2);
+}
+.retail-location-list button > span:last-child {
+  color: var(--ink-faint);
+}
+.retail-location-list button:hover {
+  background: var(--surface);
+  color: var(--ink);
+}
+.retail-location-list button[aria-pressed="true"] {
+  background: var(--data-wash);
+  color: var(--data);
+}
+.retail-location-list button[aria-pressed="true"] > span:last-child {
+  color: var(--data);
+}
+.retail-location-list button:focus-visible {
+  outline: 2px solid var(--brand-strong);
+  outline-offset: -2px;
+}
+.retail-picker-empty {
+  padding: 12px 4px;
+  font-size: 12px;
+  color: var(--ink-muted);
+}
+
+/* Detail di bawah dropdown — mengalir di panel, bukan kartu bergaris+bayangan. */
+.retail-detail {
+  position: relative;
+  padding-top: 4px;
+}
+.retail-detail-close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  padding: 4px;
+  border-radius: var(--r-sm);
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.retail-detail-close:hover {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+.retail-detail-kind {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font: 500 10.5px/1 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.retail-detail h3 {
+  margin: 10px 28px 0 0;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.retail-detail-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 16px 0 0;
+}
+.retail-detail-meta div {
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  background: var(--paper-2);
+}
+.retail-detail-meta dt {
+  font: 500 9px/1 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.retail-detail-meta dd {
+  margin: 6px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.retail-detail p {
+  margin: 16px 0 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--ink-muted);
+}
+.retail-detail-empty {
+  padding: 20px 4px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-muted);
+}
+
+/* ==========================================================================
+   Dialog Bandingkan — modal penuh di atas peta.
+   ========================================================================== */
+.dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+  background: rgba(22, 19, 15, 0.5);
+  backdrop-filter: blur(3px);
+}
+.comparison-dialog {
+  width: min(920px, 100%);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  padding: 26px 28px;
+  border-radius: var(--r-xl);
+  background: var(--paper);
+  box-shadow: var(--shadow-lift);
+}
+.comparison-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: flex-start;
+}
+.comparison-header h2 {
+  margin: 8px 0 6px;
+  font-size: var(--t-h3);
+  color: var(--ink);
+}
+.comparison-header p {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--ink-muted);
+}
+.comparison-close {
+  flex: none;
+  display: flex;
+  padding: 6px;
+  border-radius: var(--r-sm);
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.comparison-close:hover {
+  background: var(--paper-2);
+  color: var(--ink);
+}
+.comparison-pickers {
+  display: flex;
+  align-items: end;
+  gap: 14px;
+  margin: 22px 0;
+  padding: 14px 16px;
+  border-radius: var(--r-md);
+  background: var(--paper-2);
+}
+.comparison-pickers label {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  font: 500 10px/1 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+.comparison-pickers select {
+  padding: 9px 11px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font: 600 13.5px/1 var(--font-inter), system-ui, sans-serif;
+}
+.comparison-pickers > span {
+  padding-bottom: 11px;
+  font-size: 11px;
+  color: var(--ink-faint);
+}
+.comparison-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.comparison-cards article {
+  padding: 18px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  background: var(--surface);
+}
+.comparison-station-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.comparison-station-title span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex: none;
+}
+.comparison-cards dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin: 16px 0;
+}
+.comparison-cards dl div {
+  padding: 9px 10px;
+  border-radius: var(--r-sm);
+  background: var(--paper-2);
+}
+.comparison-cards dt {
+  font: 500 9px/1 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.comparison-cards dd {
+  margin: 5px 0 0;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--ink);
+}
+.comparison-cards .comparison-highlight {
+  background: var(--data-wash);
+}
+.comparison-cards .comparison-highlight dd {
+  color: var(--data);
+}
+.comparison-missing {
+  display: grid;
+  gap: 5px;
+  margin-bottom: 14px;
+  font-size: 12px;
+}
+.comparison-missing span {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.comparison-missing strong {
+  color: var(--ink);
+}
+.comparison-chart {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border-radius: var(--r-md);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+}
+.comparison-chart h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  color: var(--ink);
+}
+.comparison-chart-row {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin: 9px 0;
+  font-size: 11.5px;
+  color: var(--ink-muted);
+}
+.comparison-chart-row > div {
+  display: grid;
+  gap: 4px;
+}
+.comparison-chart-row > div > div {
+  height: 6px;
+  border-radius: var(--r-pill);
+  min-width: 2px;
+}
+
+/* Chip status kategori — dipakai dialog Bandingkan bila nanti diperluas, dan
+   panel brief kalau status kategori mock digunakan. Tiga keadaan tetap. */
+.category-status {
+  padding: 3px 7px;
+  border-radius: var(--r-pill);
+  font: 600 9px/1 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: 0.04em;
+  text-transform: capitalize;
+}
+.category-status-terisi {
+  color: #2f6d4f;
+  background: rgba(47, 109, 79, 0.12);
+}
+.category-status-kurang {
+  color: var(--field);
+  background: var(--field-wash);
+}
+.category-status-kosong {
+  color: #a3324a;
+  background: rgba(163, 50, 74, 0.1);
+}
+
+@media (max-width: 900px) {
+  .comparison-cards {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* --- Gerak ---------------------------------------------------------------

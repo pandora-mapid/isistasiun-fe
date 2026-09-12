@@ -34,6 +34,7 @@ export function ComparisonDialog({ stations, analytics, statuses, activeSlot, ac
     [selectedStations, analytics, activeCategory, statuses],
   );
   const maxSlotGap = Math.max(1, ...slotRows.flatMap((row) => selectedStations.map((station) => row.by_station[station.id] ?? 0)));
+  const title = selectedStations.map((station) => station.name).join(" dan ") || "Perbandingan simpul";
 
   useEffect(() => {
     closeRef.current?.focus();

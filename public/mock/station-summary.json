@@ -1,0 +1,98 @@
+{
+  "success": true,
+  "data": {
+    "generated_at": "2026-08-20T10:00:00Z",
+    "pipeline_version": "mock-0.1",
+    "day_type": "weekday",
+    "stations": [
+      {
+        "station_id": 1,
+        "station_name": "Manggarai",
+        "typology": "transit",
+        "placeholder": false,
+        "pintu_dicacah": 3,
+        "pintu_ditahan": 0,
+        "gap": { "p10": 5000000, "p50": 5700000, "p90": 7300000 },
+        "potensi": { "p10": 7200000, "p50": 8200000, "p90": 10500000 },
+        "tertangkap": { "p10": 2200000, "p50": 2500000, "p90": 3200000 },
+        "capture_rate": 0.3049,
+        "confidence": { "min": 0.77, "max": 0.87 },
+        "struk_terbaca": 713,
+        "peak": {
+          "point_id": 12,
+          "point_label": "Koridor Transit Utara",
+          "slot": "pagi",
+          "variables": { "F": 1574, "E": 0.07, "C": 0.66, "V": 30000 },
+          "gap": { "p10": 860000, "p50": 1100000, "p90": 1520000 }
+        },
+        "composition": [
+          { "category": "fnb", "demand_share": 0.4666, "gerai_count": 3, "hilang": false },
+          { "category": "ritel", "demand_share": 0.1837, "gerai_count": 2, "hilang": true },
+          { "category": "apotek", "demand_share": 0.1061, "gerai_count": 0, "hilang": true },
+          { "category": "jasa", "demand_share": 0.1257, "gerai_count": 1, "hilang": true },
+          { "category": "lainnya", "demand_share": 0.1179, "gerai_count": 2, "hilang": true }
+        ],
+        "basis": "monte-carlo-simpul"
+      },
+      {
+        "station_id": 2,
+        "station_name": "Sudirman",
+        "typology": "perkantoran",
+        "placeholder": false,
+        "pintu_dicacah": 4,
+        "pintu_ditahan": 1,
+        "gap": { "p10": 3100000, "p50": 3500000, "p90": 4500000 },
+        "potensi": { "p10": 4400000, "p50": 5000000, "p90": 6400000 },
+        "tertangkap": { "p10": 1300000, "p50": 1500000, "p90": 1900000 },
+        "capture_rate": 0.3,
+        "confidence": { "min": 0.77, "max": 0.92 },
+        "struk_terbaca": 848,
+        "peak": {
+          "point_id": 24,
+          "point_label": "Pintu 4",
+          "slot": "pagi",
+          "variables": { "F": 977, "E": 0.062, "C": 0.72, "V": 30000 },
+          "gap": { "p10": 530000, "p50": 680000, "p90": 940000 }
+        },
+        "composition": [
+          { "category": "fnb", "demand_share": 0.5087, "gerai_count": 3, "hilang": false },
+          { "category": "ritel", "demand_share": 0.1483, "gerai_count": 2, "hilang": true },
+          { "category": "apotek", "demand_share": 0.1221, "gerai_count": 0, "hilang": true },
+          { "category": "jasa", "demand_share": 0.124, "gerai_count": 1, "hilang": true },
+          { "category": "lainnya", "demand_share": 0.0969, "gerai_count": 2, "hilang": true }
+        ],
+        "basis": "monte-carlo-simpul"
+      },
+      {
+        "station_id": 3,
+        "station_name": "Stasiun C (belum ditentukan)",
+        "typology": "hunian",
+        "placeholder": true,
+        "pintu_dicacah": 3,
+        "pintu_ditahan": 0,
+        "gap": { "p10": 2150000, "p50": 2450000, "p90": 3150000 },
+        "potensi": { "p10": 3100000, "p50": 3530000, "p90": 4530000 },
+        "tertangkap": { "p10": 950000, "p50": 1080000, "p90": 1390000 },
+        "capture_rate": 0.3059,
+        "confidence": { "min": 0.77, "max": 0.87 },
+        "struk_terbaca": 795,
+        "peak": {
+          "point_id": 31,
+          "point_label": "Pintu 1",
+          "slot": "pagi",
+          "variables": { "F": 651, "E": 0.062, "C": 0.63, "V": 33000 },
+          "gap": { "p10": 360000, "p50": 460000, "p90": 640000 }
+        },
+        "composition": [
+          { "category": "fnb", "demand_share": 0.3803, "gerai_count": 4, "hilang": false },
+          { "category": "ritel", "demand_share": 0.2241, "gerai_count": 3, "hilang": false },
+          { "category": "apotek", "demand_share": 0.1643, "gerai_count": 1, "hilang": true },
+          { "category": "jasa", "demand_share": 0.1298, "gerai_count": 2, "hilang": true },
+          { "category": "lainnya", "demand_share": 0.1014, "gerai_count": 2, "hilang": true }
+        ],
+        "basis": "monte-carlo-simpul"
+      }
+    ]
+  },
+  "error": null
+}

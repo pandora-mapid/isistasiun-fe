@@ -242,11 +242,13 @@ Fitur-fitur yang **dijanjikan di proposal** tapi belum ada di kode. Sebagian bis
 | 3.2 | **Ekspor CSV** tabel analisis | §3.2 | ❌ Tidak — bisa sepenuhnya di frontend |
 | 3.3 | **Ekspor PDF** brief simpul | §3.2 | ❌ Tidak — bisa sepenuhnya di frontend |
 | 3.4 | **Tabel atribut** | §3.2 | ⚠️ Sebagian |
-| 3.5 | **Bandingkan dua simpul berdampingan** | §3.2 | ⚠️ Sebagian |
+| 3.5 | **Bandingkan dua simpul berdampingan** | §3.2 | ⚠️ Sebagian — data & ringkasan siap, UI penuh belum |
 | 3.6 | **Copilot AI** tersambung ke `POST /copilot/query` | §3.4 | ✅ Ya |
 | 3.7 | **Pembanding akhir pekan** — proposal menjanjikan satu sampel akhir pekan sebagai pembanding. UI-nya sudah ada tempatnya di panel slot (ditandai "belum dicacah"), tapi belum ada datanya dan belum ada cara memilihnya | §5.2 | ✅ Ya — butuh survei akhir pekan + `day_type` dari backend |
 
 > Tombol "Bandingkan", "Tabel atribut", "Unduh brief", dan "Brief PDF" di UI sekarang sengaja dibuat mati. Semuanya adalah janji proposal, bukan hiasan — jadi perlu masuk daftar pekerjaan sadar, bukan dilupakan.
+
+> **3.5 — fondasinya sudah ada (2026-09-10).** "Ringkasan & perbandingan antarsimpul" (data + logika) selesai: bentuk `StationSummary` di [`DATA_CONTRACT.md`](DATA_CONTRACT.md) §B4, data contoh `public/mock/station-summary.json` (dikunci konsisten dengan `spending-gap.json` oleh `tests/summary.spec.ts`), pemilih murni `lib/analytics/summary.ts`, dan strip **"Ringkasan simpul"** read-only di `/insight` yang menyandingkan Manggarai vs Sudirman. Backend: `GET /analytics/station-summary` (paket `internal/summary/`, milik Arzaka — `02-BACKEND-SPEC §2`). Yang belum: UI "Bandingkan" penuh (overlay 2 kolom di `/peta` atau rute sendiri) + keadaan "batas tercapai · upgrade" untuk multi-simpul premium.
 
 > **Catatan 3.7.** `day_type` sudah ada di `lib/data/types.ts` sejak Fase 0, tapi nilainya selalu `weekday` dan tidak ada satu pun kendali yang mengubahnya. Jadi jenis hari sekarang adalah sumbu yang terpasang di tipe data tapi belum terpasang di UI — perlu diputuskan bentuk kendalinya saat datanya ada.
 

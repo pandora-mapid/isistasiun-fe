@@ -25,7 +25,9 @@ async function tungguPeta(page: Page) {
       return map.queryRenderedFeatures({ layers: ["point-circle"] }).length > 0;
     },
     undefined,
-    { timeout: 30_000 },
+    // Di bawah suite paralel penuh + mesin sibuk, dev server + render SwiftShader
+    // bisa selambat ini untuk menggambar fitur pertama. Masih < `timeout` tes.
+    { timeout: 55_000 },
   );
 }
 

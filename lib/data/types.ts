@@ -185,7 +185,6 @@ export type RentalAsset = {
   source_updated_at: string | null;
   note: string | null;
 };
-
 export type MockCategoryStatus = {
   station_id: number;
   category: CategoryKey;
@@ -241,6 +240,91 @@ export type MockDemoData = {
   category_statuses: MockCategoryStatus[];
   recommendations: MockRecommendation[];
   evidence: MockEvidence[];
+};
+
+/* -------------------------------------------------------------------------
+ * Ringkasan & perbandingan antarsimpul
+ *
+ * Naik satu tingkat dari `SpendingGapPayload`: yang di sana per titik
+ * pengamatan, yang di sini per **stasiun** — potret satu simpul sebagai
+ * kawasan, plus sumbu pembanding Persona 2 (pengusaha: "buka toko di simpul
+ * mana"). Mengikuti `DATA_CONTRACT.md` §B "Ringkasan simpul".
+ *
+ * Fase 2: `GET /api/v1/analytics/station-summary`. Sekarang dibaca dari
+ * `public/mock/station-summary.json`, yang dikarang KONSISTEN dengan
+ * `spending-gap.json` (titik puncak & jumlah gerai kategori sama persis) —
+ * `tests/summary.spec.ts` mengunci supaya keduanya tidak bisa menyimpang.
+ * ---------------------------------------------------------------------- */
+
+/** Rincian satu kategori usaha pada tingkat stasiun (bukan per slot). */
+export type CategoryComposition = {
+  category: CategoryKey;
+  /** Porsi permintaan kawasan untuk kategori ini, 0–1. */
+  demand_share: number;
+  /**
+   * Jumlah gerai kategori ini di dalam stasiun. Diambil dari titik
+   * berkesenjangan terbesar — titik yang sama yang dibaca matriks Insight,
+   * supaya strip dan matriks di halaman itu tidak berbeda angka.
+   */
+  gerai_count: number;
+  /**
+   * Permintaan terbaca tapi gerainya di bawah ambang (`AMBANG_GERAI`).
+   * Ini "kategori hilang" versi tingkat stasiun.
+   */
+  hilang: boolean;
+};
+
+/** Titik puncak sebuah simpul — pembawa karakter F/E/C/V-nya. */
+export type StationPeak = {
+  point_id: number;
+  point_label: string;
+  slot: SlotKey;
+  /** F × E × C × V pada slot puncak titik ini. `null` bila tidak dicacah. */
+  variables: Variables | null;
+  gap: Range;
+};
+
+/**
+ * Potret satu simpul sebagai kawasan.
+ *
+ * `gap`/`potensi`/`tertangkap` adalah hasil **simulasi Monte Carlo setingkat
+ * simpul** (`basis: "monte-carlo-simpul"`) — bukan penjumlahan angka titik
+ * yang tampil di layar. Menjumlahkan titik dilarang (ROADMAP §9.4: "summing
+ * invents a number nobody measured"); simulasi setingkat simpul adalah
+ * angka yang memang dihitung pipeline (`/pipeline/simulations/monte-carlo`
+ * "per simpul"). Di data contoh angkanya dikarang mendekati jumlah titik —
+ * karena secara nyata memang akan mendekati itu — tapi rentang P10–P90-nya
+ * lebih rapat, meniru efek diversifikasi simulasi gabungan.
+ */
+export type StationSummaryRow = {
+  station_id: number;
+  station_name: string;
+  typology: string;
+  /** Placeholder = simpul yang datanya belum dikumpulkan (mis. simpul ke-3). */
+  placeholder: boolean;
+  /** Titik pengamatan dalam scope survei simpul ini. */
+  pintu_dicacah: number;
+  /** Titik yang estimasinya ditahan karena sampel tipis. */
+  pintu_ditahan: number;
+  gap: Range;
+  potensi: Range;
+  tertangkap: Range;
+  /** `tertangkap.p50 / potensi.p50`, 0–1. `null` bila tak terhitung. */
+  capture_rate: number | null;
+  /** Rentang skor kepercayaan titik-titik yang diestimasi. */
+  confidence: { min: number; max: number } | null;
+  /** Jumlah struk yang terbaca OCR di seluruh titik simpul ini. */
+  struk_terbaca: number;
+  peak: StationPeak | null;
+  composition: CategoryComposition[];
+  basis: "monte-carlo-simpul" | "agregat-titik";
+};
+
+export type StationSummaryPayload = {
+  generated_at: string;
+  pipeline_version: string;
+  day_type: "weekday" | "weekend";
+  stations: StationSummaryRow[];
 };
 
 /**

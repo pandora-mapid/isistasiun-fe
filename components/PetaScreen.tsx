@@ -17,7 +17,9 @@ import {
   confidenceLabel,
   evidenceFor,
   pointRank,
-} from "@/lib/analytics/demo-select";
+  } from "@/lib/analytics/demo-select";
+import { RetailPanel } from "./RetailPanel";
+import { RETAIL_KINDS, RETAIL_LEGEND } from "@/lib/map/retail-style";
 import {
   biggestGapPoint,
   confidenceDomainOf,
@@ -238,7 +240,7 @@ export function PetaScreen({
     error,
   } = usePetaData();
 
-  const [tab, setTab] = useState<"brief" | "copilot">("brief");
+  const [tab, setTab] = useState<"brief" | "retail" | "copilot">("brief");
   const [layersOpen, setLayersOpen] = useState(false);
   const [activeLayers, setActiveLayers] = useState<string[]>(
     DEFAULT_ACTIVE_LAYERS,
@@ -580,7 +582,7 @@ export function PetaScreen({
       }).format(new Date(selectedEvidence.surveyed_at))
     : "Belum tersedia";
 
-  const tabX = tab === "brief" ? 4 : 190;
+  const tabX = { brief: 4, retail: 130, copilot: 256 }[tab];
   const chev = layersOpen ? 180 : 0;
   const layerCount = layersOpen
     ? `${activeLayers.length} dari ${LAYER_TERSEDIA.length} aktif`
@@ -1077,43 +1079,29 @@ export function PetaScreen({
                   position: "absolute",
                   top: 4,
                   bottom: 4,
-                  width: 186,
+                  width: 122,
                   background: "var(--surface)",
                   boxShadow: "var(--shadow-soft)",
                   transition: "left .18s cubic-bezier(.4,0,.2,1)",
                   left: tabX,
                 }}
               />
-              <button
-                onClick={() => setTab("brief")}
-                style={{
-                  all: "unset",
-                  position: "relative",
-                  flex: 1,
-                  textAlign: "center",
-                  padding: "9px 0",
-                  font: "600 12.5px/1 var(--font-inter)",
-                  color: "var(--ink)",
-                  cursor: "pointer",
-                }}
-              >
-                Ringkasan
-              </button>
-              <button
-                onClick={() => setTab("copilot")}
-                style={{
-                  all: "unset",
-                  position: "relative",
-                  flex: 1,
-                  textAlign: "center",
-                  padding: "9px 0",
-                  font: "600 12.5px/1 var(--font-inter)",
-                  color: "var(--ink)",
-                  cursor: "pointer",
-                }}
-              >
-                Tanya Data
-              </button>
+              {(
+                [
+                  ["brief", "Ringkasan"],
+                  ["retail", "Retail"],
+                  ["copilot", "Tanya Data"],
+                ] as const
+              ).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setTab(key)}
+                  aria-pressed={tab === key}
+                  style={{ all: "unset", position: "relative", flex: 1, textAlign: "center", padding: "9px 0", font: "600 12.5px/1 var(--font-inter)", color: "var(--ink)", cursor: "pointer" }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -2166,6 +2154,50 @@ export function PetaScreen({
             </div>
           )}
 
+          {tab === "retail" && (
+            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
+              <div style={{ flex: "none", padding: "4px 22px 16px" }}>
+                <div className="k" style={{ marginBottom: 10 }}>Retail &amp; potensi toko</div>
+                <div style={{ fontSize: 12.5, color: "var(--ink-muted)" }}>
+                  Gerai yang sudah ada, kandidat toko, dan ruko depan stasiun di
+                  kawasan Manggarai. Penanda di peta bisa disembunyikan lewat
+                  Lapisan &amp; filter.
+                </div>
+                {/* Kunci baca penanda retail — di sini, bukan di legenda peta,
+                   supaya legenda peta tetap seperti semula. */}
+                <div className="row" style={{ gap: "8px 16px", flexWrap: "wrap", marginTop: 12 }}>
+                  {RETAIL_KINDS.map((kind) => (
+                    <span
+                      key={kind}
+                      className="row"
+                      style={{ gap: 6, fontSize: 11, color: "var(--ink-2)", whiteSpace: "nowrap" }}
+                    >
+                      <span
+                        style={{
+                          width: 9,
+                          height: 9,
+                          borderRadius: 999,
+                          background: RETAIL_LEGEND[kind].fill,
+                          boxShadow: `0 0 0 1.5px ${RETAIL_LEGEND[kind].stroke}`,
+                          flex: "none",
+                        }}
+                      />
+                      {RETAIL_LEGEND[kind].label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="sc" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 22px 16px" }}>
+                <RetailPanel
+                  locations={retailLocations}
+                  selected={selectedRetail}
+                  onSelect={selectRetail}
+                  onClose={() => setSelectedRetail(null)}
+                />
+              </div>
+            </div>
+          )}
+
           {tab === "copilot" && (
             <div
               style={{
@@ -2829,6 +2861,26 @@ export function PetaScreen({
           }
         />
       </div>
+
+      {showComparison && analytics && stations && demo && (
+        <ComparisonDialog
+          stations={stations}
+          analytics={analytics}
+          statuses={demo.category_statuses}
+          activeSlot={activeSlot}
+          activeCategory={activeCategory}
+          onClose={() => setShowComparison(false)}
+          onOpenStation={(target) => {
+            if (target.longitude === undefined || target.latitude === undefined) return;
+            setStationTarget({ longitude: target.longitude, latitude: target.latitude });
+            setPilihanTitik(
+              analytics.points.find((point) => point.station_id === target.id)?.point_id ?? null,
+            );
+            setSelectedRetail(null);
+            setShowComparison(false);
+          }}
+        />
+      )}
     </div>
   );
 }
