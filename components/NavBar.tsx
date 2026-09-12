@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AuthNavAction } from "@/components/auth/AuthNavAction";
 
 export type NavKey =
   | "beranda"
@@ -7,6 +8,8 @@ export type NavKey =
   | "insight"
   | "metodologi"
   | "rekomendasi";
+
+export type PageKey = NavKey | "login" | "premium";
 
 const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
   { key: "beranda", href: "/", label: "Beranda" },
@@ -60,8 +63,11 @@ function Brand() {
 }
 
 /** The 5 route pills with the active/inactive treatment — shared by both nav
- * variants so the active state looks identical wherever the nav appears. */
-function NavLinks({ active }: { active: NavKey }) {
+ * variants so the active state looks identical wherever the nav appears.
+ *
+ * Takes `PageKey`, not `NavKey`: /login and /premium have no pill of their own,
+ * so they simply leave every pill inactive rather than needing a branch here. */
+function NavLinks({ active }: { active: PageKey }) {
   return (
     <div className="row" style={{ gap: 4, marginRight: "auto" }}>
       {NAV_ITEMS.map((item) => {
@@ -97,7 +103,15 @@ function NavLinks({ active }: { active: NavKey }) {
  * hasn't opted in (Peta) stays pixel-identical. The `.paper-canvas` scope
  * (Beranda, Insight, Metodologi, Rekomendasi) overrides them, turning this same
  * markup into a floating pill bar without a second NavBar existing anywhere. */
-export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
+export function NavBar({
+  active,
+  cta,
+  showAuth = true,
+}: {
+  active: PageKey;
+  cta: ReactNode;
+  showAuth?: boolean;
+}) {
   return (
     <div
       className="row"
@@ -113,7 +127,10 @@ export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
     >
       <Brand />
       <NavLinks active={active} />
-      {cta}
+      <div className="nav-actions">
+        {cta}
+        {showAuth && <AuthNavAction />}
+      </div>
     </div>
   );
 }
