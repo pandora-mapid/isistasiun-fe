@@ -50,6 +50,7 @@ import type {
   Station,
 } from "@/lib/data/types";
 import { usePetaData } from "@/lib/data/usePetaData";
+import { askCopilot, type CopilotAnswer } from "@/lib/data/source";
 import {
   desimal,
   jarak,
@@ -226,6 +227,25 @@ const QUESTIONS = [
   "kawasan mana yang sampelnya masih tipis?",
 ];
 
+/**
+ * Copilot memakai kosakata kategori/slot backend (makanan_minuman, evening, …);
+ * peta memakai kunci lokal (fnb, sore, …). Peta inilah jembatannya, jadi
+ * `spatial_filter` dari AI bisa langsung menggerakkan filter peta.
+ */
+const AI_CATEGORY_TO_FE: Record<string, CategoryFilter> = {
+  makanan_minuman: "fnb",
+  ritel_kemasan: "ritel",
+  apotek_kesehatan: "apotek",
+  jasa: "jasa",
+  lainnya: "lainnya",
+};
+const AI_SLOT_TO_FE: Record<string, SlotKey> = {
+  morning: "pagi",
+  midday: "siang",
+  evening: "sore",
+  night: "malam",
+};
+
 export function PetaScreen({
   initialQuery,
 }: {
@@ -261,7 +281,12 @@ export function PetaScreen({
   const [activeCatchment, setActiveCatchment] = useState<number>(5);
   const [activeSlot, setActiveSlot] = useState<SlotKey>(initialQuery.slot);
   const [showTransparansi, setShowTransparansi] = useState(false);
-  const [showCopilotResult, setShowCopilotResult] = useState(true);
+  const [showCopilotResult, setShowCopilotResult] = useState(false);
+  const [cqInput, setCqInput] = useState("");
+  const [cqAsked, setCqAsked] = useState<string | null>(null);
+  const [cqAnswer, setCqAnswer] = useState<CopilotAnswer | null>(null);
+  const [cqLoading, setCqLoading] = useState(false);
+  const [cqError, setCqError] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   /**
    * Overlay "Ringkasan & Bandingkan Simpul" — fitur TERPISAH dari
@@ -345,6 +370,47 @@ export function PetaScreen({
     setSelectedRental(null);
     updatePetaUrl({ rental: null });
   }, []);
+
+  /**
+   * Kirim pertanyaan ke copilot backend (`POST /copilot/query`) lalu terapkan
+   * hasilnya ke peta: aktifkan `suggested_layers`, dan pindahkan filter
+   * kategori/slot sesuai `spatial_filter`. Angka jawaban tidak di-parse di sini
+   * — backend & verifier yang menjaminnya; kita hanya menampilkan prosanya.
+   *
+   * `station_id` sengaja tidak dikirim: backend memvalidasinya sebagai UUID,
+   * sementara stasiun di peta memakai id numerik (1/2). Copilot tetap menjawab
+   * tanpa konteks stasiun; peta sudah menampilkan kedua simpul.
+   */
+  const submitCopilot = useCallback(
+    async (raw: string) => {
+      const query = raw.trim();
+      if (!query || cqLoading) return;
+      setCqAsked(query);
+      setCqInput("");
+      setCqLoading(true);
+      setCqError(false);
+      setShowCopilotResult(true);
+      try {
+        const ans = await askCopilot(query);
+        setCqAnswer(ans);
+        const cat = ans.spatial_filter?.category;
+        if (cat && AI_CATEGORY_TO_FE[cat]) setActiveCategory(AI_CATEGORY_TO_FE[cat]);
+        const slot = ans.spatial_filter?.time_slot;
+        if (slot && AI_SLOT_TO_FE[slot]) setActiveSlot(AI_SLOT_TO_FE[slot]);
+        const layers = (ans.suggested_layers ?? []).filter(
+          (key) => key in LAYER_GROUPS,
+        );
+        if (layers.length) {
+          setActiveLayers((prev) => Array.from(new Set([...prev, ...layers])));
+        }
+      } catch {
+        setCqError(true);
+      } finally {
+        setCqLoading(false);
+      }
+    },
+    [cqLoading],
+  );
 
   /**
    * Titik yang dipilih pengguna.
@@ -2426,32 +2492,34 @@ export function PetaScreen({
                 </div>
 
                 {/* User's question — right-aligned, solid ink bubble. */}
-                <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <div style={{ maxWidth: "82%" }}>
-                    <div
-                      className="k"
-                      style={{
-                        textAlign: "right",
-                        color: "var(--ink-faint)",
-                        marginBottom: 4,
-                      }}
-                    >
-                      Kamu
-                    </div>
-                    <div
-                      style={{
-                        borderRadius: "var(--r-md)",
-                        borderBottomRightRadius: 4,
-                        background: "var(--ink)",
-                        padding: "11px 15px",
-                        fontSize: 13,
-                        color: "var(--surface)",
-                      }}
-                    >
-                      simpul mana yang kekurangan gerai apotek pagi hari?
+                {cqAsked && (
+                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                    <div style={{ maxWidth: "82%" }}>
+                      <div
+                        className="k"
+                        style={{
+                          textAlign: "right",
+                          color: "var(--ink-faint)",
+                          marginBottom: 4,
+                        }}
+                      >
+                        Kamu
+                      </div>
+                      <div
+                        style={{
+                          borderRadius: "var(--r-md)",
+                          borderBottomRightRadius: 4,
+                          background: "var(--ink)",
+                          padding: "11px 15px",
+                          fontSize: 13,
+                          color: "var(--surface)",
+                        }}
+                      >
+                        {cqAsked}
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
 
                 {/* AI's answer — left-aligned, neutral bubble with a small
                    sparkle avatar, so the two speakers are never ambiguous.
@@ -2502,62 +2570,90 @@ export function PetaScreen({
                           padding: "16px 18px",
                         }}
                       >
-                        <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
-                          2 dari 3 simpul. Permintaan apotek di kawasan{" "}
-                          <b>Stasiun B</b> terbaca 37% tanpa satu pun gerai di
-                          dalam stasiun.
-                        </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 6,
-                            marginTop: 14,
-                          }}
-                        >
-                          <span
-                            className="chip"
+                        {cqLoading ? (
+                          <div
                             style={{
-                              background: "var(--data-wash)",
-                              borderColor: "transparent",
-                              color: "var(--data)",
+                              fontSize: 13.5,
+                              lineHeight: 1.55,
+                              color: "var(--ink-muted)",
                             }}
                           >
-                            Lapisan → Kategori hilang
-                          </span>
-                          <span
-                            className="chip"
-                            style={{
-                              background: "var(--data-wash)",
-                              borderColor: "transparent",
-                              color: "var(--data)",
-                            }}
-                          >
-                            Kategori → {categoryLabel(activeCategory)}
-                          </span>
-                          <span
-                            className="chip"
-                            style={{
-                              background: "var(--data-wash)",
-                              borderColor: "transparent",
-                              color: "var(--data)",
-                            }}
-                          >
-                            Slot → {slotLabel(activeSlot)}
-                          </span>
-                        </div>
-                        <div
-                          style={{
-                            fontSize: 11.5,
-                            lineHeight: 1.5,
-                            color: "var(--ink-muted)",
-                            marginTop: 14,
-                          }}
-                        >
-                          Setiap jawaban mengubah lapisan peta, dan menyebut
-                          slot waktu yang dipakai. Tidak ada angka di luar slot
-                          yang dicacah.
-                        </div>
+                            Menyusun jawaban…
+                          </div>
+                        ) : cqError ? (
+                          <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
+                            Gagal menghubungi layanan data. Coba lagi sebentar.
+                          </div>
+                        ) : cqAnswer ? (
+                          <>
+                            <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
+                              {cqAnswer.answer}
+                            </div>
+                            {((cqAnswer.suggested_layers?.length ?? 0) > 0 ||
+                              cqAnswer.spatial_filter?.category ||
+                              cqAnswer.spatial_filter?.time_slot) && (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  flexWrap: "wrap",
+                                  gap: 6,
+                                  marginTop: 14,
+                                }}
+                              >
+                                {(cqAnswer.suggested_layers ?? []).map((layer) => (
+                                  <span
+                                    key={layer}
+                                    className="chip"
+                                    style={{
+                                      background: "var(--data-wash)",
+                                      borderColor: "transparent",
+                                      color: "var(--data)",
+                                    }}
+                                  >
+                                    Lapisan →{" "}
+                                    {LAYER_ROWS.find((r) => r.key === layer)
+                                      ?.label ?? layer}
+                                  </span>
+                                ))}
+                                {cqAnswer.spatial_filter?.category && (
+                                  <span
+                                    className="chip"
+                                    style={{
+                                      background: "var(--data-wash)",
+                                      borderColor: "transparent",
+                                      color: "var(--data)",
+                                    }}
+                                  >
+                                    Kategori → {categoryLabel(activeCategory)}
+                                  </span>
+                                )}
+                                {cqAnswer.spatial_filter?.time_slot && (
+                                  <span
+                                    className="chip"
+                                    style={{
+                                      background: "var(--data-wash)",
+                                      borderColor: "transparent",
+                                      color: "var(--data)",
+                                    }}
+                                  >
+                                    Slot → {slotLabel(activeSlot)}
+                                  </span>
+                                )}
+                              </div>
+                            )}
+                            <div
+                              style={{
+                                fontSize: 11.5,
+                                lineHeight: 1.5,
+                                color: "var(--ink-muted)",
+                                marginTop: 14,
+                              }}
+                            >
+                              Jawaban menyesuaikan lapisan &amp; filter peta.
+                              Angka hanya dari slot yang dicacah.
+                            </div>
+                          </>
+                        ) : null}
                       </div>
                     </div>
                   </div>
@@ -2572,7 +2668,8 @@ export function PetaScreen({
                     <button
                       type="button"
                       key={q}
-                      onClick={() => setShowCopilotResult(true)}
+                      onClick={() => submitCopilot(q)}
+                      disabled={cqLoading}
                       className="lyr btn-reset"
                       style={{
                         border: "1px solid var(--rule)",
@@ -2594,7 +2691,11 @@ export function PetaScreen({
                   boxShadow: "0 -1px 0 var(--rule)",
                 }}
               >
-                <div
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    submitCopilot(cqInput);
+                  }}
                   className="pill row"
                   style={{
                     gap: 10,
@@ -2614,19 +2715,30 @@ export function PetaScreen({
                   >
                     <path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z" />
                   </svg>
-                  <span
-                    style={{ flex: 1, fontSize: 13, color: "var(--ink-faint)" }}
-                  >
-                    tanya tentang simpul ini…
-                  </span>
+                  <input
+                    value={cqInput}
+                    onChange={(e) => setCqInput(e.target.value)}
+                    placeholder="tanya tentang data peta…"
+                    aria-label="Tanya data peta"
+                    style={{
+                      flex: 1,
+                      fontSize: 13,
+                      color: "var(--ink)",
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      font: "inherit",
+                    }}
+                  />
                   <button
-                    onClick={() => setShowCopilotResult(true)}
+                    type="submit"
+                    disabled={cqLoading || !cqInput.trim()}
                     className="b bp"
                     style={{ padding: "9px 16px", fontSize: 12 }}
                   >
-                    Tanya
+                    {cqLoading ? "…" : "Tanya"}
                   </button>
-                </div>
+                </form>
               </div>
             </div>
           )}

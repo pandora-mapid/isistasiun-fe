@@ -225,3 +225,40 @@ export async function loadRentalAssets(): Promise<RentalAsset[]> {
 export async function loadDemoData(): Promise<MockDemoData> {
   return MOCK_DEMO_DATA;
 }
+
+/** Bentuk jawaban AI Copilot — cermin `copilot/dto.go` di backend. */
+export interface CopilotAnswer {
+  answer: string;
+  suggested_layers: string[] | null;
+  spatial_filter: {
+    station_id?: string;
+    category?: string;
+    time_slot?: string;
+  } | null;
+}
+
+/**
+ * AI Copilot "Tanya Data" — `POST /api/v1/copilot/query`.
+ *
+ * Beda dari fungsi lain di berkas ini: ini **POST**, dan hanya berfungsi saat
+ * `NEXT_PUBLIC_API_BASE_URL` menunjuk ke backend nyata — endpoint copilot tidak
+ * ada di data `/mock`. Backend **selalu** balas 200 dengan jawaban deterministik
+ * saat layanan AI mati (`answer` tetap terisi, ada catatan "mode ringkas"),
+ * jadi pemanggil tak perlu menangani matinya AI secara khusus — cukup tangani
+ * kegagalan jaringan biasa. Lihat isi-stasiun-ai-integration.md §2.1.
+ */
+export async function askCopilot(
+  query: string,
+  stationId?: string,
+): Promise<CopilotAnswer> {
+  const res = await fetch(`${BASE}/copilot/query`, {
+    method: "POST",
+    cache: "no-store",
+    headers: { "Content-Type": "application/json", ...(headers() ?? {}) },
+    body: JSON.stringify({ query, station_id: stationId ?? null }),
+  });
+  if (!res.ok) {
+    throw new Error(`Gagal memuat copilot/query: ${res.status} ${res.statusText}`);
+  }
+  return unwrap((await res.json()) as ApiEnvelope<CopilotAnswer>);
+}
