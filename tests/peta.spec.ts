@@ -662,3 +662,102 @@ test("overlay ringkasan simpul berdiri sendiri di samping tombol Bandingkan", as
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 });
+
+test("tabel atribut terbuka, bisa diurutkan, dan mengunduh CSV", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.getByRole("button", { name: "Tabel atribut" }).click();
+  const dialog = page.getByRole("dialog", { name: /titik pengamatan/ });
+  await expect(dialog).toBeVisible();
+
+  // Kolom F/E/C/V memang ada — itu yang membedakan tabel ini dari panel.
+  for (const judul of ["Gap P50", "F (org/jam)", "E", "C", "V (Rp)"]) {
+    await expect(dialog.getByRole("columnheader", { name: new RegExp(judul.replace(/[()/]/g, ".")) }).first()).toBeVisible();
+  }
+
+  // Sortir harus sampai ke pembaca layar, bukan cuma panah visual.
+  const gapP50 = dialog.getByRole("columnheader", { name: /Gap P50/ });
+  await expect(gapP50).toHaveAttribute("aria-sort", "descending");
+  await gapP50.getByRole("button").click();
+  await expect(gapP50).toHaveAttribute("aria-sort", "ascending");
+
+  // Unduhan benar-benar terjadi, dan namanya membawa potongan filternya.
+  const unduhan = page.waitForEvent("download");
+  await dialog.getByRole("button", { name: "Unduh CSV" }).click();
+  const file = await unduhan;
+  expect(file.suggestedFilename()).toContain("tabel-atribut");
+  expect(file.suggestedFilename().endsWith(".csv")).toBe(true);
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
+test("tombol Unduh brief mengunduh CSV potongan aktif tanpa membuka tabel", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  const unduhan = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Unduh brief" }).click();
+  const file = await unduhan;
+  expect(file.suggestedFilename()).toContain("tabel-atribut");
+
+  // Isinya benar-benar CSV dengan header yang sama, bukan berkas kosong.
+  const stream = await file.createReadStream();
+  const isi = await new Promise<string>((resolve, reject) => {
+    let buf = "";
+    stream.on("data", (c) => (buf += c));
+    stream.on("end", () => resolve(buf));
+    stream.on("error", reject);
+  });
+  expect(isi).toContain("Gap P50");
+  expect(isi).toContain("Sampel tipis");
+});
+
+test("brief simpul tampil dan menyediakan cetak ke PDF", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.getByRole("button", { name: "Brief PDF" }).click();
+  const dialog = page.getByRole("dialog", { name: "Brief PDF" });
+  await expect(dialog).toBeVisible();
+
+  // Bentuk brief menurut isi-stasiun-ai-integration.md §2.2.
+  await expect(dialog.getByText("Rentang tertangkap").first()).toBeVisible();
+  await expect(dialog.getByText("Asumsi yang dipakai").first()).toBeVisible();
+  await expect(dialog.getByText("Kategori hilang teratas").first()).toBeVisible();
+  await expect(dialog.getByText("Catatan kepercayaan").first()).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Cetak / simpan PDF" })).toBeEnabled();
+
+  // Kontrolnya tidak boleh ikut tercetak: tombol "Cetak" di dalam PDF-nya
+  // sendiri adalah tombol yang tak bisa ditekan siapa pun.
+  await page.emulateMedia({ media: "print" });
+  await expect(dialog.getByRole("button", { name: "Cetak / simpan PDF" })).toBeHidden();
+  await expect(dialog.getByText("Asumsi yang dipakai").first()).toBeVisible();
+  await page.emulateMedia({ media: "screen" });
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
+test("peta tetap terbaca di lebar sempit", async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 800 });
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  // Panel ringkasan turun jadi lembar bawah, tidak lagi kolom 414px yang
+  // menutupi hampir seluruh peta.
+  const panel = page.locator(".peta-panel");
+  const kotak = await panel.boundingBox();
+  expect(kotak).not.toBeNull();
+  expect(kotak!.width).toBeGreaterThan(700);
+  expect(kotak!.height).toBeLessThan(800 * 0.62);
+
+  // Dan halaman tidak boleh bisa digeser mendatar.
+  const meluber = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+  );
+  expect(meluber).toBe(false);
+});

@@ -1322,6 +1322,144 @@ a.kartu:focus-visible {
     transform: none !important;
     opacity: 1 !important;
   }
+
+  /* --- Brief simpul: cetak lewat dialog browser, tanpa library PDF -------
+     `jspdf` dkk. berarti satu dependensi baru yang merender ulang tata letak
+     dan tipografinya sendiri, dan hasilnya selalu meleset dari yang tampil di
+     layar. Dialog cetak sudah menghasilkan PDF di semua platform target dan
+     memakai tipografi halaman ini apa adanya.
+
+     Memakai `visibility`, bukan `display: none` pada saudara-saudaranya:
+     backdrop modal bukan anak langsung `body` (ia bersarang di dalam pembungkus
+     halaman), jadi aturan berbasis anak-langsung ikut menyembunyikan brief-nya
+     sendiri. `visibility` diwariskan ke bawah tapi bisa dibalik lagi pada
+     keturunan, jadi polanya bekerja berapa pun dalamnya sarang. */
+  body:has(.brief-cetak) {
+    visibility: hidden;
+  }
+  body:has(.brief-cetak) .brief-cetak,
+  body:has(.brief-cetak) .brief-cetak * {
+    visibility: visible;
+  }
+  .dialog-backdrop:has(.brief-cetak) {
+    position: static !important;
+    display: block !important;
+    background: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+  .brief-cetak {
+    position: absolute !important;
+    inset: 0 auto auto 0 !important;
+    width: 100% !important;
+    max-height: none !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    background: #fff !important;
+  }
+  /* Kontrol tidak ikut tercetak: tombol "Cetak" di dalam PDF-nya sendiri
+     adalah tombol yang tidak bisa ditekan siapa pun. */
+  .cetak-sembunyi {
+    display: none !important;
+  }
+  @page {
+    margin: 18mm 16mm;
+  }
+}
+
+/* --- Responsivitas /peta -------------------------------------------------
+   Tata letak peta disusun untuk layar lebar: panel ringkasan mengambang 414px
+   di kanan, panel slot + legenda di bawah, kontrol zoom di kiri. Di bawah
+   ~1100px ketiganya saling menindih dan peta praktis tertutup seluruhnya.
+
+   Dikerjakan dengan menurunkan panel mengambang menjadi lembar yang menempel
+   di bawah, bukan dengan menyembunyikannya: panel itu yang membawa angkanya,
+   dan peta tanpa angka bukan versi kecil dari halaman ini — itu halaman lain.
+   -------------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+  .peta-panel {
+    position: absolute !important;
+    inset: auto 0 0 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: 58vh !important;
+    border-radius: 14px 14px 0 0 !important;
+  }
+  .peta-kontrol-kiri {
+    top: auto !important;
+    bottom: 62vh !important;
+  }
+  /* Panel bawah (slot + legenda) naik ke atas lembar panel supaya keduanya
+     tidak saling menindih. */
+  .peta-bawah {
+    bottom: 60vh !important;
+    left: 12px !important;
+    right: 12px !important;
+  }
+}
+
+/* --- Navigasi di layar sempit --------------------------------------------
+   Satu baris berisi brand + 5 pil rute + tombol aksi tidak muat di bawah
+   ~760px, dan karena `.row` tidak membungkus, yang melebar justru seluruh
+   halaman — gejalanya: tiap layar bisa digeser mendatar dan isinya terpotong.
+
+   Deretan pil yang digeser di dalam dirinya sendiri, bukan menu hamburger:
+   rutenya cuma lima dan semuanya setara, jadi menyembunyikannya di balik satu
+   ketukan lagi justru membuat navigasi lebih jauh, bukan lebih ringkas.
+   -------------------------------------------------------------------------- */
+.nav-links {
+  /* Tanpa ini flex item menolak menyusut di bawah lebar isinya, dan
+     `overflow-x` di bawah tidak pernah terpakai. */
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .nav-row {
+    gap: 12px !important;
+    padding: 14px 16px !important;
+  }
+  .nav-links {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Kotak "IS" tetap tinggal — itu penanda baliknya ke beranda. Yang dilepas
+     hanya wordmark-nya, karena di lebar ini ia memakan ruang sebanyak dua pil
+     rute. */
+  .nav-wordmark {
+    display: none;
+  }
+  .nav-row {
+    padding: 12px !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .peta-panel {
+    max-height: 64vh !important;
+  }
+  .peta-bawah {
+    bottom: 66vh !important;
+  }
+  .peta-kontrol-kiri {
+    bottom: 68vh !important;
+  }
+  /* Dialog penuh layar: di lebar ini sisa gutter cuma beberapa piksel dan
+     kolom tabel sudah harus digeser. */
+  .dialog-backdrop > section {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+  }
 }
 
 /* Momen tanda tangan: bar rentang P10–P90 di hero menggambar dirinya sendiri,

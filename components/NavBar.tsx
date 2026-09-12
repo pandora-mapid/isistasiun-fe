@@ -47,6 +47,7 @@ function Brand() {
         IS
       </span>
       <span
+        className="nav-wordmark"
         style={{
           font: "800 16px/1 var(--font-inter)",
           letterSpacing: "-.01em",
@@ -63,7 +64,10 @@ function Brand() {
  * variants so the active state looks identical wherever the nav appears. */
 function NavLinks({ active }: { active: NavKey }) {
   return (
-    <div className="row" style={{ gap: 4, marginRight: "auto" }}>
+    // `nav-links`: di layar sempit deretan pil ini yang digeser mendatar di
+    // dalam dirinya sendiri, bukan mendorong seluruh halaman jadi melebar.
+    // Lihat aturannya di globals.css.
+    <div className="row nav-links" style={{ gap: 4, marginRight: "auto" }}>
       {NAV_ITEMS.map((item) => {
         const isActive = item.key === active;
         return (
@@ -100,7 +104,7 @@ function NavLinks({ active }: { active: NavKey }) {
 export function NavBar({ active, cta }: { active: NavKey; cta: ReactNode }) {
   return (
     <div
-      className="row"
+      className="row nav-row"
       style={{
         gap: 22,
         padding: "20px 28px",

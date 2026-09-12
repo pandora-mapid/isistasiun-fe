@@ -8,6 +8,10 @@ import { StationSearch } from "./StationSearch";
 import { RetailPanel } from "./RetailPanel";
 import { ComparisonDialog } from "./ComparisonDialog";
 import { BandingSimpulOverlay } from "./BandingSimpulOverlay";
+import { TabelAtribut } from "./TabelAtribut";
+import { BriefSimpul } from "./BriefSimpul";
+import { barisAtribut, csvAtribut, namaBerkasAtribut } from "@/lib/export/rows";
+import { unduhTeks } from "@/lib/export/unduh";
 import { retailGeoJSON, type RetailLocation } from "@/lib/data/retail";
 import { sewaGeoJSON, type RentPlot } from "@/lib/data/rent";
 import { SewaCard } from "@/components/SewaCard";
@@ -176,6 +180,8 @@ export function PetaScreen() {
    * catatan di `components/BandingSimpulOverlay.tsx`.
    */
   const [showBandingSimpul, setShowBandingSimpul] = useState(false);
+  const [showTabel, setShowTabel] = useState(false);
+  const [showBrief, setShowBrief] = useState(false);
   /** Titik yang harus didatangi kamera — dari pencarian, daftar retail, banding. */
   const [stationTarget, setStationTarget] = useState<
     { longitude: number; latitude: number; zoom?: number } | null
@@ -447,7 +453,7 @@ export function PetaScreen() {
         />
 
         <div
-          className="row glass"
+          className="row glass peta-kontrol-kiri"
           style={{
             position: "absolute",
             left: 24,
@@ -584,7 +590,7 @@ export function PetaScreen() {
         </div>
 
         <div
-          className="glass"
+          className="glass peta-bawah"
           style={{ position: "absolute", left: 24, right: 462, bottom: 24, padding: "14px 18px 16px" }}
         >
           <div className="row" style={{ gap: 10, marginBottom: 11 }}>
@@ -663,7 +669,7 @@ export function PetaScreen() {
         </div>
 
         <div
-          className="glass"
+          className="glass peta-panel"
           style={{ position: "absolute", right: 24, top: 112, bottom: 44, width: 414, display: "flex", flexDirection: "column", overflow: "hidden" }}
         >
           <div style={{ flex: "none", padding: "14px 14px 12px" }}>
@@ -1141,8 +1147,35 @@ export function PetaScreen() {
               </div>
 
               <div style={{ flex: "none", padding: "16px 22px 20px", display: "flex", gap: 8, boxShadow: "0 -1px 0 var(--rule)" }}>
-                <button className="b bs" style={{ flex: 1 }}>Tabel atribut</button>
-                <button className="b bp" style={{ flex: 1 }}>Unduh brief</button>
+                <button
+                  type="button"
+                  className="b bs"
+                  style={{ flex: 1 }}
+                  onClick={() => setShowTabel(true)}
+                  disabled={!analytics || !entrances}
+                >
+                  Tabel atribut
+                </button>
+                {/* "Unduh brief" mengunduh CSV potongan yang sedang tampil —
+                   tanpa membuka tabelnya dulu, karena itu memang jalan pintas
+                   yang dijanjikan tombolnya. Barisnya disusun modul yang sama
+                   dengan tabel, jadi isinya tidak bisa berbeda. */}
+                <button
+                  type="button"
+                  className="b bp"
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    if (!analytics || !entrances) return;
+                    const rows = barisAtribut(analytics, entrances, activeSlot, activeCategory);
+                    unduhTeks(
+                      namaBerkasAtribut(analytics, activeSlot, activeCategory),
+                      csvAtribut(rows),
+                    );
+                  }}
+                  disabled={!analytics || !entrances}
+                >
+                  Unduh brief
+                </button>
               </div>
             </div>
           )}
@@ -1445,7 +1478,13 @@ export function PetaScreen() {
               >
                 Ringkasan &amp; Bandingkan Simpul
               </button>
-              <button className="b bp">Brief PDF</button>
+              <button
+                type="button"
+                className="b bp"
+                onClick={() => setShowBrief(true)}
+              >
+                Brief PDF
+              </button>
             </div>
           }
         />
@@ -1454,6 +1493,18 @@ export function PetaScreen() {
       {showBandingSimpul && (
         <BandingSimpulOverlay onClose={() => setShowBandingSimpul(false)} />
       )}
+
+      {showTabel && analytics && entrances && (
+        <TabelAtribut
+          payload={analytics}
+          entrances={entrances}
+          slot={activeSlot}
+          category={activeCategory}
+          onClose={() => setShowTabel(false)}
+        />
+      )}
+
+      {showBrief && <BriefSimpul onClose={() => setShowBrief(false)} />}
 
       {showComparison && analytics && stations && demo && (
         <ComparisonDialog
