@@ -15,24 +15,32 @@ import type { FeatureCollection, Point, Polygon } from "geojson";
 
 import {
   loadEntrances,
+  loadConfidenceLayer,
+  loadConfidenceGrid,
   loadIsochrones,
   loadObservationPoints,
   loadSpendingGap,
   loadStations,
   loadDemoData,
+  loadRentalAssets,
 } from "./source";
 import type {
   IsochroneProps,
+  ConfidenceLayerEntry,
+  ConfidenceGridProps,
   ObservationPointProps,
   SpendingGapPayload,
   Station,
   MockDemoData,
+  RentalAsset,
 } from "./types";
 
 export type PetaData = {
   points: FeatureCollection<Point, ObservationPointProps> | null;
   isochrones: FeatureCollection<Polygon, IsochroneProps> | null;
   analytics: SpendingGapPayload | null;
+  confidence: ConfidenceLayerEntry[] | null;
+  confidenceGrid: FeatureCollection<Polygon, ConfidenceGridProps> | null;
   stations: Station[] | null;
   /**
    * Nama tiap titik pengamatan — atribut, bukan geometri.
@@ -43,6 +51,7 @@ export type PetaData = {
    */
   entrances: ObservationPointProps[] | null;
   demo: MockDemoData | null;
+  rentals: RentalAsset[] | null;
   /** Pesan kegagalan yang layak ditampilkan, bukan hanya dicatat di console. */
   error: string | null;
 };
@@ -51,9 +60,12 @@ const KOSONG: PetaData = {
   points: null,
   isochrones: null,
   analytics: null,
+  confidence: null,
+  confidenceGrid: null,
   stations: null,
   entrances: null,
   demo: null,
+  rentals: null,
   error: null,
 };
 
@@ -67,19 +79,25 @@ export function usePetaData(): PetaData {
       loadObservationPoints(),
       loadIsochrones(),
       loadSpendingGap(),
+      loadConfidenceLayer(),
+      loadConfidenceGrid(),
       loadStations(),
       loadEntrances(),
       loadDemoData(),
+      loadRentalAssets(),
     ])
-      .then(([points, isochrones, analytics, stations, entrances, demo]) => {
+      .then(([points, isochrones, analytics, confidence, confidenceGrid, stations, entrances, demo, rentals]) => {
         if (cancelled) return;
         setData({
           points,
           isochrones,
           analytics,
+          confidence,
+          confidenceGrid,
           stations,
           entrances,
           demo,
+          rentals,
           error: null,
         });
       })

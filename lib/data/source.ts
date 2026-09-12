@@ -10,14 +10,21 @@
 import type { FeatureCollection, Point, Polygon } from "geojson";
 import type {
   ApiEnvelope,
+  ConfidenceGridProps,
+  ConfidenceLayerEntry,
   IsochroneProps,
   MockDemoData,
   ObservationPointProps,
   SpendingGapPayload,
   Station,
+  RentalAsset,
   StationSummaryPayload,
 } from "./types";
 import { MOCK_DEMO_DATA } from "./demo";
+import { MOCK_RENTAL_ASSETS } from "./rental-demo";
+
+const PROTOTYPE_STATION_IDS = new Set([1, 2]);
+const PROTOTYPE_POINT_IDS = new Set([11, 12, 13, 21, 22, 23, 24]);
 
 /**
  * Alamat sumber data.
@@ -30,6 +37,7 @@ import { MOCK_DEMO_DATA } from "./demo";
  * teks, jadi rujukan dinamis tidak akan tergantikan dan hasilnya `undefined`.
  */
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "/mock";
+const USING_LOCAL_MOCK = BASE === "/mock";
 
 /**
  * Token yang disisipkan ke setiap permintaan, kalau ada.
@@ -82,19 +90,59 @@ function unwrap<T>(envelope: ApiEnvelope<T>): T {
 export function loadObservationPoints(): Promise<
   FeatureCollection<Point, ObservationPointProps>
 > {
-  return getJson("observation-points.geojson");
+  return getJson<FeatureCollection<Point, ObservationPointProps>>("observation-points.geojson")
+    .then((collection) => ({
+      ...collection,
+      features: collection.features.filter((feature) =>
+        PROTOTYPE_STATION_IDS.has(feature.properties.station_id),
+      ),
+    }));
 }
 
 /** Geometri isochrone. Fase 2: diganti tile vektor. */
 export function loadIsochrones(): Promise<
   FeatureCollection<Polygon, IsochroneProps>
 > {
-  return getJson("isochrones.geojson");
+  return getJson<FeatureCollection<Polygon, IsochroneProps>>("isochrones.geojson")
+    .then((collection) => ({
+      ...collection,
+      features: collection.features.filter((feature) =>
+        PROTOTYPE_POINT_IDS.has(feature.properties.point_id),
+      ),
+    }));
 }
 
 /** Hasil analisis. Fase 2: `GET /api/v1/analytics/spending-gap`. */
 export async function loadSpendingGap(): Promise<SpendingGapPayload> {
-  return unwrap(await getJson<ApiEnvelope<SpendingGapPayload>>("spending-gap.json"));
+  const payload = unwrap(await getJson<ApiEnvelope<SpendingGapPayload>>("spending-gap.json"));
+  return {
+    ...payload,
+    points: payload.points.filter((point) => PROTOTYPE_STATION_IDS.has(point.station_id)),
+  };
+}
+
+/** Mutu data per titik dan slot. Fase API: `GET /api/v1/confidence-layer`. */
+export async function loadConfidenceLayer(): Promise<ConfidenceLayerEntry[]> {
+  const rows = unwrap(
+    await getJson<ApiEnvelope<ConfidenceLayerEntry[]>>(
+      USING_LOCAL_MOCK ? "confidence-layer.json" : "confidence-layer",
+    ),
+  );
+  return rows
+    .filter((row) => PROTOTYPE_POINT_IDS.has(row.point_id))
+    .map((row) => ({
+      ...row,
+      confidence_score: Math.max(0, Math.min(1, row.confidence_score)),
+    }));
+}
+
+/** Geometri grid mock. Fase API: ikut tile/GeoJSON zona confidence. */
+export async function loadConfidenceGrid(): Promise<
+  FeatureCollection<Polygon, ConfidenceGridProps>
+> {
+  return getJson<FeatureCollection<Polygon, ConfidenceGridProps>>(
+    "confidence-grid.geojson",
+  );
 }
 
 /**
@@ -112,7 +160,8 @@ export async function loadStationSummary(): Promise<StationSummaryPayload> {
 
 /** Daftar stasiun. Fase 2: `GET /api/v1/stations`. */
 export async function loadStations(): Promise<Station[]> {
-  return unwrap(await getJson<ApiEnvelope<Station[]>>("stations.json"));
+  return unwrap(await getJson<ApiEnvelope<Station[]>>("stations.json"))
+    .filter((station) => PROTOTYPE_STATION_IDS.has(station.id));
 }
 
 /**
@@ -130,16 +179,32 @@ export async function loadStations(): Promise<Station[]> {
  * pemanggilnya tidak perlu tahu.
  */
 export async function loadEntrances(): Promise<ObservationPointProps[]> {
-  return unwrap(await getJson<ApiEnvelope<ObservationPointProps[]>>("entrances.json"));
+  return unwrap(await getJson<ApiEnvelope<ObservationPointProps[]>>("entrances.json"))
+    .filter((entrance) => PROTOTYPE_STATION_IDS.has(entrance.station_id));
 }
 
-/**
- * Data presentasi Tahap 1 — retail, status kategori, bukti, rekomendasi.
- *
- * Untuk sekarang berupa berkas TS tetap (`lib/data/demo.ts`). Fase API cukup
- * mengganti isi fungsi ini dengan panggilan jaringan; pemanggilnya tidak
- * berubah. Lihat DATA_CONTRACT.md — bentuknya di `MockDemoData`.
- */
+type ApiRentalAsset = Omit<RentalAsset, "station_id"> & {
+  station_id: string;
+};
+
+const STATION_ID_BY_CODE: Record<string, number> = { MRI: 1, SUD: 2 };
+
+/** Inventaris titik sewa; atribut datang dari `/analytics/rental-assets`. */
+export async function loadRentalAssets(): Promise<RentalAsset[]> {
+  if (USING_LOCAL_MOCK) return MOCK_RENTAL_ASSETS;
+
+  const rows = unwrap(
+    await getJson<ApiEnvelope<ApiRentalAsset[]>>("analytics/rental-assets"),
+  );
+  return rows
+    .map((row) => ({
+      ...row,
+      station_id: STATION_ID_BY_CODE[row.station_code] ?? 0,
+    }))
+    .filter((asset) => asset.station_id !== 0);
+}
+
+/** Data presentasi Tahap 1. Fase API mengganti implementasi fungsi ini saja. */
 export async function loadDemoData(): Promise<MockDemoData> {
   return MOCK_DEMO_DATA;
 }

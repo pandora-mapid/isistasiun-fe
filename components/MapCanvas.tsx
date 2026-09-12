@@ -13,10 +13,16 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { Domain } from "@/lib/analytics/select";
 import type { RetailLocation } from "@/lib/data/retail";
+import type { FilterCategory } from "./RetailPanel";
+import { rentalCircleLayer, rentalLabelLayer } from "@/lib/map/rental-style";
+import { stationCircleLayer, stationLabelLayer } from "@/lib/map/station-style";
 import type {
+  ConfidenceGridProps,
   IsochroneProps,
   ObservationPointProps,
   PointFeatureState,
+  RentalAsset,
+  Station,
 } from "@/lib/data/types";
 import {
   resolveBasemapUrl,
@@ -31,21 +37,27 @@ import {
 import {
   isochroneFillLayer,
   isochroneLineLayer,
+  confidenceBoundaryLayer,
+  confidenceFillLayer,
   pointArusLayer,
   pointCircleLayer,
   pointConfidenceLayer,
   pointLabelLayer,
   scaleDependentPaint,
 } from "@/lib/map/style";
-import {
-  retailCircleLayer,
-  retailLabelLayer,
-  retailStrokeColor,
-  retailStrokeWidth,
-} from "@/lib/map/retail-style";
+import { retailCircleLayer, retailLabelLayer } from "@/lib/map/retail-style";
 
-/** Koleksi retail kosong — dipakai kalau pemanggil tidak mengoper apa pun. */
-const RETAIL_KOSONG: FeatureCollection<Point, RetailLocation> = {
+const EMPTY_RETAIL: FeatureCollection<Point, RetailLocation> = {
+  type: "FeatureCollection",
+  features: [],
+};
+
+const EMPTY_STATIONS: FeatureCollection<Point, Station> = {
+  type: "FeatureCollection",
+  features: [],
+};
+
+const EMPTY_RENTALS: FeatureCollection<Point, RentalAsset> = {
   type: "FeatureCollection",
   features: [],
 };
@@ -72,6 +84,8 @@ type Props = {
   gapDomain: Domain;
   /** Sebaran skor kepercayaan yang sedang aktif — menentukan kepekatan halo. */
   confidenceDomain: Domain;
+  /** Grid polygon mutu data; titik pintu tetap berada di atasnya dan interaktif. */
+  confidenceGrid?: FeatureCollection<Polygon, ConfidenceGridProps> | null;
   /** Kawasan tangkapan yang sedang dipilih: 3, 5, atau 10 menit. */
   catchmentMinutes: number;
   /** ID layer peta yang boleh terlihat. Selebihnya disembunyikan. */
@@ -85,6 +99,17 @@ type Props = {
    * bergerak. Dipakai legenda untuk menggambar batang skala yang sungguhan.
    */
   onScaleChange?: (metersPerPixel: number) => void;
+  stationTarget?: { longitude: number; latitude: number; zoom?: number } | null;
+  retailLocations?: FeatureCollection<Point, RetailLocation>;
+  selectedRetailId?: string | null;
+  onSelectRetail?: (location: RetailLocation) => void;
+  stationLocations?: FeatureCollection<Point, Station>;
+  selectedStationId?: number | null;
+  onSelectStation?: (station: Station) => void;
+  rentalLocations?: FeatureCollection<Point, RentalAsset>;
+  selectedRentalId?: string | null;
+  onSelectRental?: (asset: RentalAsset) => void;
+  activeRetailFilter?: FilterCategory;
   /**
    * Boleh digeser, di-zoom, dan diklik. Bawaannya ya.
    *
@@ -125,22 +150,6 @@ type Props = {
     | "top-right"
     | "bottom-left"
     | "bottom-right";
-  /**
-   * Lokasi retail & potensi toko sebagai GeoJSON. Opsional — peta hero Beranda
-   * tidak menggambar lapisan ini. Difilter/dibangun ulang di `PetaScreen`;
-   * source-nya di-`setData` ulang tiap kali prop ini berubah.
-   */
-  retailLocations?: FeatureCollection<Point, RetailLocation>;
-  /** `id` retail yang sedang dipilih — menebalkan garis tepinya. */
-  selectedRetailId?: string | null;
-  /** Dipanggil saat sebuah bulatan retail diklik. */
-  onSelectRetail?: (location: RetailLocation) => void;
-  /**
-   * Titik yang harus didatangi kamera setelah layer terpasang — dari pencarian
-   * stasiun, daftar retail, atau dialog Bandingkan. `null` = biarkan di kawasan
-   * studi.
-   */
-  stationTarget?: { longitude: number; latitude: number; zoom?: number } | null;
 };
 
 /** Batas menunggu style basemap sebelum dianggap gagal. */
@@ -253,20 +262,28 @@ export function MapCanvas({
   featureStates,
   gapDomain,
   confidenceDomain,
+  confidenceGrid = null,
   catchmentMinutes,
   visibleLayers,
   selectedPointId,
   onSelectPoint,
   dataError = null,
   onScaleChange,
+  stationTarget,
+  retailLocations = EMPTY_RETAIL,
+  selectedRetailId = null,
+  onSelectRetail,
+  stationLocations = EMPTY_STATIONS,
+  selectedStationId = null,
+  onSelectStation,
+  rentalLocations = EMPTY_RENTALS,
+  selectedRentalId = null,
+  onSelectRental,
+  activeRetailFilter = "all",
   interactive = true,
   fitPadding = FIT_PADDING,
   borderRadius,
   attributionPosition = "bottom-right",
-  retailLocations = RETAIL_KOSONG,
-  selectedRetailId = null,
-  onSelectRetail,
-  stationTarget = null,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -276,6 +293,7 @@ export function MapCanvas({
   const [layersReady, setLayersReady] = useState(false);
   /** Pesan yang ditampilkan di atas peta: kegagalan keras maupun peringatan. */
   const [notice, setNotice] = useState<string | null>(null);
+  const [analysisAvailable, setAnalysisAvailable] = useState(true);
   /** Titik yang sedang disorot kursor, supaya bisa dibersihkan saat berpindah. */
   const hoveredRef = useRef<number | null>(null);
   /** Apakah glyph label bisa diambil — ikut gagal kalau basemap gagal. */
@@ -438,7 +456,19 @@ export function MapCanvas({
 
     map.addSource(SOURCE.isochrones, { type: "geojson", data: isochrones });
     map.addSource(SOURCE.points, { type: "geojson", data: points });
-    map.addSource(SOURCE.retail, { type: "geojson", data: retailRef.current });
+    map.addSource(SOURCE.confidenceGrid, {
+      type: "geojson",
+      data: confidenceGrid ?? { type: "FeatureCollection", features: [] },
+    });
+    map.addSource(SOURCE.rental, {
+      type: "geojson",
+      data: rentalLocations,
+    });
+    map.addSource(SOURCE.stationMarkers, {
+      type: "geojson",
+      data: stationLocations,
+    });
+    map.addSource(SOURCE.retail, { type: "geojson", data: retailLocations });
     map.addSource(SOURCE.pointLabels, {
       type: "geojson",
       data: labelData ?? { type: "FeatureCollection", features: [] },
@@ -447,6 +477,12 @@ export function MapCanvas({
     // Urutan mengikuti LAYER_ORDER: isochrone paling bawah, label paling atas.
     map.addLayer(isochroneFillLayer());
     map.addLayer(isochroneLineLayer());
+    map.addLayer(confidenceFillLayer());
+    map.addLayer(confidenceBoundaryLayer());
+    map.addLayer(stationCircleLayer());
+    if (glyphsAvailableRef.current) map.addLayer(stationLabelLayer());
+    map.addLayer(rentalCircleLayer());
+    if (glyphsAvailableRef.current) map.addLayer(rentalLabelLayer());
     map.addLayer(pointConfidenceLayer(gapDomain, confidenceDomain));
     map.addLayer(pointCircleLayer(gapDomain));
     // Bulatan retail di atas lingkaran kesenjangan (LAYER_ORDER), di bawah simbol.
@@ -480,7 +516,283 @@ export function MapCanvas({
     // `gapDomain` sengaja tidak masuk daftar: layer dipasang
     // sekali, lalu skalanya diperbarui oleh efek tersendiri di bawah.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [styleReady, points, isochrones, labelData, layersReady]);
+  }, [
+    styleReady,
+    points,
+    isochrones,
+    labelData,
+    layersReady,
+    retailLocations,
+    stationLocations,
+    confidenceGrid,
+    rentalLocations,
+  ]);
+
+  // Tunggu pemasangan layer agar fitBounds awal tidak menimpa pencarian.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !stationTarget) return;
+    map.flyTo({
+      center: [stationTarget.longitude, stationTarget.latitude],
+      zoom: stationTarget.zoom ?? 16.5,
+      bearing: 0,
+      pitch: 0,
+      padding: { top: 0, bottom: 0, left: 0, right: 0 },
+      duration: 1100,
+    });
+  }, [layersReady, stationTarget]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !interactive || !onSelectRetail) return;
+    const select = (event: {
+      features?: { properties?: Record<string, unknown> }[];
+    }) => {
+      const id = event.features?.[0]?.properties?.id;
+      const location = retailLocations.features.find(
+        (feature) => feature.properties.id === id,
+      )?.properties;
+      if (location && onSelectRetail) onSelectRetail(location);
+    };
+    const enter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const leave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+    map.on("click", LAYER.retailCircle, select);
+    map.on("mouseenter", LAYER.retailCircle, enter);
+    map.on("mouseleave", LAYER.retailCircle, leave);
+    return () => {
+      map.off("click", LAYER.retailCircle, select);
+      map.off("mouseenter", LAYER.retailCircle, enter);
+      map.off("mouseleave", LAYER.retailCircle, leave);
+    };
+  }, [layersReady, interactive, retailLocations, onSelectRetail]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !interactive || !onSelectStation) return;
+    const select = (event: {
+      features?: { properties?: Record<string, unknown> }[];
+      point?: { x: number; y: number };
+    }) => {
+      // Entrance and retail markers have click priority when their small
+      // circles overlap an asset marker at this zoom level.
+      if (event.point) {
+        const blockingLayers = [
+          LAYER.pointCircle,
+          LAYER.retailCircle,
+          LAYER.stationCircle,
+        ];
+        const blocked = blockingLayers.some(
+          (layer) =>
+            map.getLayer(layer) &&
+            map.queryRenderedFeatures(event.point as never, { layers: [layer] })
+              .length > 0,
+        );
+        if (blocked) return;
+      }
+      const id = event.features?.[0]?.properties?.id;
+      const st = stationLocations.features.find(
+        (feature) => feature.properties.id === id,
+      )?.properties;
+      if (st && onSelectStation) onSelectStation(st);
+    };
+    const enter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const leave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+    map.on("click", LAYER.stationCircle, select);
+    map.on("mouseenter", LAYER.stationCircle, enter);
+    map.on("mouseleave", LAYER.stationCircle, leave);
+    if (map.getLayer(LAYER.stationLabel)) {
+      map.on("click", LAYER.stationLabel, select);
+      map.on("mouseenter", LAYER.stationLabel, enter);
+      map.on("mouseleave", LAYER.stationLabel, leave);
+    }
+    return () => {
+      map.off("click", LAYER.stationCircle, select);
+      map.off("mouseenter", LAYER.stationCircle, enter);
+      map.off("mouseleave", LAYER.stationCircle, leave);
+      if (map.getLayer(LAYER.stationLabel)) {
+        map.off("click", LAYER.stationLabel, select);
+        map.off("mouseenter", LAYER.stationLabel, enter);
+        map.off("mouseleave", LAYER.stationLabel, leave);
+      }
+    };
+  }, [layersReady, interactive, stationLocations, onSelectStation]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !map.getLayer(LAYER.stationCircle)) return;
+    map.setPaintProperty(LAYER.stationCircle, "circle-color", [
+      "case",
+      ["==", ["get", "id"], selectedStationId ?? 0],
+      "#2563eb",
+      "#0f172a",
+    ]);
+    map.setPaintProperty(LAYER.stationCircle, "circle-stroke-width", [
+      "case",
+      ["==", ["get", "id"], selectedStationId ?? 0],
+      4,
+      2.5,
+    ]);
+  }, [layersReady, selectedStationId]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !interactive || !onSelectRental) return;
+    const select = (event: {
+      features?: { properties?: Record<string, unknown> }[];
+      point?: { x: number; y: number };
+    }) => {
+      // Entrance and retail markers have click priority when their small
+      // circles overlap an asset marker at this zoom level.
+      if (event.point) {
+        const blockingLayers = [
+          LAYER.pointCircle,
+          LAYER.retailCircle,
+          LAYER.stationCircle,
+        ];
+        const blocked = blockingLayers.some(
+          (layer) =>
+            map.getLayer(layer) &&
+            map.queryRenderedFeatures(event.point as never, { layers: [layer] })
+              .length > 0,
+        );
+        if (blocked) return;
+      }
+      const id = event.features?.[0]?.properties?.id;
+      const asset = rentalLocations.features.find(
+        (feature) => feature.properties.id === id,
+      )?.properties;
+      if (asset) onSelectRental(asset);
+    };
+    const enter = () => {
+      map.getCanvas().style.cursor = "pointer";
+    };
+    const leave = () => {
+      map.getCanvas().style.cursor = "";
+    };
+    map.on("click", LAYER.rentalCircle, select);
+    map.on("mouseenter", LAYER.rentalCircle, enter);
+    map.on("mouseleave", LAYER.rentalCircle, leave);
+    if (map.getLayer(LAYER.rentalLabel)) {
+      map.on("click", LAYER.rentalLabel, select);
+      map.on("mouseenter", LAYER.rentalLabel, enter);
+      map.on("mouseleave", LAYER.rentalLabel, leave);
+    }
+    return () => {
+      map.off("click", LAYER.rentalCircle, select);
+      map.off("mouseenter", LAYER.rentalCircle, enter);
+      map.off("mouseleave", LAYER.rentalCircle, leave);
+      if (map.getLayer(LAYER.rentalLabel)) {
+        map.off("click", LAYER.rentalLabel, select);
+        map.off("mouseenter", LAYER.rentalLabel, enter);
+        map.off("mouseleave", LAYER.rentalLabel, leave);
+      }
+    };
+  }, [layersReady, interactive, rentalLocations, onSelectRental]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !map.getLayer(LAYER.rentalCircle)) return;
+
+    if (selectedRentalId) {
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "id"], selectedRentalId],
+        "#0f172a",
+        "#ffffff",
+      ]);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "id"], selectedRentalId],
+        4.5,
+        1.6,
+      ]);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "id"], selectedRentalId],
+        1.0,
+        0.4,
+      ]);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "id"], selectedRentalId],
+        1.0,
+        0.5,
+      ]);
+    } else if (selectedRetailId) {
+      map.setPaintProperty(
+        LAYER.rentalCircle,
+        "circle-stroke-color",
+        "#ffffff",
+      );
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", 1.5);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", 0.3);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", 0.35);
+    } else if (activeRetailFilter === "sewa") {
+      // Highlight semua sewa tempat saat filter sewa aktif
+      map.setPaintProperty(
+        LAYER.rentalCircle,
+        "circle-stroke-color",
+        "#2563eb",
+      );
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", 4.0);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", 1.0);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", 1.0);
+    } else if (activeRetailFilter && activeRetailFilter !== "all") {
+      // Redupkan jika kategori retail lain yang sedang difilter
+      map.setPaintProperty(
+        LAYER.rentalCircle,
+        "circle-stroke-color",
+        "#ffffff",
+      );
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", 1.2);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", 0.25);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", 0.3);
+    } else {
+      map.setPaintProperty(
+        LAYER.rentalCircle,
+        "circle-stroke-color",
+        "#ffffff",
+      );
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", 2.0);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", 0.92);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", 1.0);
+    }
+  }, [layersReady, selectedRentalId, selectedRetailId, activeRetailFilter]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !stationLocations) return;
+    const src = map.getSource(SOURCE.stationMarkers);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(stationLocations);
+    }
+  }, [stationLocations, layersReady]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady) return;
+    const src = map.getSource(SOURCE.rental);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(rentalLocations);
+    }
+  }, [rentalLocations, layersReady]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !confidenceGrid) return;
+    const src = map.getSource(SOURCE.confidenceGrid);
+    if (src && "setData" in src) {
+      (src as { setData: (d: unknown) => void }).setData(confidenceGrid);
+    }
+  }, [confidenceGrid, layersReady]);
 
   // --- interaksi titik: sorot dan pilih -----------------------------------
   //
@@ -629,6 +941,27 @@ export function MapCanvas({
     };
   }, [styleReady, onScaleChange]);
 
+  // Basemap tetap bebas dijelajahi. Status ini hanya menerangkan apakah pusat
+  // kamera masih berada di kotak dua stasiun yang memiliki data prototipe.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !styleReady) return;
+    const update = () => {
+      const center = map.getCenter();
+      setAnalysisAvailable(
+        center.lng >= STUDY_BOUNDS[0] &&
+          center.lng <= STUDY_BOUNDS[2] &&
+          center.lat >= STUDY_BOUNDS[1] &&
+          center.lat <= STUDY_BOUNDS[3],
+      );
+    };
+    update();
+    map.on("moveend", update);
+    return () => {
+      map.off("moveend", update);
+    };
+  }, [styleReady]);
+
   // --- filter isochrone mengikuti pilihan kawasan tangkapan ---------------
   useEffect(() => {
     const map = mapRef.current;
@@ -657,9 +990,16 @@ export function MapCanvas({
 
     for (const id of LAYER_ORDER) {
       if (!map.getLayer(id)) continue;
-      // Isochrone tidak diatur panel lapisan — kemunculannya ditentukan
-      // filter kawasan tangkapan, jadi dibiarkan apa adanya.
-      if (id === LAYER.isochroneFill || id === LAYER.isochroneLine) continue;
+      // Isochrone dan station markers tidak diatur panel lapisan — kemunculannya
+      // selalu aktif sebagai referensi navigasi spasial.
+      if (
+        id === LAYER.isochroneFill ||
+        id === LAYER.isochroneLine ||
+        id === LAYER.stationCircle ||
+        id === LAYER.stationLabel
+      ) {
+        continue;
+      }
       map.setLayoutProperty(
         id,
         "visibility",
@@ -690,17 +1030,150 @@ export function MapCanvas({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !layersReady || !map.getLayer(LAYER.retailCircle)) return;
-    map.setPaintProperty(
-      LAYER.retailCircle,
-      "circle-stroke-color" as never,
-      retailStrokeColor(selectedRetailId) as never,
-    );
-    map.setPaintProperty(
-      LAYER.retailCircle,
-      "circle-stroke-width" as never,
-      retailStrokeWidth(selectedRetailId) as never,
-    );
-  }, [selectedRetailId, layersReady, retailLocations]);
+
+    const strokeMatch = [
+      "match",
+      ["get", "kind"],
+      "shopfront",
+      "#b45f33",
+      "#16130f",
+    ] as never;
+
+    if (selectedRetailId) {
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "id"], selectedRetailId],
+        "#0f172a",
+        strokeMatch,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "id"], selectedRetailId],
+        4.5,
+        1.5,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "id"], selectedRetailId],
+        1.0,
+        0.35,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "id"], selectedRetailId],
+        1.0,
+        0.4,
+      ]);
+    } else if (selectedRentalId) {
+      map.setPaintProperty(
+        LAYER.retailCircle,
+        "circle-stroke-color",
+        strokeMatch,
+      );
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", 1.5);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", 0.3);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", 0.35);
+    } else if (activeRetailFilter === "sewa") {
+      map.setPaintProperty(
+        LAYER.retailCircle,
+        "circle-stroke-color",
+        strokeMatch,
+      );
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", 1.2);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", 0.25);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", 0.3);
+    } else if (activeRetailFilter === "potensi") {
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "kind"], "potential"],
+        "#f59e0b",
+        strokeMatch,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "kind"], "potential"],
+        4.0,
+        1.5,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "kind"], "potential"],
+        1.0,
+        0.35,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "kind"], "potential"],
+        1.0,
+        0.4,
+      ]);
+    } else if (activeRetailFilter === "existing") {
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "kind"], "existing"],
+        "#10b981",
+        strokeMatch,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "kind"], "existing"],
+        4.0,
+        1.5,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "kind"], "existing"],
+        1.0,
+        0.35,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "kind"], "existing"],
+        1.0,
+        0.4,
+      ]);
+    } else if (activeRetailFilter === "ruko") {
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "kind"], "shopfront"],
+        "#8b5cf6",
+        strokeMatch,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "kind"], "shopfront"],
+        4.0,
+        1.5,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "kind"], "shopfront"],
+        1.0,
+        0.35,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "kind"], "shopfront"],
+        1.0,
+        0.4,
+      ]);
+    } else {
+      map.setPaintProperty(
+        LAYER.retailCircle,
+        "circle-stroke-color",
+        strokeMatch,
+      );
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", 1.6);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", 1.0);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", 1.0);
+    }
+  }, [
+    selectedRetailId,
+    selectedRentalId,
+    activeRetailFilter,
+    layersReady,
+    retailLocations,
+  ]);
 
   // --- interaksi retail: sorot dan pilih --------------------------------
   //
@@ -708,10 +1181,17 @@ export function MapCanvas({
   // non-interaktif tidak mendaftarkannya sama sekali.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !layersReady || !interactive || !map.getLayer(LAYER.retailCircle))
+    if (
+      !map ||
+      !layersReady ||
+      !interactive ||
+      !map.getLayer(LAYER.retailCircle)
+    )
       return;
 
-    const onClick = (e: { features?: { properties?: Record<string, unknown> }[] }) => {
+    const onClick = (e: {
+      features?: { properties?: Record<string, unknown> }[];
+    }) => {
       const id = e.features?.[0]?.properties?.id;
       const location = retailRef.current.features.find(
         (f) => f.properties.id === id,
@@ -783,6 +1263,15 @@ export function MapCanvas({
           }}
         >
           {pesan}
+        </div>
+      )}
+      {!analysisAvailable && (
+        <div className="analysis-unavailable" role="status">
+          <strong>Analisis belum tersedia</strong>
+          <span>
+            Peta dapat dijelajahi, tetapi data mock hanya tersedia di Manggarai
+            dan Sudirman.
+          </span>
         </div>
       )}
     </div>
