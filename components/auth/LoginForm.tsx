@@ -53,7 +53,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
   return (
     <form className="auth-form" onSubmit={submit} noValidate>
       <div className="auth-field">
-        <label htmlFor="operator-email">Email operator</label>
+        <label htmlFor="operator-email">Email</label>
         <input
           id="operator-email"
           name="email"
@@ -95,11 +95,10 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
       )}
 
       <button className="b bp auth-submit" type="submit" disabled={pending}>
-        {pending ? "Memeriksa…" : "Masuk ke analisis premium"}
+        {pending ? "Memeriksa…" : "Masuk"}
       </button>
-      <p className="auth-security-note">
-        Refresh session disimpan sebagai cookie HttpOnly. Token tidak disimpan
-        di localStorage.
+      <p className="auth-help">
+        Belum punya akun? Akun operator dibuat oleh pengelola data Isi Stasiun.
       </p>
     </form>
   );

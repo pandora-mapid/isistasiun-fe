@@ -18,7 +18,7 @@ export function AuthNavAction() {
   if (status === "anonymous") {
     return (
       <Link href="/login" className="b bs auth-nav-login">
-        Masuk operator
+        Masuk
       </Link>
     );
   }

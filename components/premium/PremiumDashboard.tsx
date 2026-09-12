@@ -146,7 +146,7 @@ export function PremiumDashboard() {
       <header className="premium-header">
         <div>
           <span className="eyebrow-chip">Analisis operator</span>
-          <h1>Deep analysis per simpul</h1>
+          <h1>Analisis mendalam per simpul</h1>
           <p>
             Rincian ini dilindungi role API. Masuk sebagai <b>{user?.role}</b> ·{" "}
             {user?.email}
@@ -350,7 +350,7 @@ export function PremiumDashboard() {
                   </li>
                 ))}
                 {!analysis.confidence.length && (
-                  <li>Belum ada rincian confidence untuk simpul ini.</li>
+                  <li>Belum ada rincian mutu data untuk simpul ini.</li>
                 )}
               </ul>
             </section>
