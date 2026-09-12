@@ -1,7 +1,16 @@
-# Membangun image frontend dan mendorongnya ke GHCR.
+# Membangun image frontend, mendorongnya ke GHCR, lalu men-deploy-nya ke VPS.
+#
+# Build dan deploy sengaja hidup di SATU workflow yang dipicu `push`, bukan dua
+# workflow yang dirantai `workflow_run`. Sebabnya bukan kerapian: workflow
+# `workflow_run` tidak pernah muncul sebagai check di commit, jadi deploy yang
+# gagal bersembunyi di balik centang hijau "All checks have passed" — persis
+# yang terjadi pada 12 September 2026, dua deploy gagal beruntun tanpa ada
+# yang menyadarinya sampai situsnya diperiksa manual. `needs:` memberi jaminan
+# urutan yang sama (deploy hanya jalan kalau build sukses) sambil tetap tampil
+# di daftar check.
 #
 # Dua tag per commit:
-#   {branch}-{short_sha}  — tetap, menunjuk satu commit; ini yang dipakai CD
+#   {branch}-{short_sha}  — tetap, menunjuk satu commit; ini yang dipakai deploy
 #   {branch}              — bergerak, selalu menunjuk build terakhir cabang itu
 #
 # Auth memakai GITHUB_TOKEN bawaan (bukan PAT): cukup `packages: write` di
@@ -19,11 +28,12 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: pandora-mapid/isistasiun-fe
 
-# Push beruntun ke cabang yang sama: yang lama dibatalkan, tidak ada gunanya
-# menyelesaikan build untuk commit yang sudah tertimpa.
+# Push beruntun ke cabang yang sama membatalkan build lama — kecuali di
+# `development`, karena di sana run-nya ikut men-deploy dan membatalkan deploy
+# di tengah jalan bisa meninggalkan server dengan container setengah tertukar.
 concurrency:
   group: ci-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref_name != 'development' }}
 
 jobs:
   build-push:
@@ -33,6 +43,11 @@ jobs:
     permissions:
       contents: read
       packages: write
+
+    # Tag diteruskan ke job deploy, bukan dihitung ulang di sana: yang
+    # di-deploy harus persis image yang baru saja dibangun run ini.
+    outputs:
+      sha_tag: ${{ steps.meta.outputs.sha_tag }}
 
     steps:
       - name: Checkout
@@ -113,3 +128,67 @@ jobs:
             echo
             echo "NEXT_PUBLIC_API_BASE_URL = \`${{ steps.env.outputs.api_base_url }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: Deploy ke VPS (development)
+    needs: build-push
+    # `main` tetap dibangun dan didorong ke GHCR, tapi promosi ke produksi
+    # dilakukan manual — sama seperti sebelumnya.
+    if: github.ref_name == 'development'
+    runs-on: ubuntu-latest
+
+    # `packages: read` supaya GITHUB_TOKEN di bawah sah dipakai VPS untuk
+    # menarik image.
+    permissions:
+      contents: read
+      packages: read
+
+    steps:
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1
+        env:
+          IMAGE_TAG: ${{ needs.build-push.outputs.sha_tag }}
+          GHCR_USER: ${{ github.actor }}
+          # Sebelumnya VPS menarik image tanpa login sama sekali, jadi deploy
+          # diam-diam bergantung pada package tetap publik. Begitu visibility-
+          # nya berubah, `pull` mati dengan `error from registry: denied` dan
+          # tidak ada satu pun berkas di repo ini yang bisa menjelaskan kenapa.
+          # GITHUB_TOKEN hanya sah selama run berjalan dan dibuang lagi di
+          # akhir skrip, jadi tidak ada kredensial yang mengendap di server.
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: IMAGE_TAG,GHCR_USER,GHCR_TOKEN
+          # Tanpa ini, perintah yang gagal di tengah skrip tidak menggagalkan
+          # langkah — deploy bisa "hijau" padahal container-nya tidak naik.
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            cd /opt/isistasiun-fe
+
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+
+            # `.env` adalah milik server, bukan repo — workflow ini hanya
+            # menyentuh satu baris di dalamnya.
+            if grep -q '^IMAGE_TAG=' .env; then
+              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${IMAGE_TAG}|" .env
+            else
+              echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
+            fi
+            echo "IMAGE_TAG -> ${IMAGE_TAG}"
+
+            compose="docker compose -f docker-compose.deploy.yml --env-file .env"
+
+            $compose pull frontend
+            $compose up -d frontend
+
+            docker logout ghcr.io || true
+
+            # Image lama yang sudah tidak dirujuk container mana pun. `-f`
+            # supaya tidak menunggu konfirmasi interaktif.
+            docker image prune -f
+
+            $compose ps frontend
