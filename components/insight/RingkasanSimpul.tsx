@@ -75,6 +75,7 @@ export function RingkasanSimpul() {
 
   return (
     <div
+      className="runtuh-1"
       style={{
         display: "grid",
         gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
@@ -214,9 +215,10 @@ function KartuSimpul({
       </div>
 
       <div
+        className="runtuh-2"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
           gap: "var(--s2)",
           marginTop: "var(--s3)",
           paddingTop: "var(--s2)",

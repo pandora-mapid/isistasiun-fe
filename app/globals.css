@@ -1462,6 +1462,143 @@ a.kartu:focus-visible {
   }
 }
 
+/* --- Kolom yang runtuh di layar sempit -----------------------------------
+   Tata letak halaman naratif (Beranda, Insight, Metodologi, Rekomendasi)
+   dibangun dari grid berkolom banyak yang ditulis sebagai `style` sebaris di
+   TSX. Di layar sempit kolomnya tidak pernah menyusut: yang bertrek `1fr`
+   telanjang tertahan `min-width: auto` milik grid item, dan yang sudah
+   dijaga `minmax(0, …)` tetap menyisakan kolom selebar ~100px — terlalu
+   sempit untuk angka rupiah di dalamnya. Dua-duanya berujung sama: halaman
+   bisa digeser mendatar dan isinya terpotong.
+
+   Diperbaiki lewat dua kelas, bukan dengan menulis ulang tiap `style`
+   sebaris: perubahannya jadi satu tempat yang bisa dibaca sekaligus, dan
+   keputusan tata letak lebarnya tetap tinggal di komponen masing-masing.
+
+   `!important` di sini bukan jalan pintas — `style` sebaris menang atas
+   selektor apa pun, jadi ini satu-satunya cara menimpanya dari stylesheet.
+
+   - `.runtuh-1` — tata letak tingkat-bagian (2–3 kolom) dan deret kartu:
+     jadi satu kolom di bawah 900px. Kartu bersusun ke bawah, urutannya tetap.
+   - `.runtuh-2` — deret angka pendek (3–5 kolom): jadi dua kolom di bawah
+     760px, baru satu kolom di bawah 430px. Dibuat bertahap karena angka
+     seperti "15 / menit per blok" masih terbaca berdampingan; memaksanya
+     satu kolom sejak awal justru memanjangkan halaman tanpa menambah
+     keterbacaan.
+   - `.runtuh-2-tetap` — sama, tapi berhenti di dua kolom. Dipakai kalau
+     deretnya duduk di dalam kartu yang tingginya ikut memanjang.
+   -------------------------------------------------------------------------- */
+@media (max-width: 900px) {
+  .runtuh-1 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .runtuh-2,
+  .runtuh-2-tetap {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .runtuh-2 {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* Tabel data tetap bertabel. Kolomnya saling dibandingkan baris per baris,
+   jadi meruntuhkannya jadi satu kolom menghapus justru hal yang dibaca —
+   digeser di dalam wadahnya sendiri, bukan diruntuhkan. */
+@media (max-width: 900px) {
+  .tabel-geser {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabel-geser > * {
+    min-width: 520px;
+  }
+}
+
+/* Legenda peta hero sengaja menjorok ~40px keluar tepi kanan, ke dalam selokan
+   `--page-x`. Di bawah ~900px selokan itu tidak selebar itu lagi — dan kolom
+   peta sudah jadi selebar halaman — jadi yang tadinya menjorok ke selokan
+   berubah jadi menjorok keluar layar. Ditarik balik ke dalam bingkai. */
+@media (max-width: 900px) {
+  .legenda-hero {
+    right: 0 !important;
+  }
+}
+
+/* Tiga kartu "untuk siapa" ditumpuk mengipas: saling menindih ke atas dan
+   digeser `translateX(i * 30%)`. Kipasnya bekerja selama ada kolom kosong di
+   sebelahnya untuk ditumpahi. Di bawah 600px bagiannya sudah satu kolom, jadi
+   kipas itu tidak lagi terbaca sebagai kedalaman — ia cuma mendorong kartu
+   ketiga keluar layar. Diluruskan jadi tumpukan biasa. */
+@media (max-width: 600px) {
+  .kartu-tumpuk {
+    width: 100% !important;
+    transform: none !important;
+    margin-top: var(--s3) !important;
+  }
+  .kartu-tumpuk:first-child {
+    margin-top: 0 !important;
+  }
+}
+
+/* Grid 12 kolom kepala bab. Anaknya ditempatkan pada garis yang eksplisit
+   (`grid-column: 10 / span 3`), jadi meruntuhkan `grid-template-columns` saja
+   tidak cukup — garis ke-10 tetap diminta, dan grid menumbuhkan kolom implisit
+   di luar layar untuk memenuhinya. Penempatan anaknya ikut dinetralkan. */
+@media (max-width: 900px) {
+  .g12 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .g12 > * {
+    grid-column: 1 / -1 !important;
+  }
+}
+
+/* Label yang sengaja `nowrap` supaya frasanya tidak patah di tengah. Di lebar
+   tertentu `nowrap` berhenti jadi pilihan tipografi dan jadi penyebab halaman
+   melar — di titik itu ia dilepas. Dua ambang karena dua panjang teks:
+   judul persamaan butuh 393px, kicker statistik cuma 285px. */
+@media (max-width: 760px) {
+  .boleh-patah {
+    white-space: normal !important;
+  }
+  /* Melepas `nowrap` saja tidak cukup: blok judulnya `flex: 0 0 auto`, jadi
+     lebarnya diambil dari max-content — dan max-content tidak peduli teksnya
+     boleh patah atau tidak. Bloknya harus boleh menyusut lebih dulu, baru
+     `white-space` di atas ada gunanya. */
+  .blok-judul {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .boleh-patah-kecil {
+    white-space: normal !important;
+  }
+}
+
+/* Kartu angka lapangan menembus ~28px keluar sudut kanan-bawah foto. Menembus
+   sudut hanya bekerja selama kartunya kecil dan pendek — dan begitu bagiannya
+   jadi satu kolom, kartunya melebar dan memanjang sampai menutupi judul bab
+   dan fotonya sekaligus. Jadi bukan cuma ditarik masuk: ia dikembalikan ke
+   aliran normal, duduk di bawah foto sebagai keterangan. */
+@media (max-width: 900px) {
+  .kartu-sudut {
+    position: static !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin-top: var(--s3) !important;
+  }
+}
+
 /* Momen tanda tangan: bar rentang P10–P90 di hero menggambar dirinya sendiri,
    sekali, saat halaman dibuka. Rentang adalah klaim epistemik produk ini —
    jadi yang bergerak sebaiknya justru itu, bukan hiasan. */

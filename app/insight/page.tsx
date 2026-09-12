@@ -86,6 +86,7 @@ export default function InsightPage() {
           }}
         >
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns:
@@ -157,6 +158,7 @@ export default function InsightPage() {
             catatan="Gerai di dalam stasiun menangkap sekitar sepertiga potensi yang lewat pintu terbesar; sisanya batas atas peluang pendapatan non-tiket."
           />
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(0, 1.55fr) minmax(0, 1fr)",
@@ -186,6 +188,7 @@ export default function InsightPage() {
             catatan="Kesenjangan per slot di pintu dengan selisih terbesar, dan instrumen F × E × C × V yang menyusunnya."
           />
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns:
@@ -219,6 +222,7 @@ export default function InsightPage() {
             catatan="Terisi · Kurang · Kosong dibaca dari jumlah gerai yang tercacah terhadap ambang 3 per kategori, bukan dari data sewa."
           />
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(0, 1fr) minmax(0, 300px)",
@@ -269,6 +273,7 @@ export default function InsightPage() {
           }}
         >
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(0, 1fr) minmax(0, 320px)",

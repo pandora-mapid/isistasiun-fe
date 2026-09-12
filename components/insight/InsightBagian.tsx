@@ -86,9 +86,10 @@ export function HeroKartu() {
         </p>
       </div>
       <div
+        className="runtuh-2"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
           gap: 1,
           background: "var(--rule)",
         }}
@@ -380,9 +381,10 @@ export function BatangBersarang() {
       </div>
 
       <div
+        className="runtuh-2"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
+          gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
           gap: "var(--s2)",
           marginTop: "var(--s3)",
           borderTop: "1px solid var(--rule)",
@@ -614,9 +616,10 @@ export function InstrumenSlot() {
         Instrumen · slot {instrumen?.slotLabel ?? "puncak"}
       </div>
       <div
+        className="runtuh-2"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
           gap: "var(--s2)",
         }}
       >
@@ -879,6 +882,7 @@ export function MatriksKategori() {
         border: "1px solid var(--rule)",
         background: "var(--surface)",
       }}
+      className="tabel-geser"
     >
       <div
         style={{

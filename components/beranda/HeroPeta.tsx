@@ -196,7 +196,7 @@ export function HeroPeta() {
          keluar frame. */}
       {peta && (
         <div
-          className="kartu"
+          className="kartu legenda-hero"
           style={{
             position: "absolute",
             top: 54,

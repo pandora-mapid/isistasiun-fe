@@ -48,7 +48,7 @@ Karena visual bisa berubah kapan saja saat jeda, kode di Fase 0 dan 1 **wajib** 
 
 ### Jeda itu justru waktu yang tepat untuk
 
-- **Responsivitas** — lihat §6, ini janji proposal yang belum ada pemiliknya
+- ~~**Responsivitas**~~ — ✅ selesai 2026-09-12, lihat §6 nomor 3.1 dan §7
 - Perbaikan tipografi, spasi, dan konsistensi warna
 - Penyesuaian tampilan setelah desain dinilai ulang
 - Utang teknis di §6
@@ -240,10 +240,10 @@ Fitur-fitur yang **dijanjikan di proposal** tapi belum ada di kode. Sebagian bis
 
 | # | Pekerjaan | Sumber janji | Butuh backend? |
 |---|---|---|---|
-| 3.1 | **Responsivitas** — layout sekarang memakai kolom lebar tetap dan akan berantakan di bawah ±1100px | §5.3 Tahap 4 | ❌ Tidak — **cocok dikerjakan saat jeda** |
-| 3.2 | **Ekspor CSV** tabel analisis | §3.2 | ❌ Tidak — bisa sepenuhnya di frontend |
-| 3.3 | **Ekspor PDF** brief simpul | §3.2 | ❌ Tidak — bisa sepenuhnya di frontend |
-| 3.4 | **Tabel atribut** | §3.2 | ⚠️ Sebagian |
+| 3.1 | ~~**Responsivitas**~~ | §5.3 Tahap 4 | ✅ Selesai — kelima rute bersih 1600→320px, dijaga `tests/responsif.spec.ts`; rinciannya di §7 |
+| 3.2 | ~~**Ekspor CSV** tabel analisis~~ | §3.2 | ✅ Selesai — `lib/export/` |
+| 3.3 | ~~**Ekspor PDF** brief simpul~~ | §3.2 | ✅ Selesai — cetak browser, tanpa library PDF |
+| 3.4 | ~~**Tabel atribut**~~ | §3.2 | ✅ Selesai — bisa diurutkan, satu sumber baris dengan CSV-nya |
 | 3.5 | ~~**Bandingkan dua simpul berdampingan**~~ | §3.2 | ✅ Selesai — overlay 2 kolom di `/peta` (keadaan "batas tercapai · upgrade" ditunda bersama premium) |
 | 3.6 | **Copilot AI** tersambung ke `POST /copilot/query` | §3.4 | ✅ Ya |
 | 3.7 | **Pembanding akhir pekan** — proposal menjanjikan satu sampel akhir pekan sebagai pembanding. UI-nya sudah ada tempatnya di panel slot (ditandai "belum dicacah"), tapi belum ada datanya dan belum ada cara memilihnya | §5.2 | ✅ Ya — butuh survei akhir pekan + `day_type` dari backend |
@@ -301,7 +301,7 @@ Kecil-kecil, bisa disisipkan kapan saja. Semuanya aman dikerjakan saat jeda.
 | **Potensi belanja tidak punya lapisan peta** | Angkanya tetap tampil di panel kanan dan di situ sudah tepat. Yang dihapus lapisan petanya, karena cincin berskala terpisah membuat jarak antar-titik tidak bisa dibandingkan. Kalau suatu saat potensi perlu tampil di peta, syaratnya skala berlabuh nol berbasis luas yang dipakai bersama lingkaran kesenjangan |
 | ~~**Dua baris lapisan tanpa data**~~ → **satu baris** | Tinggal *Event & aktivasi* (`/analytics/event-potential`) yang belum punya data contoh. *Indeks sewa / arus* sudah tersambung — dua sumber contoh baru berbentuk persis seperti `AssetResponse`/`RentFlowIndexResponse` Go, layer `sewa-petak` + `sewa-indeks`, lihat catatan §3. *Kategori hilang* dan *Arus pintu* sudah selesai lebih dulu |
 | ~~**Tidak ada variabel lingkungan sama sekali**~~ | ✅ Selesai di §4.2. `NEXT_PUBLIC_API_BASE_URL` dan `NEXT_PUBLIC_BASEMAP_URL` keduanya dirujuk literal — Next.js menyisipkan nilainya dengan mencocokkan teks, jadi rujukan lewat variabel perantara menghasilkan `undefined` |
-| **Responsivitas baru selesai di `/peta`** | `/peta` sudah tidak bisa digeser mendatar di 1024/900/760/390px: panel ringkasan turun jadi lembar bawah (bukan disembunyikan — panel itu yang membawa angkanya), panel slot & kontrol kiri ikut naik, dialog jadi penuh layar di bawah 760px. NavBar juga sudah bisa digeser di dalam dirinya sendiri. **Yang belum:** Beranda, Insight, Metodologi, dan Rekomendasi masih meluber mendatar di bawah ~760px (terukur: Beranda 5px@760 / 234px@390, Insight 19px@760 / 167px@390, Metodologi 307px@390, Rekomendasi 86px@390). Penyebabnya grid dan kartu berlebar tetap di masing-masing halaman, bukan lagi NavBar |
+| ~~**Responsivitas baru selesai di `/peta`**~~ | ✅ Selesai untuk kelima layar. `/peta`: panel ringkasan turun jadi lembar bawah (bukan disembunyikan — panel itu yang membawa angkanya), panel slot & kontrol kiri ikut naik, dialog penuh layar di bawah 760px, NavBar digeser di dalam dirinya sendiri. Beranda/Insight/Metodologi/Rekomendasi menyusul: dua kelas utilitas (`.runtuh-1` → satu kolom di bawah 900px, `.runtuh-2` → dua kolom di bawah 760px lalu satu di bawah 430px) diterapkan ke grid tata letak yang ditulis sebagai `style` sebaris, plus empat perbaikan setempat — grid `.g12` yang anaknya ditempatkan di garis eksplisit, dua hiasan `position: absolute` yang menjorok ke selokan `--page-x`, dan dua teks `white-space: nowrap`. Satu bug yang ikut ketahuan dan diperbaiki di sumbernya: trek `1fr` telanjang (`repeat(3, 1fr)` dst.) tertahan `min-width: auto` milik grid item, jadi ia meluber **di lebar berapa pun** begitu isinya panjang — mis. saat metrik jatuh ke "tidak diestimasi" dan bukan "Rp 4,2 jt"; semuanya kini `minmax(0, 1fr)`. Terukur bersih di 1600/1280/1024/900/760/600/430/390/360/320px untuk kelima rute, dijaga `tests/responsif.spec.ts` |
 | **Modal transparansi belum menjebak fokus** | Sudah punya `role="dialog"`, Esc, dan fokus awal yang pindah ke dalam. Yang belum: Tab masih bisa keluar dan menyusuri panel di baliknya yang sedang tertutup lapisan gelap. Dikerjakan bersama responsivitas, karena menyentuh JSX yang sama |
 | **`setFeatureState` dan `setFilter` dipanggil pada setiap `sourcedata`** | `sourcedata` juga menyala untuk tile basemap, jadi selama peta digeser keduanya dipanggil berkali-kali per detik dengan nilai yang identik — MapLibre tidak membandingkan isinya, layer ditandai kotor tiap kali. Tak terasa pada 10 titik. **Kerjakan tepat sebelum Fase 2**, bukan sekarang: saring `e.sourceId` lebih dulu, dan bentuk akhirnya baru jelas setelah source-nya jadi tile vektor (2.1) |
 | ~~**Autentikasi belum pernah dibahas**~~ | ✅ Terjawab. `02-BACKEND-SPEC.md` §1 memakai JWT, tapi enam endpoint peta ada di tier gratis dan tidak butuh token. Pekerjaan auth pindah ke §6.1 sebagai jalur terpisah |
@@ -322,7 +322,7 @@ Ringkasan apa yang memblokir apa:
 | Fase 2 seluruhnya | Kesiapan backend (tile + endpoint) — **belum siap** |
 | 2.8 sisip header `Authorization` | **Tidak ada** — bisa dicicil sekarang, bukan prasyarat |
 | 6.1 auth dan tier berbayar | Kesiapan endpoint `/auth/*` dan `/premium/*` — **jalur terpisah, tidak memblokir Fase 2** |
-| 3.1 responsivitas | **Tidak ada** — cocok saat jeda, dan sebaiknya sekalian dengan jebakan fokus modal (§7). Beranda sudah memakai `clamp()` dan grid 12 kolom sehingga bertahan sampai ±1100px; tiga layar lain belum |
+| 3.1 responsivitas | ✅ **Selesai** untuk kelima layar (§7). Jebakan fokus modal — yang dulu direncanakan sekalian — belum, dan sekarang berdiri sendiri |
 | 3.2 dan 3.3 ekspor | **Tidak ada** — murni frontend |
 | 3.6 copilot | Kontrak `POST /copilot/query`, belum dibahas |
 | 3.7 pembanding akhir pekan | Survei akhir pekan + `day_type` dari backend |

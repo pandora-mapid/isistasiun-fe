@@ -132,6 +132,7 @@ export default function BerandaPage() {
           }}
         >
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(0, 1.2fr) minmax(0, 0.9fr)",
@@ -251,6 +252,7 @@ export default function BerandaPage() {
             style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
           >
             <div
+              className="runtuh-1"
               style={{
                 display: "grid",
                 gridTemplateColumns: "minmax(0, 1fr) minmax(0, 0.9fr)",
@@ -303,6 +305,7 @@ export default function BerandaPage() {
               judul="Dua pasang mata, lalu satu mesin pembaca."
             />
             <div
+              className="runtuh-1"
               style={{
                 display: "grid",
                 gridTemplateColumns: "minmax(0, 7fr) minmax(0, 5fr)",
@@ -335,7 +338,7 @@ export default function BerandaPage() {
                    tiap sel selebar isinya, kartu memanjang menyamping, tak ada
                    label yang pecah ke bawah (dulu "menit / per / blok"). */}
                 <div
-                  className="kartu"
+                  className="kartu kartu-sudut"
                   style={{
                     position: "absolute",
                     right: -28,
@@ -347,6 +350,7 @@ export default function BerandaPage() {
                   }}
                 >
                   <div
+                    className="runtuh-2-tetap"
                     style={{
                       display: "grid",
                       gridTemplateColumns: "repeat(4, auto)",
@@ -459,6 +463,7 @@ export default function BerandaPage() {
             style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
           >
             <div
+              className="runtuh-1"
               style={{
                 display: "grid",
                 gridTemplateColumns: "minmax(0, 0.6fr) minmax(0, 1.4fr)",
@@ -530,6 +535,7 @@ export default function BerandaPage() {
                baris pendek di dalamnya tidak menyisakan ruang kosong lebar di
                sisi kanan (sempat `1fr`, terlalu lebar untuk isinya). */}
             <div
+              className="runtuh-1"
               style={{
                 display: "grid",
                 gridTemplateColumns: "minmax(0, 1fr) minmax(0, 0.62fr)",
@@ -550,7 +556,7 @@ export default function BerandaPage() {
                     key={k.judul}
                     style={{
                       display: "grid",
-                      gridTemplateColumns: "2.5ch 1fr",
+                      gridTemplateColumns: "2.5ch minmax(0, 1fr)",
                       gap: "var(--s3)",
                       padding: "calc(var(--s5) - var(--s2)) 0",
                       borderTop:
@@ -689,7 +695,7 @@ export default function BerandaPage() {
                         key={t}
                         style={{
                           display: "grid",
-                          gridTemplateColumns: "1ch 1fr",
+                          gridTemplateColumns: "1ch minmax(0, 1fr)",
                           gap: "var(--s2)",
                           padding: "4px 0",
                           fontSize: "var(--t-small)",
@@ -740,6 +746,7 @@ export default function BerandaPage() {
             style={{ paddingTop: "var(--s6)", paddingBottom: "var(--s6)" }}
           >
             <div
+              className="runtuh-1"
               style={{
                 display: "grid",
                 gridTemplateColumns: "minmax(0, 1fr) minmax(0, 0.95fr)",
@@ -751,7 +758,7 @@ export default function BerandaPage() {
                 {AUDIENS.map((a, i) => (
                   <div
                     key={a.judul}
-                    className="kartu"
+                    className="kartu kartu-tumpuk"
                     style={{
                       position: "relative",
                       zIndex: i + 1,
@@ -828,6 +835,7 @@ export default function BerandaPage() {
               operasi dan risiko usaha tidak diperhitungkan di dalamnya.
             </div>
             <div
+              className="runtuh-2"
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
