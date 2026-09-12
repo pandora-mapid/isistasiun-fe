@@ -3190,7 +3190,7 @@ a.kartu:focus-visible {
   opacity: 0.65;
 }
 
-.auth-security-note {
+.auth-help {
   margin: -4px 0 0;
   color: var(--ink-faint);
   font-size: 10.5px;

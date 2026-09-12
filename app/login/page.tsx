@@ -28,19 +28,18 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           <span className="eyebrow-chip">Akses operator</span>
           <h1 id="login-title">Masuk untuk membaca lapisan yang lebih dalam.</h1>
           <p>
-            Peta dasar dan analitik publik tetap terbuka. Akun operator hanya
-            membuka rincian per slot, anomali sewa terhadap arus, potensi event,
-            dan mutu bukti di balik setiap simpul.
+            Peta dan analitik dasar tetap terbuka untuk siapa pun. Akun ini
+            hanya diperlukan untuk lapisan yang lebih rinci:
           </p>
           <ul>
-            <li>Access token berumur pendek dan hanya hidup di memori.</li>
-            <li>Refresh token diputar setiap kali sesi diperbarui.</li>
-            <li>Role operator dan admin diverifikasi kembali oleh API.</li>
+            <li>Kesenjangan belanja per slot waktu, bukan hanya totalnya.</li>
+            <li>Petak sewa yang harganya menyimpang dari arus pengunjungnya.</li>
+            <li>Jumlah sampel di balik tiap angka, termasuk yang masih tipis.</li>
           </ul>
         </div>
         <div className="auth-card">
           <div className="auth-card-head">
-            <span className="k">Kredensial operator</span>
+            <span className="k">Akun operator</span>
             <span className="auth-lock" aria-hidden="true">
               ↗
             </span>

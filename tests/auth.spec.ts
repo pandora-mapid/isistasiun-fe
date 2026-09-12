@@ -121,13 +121,13 @@ test("operator dapat login dan membuka deep analysis", async ({ page }) => {
   });
 
   await page.goto("/login?next=/premium");
-  await page.getByLabel("Email operator").fill(user.email);
+  await page.getByLabel("Email").fill(user.email);
   await page.getByLabel("Kata sandi").fill("correct-password");
-  await page.getByRole("button", { name: "Masuk ke analisis premium" }).click();
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
 
   await expect(page).toHaveURL(/\/premium$/);
   await expect(
-    page.getByRole("heading", { name: "Deep analysis per simpul" }),
+    page.getByRole("heading", { name: "Analisis mendalam per simpul" }),
   ).toBeVisible();
   await expect(page.getByText("Peluang yang belum terisi")).toBeVisible();
   await expect(page.getByText("apotek", { exact: true })).toBeVisible();
