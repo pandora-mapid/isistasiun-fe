@@ -6,7 +6,6 @@ import Link from "next/link";
 import { NavBar } from "./NavBar";
 import { MapCanvas } from "./MapCanvas";
 import { StationSearch } from "./StationSearch";
-import { RentalAssets } from "./RentalAssets";
 import { ComparisonDialog } from "./ComparisonDialog";
 import { buildStationConfidenceGrid } from "@/lib/data/confidence";
 import { retailGeoJSON, type RetailLocation } from "@/lib/data/retail";
@@ -16,8 +15,8 @@ import {
   confidenceLabel,
   evidenceFor,
   pointRank,
-  } from "@/lib/analytics/demo-select";
-import { RetailPanel } from "./RetailPanel";
+} from "@/lib/analytics/demo-select";
+import { RetailPanel, type FilterCategory } from "./RetailPanel";
 import { RETAIL_KINDS, RETAIL_LEGEND } from "@/lib/map/retail-style";
 import {
   biggestGapPoint,
@@ -68,6 +67,8 @@ export type PetaInitialQuery = {
   stationId: number | null;
   pointId: number | null;
   retailId: string | null;
+  rentalId?: string | null;
+  retailFilter?: FilterCategory;
   slot: SlotKey;
   category: CategoryFilter;
 };
@@ -239,7 +240,14 @@ export function PetaScreen({
     error,
   } = usePetaData();
 
-  const [tab, setTab] = useState<"brief" | "retail" | "copilot">("brief");
+  const [activeRetailFilter, setActiveRetailFilter] = useState<FilterCategory>(
+    initialQuery.retailFilter ?? "all",
+  );
+  const [tab, setTab] = useState<"brief" | "retail" | "copilot">(
+    initialQuery.retailFilter || initialQuery.retailId || initialQuery.rentalId
+      ? "retail"
+      : "brief",
+  );
   const [layersOpen, setLayersOpen] = useState(false);
   const [activeLayers, setActiveLayers] = useState<string[]>(
     DEFAULT_ACTIVE_LAYERS,
@@ -260,9 +268,27 @@ export function PetaScreen({
   const [selectedRetailChoice, setSelectedRetail] = useState<
     RetailLocation | null | undefined
   >(undefined);
-  const [selectedRental, setSelectedRental] = useState<RentalAsset | null>(
-    null,
-  );
+  const [selectedRentalChoice, setSelectedRental] = useState<
+    RentalAsset | null | undefined
+  >(undefined);
+
+  const handleRetailFilterChange = useCallback((filter: FilterCategory) => {
+    setActiveRetailFilter(filter);
+    updatePetaUrl({
+      retail_filter: filter === "all" ? null : filter,
+    });
+    if (filter === "sewa") {
+      setActiveLayers((current) =>
+        current.includes("rental") ? current : [...current, "rental"],
+      );
+    }
+    if (filter === "potensi" || filter === "existing" || filter === "ruko") {
+      setActiveLayers((current) =>
+        current.includes("retail") ? current : [...current, "retail"],
+      );
+    }
+  }, []);
+
   const selectRetail = useCallback((location: RetailLocation) => {
     setSelectedRental(null);
     setSelectedRetail(location);
@@ -274,6 +300,11 @@ export function PetaScreen({
     setActiveLayers((current) =>
       current.includes("retail") ? current : [...current, "retail"],
     );
+    updatePetaUrl({
+      retail: location.id,
+      rental: null,
+    });
+    setTab("retail");
   }, []);
 
   const selectRental = useCallback((asset: RentalAsset) => {
@@ -287,6 +318,21 @@ export function PetaScreen({
     setActiveLayers((current) =>
       current.includes("rental") ? current : [...current, "rental"],
     );
+    updatePetaUrl({
+      rental: asset.id,
+      retail: null,
+    });
+    setTab("retail");
+  }, []);
+
+  const handleCloseRetail = useCallback(() => {
+    setSelectedRetail(null);
+    updatePetaUrl({ retail: null });
+  }, []);
+
+  const handleCloseRental = useCallback(() => {
+    setSelectedRental(null);
+    updatePetaUrl({ rental: null });
   }, []);
 
   /**
@@ -513,6 +559,10 @@ export function PetaScreen({
     retailLocations.find((item) => item.id === initialQuery.retailId) ?? null;
   const selectedRetail =
     selectedRetailChoice === undefined ? linkedRetail : selectedRetailChoice;
+  const linkedRental =
+    rentalAssets.find((item) => item.id === initialQuery.rentalId) ?? null;
+  const selectedRental =
+    selectedRentalChoice === undefined ? linkedRental : selectedRentalChoice;
   const linkedStation = stations?.find(
     (item) => item.id === initialQuery.stationId,
   );
@@ -525,14 +575,20 @@ export function PetaScreen({
             latitude: selectedRetail.latitude,
             zoom: 19,
           }
-        : linkedStation?.longitude !== undefined &&
-            linkedStation.latitude !== undefined
+        : selectedRental
           ? {
-              longitude: linkedStation.longitude,
-              latitude: linkedStation.latitude,
+              longitude: selectedRental.longitude,
+              latitude: selectedRental.latitude,
+              zoom: 19,
             }
-          : null),
-    [stationTarget, selectedRetail, linkedStation],
+          : linkedStation?.longitude !== undefined &&
+              linkedStation.latitude !== undefined
+            ? {
+                longitude: linkedStation.longitude,
+                latitude: linkedStation.latitude,
+              }
+            : null),
+    [stationTarget, selectedRetail, selectedRental, linkedStation],
   );
 
   const dynamicConfidenceGrid = useMemo(
@@ -643,6 +699,7 @@ export function PetaScreen({
           stationLocations={stationLocations}
           selectedStationId={currentStation?.id ?? null}
           onSelectStation={handleSelectStation}
+          activeRetailFilter={activeRetailFilter}
         />
         <StationSearch
           stations={stations}
@@ -701,12 +758,6 @@ export function PetaScreen({
               );
             })}
         </div>
-        <RentalAssets
-          assets={rentalAssets}
-          selected={selectedRental}
-          onSelect={selectRental}
-          onClose={() => setSelectedRental(null)}
-        />
 
         <div
           className="row glass"
@@ -1089,7 +1140,16 @@ export function PetaScreen({
                   key={key}
                   onClick={() => setTab(key)}
                   aria-pressed={tab === key}
-                  style={{ all: "unset", position: "relative", flex: 1, textAlign: "center", padding: "9px 0", font: "600 12.5px/1 var(--font-inter)", color: "var(--ink)", cursor: "pointer" }}
+                  style={{
+                    all: "unset",
+                    position: "relative",
+                    flex: 1,
+                    textAlign: "center",
+                    padding: "9px 0",
+                    font: "600 12.5px/1 var(--font-inter)",
+                    color: "var(--ink)",
+                    cursor: "pointer",
+                  }}
                 >
                   {label}
                 </button>
@@ -2147,44 +2207,171 @@ export function PetaScreen({
           )}
 
           {tab === "retail" && (
-            <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
-              <div style={{ flex: "none", padding: "4px 22px 16px" }}>
-                <div className="k" style={{ marginBottom: 10 }}>Retail &amp; potensi toko</div>
-                <div style={{ fontSize: 12.5, color: "var(--ink-muted)" }}>
-                  Gerai yang sudah ada, kandidat toko, dan ruko depan stasiun di
-                  kawasan Manggarai. Penanda di peta bisa disembunyikan lewat
-                  Lapisan &amp; filter.
+            <div
+              style={{
+                flex: 1,
+                minHeight: 0,
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div style={{ flex: "none", padding: "4px 22px 14px" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    marginBottom: 6,
+                  }}
+                >
+                  <div
+                    className="k"
+                    style={{ fontSize: 11, letterSpacing: "0.08em" }}
+                  >
+                    KATALOG ASET &amp; POTENSI
+                  </div>
+                  <span
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 600,
+                      color: "var(--data)",
+                      background: "var(--data-wash)",
+                      padding: "2px 8px",
+                      borderRadius: "var(--r-pill)",
+                    }}
+                  >
+                    Stasiun {currentStation?.name ?? "Manggarai"}
+                  </span>
                 </div>
-                {/* Kunci baca penanda retail — di sini, bukan di legenda peta,
-                   supaya legenda peta tetap seperti semula. */}
-                <div className="row" style={{ gap: "8px 16px", flexWrap: "wrap", marginTop: 12 }}>
-                  {RETAIL_KINDS.map((kind) => (
+                <div
+                  style={{
+                    fontSize: 12.5,
+                    lineHeight: 1.5,
+                    color: "var(--ink-muted)",
+                  }}
+                >
+                  Inventaris gerai beroperasi, titik potensi toko baru, dan
+                  properti ruko strategis di sekitar kawasan stasiun.
+                </div>
+                {/* Legenda Pill yang Elegan & Informatif */}
+                <div
+                  style={{
+                    display: "flex",
+                    gap: 7,
+                    flexWrap: "wrap",
+                    marginTop: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 7,
+                      padding: "4px 10px",
+                      borderRadius: "var(--r-pill)",
+                      background: "var(--surface)",
+                      border: "1px solid var(--rule)",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                      fontSize: 11.5,
+                      color: "var(--ink)",
+                    }}
+                  >
                     <span
-                      key={kind}
-                      className="row"
-                      style={{ gap: 6, fontSize: 11, color: "var(--ink-2)", whiteSpace: "nowrap" }}
+                      style={{
+                        width: 8,
+                        height: 8,
+                        borderRadius: 999,
+                        background: "#2563eb",
+                        boxShadow: "0 0 0 1.5px #60a5fa",
+                        flex: "none",
+                      }}
+                    />
+                    <span style={{ fontWeight: 500 }}>Sewa Tempat</span>
+                    <span
+                      style={{
+                        fontSize: 10.5,
+                        fontWeight: 600,
+                        padding: "1px 6px",
+                        borderRadius: 999,
+                        background: "var(--paper-2)",
+                        color: "var(--ink-muted)",
+                        marginLeft: 1,
+                      }}
                     >
-                      <span
-                        style={{
-                          width: 9,
-                          height: 9,
-                          borderRadius: 999,
-                          background: RETAIL_LEGEND[kind].fill,
-                          boxShadow: `0 0 0 1.5px ${RETAIL_LEGEND[kind].stroke}`,
-                          flex: "none",
-                        }}
-                      />
-                      {RETAIL_LEGEND[kind].label}
+                      {rentalAssets.length}
                     </span>
-                  ))}
+                  </div>
+                  {RETAIL_KINDS.map((kind) => {
+                    const count = retailLocations.filter(
+                      (l) => l.kind === kind,
+                    ).length;
+                    return (
+                      <div
+                        key={kind}
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 7,
+                          padding: "4px 10px",
+                          borderRadius: "var(--r-pill)",
+                          background: "var(--surface)",
+                          border: "1px solid var(--rule)",
+                          boxShadow: "0 1px 2px rgba(0,0,0,0.03)",
+                          fontSize: 11.5,
+                          color: "var(--ink)",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 8,
+                            height: 8,
+                            borderRadius: 999,
+                            background: RETAIL_LEGEND[kind].fill,
+                            boxShadow: `0 0 0 1.5px ${RETAIL_LEGEND[kind].stroke}`,
+                            flex: "none",
+                          }}
+                        />
+                        <span style={{ fontWeight: 500 }}>
+                          {RETAIL_LEGEND[kind].label}
+                        </span>
+                        <span
+                          style={{
+                            fontSize: 10.5,
+                            fontWeight: 600,
+                            padding: "1px 6px",
+                            borderRadius: 999,
+                            background: "var(--paper-2)",
+                            color: "var(--ink-muted)",
+                            marginLeft: 1,
+                          }}
+                        >
+                          {count}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-              <div className="sc" style={{ flex: 1, minHeight: 0, overflowY: "auto", padding: "0 22px 16px" }}>
+              <div
+                className="sc"
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  overflowY: "auto",
+                  padding: "0 22px 16px",
+                }}
+              >
                 <RetailPanel
                   locations={retailLocations}
+                  rentalAssets={rentalAssets}
                   selected={selectedRetail}
+                  selectedRental={selectedRental}
+                  activeFilter={activeRetailFilter}
+                  onFilterChange={handleRetailFilterChange}
                   onSelect={selectRetail}
-                  onClose={() => setSelectedRetail(null)}
+                  onSelectRental={selectRental}
+                  onClose={handleCloseRetail}
+                  onCloseRental={handleCloseRental}
                 />
               </div>
             </div>
@@ -2836,10 +3023,15 @@ export function PetaScreen({
           activeCategory={activeCategory}
           onClose={() => setShowComparison(false)}
           onOpenStation={(target) => {
-            if (target.longitude === undefined || target.latitude === undefined) return;
-            setStationTarget({ longitude: target.longitude, latitude: target.latitude });
+            if (target.longitude === undefined || target.latitude === undefined)
+              return;
+            setStationTarget({
+              longitude: target.longitude,
+              latitude: target.latitude,
+            });
             setPilihanTitik(
-              analytics.points.find((point) => point.station_id === target.id)?.point_id ?? null,
+              analytics.points.find((point) => point.station_id === target.id)
+                ?.point_id ?? null,
             );
             setSelectedRetail(null);
             setShowComparison(false);

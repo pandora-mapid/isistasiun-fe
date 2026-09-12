@@ -65,8 +65,7 @@ test("retail mengikuti stasiun aktif dan tidak menjadi daftar global", async ({
   await search.press("Enter");
 
   await page.getByRole("button", { name: "Retail", exact: true }).click();
-  const panel = page.locator(".retail-picker-empty");
-  await expect(panel).toContainText("Tidak ada asset untuk stasiun ini.");
+  await expect(page.getByText(/Kios lokal Sudirman/)).toHaveCount(3);
   await expect(page.getByText("Famima Manggarai", { exact: true })).toHaveCount(
     0,
   );
@@ -88,16 +87,19 @@ test("stasiun aktif tersimpan di URL dan pulih setelah refresh", async ({
     "Sudirman",
   );
   await page.getByRole("button", { name: "Retail", exact: true }).click();
-  await expect(page.locator(".retail-picker-empty")).toContainText(
-    "Tidak ada asset untuk stasiun ini.",
+  await expect(page.getByText(/Kios lokal Sudirman/)).toHaveCount(3);
+  await expect(page.getByText("Famima Manggarai", { exact: true })).toHaveCount(
+    0,
   );
 });
 
 test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembunyikan", async ({ page }) => {
   await page.getByRole("button", { name: "Retail", exact: true }).click();
-  const panel = page.locator(".retail-location-list");
-  await expect(panel.getByRole("button")).toHaveCount(10);
-  await panel.getByRole("button", { name: "Famima Manggarai", exact: true }).click();
+  const panel = page.locator(
+    ".retail-group-items:not(.rental-asset-list) .retail-card-btn",
+  );
+  await expect(panel).toHaveCount(10);
+  await page.getByRole("button", { name: "Famima Manggarai", exact: true }).click();
   const detail = page.getByRole("article", { name: "Detail lokasi retail" });
   await expect(detail).toContainText("-6.2102422, 106.8502918");
   await expect.poll(() => page.evaluate(() => {
@@ -123,7 +125,10 @@ test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembun
   await page.mouse.click(point.x, point.y);
   await expect(detail.getByRole("heading")).toHaveText("Indomaret Manggarai");
   await page.getByRole("button", { name: "Indomaret Manggarai", exact: true }).click();
-  await page.locator(".retail-location-list").getByRole("button", { name: "Potensi toko 5", exact: true }).click();
+  await page
+    .locator(".retail-group-items:not(.rental-asset-list)")
+    .getByRole("button", { name: "Potensi toko 5", exact: true })
+    .click();
   await expect(detail).toContainText("Estimasi potensi pendapatan belum tersedia");
   await expect(detail).toContainText("-6.2105015, 106.8508356");
   await page.getByRole("button", { name: "Ringkasan", exact: true }).click();

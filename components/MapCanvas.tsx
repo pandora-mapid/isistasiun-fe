@@ -13,6 +13,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { Domain } from "@/lib/analytics/select";
 import type { RetailLocation } from "@/lib/data/retail";
+import type { FilterCategory } from "./RetailPanel";
 import { rentalCircleLayer, rentalLabelLayer } from "@/lib/map/rental-style";
 import { stationCircleLayer, stationLabelLayer } from "@/lib/map/station-style";
 import type {
@@ -44,12 +45,7 @@ import {
   pointLabelLayer,
   scaleDependentPaint,
 } from "@/lib/map/style";
-import {
-  retailCircleLayer,
-  retailLabelLayer,
-  retailStrokeColor,
-  retailStrokeWidth,
-} from "@/lib/map/retail-style";
+import { retailCircleLayer, retailLabelLayer } from "@/lib/map/retail-style";
 
 const EMPTY_RETAIL: FeatureCollection<Point, RetailLocation> = {
   type: "FeatureCollection",
@@ -113,6 +109,7 @@ type Props = {
   rentalLocations?: FeatureCollection<Point, RentalAsset>;
   selectedRentalId?: string | null;
   onSelectRental?: (asset: RentalAsset) => void;
+  activeRetailFilter?: FilterCategory;
   /**
    * Boleh digeser, di-zoom, dan diklik. Bawaannya ya.
    *
@@ -282,10 +279,11 @@ export function MapCanvas({
   rentalLocations = EMPTY_RENTALS,
   selectedRentalId = null,
   onSelectRental,
+  activeRetailFilter = "all",
   interactive = true,
   fitPadding = FIT_PADDING,
   borderRadius,
-   attributionPosition = "bottom-right",
+  attributionPosition = "bottom-right",
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -574,23 +572,6 @@ export function MapCanvas({
 
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !layersReady) return;
-    map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
-      "case",
-      ["==", ["get", "id"], selectedRetailId ?? ""],
-      "#0f172a",
-      "#ffffff",
-    ]);
-    map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
-      "case",
-      ["==", ["get", "id"], selectedRetailId ?? ""],
-      3,
-      2,
-    ]);
-  }, [layersReady, selectedRetailId]);
-
-  useEffect(() => {
-    const map = mapRef.current;
     if (!map || !layersReady || !interactive || !onSelectStation) return;
     const select = (event: {
       features?: { properties?: Record<string, unknown> }[];
@@ -719,19 +700,72 @@ export function MapCanvas({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !layersReady || !map.getLayer(LAYER.rentalCircle)) return;
-    map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-color", [
-      "case",
-      ["==", ["get", "id"], selectedRentalId ?? ""],
-      "#0f172a",
-      "#ffffff",
-    ]);
-    map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", [
-      "case",
-      ["==", ["get", "id"], selectedRentalId ?? ""],
-      3,
-      2,
-    ]);
-  }, [layersReady, selectedRentalId]);
+
+    if (selectedRentalId) {
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "id"], selectedRentalId],
+        "#0f172a",
+        "#ffffff",
+      ]);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "id"], selectedRentalId],
+        4.5,
+        1.6,
+      ]);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "id"], selectedRentalId],
+        1.0,
+        0.4,
+      ]);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "id"], selectedRentalId],
+        1.0,
+        0.5,
+      ]);
+    } else if (selectedRetailId) {
+      map.setPaintProperty(
+        LAYER.rentalCircle,
+        "circle-stroke-color",
+        "#ffffff",
+      );
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", 1.5);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", 0.3);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", 0.35);
+    } else if (activeRetailFilter === "sewa") {
+      // Highlight semua sewa tempat saat filter sewa aktif
+      map.setPaintProperty(
+        LAYER.rentalCircle,
+        "circle-stroke-color",
+        "#2563eb",
+      );
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", 4.0);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", 1.0);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", 1.0);
+    } else if (activeRetailFilter && activeRetailFilter !== "all") {
+      // Redupkan jika kategori retail lain yang sedang difilter
+      map.setPaintProperty(
+        LAYER.rentalCircle,
+        "circle-stroke-color",
+        "#ffffff",
+      );
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", 1.2);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", 0.25);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", 0.3);
+    } else {
+      map.setPaintProperty(
+        LAYER.rentalCircle,
+        "circle-stroke-color",
+        "#ffffff",
+      );
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-width", 2.0);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-opacity", 0.92);
+      map.setPaintProperty(LAYER.rentalCircle, "circle-stroke-opacity", 1.0);
+    }
+  }, [layersReady, selectedRentalId, selectedRetailId, activeRetailFilter]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -996,17 +1030,150 @@ export function MapCanvas({
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !layersReady || !map.getLayer(LAYER.retailCircle)) return;
-    map.setPaintProperty(
-      LAYER.retailCircle,
-      "circle-stroke-color" as never,
-      retailStrokeColor(selectedRetailId) as never,
-    );
-    map.setPaintProperty(
-      LAYER.retailCircle,
-      "circle-stroke-width" as never,
-      retailStrokeWidth(selectedRetailId) as never,
-    );
-  }, [selectedRetailId, layersReady, retailLocations]);
+
+    const strokeMatch = [
+      "match",
+      ["get", "kind"],
+      "shopfront",
+      "#b45f33",
+      "#16130f",
+    ] as never;
+
+    if (selectedRetailId) {
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "id"], selectedRetailId],
+        "#0f172a",
+        strokeMatch,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "id"], selectedRetailId],
+        4.5,
+        1.5,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "id"], selectedRetailId],
+        1.0,
+        0.35,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "id"], selectedRetailId],
+        1.0,
+        0.4,
+      ]);
+    } else if (selectedRentalId) {
+      map.setPaintProperty(
+        LAYER.retailCircle,
+        "circle-stroke-color",
+        strokeMatch,
+      );
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", 1.5);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", 0.3);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", 0.35);
+    } else if (activeRetailFilter === "sewa") {
+      map.setPaintProperty(
+        LAYER.retailCircle,
+        "circle-stroke-color",
+        strokeMatch,
+      );
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", 1.2);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", 0.25);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", 0.3);
+    } else if (activeRetailFilter === "potensi") {
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "kind"], "potential"],
+        "#f59e0b",
+        strokeMatch,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "kind"], "potential"],
+        4.0,
+        1.5,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "kind"], "potential"],
+        1.0,
+        0.35,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "kind"], "potential"],
+        1.0,
+        0.4,
+      ]);
+    } else if (activeRetailFilter === "existing") {
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "kind"], "existing"],
+        "#10b981",
+        strokeMatch,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "kind"], "existing"],
+        4.0,
+        1.5,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "kind"], "existing"],
+        1.0,
+        0.35,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "kind"], "existing"],
+        1.0,
+        0.4,
+      ]);
+    } else if (activeRetailFilter === "ruko") {
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-color", [
+        "case",
+        ["==", ["get", "kind"], "shopfront"],
+        "#8b5cf6",
+        strokeMatch,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", [
+        "case",
+        ["==", ["get", "kind"], "shopfront"],
+        4.0,
+        1.5,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", [
+        "case",
+        ["==", ["get", "kind"], "shopfront"],
+        1.0,
+        0.35,
+      ]);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", [
+        "case",
+        ["==", ["get", "kind"], "shopfront"],
+        1.0,
+        0.4,
+      ]);
+    } else {
+      map.setPaintProperty(
+        LAYER.retailCircle,
+        "circle-stroke-color",
+        strokeMatch,
+      );
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-width", 1.6);
+      map.setPaintProperty(LAYER.retailCircle, "circle-opacity", 1.0);
+      map.setPaintProperty(LAYER.retailCircle, "circle-stroke-opacity", 1.0);
+    }
+  }, [
+    selectedRetailId,
+    selectedRentalId,
+    activeRetailFilter,
+    layersReady,
+    retailLocations,
+  ]);
 
   // --- interaksi retail: sorot dan pilih --------------------------------
   //
@@ -1014,10 +1181,17 @@ export function MapCanvas({
   // non-interaktif tidak mendaftarkannya sama sekali.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !layersReady || !interactive || !map.getLayer(LAYER.retailCircle))
+    if (
+      !map ||
+      !layersReady ||
+      !interactive ||
+      !map.getLayer(LAYER.retailCircle)
+    )
       return;
 
-    const onClick = (e: { features?: { properties?: Record<string, unknown> }[] }) => {
+    const onClick = (e: {
+      features?: { properties?: Record<string, unknown> }[];
+    }) => {
       const id = e.features?.[0]?.properties?.id;
       const location = retailRef.current.features.find(
         (f) => f.properties.id === id,

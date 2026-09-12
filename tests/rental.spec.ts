@@ -17,10 +17,10 @@ test("aset sewa memuat delapan aset Manggarai dan detail status", async ({
 }) => {
   await page.goto("/peta?basemap=positron", { waitUntil: "domcontentloaded" });
   await waitForRentalLayer(page);
+  await page.getByRole("button", { name: "Retail", exact: true }).click();
   const panel = page.getByRole("region", { name: "Aset sewa stasiun" });
   await expect(panel).toContainText("8 lokasi");
 
-  await panel.locator("summary").click();
   await expect(panel.locator(".rental-asset-list button")).toHaveCount(8);
   await expect(page.getByText(/MANGGARAI NO 5/)).toBeVisible();
   await expect(page.getByText(/Kios lokal Sudirman/)).not.toBeVisible();
