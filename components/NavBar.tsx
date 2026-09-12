@@ -77,13 +77,13 @@ function NavLinks({ active }: { active: PageKey }) {
             key={item.key}
             href={item.href}
             aria-current={isActive ? "page" : undefined}
-            className="pill"
+            className="pill nav-link"
             style={{
               padding: "8px 14px",
               fontSize: 13,
               fontWeight: isActive ? 600 : 400,
-              background: isActive ? "var(--nav-active-bg)" : "transparent",
-              color: isActive ? "var(--nav-active-fg)" : "var(--nav-idle)",
+              background: isActive ? "var(--nav-active-bg)" : undefined,
+              color: isActive ? "var(--nav-active-fg)" : undefined,
             }}
           >
             {item.label}

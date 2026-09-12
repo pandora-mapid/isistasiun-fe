@@ -21,9 +21,18 @@ test("aset sewa memuat delapan aset Manggarai dan detail status", async ({
   const panel = page.getByRole("region", { name: "Aset sewa stasiun" });
   await expect(panel).toContainText("8 lokasi");
 
+  // Pada filter semua, daftar diringkas 3 item terlebih dahulu
+  await expect(panel.locator(".rental-asset-list button")).toHaveCount(3);
+  // Klik tombol tampilkan lebih banyak (show more)
+  await panel.getByRole("button", { name: /Tampilkan \d+ lainnya/ }).click();
+
   await expect(panel.locator(".rental-asset-list button")).toHaveCount(8);
   await expect(page.getByText(/MANGGARAI NO 5/)).toBeVisible();
   await expect(page.getByText(/Kios lokal Sudirman/)).not.toBeVisible();
+
+  // Dapat diciutkan kembali (show less)
+  await panel.getByRole("button", { name: "Tampilkan lebih sedikit" }).click();
+  await expect(panel.locator(".rental-asset-list button")).toHaveCount(3);
 });
 
 test("sakelar aset sewa mengubah visibilitas marker", async ({ page }) => {

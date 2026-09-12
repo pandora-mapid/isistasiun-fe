@@ -2243,23 +2243,13 @@ export function PetaScreen({
                     Stasiun {currentStation?.name ?? "Manggarai"}
                   </span>
                 </div>
-                <div
-                  style={{
-                    fontSize: 12.5,
-                    lineHeight: 1.5,
-                    color: "var(--ink-muted)",
-                  }}
-                >
-                  Inventaris gerai beroperasi, titik potensi toko baru, dan
-                  properti ruko strategis di sekitar kawasan stasiun.
-                </div>
                 {/* Legenda Pill yang Elegan & Informatif */}
                 <div
                   style={{
                     display: "flex",
                     gap: 7,
                     flexWrap: "wrap",
-                    marginTop: 12,
+                    marginTop: 10,
                   }}
                 >
                   <div
