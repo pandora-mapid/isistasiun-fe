@@ -58,7 +58,7 @@ export function ComparisonDialog({ stations, analytics, statuses, activeSlot, ac
       <header className="comparison-header">
         <div>
           <span className="k">Perbandingan dua simpul · data mock</span>
-          <h2 id="comparison-title">Manggarai dan Sudirman</h2>
+          <h2 id="comparison-title">{title}</h2>
           <p>Filter aktif: {slotLabel(activeSlot)} · {categoryLabel(activeCategory)}</p>
         </div>
         <button ref={closeRef} type="button" aria-label="Tutup perbandingan" onClick={onClose}>×</button>

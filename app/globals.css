@@ -1614,14 +1614,11 @@ a.kartu:focus-visible {
    ========================================================================== */
 .station-search {
   position: absolute;
-  top: 122px;
-  /* Rata tepi kiri pil nav (yang bermargin `--page-x`), bukan `24px` seperti
-     legenda — supaya kotak cari terbaca "menempel di bawah nav", bukan mencong.
-     `top` cukup untuk lolos bayangan pil nav, tidak lebih — biar terasa satu
-     kesatuan dengan nav, bukan panel terpisah. */
-  left: var(--page-x);
-  z-index: 12;
-  width: min(360px, calc(100% - 2 * var(--page-x)));
+  top: 104px;
+  /* Keep the search, station chips, and asset panels on one left rail. */
+  left: 64px;
+  z-index: 21;
+  width: min(350px, calc(100% - 88px));
   color: var(--ink);
 }
 .station-search-field {

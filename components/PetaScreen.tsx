@@ -2798,33 +2798,6 @@ export function PetaScreen({
             </div>
           </div>
         )}
-        {showComparison && analytics && stations && demo && (
-          <ComparisonDialog
-            stations={stations}
-            analytics={analytics}
-            statuses={demo.category_statuses}
-            activeSlot={activeSlot}
-            activeCategory={activeCategory}
-            onClose={() => setShowComparison(false)}
-            onOpenStation={(target) => {
-              if (
-                target.longitude === undefined ||
-                target.latitude === undefined
-              )
-                return;
-              setStationTarget({
-                longitude: target.longitude,
-                latitude: target.latitude,
-              });
-              setPilihanTitik(
-                analytics.points.find((point) => point.station_id === target.id)
-                  ?.point_id ?? null,
-              );
-              setSelectedRetail(null);
-              setShowComparison(false);
-            }}
-          />
-        )}
       </div>
 
       {/* Pil nav mengambang di atas peta full-bleed — bahasa yang sama dengan
