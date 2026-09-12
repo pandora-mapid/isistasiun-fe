@@ -146,8 +146,18 @@ test("hiasan mengambang tidak menutupi teks di layar sempit", async ({ page }) =
 
     const tindihan = await page.evaluate(() => {
       const mengambang = Array.from(document.querySelectorAll("body *")).filter((el) => {
-        const pos = getComputedStyle(el).position;
-        return pos === "absolute" || pos === "fixed";
+        const cs = getComputedStyle(el);
+        if (cs.position !== "absolute" && cs.position !== "fixed") return false;
+        // Hiasan latar TIDAK dihitung menindih. Beranda menggambar satu lapis
+        // ilustrasi jalur transit selebar halaman di belakang isinya; ia
+        // memang menumpuki setiap judul, dan itu memang maksudnya. Keduanya
+        // ditandai dengan jujur di markup — `aria-hidden` (pembaca layar
+        // melewatinya) dan `pointer-events: none` (tetikus menembusnya) —
+        // jadi penandaan itu yang dipakai, bukan tebakan soal warna atau
+        // z-index. Yang dijaga tes ini kartu buram yang menutupi teks.
+        if (el.getAttribute("aria-hidden") === "true") return false;
+        if (cs.pointerEvents === "none") return false;
+        return true;
       });
       const teks = Array.from(
         document.querySelectorAll("h1, h2, h3, p, dd, li"),
