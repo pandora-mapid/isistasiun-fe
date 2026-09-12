@@ -7,6 +7,7 @@ import { MapCanvas } from "./MapCanvas";
 import { StationSearch } from "./StationSearch";
 import { RetailPanel } from "./RetailPanel";
 import { ComparisonDialog } from "./ComparisonDialog";
+import { BandingSimpulOverlay } from "./BandingSimpulOverlay";
 import { retailGeoJSON, type RetailLocation } from "@/lib/data/retail";
 import { sewaGeoJSON, type RentPlot } from "@/lib/data/rent";
 import { SewaCard } from "@/components/SewaCard";
@@ -169,6 +170,12 @@ export function PetaScreen() {
   const [showTransparansi, setShowTransparansi] = useState(false);
   const [showCopilotResult, setShowCopilotResult] = useState(true);
   const [showComparison, setShowComparison] = useState(false);
+  /**
+   * Overlay "Ringkasan & Bandingkan Simpul" — fitur TERPISAH dari
+   * `showComparison` di atas. Dua tombol, dua label, dua sumber angka; lihat
+   * catatan di `components/BandingSimpulOverlay.tsx`.
+   */
+  const [showBandingSimpul, setShowBandingSimpul] = useState(false);
   /** Titik yang harus didatangi kamera — dari pencarian, daftar retail, banding. */
   const [stationTarget, setStationTarget] = useState<
     { longitude: number; latitude: number; zoom?: number } | null
@@ -1429,11 +1436,24 @@ export function PetaScreen() {
               >
                 Bandingkan
               </button>
+              {/* Label sengaja dibuat panjang dan berbeda: tombol di sebelahnya
+                 juga "membandingkan", tapi dari angka yang lain sama sekali. */}
+              <button
+                type="button"
+                className="b bs"
+                onClick={() => setShowBandingSimpul(true)}
+              >
+                Ringkasan &amp; Bandingkan Simpul
+              </button>
               <button className="b bp">Brief PDF</button>
             </div>
           }
         />
       </div>
+
+      {showBandingSimpul && (
+        <BandingSimpulOverlay onClose={() => setShowBandingSimpul(false)} />
+      )}
 
       {showComparison && analytics && stations && demo && (
         <ComparisonDialog

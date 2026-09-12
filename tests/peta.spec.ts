@@ -626,3 +626,39 @@ test("panel transparansi menerima fokus dan ditutup dengan Esc", async ({
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 });
+
+test("overlay ringkasan simpul berdiri sendiri di samping tombol Bandingkan", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  // Dua tombol, dua fitur. Kalau suatu saat keduanya disatukan, tes ini yang
+  // pertama jatuh — dan memang harus, karena angkanya datang dari dua
+  // hitungan yang berbeda (lihat lib/analytics/summary.ts).
+  const lama = page.getByRole("button", { name: "Bandingkan", exact: true });
+  const baru = page.getByRole("button", { name: "Ringkasan & Bandingkan Simpul" });
+  await expect(lama).toBeVisible();
+  await expect(baru).toBeVisible();
+
+  await baru.click();
+  const dialog = page.getByRole("dialog", { name: "Ringkasan & Bandingkan Simpul" });
+  await expect(dialog).toBeVisible();
+
+  // Dua kolom simpul, dan angka yang memang datang dari rollup simpul:
+  // rentang P10-P90 plus stempel basisnya.
+  await expect(dialog.getByText("Manggarai", { exact: false }).first()).toBeVisible();
+  await expect(dialog.getByText("Sudirman", { exact: false }).first()).toBeVisible();
+  await expect(dialog.getByText("Kesenjangan (P10–P90)").first()).toBeVisible();
+  await expect(dialog.getByText("simulasi Monte Carlo setingkat simpul")).toBeVisible();
+
+  // Dialog lama TIDAK ikut terbuka.
+  await expect(
+    page.getByRole("dialog", { name: "Perbandingan dua simpul", exact: false }),
+  ).toHaveCount(0);
+
+  // Fokus masuk ke dalam modal, Esc menutupnya — sama seperti panel lain.
+  await expect(page.getByRole("button", { name: "Tutup ringkasan simpul" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
