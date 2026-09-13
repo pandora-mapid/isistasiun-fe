@@ -44,9 +44,13 @@ test("peta menggambar titik pengamatan dan isochrone tanpa error", async ({
   page.on("console", (msg: ConsoleMessage) => {
     if (msg.type() === "error") consoleErrors.push(msg.text());
   });
-  page.on("pageerror", (err) => consoleErrors.push(`pageerror: ${err.message}`));
+  page.on("pageerror", (err) =>
+    consoleErrors.push(`pageerror: ${err.message}`),
+  );
   page.on("requestfailed", (req) =>
-    failedRequests.push(`${req.url()} — ${req.failure()?.errorText ?? "gagal"}`),
+    failedRequests.push(
+      `${req.url()} — ${req.failure()?.errorText ?? "gagal"}`,
+    ),
   );
   // Response 4xx/5xx BUKAN "request failed" — pertukaran HTTP-nya berhasil,
   // hanya isinya galat. Tanpa pendengar ini, hal seperti glyph font yang 404
@@ -160,10 +164,10 @@ test("klik compass meratakan ke 2D tanpa berpindah tempat", async ({
   // Yang penting: TETAP di tempat yang sedang dilihat, tidak melompat kembali
   // ke ikhtisar tiga stasiun.
   const sesudah = await kamera();
-  expect(sesudah.zoom, "zoom ikut berubah padahal seharusnya tetap").toBeCloseTo(
-    miring.zoom,
-    1,
-  );
+  expect(
+    sesudah.zoom,
+    "zoom ikut berubah padahal seharusnya tetap",
+  ).toBeCloseTo(miring.zoom, 1);
   expect(
     Math.abs(sesudah.lng - miring.lng),
     "peta berpindah tempat padahal seharusnya diam",
@@ -223,9 +227,7 @@ test("filter kawasan tangkapan hanya menampilkan durasi yang dipilih", async ({
   // Buka panel lapisan. Toggle-nya `div` ber-onClick, bukan <button>.
   await page.locator(".layers-toggle").click();
   await page.getByText("10 mnt", { exact: true }).click();
-  await expect
-    .poll(renderedDurations, { timeout: 15_000 })
-    .toEqual([10]);
+  await expect.poll(renderedDurations, { timeout: 15_000 }).toEqual([10]);
 
   // Lalu ke 3 menit.
   await page.getByText("3 mnt", { exact: true }).click();
@@ -287,8 +289,9 @@ async function gapStates(page: Page) {
     const map = (window as unknown as { __map?: any }).__map;
     return map
       .queryRenderedFeatures({ layers: ["point-circle"] })
-      .map((f: { id: number }) =>
-        map.getFeatureState({ source: "observation-points", id: f.id }).gap,
+      .map(
+        (f: { id: number }) =>
+          map.getFeatureState({ source: "observation-points", id: f.id }).gap,
       )
       .sort((a: number, b: number) => a - b);
   });
@@ -309,7 +312,9 @@ test("filter slot waktu mengubah angka yang ditempel ke peta", async ({
 
   const pagi = await gapStates(page);
   await page.getByRole("button", { name: "16–19" }).click();
-  await expect.poll(() => gapStates(page), { timeout: 15_000 }).not.toEqual(pagi);
+  await expect
+    .poll(() => gapStates(page), { timeout: 15_000 })
+    .not.toEqual(pagi);
 
   // Panel ringkasan menyebut slot yang sedang aktif, bukan slot mati.
   await expect(page.getByText("Brief simpul · 16–19")).toBeVisible();
@@ -344,7 +349,9 @@ test("confidence mock mengikuti slot dan sakelar layer", async ({ page }) => {
   await expect(page.getByText("Mutu data", { exact: true })).toBeHidden();
 });
 
-test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => {
+test("klik titik mengisi panel ringkasan dengan titik itu", async ({
+  page,
+}) => {
   await page.goto("/peta", { waitUntil: "domcontentloaded" });
   await waitForMapReady(page);
 
@@ -363,11 +370,16 @@ test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => 
     const map = (window as unknown as { __map?: any }).__map;
     const rect = map.getCanvas().getBoundingClientRect();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const feats = map.queryRenderedFeatures({ layers: ["point-circle"] }) as any[];
+    const feats = map.queryRenderedFeatures({
+      layers: ["point-circle"],
+    }) as any[];
 
     for (const f of feats) {
       // Titik yang BUKAN pilihan awal, supaya perubahannya benar-benar terlihat.
-      const state = map.getFeatureState({ source: "observation-points", id: f.id });
+      const state = map.getFeatureState({
+        source: "observation-points",
+        id: f.id,
+      });
       if (state.terpilih) continue;
 
       const p = map.project(f.geometry.coordinates);
@@ -381,12 +393,20 @@ test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => 
       // (panel retail sudah pindah ke tab sidebar).
       if (x < 440 && y < rect.top + 300) continue;
 
-      return { id: f.id as number, label: f.properties.point_label as string, x, y };
+      return {
+        id: f.id as number,
+        label: f.properties.point_label as string,
+        x,
+        y,
+      };
     }
     return null;
   });
 
-  expect(target, "tidak ada titik yang bebas dari panel untuk diklik").not.toBeNull();
+  expect(
+    target,
+    "tidak ada titik yang bebas dari panel untuk diklik",
+  ).not.toBeNull();
   await page.mouse.click(target!.x, target!.y);
 
   // Peta menandai titiknya terpilih…
@@ -402,7 +422,9 @@ test("klik titik mengisi panel ringkasan dengan titik itu", async ({ page }) => 
   ).toBeVisible();
 });
 
-test("panel lapisan menghidupkan dan mematikan layer peta", async ({ page }) => {
+test("panel lapisan menghidupkan dan mematikan layer peta", async ({
+  page,
+}) => {
   await page.goto("/peta", { waitUntil: "domcontentloaded" });
   await waitForMapReady(page);
 
@@ -444,7 +466,9 @@ test("filter kategori mengubah tampilan titik tanpa menyembunyikannya", async ({
   await page.getByText("Apotek", { exact: true }).click();
 
   // Angkanya berubah…
-  await expect.poll(() => gapStates(page), { timeout: 15_000 }).not.toEqual(semua);
+  await expect
+    .poll(() => gapStates(page), { timeout: 15_000 })
+    .not.toEqual(semua);
 
   // …tapi jumlah titik yang tergambar TETAP. Ini konsekuensi batasan
   // feature-state di MapLibre, dan memang disengaja (ROADMAP §3).
@@ -489,7 +513,9 @@ test("panel transparansi terbuka dari titik yang sedang dipilih", async ({
   await expect(dialog).toBeVisible();
 
   // Judulnya menyebut nilai V yang sedang berlaku — bukan angka contoh mati.
-  await expect(page.getByText(/Dari mana angka V = Rp [\d.]+ berasal/)).toBeVisible();
+  await expect(
+    page.getByText(/Dari mana angka V = Rp [\d.]+ berasal/),
+  ).toBeVisible();
 });
 
 test("lapisan arus pintu menggambar angkanya", async ({ page }) => {
@@ -514,7 +540,8 @@ test("lapisan arus pintu menggambar angkanya", async ({ page }) => {
     const map = (window as unknown as { __map?: any }).__map;
     map.jumpTo({ center: [106.8503, -6.2149], zoom: 16.8 });
   });
-  await expect.poll(async () => (await tergambar()).nama, { timeout: 15_000 })
+  await expect
+    .poll(async () => (await tergambar()).nama, { timeout: 15_000 })
     .toBeGreaterThan(0);
 
   const sebelum = await tergambar();
@@ -524,7 +551,8 @@ test("lapisan arus pintu menggambar angkanya", async ({ page }) => {
   await page.locator(".lyr").filter({ hasText: "Arus pintu stasiun" }).click();
 
   // Benar-benar menggambar sesuatu — bukan sekadar sakelarnya menyala.
-  await expect.poll(async () => (await tergambar()).arus, { timeout: 15_000 })
+  await expect
+    .poll(async () => (await tergambar()).arus, { timeout: 15_000 })
     .toBeGreaterThan(0);
 
   // Dan yang paling penting: menyalakannya TIDAK BOLEH menghapus nama titik.
@@ -535,10 +563,9 @@ test("lapisan arus pintu menggambar angkanya", async ({ page }) => {
   // dari peta tanpa satu pun pesan error — persis kelas kegagalan yang membuat
   // berkas tes ini ada.
   const sesudah = await tergambar();
-  expect(
-    sesudah.nama,
-    "menyalakan lapisan arus menghapus nama titik",
-  ).toBe(sebelum.nama);
+  expect(sesudah.nama, "menyalakan lapisan arus menghapus nama titik").toBe(
+    sebelum.nama,
+  );
 });
 
 /* -------------------------------------------------------------------------
@@ -705,20 +732,30 @@ test("overlay ringkasan simpul berdiri sendiri di samping tombol Bandingkan", as
   // pertama jatuh — dan memang harus, karena angkanya datang dari dua
   // hitungan yang berbeda (lihat lib/analytics/summary.ts).
   const lama = page.getByRole("button", { name: "Bandingkan", exact: true });
-  const baru = page.getByRole("button", { name: "Ringkasan & Bandingkan Simpul" });
+  const baru = page.getByRole("button", {
+    name: "Ringkasan & Bandingkan Simpul",
+  });
   await expect(lama).toBeVisible();
   await expect(baru).toBeVisible();
 
   await baru.click();
-  const dialog = page.getByRole("dialog", { name: "Ringkasan & Bandingkan Simpul" });
+  const dialog = page.getByRole("dialog", {
+    name: "Ringkasan & Bandingkan Simpul",
+  });
   await expect(dialog).toBeVisible();
 
   // Dua kolom simpul, dan angka yang memang datang dari rollup simpul:
   // rentang P10-P90 plus stempel basisnya.
-  await expect(dialog.getByText("Manggarai", { exact: false }).first()).toBeVisible();
-  await expect(dialog.getByText("Sudirman", { exact: false }).first()).toBeVisible();
+  await expect(
+    dialog.getByText("Manggarai", { exact: false }).first(),
+  ).toBeVisible();
+  await expect(
+    dialog.getByText("Sudirman", { exact: false }).first(),
+  ).toBeVisible();
   await expect(dialog.getByText("Kesenjangan (P10–P90)").first()).toBeVisible();
-  await expect(dialog.getByText("simulasi Monte Carlo setingkat simpul")).toBeVisible();
+  await expect(
+    dialog.getByText("simulasi Monte Carlo setingkat simpul"),
+  ).toBeVisible();
 
   // Dialog lama TIDAK ikut terbuka.
   await expect(
@@ -726,12 +763,16 @@ test("overlay ringkasan simpul berdiri sendiri di samping tombol Bandingkan", as
   ).toHaveCount(0);
 
   // Fokus masuk ke dalam modal, Esc menutupnya — sama seperti panel lain.
-  await expect(page.getByRole("button", { name: "Tutup ringkasan simpul" })).toBeFocused();
+  await expect(
+    page.getByRole("button", { name: "Tutup ringkasan simpul" }),
+  ).toBeFocused();
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 });
 
-test("tabel atribut terbuka, bisa diurutkan, dan mengunduh CSV", async ({ page }) => {
+test("tabel atribut terbuka, bisa diurutkan, dan mengunduh CSV", async ({
+  page,
+}) => {
   await page.goto("/peta", { waitUntil: "domcontentloaded" });
   await waitForMapReady(page);
 
@@ -741,7 +782,13 @@ test("tabel atribut terbuka, bisa diurutkan, dan mengunduh CSV", async ({ page }
 
   // Kolom F/E/C/V memang ada — itu yang membedakan tabel ini dari panel.
   for (const judul of ["Gap P50", "F (org/jam)", "E", "C", "V (Rp)"]) {
-    await expect(dialog.getByRole("columnheader", { name: new RegExp(judul.replace(/[()/]/g, ".")) }).first()).toBeVisible();
+    await expect(
+      dialog
+        .getByRole("columnheader", {
+          name: new RegExp(judul.replace(/[()/]/g, ".")),
+        })
+        .first(),
+    ).toBeVisible();
   }
 
   // Sortir harus sampai ke pembaca layar, bukan cuma panah visual.
@@ -795,14 +842,20 @@ test("brief simpul tampil dan menyediakan cetak ke PDF", async ({ page }) => {
   // Bentuk brief menurut isi-stasiun-ai-integration.md §2.2.
   await expect(dialog.getByText("Rentang tertangkap").first()).toBeVisible();
   await expect(dialog.getByText("Asumsi yang dipakai").first()).toBeVisible();
-  await expect(dialog.getByText("Kategori hilang teratas").first()).toBeVisible();
+  await expect(
+    dialog.getByText("Kategori hilang teratas").first(),
+  ).toBeVisible();
   await expect(dialog.getByText("Catatan kepercayaan").first()).toBeVisible();
-  await expect(dialog.getByRole("button", { name: "Cetak / simpan PDF" })).toBeEnabled();
+  await expect(
+    dialog.getByRole("button", { name: "Cetak / simpan PDF" }),
+  ).toBeEnabled();
 
   // Kontrolnya tidak boleh ikut tercetak: tombol "Cetak" di dalam PDF-nya
   // sendiri adalah tombol yang tak bisa ditekan siapa pun.
   await page.emulateMedia({ media: "print" });
-  await expect(dialog.getByRole("button", { name: "Cetak / simpan PDF" })).toBeHidden();
+  await expect(
+    dialog.getByRole("button", { name: "Cetak / simpan PDF" }),
+  ).toBeHidden();
   await expect(dialog.getByText("Asumsi yang dipakai").first()).toBeVisible();
   await page.emulateMedia({ media: "screen" });
 
@@ -825,7 +878,9 @@ test("peta tetap terbaca di lebar sempit", async ({ page }) => {
 
   // Dan halaman tidak boleh bisa digeser mendatar.
   const meluber = await page.evaluate(
-    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+    () =>
+      document.documentElement.scrollWidth >
+      document.documentElement.clientWidth + 1,
   );
   expect(meluber).toBe(false);
 });
@@ -859,22 +914,38 @@ for (const { lebar, tinggi } of [
   { lebar: 760, tinggi: 900 },
   { lebar: 390, tinggi: 844 },
 ]) {
-  test(`panel /peta mengantre tanpa menindih di ${lebar}px`, async ({ page }) => {
+  test(`panel /peta mengantre tanpa menindih di ${lebar}px`, async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: lebar, height: tinggi });
     await page.goto("/peta", { waitUntil: "domcontentloaded" });
     await waitForMapReady(page);
 
-    const kotak = await page.evaluate((selektor) => {
-      return selektor.map((q) => {
-        const el = document.querySelector(q);
-        if (!el) return null;
-        const r = el.getBoundingClientRect();
-        return { q, top: Math.round(r.top), bottom: Math.round(r.bottom), lebar: Math.round(r.width) };
-      });
-    }, PANEL_PETA as unknown as string[]);
+    const kotak = await page.evaluate(
+      (selektor) => {
+        return selektor.map((q) => {
+          const el = document.querySelector(q);
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return {
+            q,
+            top: Math.round(r.top),
+            bottom: Math.round(r.bottom),
+            lebar: Math.round(r.width),
+          };
+        });
+      },
+      PANEL_PETA as unknown as string[],
+    );
 
-    for (const k of kotak) expect(k, `panel hilang: ${JSON.stringify(kotak)}`).not.toBeNull();
-    const ada = kotak as { q: string; top: number; bottom: number; lebar: number }[];
+    for (const k of kotak)
+      expect(k, `panel hilang: ${JSON.stringify(kotak)}`).not.toBeNull();
+    const ada = kotak as {
+      q: string;
+      top: number;
+      bottom: number;
+      lebar: number;
+    }[];
 
     // Tidak ada yang menyusut jadi sisa piksel — pernah terjadi saat
     // `max-width: calc(100% - 500px)` (jatah panel kanan) masih berlaku
@@ -894,6 +965,9 @@ for (const { lebar, tinggi } of [
     // Harus masih ada peta yang terlihat di antara chip stasiun dan legenda.
     const chip = ada.find((k) => k.q === ".peta-chip-stasiun")!;
     const legenda = ada.find((k) => k.q === ".peta-kontrol-kiri")!;
-    expect(legenda.top - chip.bottom, "peta tidak tersisa di antara panel").toBeGreaterThan(40);
+    expect(
+      legenda.top - chip.bottom,
+      "peta tidak tersisa di antara panel",
+    ).toBeGreaterThan(40);
   });
 }

@@ -30,6 +30,8 @@ import type {
 } from "@/lib/data/types";
 import {
   resolveBasemapUrl,
+  basemapChoiceUrl,
+  type BasemapName,
   CAMERA,
   FIT_PADDING,
   INITIAL_VIEW,
@@ -114,6 +116,10 @@ type Props = {
   selectedRentalId?: string | null;
   onSelectRental?: (asset: RentPlot) => void;
   activeRetailFilter?: FilterCategory;
+  /** Pilihan basemap yang aktif, berganti dinamis via map.setStyle(). */
+  basemap?: BasemapName;
+  /** Trigger numerik untuk memicu animasi kamera kembali ke seluruh kawasan studi. */
+  resetTrigger?: number;
   /**
    * Boleh digeser, di-zoom, dan diklik. Bawaannya ya.
    *
@@ -284,6 +290,8 @@ export function MapCanvas({
   selectedRentalId = null,
   onSelectRental,
   activeRetailFilter = "all",
+  basemap,
+  resetTrigger,
   interactive = true,
   fitPadding = FIT_PADDING,
   borderRadius,
@@ -291,6 +299,7 @@ export function MapCanvas({
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
+  const initialBoundsFittedRef = useRef(false);
   /** Peta siap menerima source dan layer. */
   const [styleReady, setStyleReady] = useState(false);
   /** Source dan layer sudah terpasang — penjaga seluruh efek di bawah. */
@@ -334,9 +343,12 @@ export function MapCanvas({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const initialStyle =
+      (basemap && basemapChoiceUrl(basemap)) || resolveBasemapUrl();
+
     const map = new MapLibreMap({
       container: containerRef.current,
-      style: resolveBasemapUrl(),
+      style: initialStyle,
       center: INITIAL_VIEW.center,
       zoom: INITIAL_VIEW.zoom,
       // MapLibre hanya bisa menaruh kredit bawaan di kanan-bawah; sudut lain
@@ -506,18 +518,20 @@ export function MapCanvas({
       map.addLayer(pointLabelLayer());
     }
 
-    // Bawa tampilan ke seluruh kawasan studi, sisakan ruang untuk panel
-    // melayang.
+    // Bawa tampilan ke seluruh kawasan studi pada muatan awal saja.
     //
     // Kotaknya datang dari konstanta, BUKAN dijumlahkan dari fitur yang sedang
     // dimuat. Menjumlahkan fitur kebetulan bekerja selama geometri berupa
     // GeoJSON — browser memegang daftar lengkapnya — tetapi berhenti bekerja
     // begitu geometri pindah ke tile vektor: yang diterima hanya fitur di
     // dalam layar, dan peta akan terbuka di tempat acak. Lihat ROADMAP §4.1.
-    map.fitBounds(new LngLatBounds(STUDY_BOUNDS), {
-      padding: fitPadding,
-      duration: 0,
-    });
+    if (!initialBoundsFittedRef.current) {
+      map.fitBounds(new LngLatBounds(STUDY_BOUNDS), {
+        padding: fitPadding,
+        duration: 0,
+      });
+      initialBoundsFittedRef.current = true;
+    }
 
     setLayersReady(true);
     // `gapDomain` sengaja tidak masuk daftar: layer dipasang
@@ -534,6 +548,38 @@ export function MapCanvas({
     confidenceGrid,
     rentalLocations,
   ]);
+
+  // --- menangani pergantian basemap dinamis -------------------------------
+  const currentBasemapRef = useRef(basemap);
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !basemap) return;
+    if (currentBasemapRef.current === basemap) return;
+    currentBasemapRef.current = basemap;
+
+    const targetUrl = basemapChoiceUrl(basemap);
+    if (!targetUrl) return;
+
+    setLayersReady(false);
+    setStyleReady(false);
+
+    map.setStyle(targetUrl);
+
+    map.once("style.load", () => {
+      glyphsAvailableRef.current = true;
+      setStyleReady(true);
+    });
+  }, [basemap]);
+
+  // --- menangani reset pandangan kamera ke kawasan studi -------------------
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !layersReady || !resetTrigger) return;
+    map.fitBounds(new LngLatBounds(STUDY_BOUNDS), {
+      padding: fitPadding,
+      duration: 800,
+    });
+  }, [resetTrigger, fitPadding, layersReady]);
 
   // Tunggu pemasangan layer agar fitBounds awal tidak menimpa pencarian.
   useEffect(() => {

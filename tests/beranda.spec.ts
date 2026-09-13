@@ -134,3 +134,31 @@ test("gerak dimatikan saat pengguna memintanya", async ({ page }) => {
   );
   expect(bergerak, "masih ada animasi yang berjalan").toBe(0);
 });
+
+test("navbar tetap mengambang (floating sticky) saat halaman digulung", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await tungguPeta(page);
+
+  const nav = page.locator(".navbar-container");
+  await expect(nav).toBeVisible();
+
+  // Posisi awal di dekat atas viewport
+  const kotakAwal = await nav.boundingBox();
+  expect(kotakAwal).not.toBeNull();
+  expect(kotakAwal!.y).toBeGreaterThanOrEqual(0);
+
+  // Gulung halaman ke bawah sejauh 800px
+  await page.evaluate(() => window.scrollTo(0, 800));
+  await page.waitForTimeout(100);
+
+  // Nav tetap terlihat di viewport dan menempel di dekat atas dengan padding yang sesuai (floating)
+  await expect(nav).toBeVisible();
+  const kotakSetelahGulung = await nav.boundingBox();
+  expect(kotakSetelahGulung).not.toBeNull();
+  // Memastikan floating navbar tidak nempel ke tepi atas (ada jarak/padding minimal 12px)
+  expect(kotakSetelahGulung!.y).toBeGreaterThanOrEqual(12);
+  expect(kotakSetelahGulung!.y).toBeLessThanOrEqual(36);
+});
+

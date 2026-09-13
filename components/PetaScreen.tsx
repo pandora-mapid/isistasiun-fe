@@ -44,11 +44,7 @@ import {
   slotLabel,
   type CategoryFilter,
 } from "@/lib/data/dimensions";
-import type {
-  PointFeatureState,
-  SlotKey,
-  Station,
-} from "@/lib/data/types";
+import type { PointFeatureState, SlotKey, Station } from "@/lib/data/types";
 import { usePetaData } from "@/lib/data/usePetaData";
 import { askCopilot, type CopilotAnswer } from "@/lib/data/source";
 import {
@@ -60,7 +56,13 @@ import {
   rupiahRingkas,
   TIDAK_DIESTIMASI,
 } from "@/lib/format";
-import { CATCHMENT_MINUTES, LAYER_GROUPS } from "@/lib/map/config";
+import {
+  CATCHMENT_MINUTES,
+  LAYER_GROUPS,
+  namaBasemapDikenali,
+  type BasemapName,
+} from "@/lib/map/config";
+import { MapToolbar, type LayerToggleItem } from "./map/MapToolbar";
 import { scaleBarFor } from "@/lib/map/scale";
 import {
   CONFIDENCE_GRID_RAMP,
@@ -271,7 +273,6 @@ export function PetaScreen({
       ? "retail"
       : "brief",
   );
-  const [layersOpen, setLayersOpen] = useState(false);
   const [activeLayers, setActiveLayers] = useState<string[]>(
     DEFAULT_ACTIVE_LAYERS,
   );
@@ -280,6 +281,60 @@ export function PetaScreen({
   );
   const [activeCatchment, setActiveCatchment] = useState<number>(5);
   const [activeSlot, setActiveSlot] = useState<SlotKey>(initialQuery.slot);
+  const [bottomDockCollapsed, setBottomDockCollapsed] = useState(false);
+  const [legendVisible, setLegendVisible] = useState(true);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      try {
+        const savedCollapsed = window.localStorage.getItem(
+          "isistasiun_bottom_dock_collapsed",
+        );
+        if (savedCollapsed !== null) {
+          setBottomDockCollapsed(savedCollapsed === "true");
+        }
+        const savedLegend = window.localStorage.getItem(
+          "isistasiun_bottom_legend_visible",
+        );
+        if (savedLegend !== null) {
+          setLegendVisible(savedLegend === "true");
+        }
+      } catch {
+        // Abaikan bila localStorage tidak tersedia
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+
+  const updateDockCollapsed = (collapsed: boolean) => {
+    setBottomDockCollapsed(collapsed);
+    try {
+      window.localStorage.setItem(
+        "isistasiun_bottom_dock_collapsed",
+        String(collapsed),
+      );
+    } catch {
+      // Abaikan bila localStorage tidak tersedia
+    }
+  };
+
+  const updateLegendVisible = (
+    action: boolean | ((prev: boolean) => boolean),
+  ) => {
+    setLegendVisible((prev) => {
+      const next = typeof action === "function" ? action(prev) : action;
+      try {
+        window.localStorage.setItem(
+          "isistasiun_bottom_legend_visible",
+          String(next),
+        );
+      } catch {
+        // Abaikan bila localStorage tidak tersedia
+      }
+      return next;
+    });
+  };
   const [showTransparansi, setShowTransparansi] = useState(false);
   const [showCopilotResult, setShowCopilotResult] = useState(false);
   const [cqInput, setCqInput] = useState("");
@@ -307,6 +362,35 @@ export function PetaScreen({
   const [selectedRentalChoice, setSelectedRental] = useState<
     RentPlot | null | undefined
   >(undefined);
+
+  const [activeBasemap, setActiveBasemap] = useState<BasemapName>(() => {
+    if (typeof window !== "undefined") {
+      const param = new URLSearchParams(window.location.search).get("basemap");
+      if (param && namaBasemapDikenali(param)) return param;
+    }
+    return "liberty";
+  });
+
+  const handleSelectBasemap = useCallback((newBasemap: BasemapName) => {
+    setActiveBasemap(newBasemap);
+    updatePetaUrl({ basemap: newBasemap });
+  }, []);
+
+  const [resetTrigger, setResetTrigger] = useState(0);
+  const handleResetView = useCallback(() => {
+    setResetTrigger((prev) => prev + 1);
+  }, []);
+
+  const layerToggleItems: LayerToggleItem[] = useMemo(
+    () =>
+      LAYER_ROWS.map((r) => ({
+        key: r.key,
+        label: r.label,
+        dot: r.dot,
+        available: r.key in LAYER_GROUPS,
+      })),
+    [],
+  );
 
   const handleRetailFilterChange = useCallback((filter: FilterCategory) => {
     setActiveRetailFilter(filter);
@@ -394,7 +478,8 @@ export function PetaScreen({
         const ans = await askCopilot(query);
         setCqAnswer(ans);
         const cat = ans.spatial_filter?.category;
-        if (cat && AI_CATEGORY_TO_FE[cat]) setActiveCategory(AI_CATEGORY_TO_FE[cat]);
+        if (cat && AI_CATEGORY_TO_FE[cat])
+          setActiveCategory(AI_CATEGORY_TO_FE[cat]);
         const slot = ans.spatial_filter?.time_slot;
         if (slot && AI_SLOT_TO_FE[slot]) setActiveSlot(AI_SLOT_TO_FE[slot]);
         const layers = (ans.suggested_layers ?? []).filter(
@@ -715,10 +800,6 @@ export function PetaScreen({
     : "Belum tersedia";
 
   const tabX = { brief: 4, retail: 130, copilot: 256 }[tab];
-  const chev = layersOpen ? 180 : 0;
-  const layerCount = layersOpen
-    ? `${activeLayers.length} dari ${LAYER_TERSEDIA.length} aktif`
-    : `${activeLayers.length} aktif`;
   const legend = gapColorStops(gapDomain);
   /** Batang skala: `null` selama peta belum melaporkan ukurannya. */
   const scaleBar = metersPerPixel
@@ -777,6 +858,28 @@ export function PetaScreen({
           selectedStationId={currentStation?.id ?? null}
           onSelectStation={handleSelectStation}
           activeRetailFilter={activeRetailFilter}
+          basemap={activeBasemap}
+          resetTrigger={resetTrigger}
+        />
+        <MapToolbar
+          activeLayers={activeLayers}
+          onToggleLayer={toggleLayer}
+          layerItems={layerToggleItems}
+          activeCatchment={activeCatchment}
+          onSelectCatchment={setActiveCatchment}
+          activeBasemap={activeBasemap}
+          onSelectBasemap={handleSelectBasemap}
+          onResetView={handleResetView}
+          activeCategory={activeCategory}
+          onSelectCategory={(cat) => setActiveCategory(cat as CategoryFilter)}
+          categories={[
+            { key: ALL_CATEGORIES, label: "Semua" },
+            ...CATEGORIES.map((c) => ({
+              key: c.key,
+              label: c.label,
+              dot: CATEGORY_DOT[c.key],
+            })),
+          ]}
         />
         <StationSearch
           stations={stations}
@@ -788,7 +891,7 @@ export function PetaScreen({
           className="peta-chip-stasiun"
           style={{
             position: "absolute",
-            top: 158,
+            top: 178,
             left: 64,
             zIndex: 10,
             display: "flex",
@@ -837,340 +940,502 @@ export function PetaScreen({
             })}
         </div>
 
-        <div
-          className="row glass peta-kontrol-kiri"
-          style={{
-            position: "absolute",
-            left: 24,
-            bottom: 132,
-            gap: 12,
-            alignItems: "stretch",
-            // Penjaga saja: isinya sekarang tetap, tapi kalau suatu saat ada
-            // butir baru, lebih baik turun sebaris daripada meluber menutupi
-            // panel di kanannya.
-            flexWrap: "wrap",
-            maxWidth: "calc(100% - 500px)",
-            padding: "10px 16px 12px",
-          }}
-        >
-          {/* Legenda mendatar dengan judul kelompok.
-
-             Tetap satu baris kelompok berjajar — tingginya bertambah sebaris
-             judul saja dan berhenti di situ, tidak ikut tumbuh bersama isinya.
-             Itu syarat yang tidak boleh dilanggar: kartu ini melayang di atas
-             peta, jadi tumbuh ke atas berarti menutupi peta.
-
-             Judulnya menerangkan apa yang sedang dibaca; bentuk lambangnya
-             tetap yang membedakan jenis — bulatan untuk tempat, persegi untuk
-             wilayah, batang untuk jarak — supaya keduanya saling menguatkan,
-             bukan judul sendirian yang menanggung beban. */}
-          <span style={LEGENDA_GRUP}>
-            <span className="k">Kesenjangan</span>
-            <span className="row" style={{ gap: 8 }}>
-              {/* Bulatannya membesar sekaligus menggelap, karena di peta besar
-                 lingkaran memang membawa arti yang sama dengan warnanya. */}
-              <span className="row" style={{ gap: 3 }}>
-                {legend.map((stop, i) => {
-                  const d =
-                    LEGEND_DOT.min +
-                    ((LEGEND_DOT.max - LEGEND_DOT.min) * i) /
-                      (legend.length - 1);
-                  return (
-                    <span
-                      key={stop.color}
-                      title={`kesenjangan ≥ ${rupiah(Math.round(stop.at))}`}
-                      style={{
-                        width: d,
-                        height: d,
-                        borderRadius: 999,
-                        background: stop.color,
-                        boxShadow: "0 0 0 1px var(--rule)",
-                        flex: "none",
-                      }}
-                    />
-                  );
-                })}
-              </span>
-              <span
-                className="fig"
-                style={{
-                  ...LEGENDA_TEKS,
-                  fontSize: 9.5,
-                  color: "var(--ink-faint)",
-                }}
-              >
-                {rupiahRingkas(gapDomain.min)} → {rupiahRingkas(gapDomain.max)}
-              </span>
+        {/* BILAH KONTROL WAKTU & LEGENDA (UNIFIED COMPACT DOCK) */}
+        <>
+          <button
+            type="button"
+            onClick={() => updateDockCollapsed(false)}
+            className="pill btn-reset map-bottom-dock-transition"
+            title="Tampilkan kontrol waktu & legenda"
+            aria-label="Tampilkan kontrol waktu dan legenda"
+            aria-expanded={!bottomDockCollapsed}
+            aria-controls="map-bottom-dock"
+            aria-hidden={!bottomDockCollapsed}
+            tabIndex={bottomDockCollapsed ? 0 : -1}
+            style={{
+              position: "absolute",
+              left: 24,
+              bottom: 18,
+              zIndex: 15,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "7px 14px",
+              borderRadius: 999,
+              background: "rgba(255, 255, 255, 0.95)",
+              backdropFilter: "blur(12px)",
+              border: "1px solid #cbd5e1",
+              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.12)",
+              color: "#0f172a",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+              opacity: bottomDockCollapsed ? 1 : 0,
+              visibility: bottomDockCollapsed ? "visible" : "hidden",
+              pointerEvents: bottomDockCollapsed ? "auto" : "none",
+              transform: bottomDockCollapsed
+                ? "translateY(0) scale(1)"
+                : "translateY(8px) scale(0.96)",
+              transformOrigin: "left bottom",
+              transition: bottomDockCollapsed
+                ? "opacity 220ms ease, transform 240ms cubic-bezier(.22,1,.36,1), visibility 0s linear"
+                : "opacity 160ms ease, transform 200ms cubic-bezier(.4,0,.2,1), visibility 0s linear 200ms",
+            }}
+          >
+            <span style={{ fontSize: 13 }}>⏱️</span>
+            <span>Slot: {slotLabel(activeSlot)}</span>
+            <span style={{ color: "#64748b", fontSize: 11, fontWeight: 450 }}>
+              · Buka Kontrol &amp; Legenda
             </span>
-          </span>
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            >
+              <polyline points="18 15 12 9 6 15" />
+            </svg>
+          </button>
 
-          {activeLayers.includes("kepercayaan") && (
-            <>
-              <span style={LEGENDA_SEKAT} />
-              <span style={LEGENDA_GRUP}>
-                <span className="k">Mutu data</span>
-                <span className="row" style={{ gap: 14 }}>
-                  <span className="row" style={{ ...LEGENDA_TEKS, gap: 8 }}>
-                    <span
-                      style={{
-                        width: 20,
-                        height: 12,
-                        background: CONFIDENCE_GRID_RAMP.thin,
-                        border: "1px solid #334155",
-                        flex: "none",
-                      }}
-                    />
-                    Rendah
-                  </span>
-                  <span className="row" style={{ ...LEGENDA_TEKS, gap: 6 }}>
-                    <span
-                      style={{
-                        width: 20,
-                        height: 12,
-                        background: CONFIDENCE_GRID_RAMP.medium,
-                        border: "1px solid #334155",
-                        flex: "none",
-                      }}
-                    />
-                    Sedang
-                  </span>
-                  <span className="row" style={{ ...LEGENDA_TEKS, gap: 6 }}>
-                    <span
-                      style={{
-                        width: 20,
-                        height: 12,
-                        background: CONFIDENCE_GRID_RAMP.strong,
-                        border: "1px solid #334155",
-                        flex: "none",
-                      }}
-                    />
-                    Memadai
-                  </span>
-                  <span className="row" style={{ ...LEGENDA_TEKS, gap: 6 }}>
-                    <span
-                      style={{
-                        width: 20,
-                        height: 12,
-                        background: CONFIDENCE_GRID_RAMP.empty,
-                        border: "1px solid #334155",
-                        flex: "none",
-                      }}
-                    />
-                    Belum ada data
-                  </span>
+          <div
+            id="map-bottom-dock"
+            className="glass map-bottom-dock-transition"
+            aria-hidden={bottomDockCollapsed}
+            inert={bottomDockCollapsed}
+            style={{
+              position: "absolute",
+              left: 24,
+              bottom: 18,
+              maxWidth: "calc(100% - 480px)",
+              zIndex: 15,
+              padding: "8px 14px 10px",
+              borderRadius: 14,
+              background: "rgba(255, 255, 255, 0.94)",
+              backdropFilter: "blur(14px)",
+              border: "1px solid #cbd5e1",
+              boxShadow: "0 6px 24px rgba(15, 23, 42, 0.12)",
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+              opacity: bottomDockCollapsed ? 0 : 1,
+              visibility: bottomDockCollapsed ? "hidden" : "visible",
+              pointerEvents: bottomDockCollapsed ? "none" : "auto",
+              transform: bottomDockCollapsed
+                ? "translateY(10px) scale(0.98)"
+                : "translateY(0) scale(1)",
+              transformOrigin: "left bottom",
+              transition: bottomDockCollapsed
+                ? "opacity 180ms ease, transform 220ms cubic-bezier(.4,0,.2,1), visibility 0s linear 220ms"
+                : "opacity 220ms ease, transform 260ms cubic-bezier(.22,1,.36,1), visibility 0s linear",
+            }}
+          >
+            {/* Baris 1: Header Ringkas + Tombol Aksi */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span
+                  className="k"
+                  style={{ fontSize: 10, letterSpacing: "0.04em" }}
+                >
+                  SLOT WAKTU
                 </span>
-              </span>
-            </>
-          )}
+                <span style={{ fontSize: 10, color: "var(--ink-faint)" }}>
+                  · Hari kerja
+                </span>
+              </div>
 
-          {/* Lapisan opsional (arus pintu) tidak diberi butir legenda:
-             labelnya di peta sudah menulis satuannya sendiri — "380/jam" —
-             jadi ia menerangkan dirinya tanpa kunci baca. Bandingkan dengan
-             lingkaran sampel tipis yang tanpa kata sama sekali. */}
-          <span style={LEGENDA_SEKAT} />
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                {/* Tombol Toggle Legenda */}
+                <button
+                  type="button"
+                  onClick={() => updateLegendVisible((v) => !v)}
+                  className="btn-reset"
+                  aria-expanded={legendVisible}
+                  aria-controls="map-legend-content"
+                  title={
+                    legendVisible ? "Sembunyikan legenda" : "Tampilkan legenda"
+                  }
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                    fontSize: 10.5,
+                    fontWeight: 500,
+                    color: legendVisible ? "#0f172a" : "#64748b",
+                    background: legendVisible
+                      ? "rgba(15, 23, 42, 0.06)"
+                      : "transparent",
+                    padding: "2px 7px",
+                    borderRadius: 6,
+                    cursor: "pointer",
+                    transition: "all 0.12s ease",
+                  }}
+                >
+                  <span>Legenda</span>
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    style={{
+                      transform: legendVisible
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+                      transition: "transform 0.15s ease",
+                    }}
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
 
-          <span style={LEGENDA_GRUP}>
-            <span className="k">Kawasan</span>
-            <span className="row" style={{ ...LEGENDA_TEKS, gap: 7 }}>
-              {/* Persegi, bukan bulatan: ini wilayah, bukan tempat. Warna
-                 sengaja tetap — cermin ISOCHRONE_COLOR di lib/map/style.ts. */}
+                {/* Tombol Sembunyikan Seluruh Dock */}
+                <button
+                  type="button"
+                  onClick={() => updateDockCollapsed(true)}
+                  className="btn-reset"
+                  title="Sembunyikan bilah agar peta bersih"
+                  aria-label="Sembunyikan kontrol waktu dan legenda"
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 3,
+                    fontSize: 10.5,
+                    fontWeight: 500,
+                    color: "#64748b",
+                    padding: "2px 6px",
+                    borderRadius: 6,
+                    cursor: "pointer",
+                    transition: "all 0.12s ease",
+                  }}
+                >
+                  <span>Sembunyikan</span>
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Baris 2: Tombol Slot Waktu */}
+            <div className="row" style={{ gap: 5, alignItems: "center" }}>
+              {SLOTS.map((slot, i) => {
+                const active = activeSlot === slot.key;
+                const tipis =
+                  selectedPoint?.by_slot.find((s) => s.slot === slot.key)
+                    ?.sampel_tipis ?? false;
+                return (
+                  <Fragment key={slot.key}>
+                    {i > 0 && <span style={GARIS_SLOT} />}
+                    <button
+                      onClick={() => setActiveSlot(slot.key)}
+                      title={`dicacah ${slot.jam}`}
+                      className="pill"
+                      style={{
+                        all: "unset",
+                        cursor: "pointer",
+                        padding: "6px 14px",
+                        background: active ? "var(--ink)" : "var(--paper-2)",
+                        color: active ? "var(--surface)" : "var(--ink-2)",
+                        font: `${active ? 600 : 500} 11.5px/1 var(--font-inter)`,
+                        boxShadow: active ? "var(--shadow-soft)" : "none",
+                        borderRadius: 999,
+                        transition: "all 0.12s ease",
+                      }}
+                    >
+                      {slot.label}
+                      {tipis && (
+                        <span
+                          className="fig"
+                          style={{
+                            opacity: 0.7,
+                            fontWeight: 400,
+                            marginLeft: 4,
+                          }}
+                        >
+                          tipis
+                        </span>
+                      )}
+                    </button>
+                  </Fragment>
+                );
+              })}
+
               <span
                 style={{
-                  width: 22,
-                  height: 13,
-                  borderRadius: 3,
-                  background: "rgba(37,99,235,.16)",
-                  border: "1px dashed #2563EB",
+                  width: 1,
+                  height: 18,
+                  background: "var(--rule)",
+                  margin: "0 4px",
                   flex: "none",
                 }}
               />
-              Jangkauan jalan kaki {activeCatchment} menit
-            </span>
-          </span>
 
-          <span style={LEGENDA_SEKAT} />
-
-          <span style={LEGENDA_GRUP}>
-            <span className="k">Skala</span>
-            {/* Batang skala: PANJANG BATANGNYA yang mewakili jarak, jadi
-               labelnya menempel di sebelahnya. Kotaknya berlebar tetap walau
-               batangnya berubah, supaya legenda tidak bergoyang saat di-zoom. */}
-            <span className="row" style={{ gap: 7 }}>
-              <span
-                style={{
-                  position: "relative",
-                  height: 7,
-                  width: SKALA_MAKS_PX,
-                  flex: "none",
-                }}
-              >
-                {scaleBar && (
-                  <>
-                    <span
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        top: 3,
-                        width: scaleBar.widthPx,
-                        height: 1.5,
-                        background: "var(--ink)",
-                      }}
-                    />
-                    <span
-                      style={{
-                        position: "absolute",
-                        left: 0,
-                        top: 0,
-                        width: 1.5,
-                        height: 7,
-                        background: "var(--ink)",
-                      }}
-                    />
-                    <span
-                      style={{
-                        position: "absolute",
-                        left: scaleBar.widthPx - 1.5,
-                        top: 0,
-                        width: 1.5,
-                        height: 7,
-                        background: "var(--ink)",
-                      }}
-                    />
-                  </>
-                )}
+              <span className="row" style={{ gap: 6, flex: "none" }}>
+                <span className="k" style={{ fontSize: 10 }}>
+                  Pembanding
+                </span>
+                <span
+                  className="pill"
+                  title="satu sampel pembanding di akhir pekan — dijanjikan proposal, belum dicacah"
+                  style={{
+                    padding: "6px 12px",
+                    border: "1.5px dashed var(--rule-strong)",
+                    background: "var(--paper-2)",
+                    color: "var(--ink-muted)",
+                    font: "500 11px/1 var(--font-inter)",
+                    cursor: "not-allowed",
+                    borderRadius: 999,
+                  }}
+                >
+                  Akhir pekan
+                </span>
               </span>
-              <span
-                className="fig"
-                style={{
-                  ...LEGENDA_TEKS,
-                  fontSize: 9.5,
-                  color: "var(--ink-muted)",
-                }}
-              >
-                {scaleBar ? jarak(scaleBar.meters) : "—"}
-              </span>
-            </span>
-          </span>
-        </div>
+            </div>
 
-        <div
-          className="fig"
-          style={{
-            position: "absolute",
-            left: 24,
-            bottom: 206,
-            fontSize: 10.5,
-            color: "var(--ink-faint)",
-          }}
-        >
-          {analytics
-            ? `data contoh · pipeline ${analytics.pipeline_version} · ${
-                analytics.day_type === "weekday" ? "hari kerja" : "akhir pekan"
-              } · dibuat ${analytics.generated_at.slice(0, 10)}`
-            : "memuat data contoh…"}
-        </div>
-
-        <div
-          className="glass peta-bawah"
-          style={{
-            position: "absolute",
-            left: 24,
-            right: 462,
-            bottom: 24,
-            padding: "14px 18px 16px",
-          }}
-        >
-          <div className="row" style={{ gap: 10, marginBottom: 11 }}>
-            <span className="k">Slot waktu · hari kerja</span>
-            <span style={{ fontSize: 11, color: "var(--ink-faint)" }}>
-              hanya slot yang benar-benar dicacah dapat dipilih — jam di
-              antaranya tidak diinterpolasi
-            </span>
-          </div>
-          <div className="row" style={{ gap: 6 }}>
-            {/* Barisnya sengaja RATA — pil dan garis penghubung bersaudara
-               langsung di dalam satu flex row.
-
-               Sebelumnya tiap slot dibungkus div ber-`flex: 1` yang juga
-               memuat garisnya. Karena slot pertama tidak punya garis (tidak
-               ada apa pun di kirinya untuk dihubungkan), jatah ruang
-               pembungkus itu tersisa kosong di kanan pil `06–09` — dan
-               timeline-nya terbaca putus tepat di ruas pertama. */}
-            {SLOTS.map((slot, i) => {
-              const active = activeSlot === slot.key;
-              // Penanda "sampel tipis" hanya muncul kalau slot itu memang tipis
-              // untuk titik yang sedang dipilih — bukan hiasan tetap.
-              const tipis =
-                selectedPoint?.by_slot.find((s) => s.slot === slot.key)
-                  ?.sampel_tipis ?? false;
-              return (
-                <Fragment key={slot.key}>
-                  {i > 0 && <span style={GARIS_SLOT} />}
-                  <button
-                    onClick={() => setActiveSlot(slot.key)}
-                    title={`dicacah ${slot.jam}`}
-                    className="pill"
-                    style={{
-                      all: "unset",
-                      cursor: "pointer",
-                      padding: "9px 16px",
-                      background: active ? "var(--ink)" : "var(--paper-2)",
-                      color: active ? "var(--surface)" : "var(--ink-2)",
-                      font: `${active ? 600 : 500} 12px/1 var(--font-inter)`,
-                      boxShadow: active ? "var(--shadow-soft)" : "none",
-                      borderRadius: 999,
-                    }}
-                  >
-                    {slot.label}
-                    {tipis && (
+            {/* Baris 3 (Opsional): Konten Legenda yang Padat */}
+            <div
+              id="map-legend-content"
+              className="map-legend-transition"
+              aria-hidden={!legendVisible}
+              style={{
+                display: "grid",
+                gridTemplateRows: legendVisible ? "1fr" : "0fr",
+                opacity: legendVisible ? 1 : 0,
+                visibility: legendVisible ? "visible" : "hidden",
+                transition: legendVisible
+                  ? "grid-template-rows 260ms cubic-bezier(.22,1,.36,1), opacity 180ms ease, visibility 0s linear"
+                  : "grid-template-rows 220ms cubic-bezier(.4,0,.2,1), opacity 140ms ease, visibility 0s linear 220ms",
+              }}
+            >
+              <div style={{ minHeight: 0, overflow: "hidden" }}>
+                <div
+                  className="row"
+                  style={{
+                    gap: 12,
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    paddingTop: 6,
+                    marginTop: 2,
+                    borderTop: "1px solid rgba(0, 0, 0, 0.06)",
+                  }}
+                >
+                  <span style={LEGENDA_GRUP}>
+                    <span className="k">
+                      Kesenjangan · {slotLabel(activeSlot)} ·{" "}
+                      {categoryLabel(activeCategory)}
+                    </span>
+                    <span className="row" style={{ gap: 8 }}>
+                      <span className="row" style={{ gap: 3 }}>
+                        {legend.map((stop, i) => {
+                          const d =
+                            LEGEND_DOT.min +
+                            ((LEGEND_DOT.max - LEGEND_DOT.min) * i) /
+                              (legend.length - 1);
+                          return (
+                            <span
+                              key={stop.color}
+                              title={`kesenjangan ≥ ${rupiah(Math.round(stop.at))}`}
+                              style={{
+                                width: d,
+                                height: d,
+                                borderRadius: 999,
+                                background: stop.color,
+                                boxShadow: "0 0 0 1px var(--rule)",
+                                flex: "none",
+                              }}
+                            />
+                          );
+                        })}
+                      </span>
                       <span
                         className="fig"
-                        style={{ opacity: 0.7, fontWeight: 400, marginLeft: 4 }}
+                        style={{
+                          ...LEGENDA_TEKS,
+                          fontSize: 9.5,
+                          color: "var(--ink-faint)",
+                          display: "inline-flex",
+                          gap: 3,
+                        }}
                       >
-                        tipis
+                        <span>{rupiah(gapDomain.min)}</span>
+                        <span>→</span>
+                        <span>{rupiah(gapDomain.max)}</span>
                       </span>
-                    )}
-                  </button>
-                </Fragment>
-              );
-            })}
-            {/* Akhir pekan BUKAN slot kelima — ia sumbu lain: jenis hari.
-               Empat pil di kiri adalah jendela waktu di dalam satu hari,
-               sedangkan ini satu sampel pembanding di hari yang berbeda
-               (janji proposal, datanya belum dicacah).
+                    </span>
+                  </span>
 
-               Karena itu ia diputus dari rantai timeline dan diberi garis
-               pemisah: duduk sebagai pil kelima yang seukuran dan sebentuk
-               membuatnya terbaca sebagai pilihan waktu yang bisa dipencet,
-               padahal bukan keduanya. */}
-            <span
-              style={{
-                width: 1,
-                height: 22,
-                background: "var(--rule)",
-                margin: "0 6px",
-                flex: "none",
-              }}
-            />
-            <span className="row" style={{ gap: 8, flex: "none" }}>
-              <span className="k">Pembanding</span>
-              <span
-                className="pill"
-                title="satu sampel pembanding di akhir pekan — dijanjikan proposal, belum dicacah"
-                style={{
-                  padding: "9px 16px",
-                  border: "1.5px dashed var(--rule-strong)",
-                  background: "var(--paper-2)",
-                  color: "var(--ink-muted)",
-                  font: "500 12px/1 var(--font-inter)",
-                  cursor: "not-allowed",
-                }}
-              >
-                Akhir pekan
-              </span>
-            </span>
+                  {activeLayers.includes("kepercayaan") && (
+                    <>
+                      <span style={LEGENDA_SEKAT} />
+                      <span style={LEGENDA_GRUP}>
+                        <span className="k">Mutu data</span>
+                        <span className="row" style={{ gap: 12 }}>
+                          <span
+                            className="row"
+                            style={{ ...LEGENDA_TEKS, gap: 6 }}
+                          >
+                            <span
+                              style={{
+                                width: 16,
+                                height: 10,
+                                background: CONFIDENCE_GRID_RAMP.thin,
+                                border: "1px solid #334155",
+                                flex: "none",
+                              }}
+                            />
+                            Rendah
+                          </span>
+                          <span
+                            className="row"
+                            style={{ ...LEGENDA_TEKS, gap: 5 }}
+                          >
+                            <span
+                              style={{
+                                width: 16,
+                                height: 10,
+                                background: CONFIDENCE_GRID_RAMP.medium,
+                                border: "1px solid #334155",
+                                flex: "none",
+                              }}
+                            />
+                            Sedang
+                          </span>
+                          <span
+                            className="row"
+                            style={{ ...LEGENDA_TEKS, gap: 5 }}
+                          >
+                            <span
+                              style={{
+                                width: 16,
+                                height: 10,
+                                background: CONFIDENCE_GRID_RAMP.strong,
+                                border: "1px solid #334155",
+                                flex: "none",
+                              }}
+                            />
+                            Memadai
+                          </span>
+                          <span
+                            className="row"
+                            style={{ ...LEGENDA_TEKS, gap: 5 }}
+                          >
+                            <span
+                              style={{
+                                width: 16,
+                                height: 10,
+                                background: CONFIDENCE_GRID_RAMP.empty,
+                                border: "1px solid #334155",
+                                flex: "none",
+                              }}
+                            />
+                            Belum ada data
+                          </span>
+                        </span>
+                      </span>
+                    </>
+                  )}
+
+                  <span style={LEGENDA_SEKAT} />
+
+                  <span style={LEGENDA_GRUP}>
+                    <span className="k">Kawasan</span>
+                    <span className="row" style={{ ...LEGENDA_TEKS, gap: 6 }}>
+                      <span
+                        style={{
+                          width: 18,
+                          height: 11,
+                          borderRadius: 2,
+                          background: "rgba(37,99,235,.16)",
+                          border: "1px dashed #2563EB",
+                          flex: "none",
+                        }}
+                      />
+                      Jangkauan jalan kaki {activeCatchment} menit
+                    </span>
+                  </span>
+
+                  <span style={LEGENDA_SEKAT} />
+
+                  <span style={LEGENDA_GRUP}>
+                    <span className="k">Skala</span>
+                    <span className="row" style={{ gap: 6 }}>
+                      <span
+                        style={{
+                          position: "relative",
+                          height: 7,
+                          width: SKALA_MAKS_PX,
+                          flex: "none",
+                        }}
+                      >
+                        {scaleBar && (
+                          <>
+                            <span
+                              style={{
+                                position: "absolute",
+                                left: 0,
+                                top: 3,
+                                width: scaleBar.widthPx,
+                                height: 1.5,
+                                background: "var(--ink)",
+                              }}
+                            />
+                            <span
+                              style={{
+                                position: "absolute",
+                                left: 0,
+                                top: 0,
+                                width: 1.5,
+                                height: 7,
+                                background: "var(--ink)",
+                              }}
+                            />
+                            <span
+                              style={{
+                                position: "absolute",
+                                left: scaleBar.widthPx - 1.5,
+                                top: 0,
+                                width: 1.5,
+                                height: 7,
+                                background: "var(--ink)",
+                              }}
+                            />
+                          </>
+                        )}
+                      </span>
+                      <span
+                        className="fig"
+                        style={{
+                          ...LEGENDA_TEKS,
+                          fontSize: 9.5,
+                          color: "var(--ink-muted)",
+                        }}
+                      >
+                        {scaleBar ? jarak(scaleBar.meters) : "—"}
+                      </span>
+                    </span>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        </>
 
         <div
           className="glass peta-panel"
@@ -1315,401 +1580,6 @@ export function PetaScreen({
                   padding: "0 22px 8px",
                 }}
               >
-                <div
-                  style={{
-                    borderRadius: "var(--r-md)",
-                    background: "var(--paper-2)",
-                    marginBottom: 26,
-                    overflow: "hidden",
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setLayersOpen((v) => !v)}
-                    className="row layers-toggle btn-reset"
-                    aria-expanded={layersOpen}
-                    style={{
-                      gap: 10,
-                      width: "100%",
-                      padding: "13px 15px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <svg
-                      width="14"
-                      height="14"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.4"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      style={{
-                        flex: "none",
-                        color: "var(--ink)",
-                        transition: "transform .18s cubic-bezier(.4,0,.2,1)",
-                        transform: `rotate(${chev}deg)`,
-                      }}
-                    >
-                      <path d="m6 9 6 6 6-6" />
-                    </svg>
-                    <span className="k" style={{ flex: 1 }}>
-                      Lapisan &amp; filter
-                    </span>
-                    <span
-                      className="fig"
-                      style={{ fontSize: 10.5, color: "var(--ink-faint)" }}
-                    >
-                      {layerCount}
-                    </span>
-                  </button>
-
-                  {!layersOpen && (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexWrap: "wrap",
-                        gap: 6,
-                        padding: "0 15px 13px",
-                      }}
-                    >
-                      {LAYER_ROWS.filter((r) =>
-                        activeLayers.includes(r.key),
-                      ).map((r) => (
-                        <span
-                          key={r.key}
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 5,
-                            padding: "2px 8px",
-                            borderRadius: "var(--r-sm)",
-                            background: "rgba(22, 19, 15, 0.05)",
-                            fontSize: 11,
-                            color: "var(--ink)",
-                          }}
-                        >
-                          <span className="dot" style={{ background: r.dot }} />
-                          <span>
-                            {r.label
-                              .replace(" belanja", "")
-                              .replace(" stasiun", "")
-                              .replace(" data", "")}
-                          </span>
-                        </span>
-                      ))}
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          padding: "2px 8px",
-                          borderRadius: "var(--r-sm)",
-                          background: "var(--surface)",
-                          border: "1px solid var(--rule)",
-                          fontSize: 11,
-                          color: "var(--ink)",
-                          fontWeight: 500,
-                        }}
-                      >
-                        {categoryLabel(activeCategory)} · {activeCatchment} mnt
-                      </span>
-                    </div>
-                  )}
-
-                  {layersOpen && (
-                    <div style={{ padding: "2px 15px 16px" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: 2,
-                        }}
-                      >
-                        {LAYER_ROWS.map((r) => {
-                          const tersedia = r.key in LAYER_GROUPS;
-                          const on = activeLayers.includes(r.key);
-                          return (
-                            <button
-                              type="button"
-                              key={r.key}
-                              onClick={() => toggleLayer(r.key)}
-                              className="lyr btn-reset"
-                              // Bukan `disabled`: baris tanpa data tetap layak
-                              // dijangkau Tab supaya keterangan "belum ada data"
-                              // ikut terbaca — yang dicegah hanya efeknya, dan
-                              // itu sudah dijaga `toggleLayer`.
-                              aria-disabled={!tersedia}
-                              aria-pressed={on}
-                              title={
-                                tersedia
-                                  ? undefined
-                                  : "lapisan ini belum punya data — lihat ROADMAP §6"
-                              }
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 10,
-                                padding: "7px 9px",
-                                borderRadius: "var(--r-md)",
-                                background: "transparent",
-                                color: tersedia
-                                  ? on
-                                    ? "var(--ink)"
-                                    : "var(--ink-2)"
-                                  : "var(--ink-faint)",
-                                fontWeight: on ? 600 : 400,
-                                cursor: tersedia ? "pointer" : "not-allowed",
-                                transition:
-                                  "background .15s ease, color .15s ease",
-                              }}
-                            >
-                              <span
-                                aria-hidden="true"
-                                style={{
-                                  width: 17,
-                                  height: 17,
-                                  borderRadius: 4,
-                                  border: `1.5px solid ${
-                                    !tersedia
-                                      ? "var(--rule-strong)"
-                                      : on
-                                        ? "var(--data)"
-                                        : "var(--rule-strong)"
-                                  }`,
-                                  background: !tersedia
-                                    ? "transparent"
-                                    : on
-                                      ? "var(--data)"
-                                      : "var(--surface)",
-                                  display: "flex",
-                                  alignItems: "center",
-                                  justifyContent: "center",
-                                  flexShrink: 0,
-                                  boxShadow:
-                                    on && tersedia
-                                      ? "0 1px 2px rgba(29, 78, 216, 0.2)"
-                                      : "none",
-                                  transition: "all .15s ease",
-                                }}
-                              >
-                                {on && (
-                                  <svg
-                                    width="11"
-                                    height="11"
-                                    viewBox="0 0 12 12"
-                                    fill="none"
-                                    stroke="#ffffff"
-                                    strokeWidth="2.2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <polyline points="2.5 6 4.8 8.5 9.5 3.5" />
-                                  </svg>
-                                )}
-                              </span>
-                              <span
-                                className="dot"
-                                style={{
-                                  background: tersedia ? r.dot : "var(--rule)",
-                                  opacity: on ? 1 : 0.45,
-                                  flexShrink: 0,
-                                }}
-                              />
-                              <span style={{ flex: 1, textAlign: "left" }}>
-                                {r.label}
-                              </span>
-                              {!tersedia && (
-                                <span
-                                  className="fig"
-                                  style={{
-                                    fontSize: 9.5,
-                                    color: "var(--ink-faint)",
-                                    background: "rgba(22, 19, 15, 0.05)",
-                                    padding: "2px 6px",
-                                    borderRadius: 4,
-                                  }}
-                                >
-                                  belum ada data
-                                </span>
-                              )}
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      <div className="k" style={{ margin: "18px 0 10px" }}>
-                        Kategori usaha
-                      </div>
-                      <div
-                        style={{ display: "flex", flexWrap: "wrap", gap: 6 }}
-                      >
-                        {[
-                          { key: ALL_CATEGORIES, label: "Semua" },
-                          ...CATEGORIES,
-                        ].map((c) => {
-                          const active = activeCategory === c.key;
-                          const dot = CATEGORY_DOT[c.key];
-                          return (
-                            <button
-                              type="button"
-                              key={c.key}
-                              className="chip btn-reset"
-                              aria-pressed={active}
-                              onClick={() =>
-                                setActiveCategory(c.key as CategoryFilter)
-                              }
-                              style={
-                                active
-                                  ? {
-                                      background: "var(--ink)",
-                                      color: "var(--surface)",
-                                      borderColor: "var(--ink)",
-                                    }
-                                  : undefined
-                              }
-                            >
-                              {dot && (
-                                <span
-                                  className="dot"
-                                  style={{ background: dot }}
-                                />
-                              )}
-                              {c.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                      <div
-                        style={{
-                          fontSize: 10.5,
-                          lineHeight: 1.45,
-                          color: "var(--ink-faint)",
-                          marginTop: 8,
-                        }}
-                      >
-                        Kategori dan slot tidak menyembunyikan titik — keduanya
-                        mengubah warna dan ukurannya, supaya jumlah titik yang
-                        dibandingkan selalu sama.
-                      </div>
-
-                      <div className="k" style={{ margin: "18px 0 10px" }}>
-                        Kawasan tangkapan
-                      </div>
-                      <div
-                        className="row pill"
-                        style={{
-                          background: "var(--paper-2)",
-                          border: "1px solid var(--rule)",
-                          padding: 3,
-                          gap: 3,
-                        }}
-                      >
-                        {CATCHMENT_MINUTES.map((m) => {
-                          const active = activeCatchment === m;
-                          return (
-                            <button
-                              type="button"
-                              key={m}
-                              onClick={() => setActiveCatchment(m)}
-                              className="pill btn-reset"
-                              aria-pressed={active}
-                              style={{
-                                flex: 1,
-                                textAlign: "center",
-                                padding: "7px 0",
-                                fontSize: 12,
-                                fontWeight: active ? 600 : 500,
-                                background: active
-                                  ? "var(--surface)"
-                                  : "transparent",
-                                color: active
-                                  ? "var(--ink)"
-                                  : "var(--ink-muted)",
-                                boxShadow: active
-                                  ? "var(--shadow-soft)"
-                                  : "none",
-                                cursor: "pointer",
-                                transition: "all .15s ease",
-                              }}
-                            >
-                              {m} mnt
-                            </button>
-                          );
-                        })}
-                      </div>
-
-                      <div className="k" style={{ margin: "18px 0 9px" }}>
-                        Kesenjangan · {slotLabel(activeSlot)} ·{" "}
-                        {categoryLabel(activeCategory)}
-                      </div>
-                      <div className="row" style={{ height: 9, gap: 2 }}>
-                        {legend.map((stop) => (
-                          <span
-                            key={stop.color}
-                            title={`≥ ${rupiah(Math.round(stop.at))}`}
-                            style={{
-                              flex: 1,
-                              height: 9,
-                              background: stop.color,
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <div
-                        className="fig row"
-                        style={{
-                          justifyContent: "space-between",
-                          fontSize: 10,
-                          color: "var(--ink-faint)",
-                          marginTop: 6,
-                        }}
-                      >
-                        <span>{rupiah(gapDomain.min)}</span>
-                        <span>{rupiah(gapDomain.max)}</span>
-                      </div>
-                      <div
-                        className="row"
-                        style={{
-                          alignItems: "flex-start",
-                          gap: 9,
-                          marginTop: 12,
-                        }}
-                      >
-                        {/* Garis putus abu (#94A3B8) sengaja tetap — cermin
-                           THIN_SAMPLE_COLOR di lib/map/style.ts. */}
-                        <span
-                          style={{
-                            width: 13,
-                            height: 13,
-                            borderRadius: 12,
-                            border: "1.5px dashed #94A3B8",
-                            flex: "none",
-                            marginTop: 1,
-                          }}
-                        />
-                        <span
-                          style={{
-                            fontSize: 11,
-                            lineHeight: 1.45,
-                            color: "var(--ink-muted)",
-                          }}
-                        >
-                          Sampel tipis — tidak diestimasi, tidak dibaca aman
-                          maupun bermasalah
-                        </span>
-                      </div>
-
-                      <button
-                        onClick={() => setLayersOpen(false)}
-                        className="b bp"
-                        style={{ width: "100%", marginTop: 16 }}
-                      >
-                        Terapkan &amp; tutup
-                      </button>
-                    </div>
-                  )}
-                </div>
-
                 {!selectedMetric && (
                   <div
                     style={{
@@ -2293,7 +2163,12 @@ export function PetaScreen({
                   style={{ flex: 1 }}
                   onClick={() => {
                     if (!analytics || !entrances) return;
-                    const rows = barisAtribut(analytics, entrances, activeSlot, activeCategory);
+                    const rows = barisAtribut(
+                      analytics,
+                      entrances,
+                      activeSlot,
+                      activeCategory,
+                    );
                     unduhTeks(
                       namaBerkasAtribut(analytics, activeSlot, activeCategory),
                       csvAtribut(rows),
@@ -2600,21 +2475,23 @@ export function PetaScreen({
                                   marginTop: 14,
                                 }}
                               >
-                                {(cqAnswer.suggested_layers ?? []).map((layer) => (
-                                  <span
-                                    key={layer}
-                                    className="chip"
-                                    style={{
-                                      background: "var(--data-wash)",
-                                      borderColor: "transparent",
-                                      color: "var(--data)",
-                                    }}
-                                  >
-                                    Lapisan →{" "}
-                                    {LAYER_ROWS.find((r) => r.key === layer)
-                                      ?.label ?? layer}
-                                  </span>
-                                ))}
+                                {(cqAnswer.suggested_layers ?? []).map(
+                                  (layer) => (
+                                    <span
+                                      key={layer}
+                                      className="chip"
+                                      style={{
+                                        background: "var(--data-wash)",
+                                        borderColor: "transparent",
+                                        color: "var(--data)",
+                                      }}
+                                    >
+                                      Lapisan →{" "}
+                                      {LAYER_ROWS.find((r) => r.key === layer)
+                                        ?.label ?? layer}
+                                    </span>
+                                  ),
+                                )}
                                 {cqAnswer.spatial_filter?.category && (
                                   <span
                                     className="chip"

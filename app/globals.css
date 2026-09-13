@@ -355,7 +355,7 @@
 .station-search {
   position: absolute;
   /* Keep the search control below the floating navbar. */
-  top: 104px;
+  top: 124px;
   left: 64px;
   width: min(350px, calc(100% - 88px));
   z-index: 21;
@@ -1261,6 +1261,20 @@ h3 {
   --nav-shadow: none;
   --nav-border-w: 1px;
   --nav-brand-radius: 12px;
+  --nav-sticky-top: 0;
+  --nav-backdrop: none;
+  --nav-z-index: 90;
+}
+
+.navbar-container {
+  position: sticky;
+  top: var(--nav-sticky-top, 0);
+  z-index: var(--nav-z-index, 90);
+  border-bottom: var(--nav-border-w, 1px) solid var(--nav-border);
+  transition:
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    padding 0.2s ease;
 }
 
 /* ==========================================================================
@@ -1424,16 +1438,22 @@ h3 {
      dengan kartu dan tombol di sistem ini. */
   --nav-radius: var(--r-pill);
   --nav-margin: var(--s3) var(--page-x) 0;
-  --nav-bg: var(--surface);
+  --nav-bg: rgba(255, 255, 255, 0.92);
   --nav-shadow: var(--shadow-soft);
-  --nav-border-w: 0px;
+  --nav-border-w: 1px;
+  --nav-border: var(--rule-soft);
   --nav-brand-radius: var(--r-pill);
+  --nav-backdrop: blur(16px);
+  --nav-sticky-top: var(--s3);
 
   /* Craft pass (putaran 10): rag judul diseimbangkan supaya tidak ada baris
      terakhir satu kata; tanda kutip & bullet menggantung ke margin supaya
      tepi kiri tetap lurus. Keduanya diabaikan mulus di peramban yang belum
      mendukung — tidak ada layout yang pecah. */
   hanging-punctuation: first;
+}
+.paper-canvas .navbar-container {
+  border: var(--nav-border-w, 1px) solid var(--nav-border);
 }
 .paper-canvas h1,
 .paper-canvas h2 {
@@ -1756,12 +1776,15 @@ a.kartu:focus-visible {
    `.peta-canvas`, bukan `.paper-canvas`: peta hero Beranda juga memakai kontrol
    `top-left` tapi navnya tidak mengambang di atas peta itu. */
 .peta-canvas .maplibregl-ctrl-top-left {
-  margin-top: 196px;
+  margin-top: 222px;
 }
 /* Pembungkus pil nav mengambang: transparan tembus klik, barisnya sendiri tidak.
    `pointer-events` itu properti terwarisi, jadi `auto` di anak langsung cukup. */
 .peta-nav-float > * {
   pointer-events: auto;
+}
+.peta-nav-float .navbar-container {
+  position: static;
 }
 
 /* ==========================================================================
@@ -1773,7 +1796,7 @@ a.kartu:focus-visible {
    ========================================================================== */
 .station-search {
   position: absolute;
-  top: 104px;
+  top: 124px;
   /* Keep the search, station chips, and asset panels on one left rail. */
   left: 64px;
   z-index: 21;
@@ -2219,9 +2242,9 @@ a.kartu:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 6px;
-  border-radius: 6px;
-  transition: background 0.15s ease;
+  padding: 5px 8px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
 }
 
 .retail-group-header.clickable {
@@ -2233,27 +2256,58 @@ a.kartu:focus-visible {
   background: var(--paper-2);
 }
 
+.retail-group-header.clickable:hover .retail-group-chevron {
+  color: var(--ink);
+}
+
+.retail-group-chevron {
+  flex-shrink: 0;
+  transition:
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.15s ease;
+}
+
 .retail-expand-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   width: 100%;
-  padding: 7px 12px;
+  padding: 8px 14px;
   margin-top: 2px;
   border-radius: 8px;
-  border: 1px dashed var(--rule);
-  background: var(--paper-2);
-  color: var(--ink-muted);
-  font-size: 11.5px;
+  border: 1px solid var(--rule);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .retail-expand-btn:hover {
-  background: var(--surface);
-  border-color: #94a3b8;
+  background: var(--paper-2);
+  border-color: #cbd5e1;
+  color: var(--ink);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.retail-expand-btn:active {
+  transform: translateY(0);
+  background: var(--paper-3, #f1f5f9);
+}
+
+.retail-expand-btn .retail-expand-icon {
+  flex-shrink: 0;
+  color: var(--ink-muted);
+  transition:
+    transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.15s ease;
+}
+
+.retail-expand-btn:hover .retail-expand-icon {
   color: var(--ink);
 }
 
@@ -2449,6 +2503,13 @@ a.kartu:focus-visible {
 .retail-metric-chip.price {
   font-weight: 600;
   color: #0f172a;
+}
+
+.retail-metric-chip.recommendation {
+  font-weight: 600;
+  color: #1d4ed8;
+  background: rgba(29, 78, 216, 0.08);
+  border-color: rgba(29, 78, 216, 0.18);
 }
 
 .retail-card-arrow {
@@ -2890,6 +2951,15 @@ a.kartu:focus-visible {
 @media (max-width: 900px) {
   .comparison-cards {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-bottom-dock-transition,
+  .map-legend-transition,
+  .map-legend-transition * {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
   }
 }
 
@@ -3730,6 +3800,13 @@ a.kartu:focus-visible {
 }
 
 @media (max-width: 760px) {
+  .navbar-container {
+    padding: 12px 18px !important;
+    gap: 12px !important;
+    top: 12px !important;
+    margin: 12px var(--page-x) 0 !important;
+  }
+
   .nav-actions > :first-child:not(:last-child),
   .auth-nav-identity {
     display: none;

@@ -47,6 +47,8 @@ export const BASEMAP_CHOICES: Record<string, string> = {
  * berkas ini dikomit. Alamatnya dibaca dari variabel lingkungan saat dipakai.
  */
 export const BASEMAP_NAMES = [
+  "satellite",
+  "building",
   "mapid",
   "liberty",
   "positron",
@@ -56,15 +58,92 @@ export const BASEMAP_NAMES = [
 
 export type BasemapName = (typeof BASEMAP_NAMES)[number];
 
+export type BasemapOption = {
+  id: BasemapName;
+  name: string;
+  category: "mapid" | "osm" | "carto";
+  description: string;
+  badge?: string;
+};
+
+export const BASEMAP_OPTIONS: BasemapOption[] = [
+  {
+    id: "satellite",
+    name: "MAPID Satelit",
+    category: "mapid",
+    description: "Citra satelit resolusi tinggi",
+    badge: "Foto Udara",
+  },
+  {
+    id: "building",
+    name: "MAPID 2D Bangunan",
+    category: "mapid",
+    description: "Footprint bangunan & tata ruang",
+    badge: "Building",
+  },
+  {
+    id: "mapid",
+    name: "MAPID Street",
+    category: "mapid",
+    description: "Peta jalan resmi GEO MAPID",
+    badge: "Street",
+  },
+  {
+    id: "liberty",
+    name: "OSM Liberty",
+    category: "osm",
+    description: "POI kawasan & bangunan 3D",
+    badge: "Default",
+  },
+  {
+    id: "positron",
+    name: "CARTO Positron",
+    category: "carto",
+    description: "Monokrom terang kontras tinggi",
+    badge: "Light",
+  },
+  {
+    id: "voyager",
+    name: "CARTO Voyager",
+    category: "carto",
+    description: "Peta perkotaan warna detail",
+    badge: "Urban",
+  },
+  {
+    id: "bright",
+    name: "OSM Bright",
+    category: "osm",
+    description: "Tampilan kontras tegas",
+    badge: "Vivid",
+  },
+];
+
 /** Apakah sebuah teks adalah nama basemap yang dikenali. */
-function namaBasemapDikenali(nama: string): nama is BasemapName {
+export function namaBasemapDikenali(nama: string): nama is BasemapName {
   return (BASEMAP_NAMES as readonly string[]).includes(nama);
 }
 
 /** Alamat satu pilihan basemap, atau `null` kalau namanya tidak dikenali. */
-function basemapChoiceUrl(nama: string): string | null {
+export function basemapChoiceUrl(nama: string): string | null {
   if (!namaBasemapDikenali(nama)) return null;
-  if (nama === "mapid") return process.env.NEXT_PUBLIC_BASEMAP_URL || null;
+  if (nama === "mapid") {
+    return (
+      process.env.NEXT_PUBLIC_BASEMAP_URL ||
+      "https://basemap.mapid.io/styles/basic/style.json?key=6a92654453df37905b3a5d93"
+    );
+  }
+  if (nama === "satellite") {
+    return (
+      process.env.NEXT_PUBLIC_BASEMAP_SATELLITE_URL ||
+      "https://basemap.mapid.io/styles/satellite/style.json?key=6a92654453df37905b3a5d93"
+    );
+  }
+  if (nama === "building") {
+    return (
+      process.env.NEXT_PUBLIC_BASEMAP_BUILDING_URL ||
+      "https://basemap.mapid.io/styles/street-2d-building/style.json?key=6a92654453df37905b3a5d93"
+    );
+  }
   return BASEMAP_CHOICES[nama] ?? null;
 }
 

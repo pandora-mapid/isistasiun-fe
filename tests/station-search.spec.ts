@@ -138,9 +138,8 @@ test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembun
     .locator(".retail-group")
     .filter({ hasText: "Potensi Toko Baru" })
     .getByRole("button", { name: /Tampilkan \d+ lainnya/ });
-  if (await expandPotensi.isVisible()) {
-    await expandPotensi.click();
-  }
+  await expect(expandPotensi).toBeVisible();
+  await expandPotensi.click();
   const panel = page.locator(
     ".retail-group-items:not(.rental-asset-list) .retail-card-btn",
   );
@@ -201,7 +200,10 @@ test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembun
   );
   await expect(detail).toContainText("-6.2105015, 106.8508356");
   await page.getByRole("button", { name: "Ringkasan", exact: true }).click();
-  await page.getByRole("button", { name: /Lapisan & filter/ }).click();
+  const layersToggle = page.locator(".layers-toggle");
+  if ((await layersToggle.getAttribute("aria-expanded")) !== "true") {
+    await layersToggle.click();
+  }
   await page
     .getByRole("button", { name: "Retail & potensi toko", exact: true })
     .click();
