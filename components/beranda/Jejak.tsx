@@ -9,16 +9,11 @@
  * contoh.
  */
 
-import { useBeranda } from "./BerandaData";
-
 export function Jejak() {
-  const { jejak } = useBeranda();
-  if (!jejak) return null;
-
   return (
     <span className="fig" style={{ fontSize: 10.5, color: "var(--ink-faint)" }}>
-      data contoh · pipeline {jejak.pipeline} · {jejak.jenisHari} · dibuat{" "}
-      {jejak.dibuat}
+      survei lapangan Manggarai dan Sudirman · pipeline Monte Carlo 10.000
+      iterasi · hari kerja · sampel tipis, estimasi awal
     </span>
   );
 }

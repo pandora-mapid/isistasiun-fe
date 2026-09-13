@@ -46,6 +46,8 @@ export interface KategoriFigure {
   demandCount: number;
   /** Sudah tersedia di dalam stasiun? */
   tersedia: boolean;
+  /** Gerai kategori ini di dalam stasiun (amatan konversi lapangan, EC). */
+  geraiCount: number;
 }
 
 export interface GerbangFigure {
@@ -77,8 +79,9 @@ function kat(
   key: KategoriFigure["key"],
   demandCount: number,
   tersedia: boolean,
+  geraiCount: number,
 ): KategoriFigure {
-  return { key, label: KATEGORI_LABEL[key], demandCount, tersedia };
+  return { key, label: KATEGORI_LABEL[key], demandCount, tersedia, geraiCount };
 }
 
 /**
@@ -115,11 +118,11 @@ export const STASIUN: StasiunFigure[] = [
       },
     ],
     kategori: [
-      kat("makanan_minuman", 21, true),
-      kat("ritel_kemasan", 4, true),
-      kat("apotek_kesehatan", 13, false),
-      kat("jasa", 55, false),
-      kat("lainnya", 0, false),
+      kat("makanan_minuman", 21, true, 1),
+      kat("ritel_kemasan", 4, true, 3),
+      kat("apotek_kesehatan", 13, false, 0),
+      kat("jasa", 55, false, 0),
+      kat("lainnya", 0, false, 0),
     ],
     gerbang: [
       { nama: "Pintu A", masuk: 44, keluar: 32, total: 76 },
@@ -144,11 +147,11 @@ export const STASIUN: StasiunFigure[] = [
       },
     ],
     kategori: [
-      kat("makanan_minuman", 30, true),
-      kat("ritel_kemasan", 20, true),
-      kat("apotek_kesehatan", 4, false),
-      kat("jasa", 71, false),
-      kat("lainnya", 0, false),
+      kat("makanan_minuman", 30, true, 4),
+      kat("ritel_kemasan", 20, true, 1),
+      kat("apotek_kesehatan", 4, false, 0),
+      kat("jasa", 71, false, 0),
+      kat("lainnya", 0, false, 1),
     ],
     gerbang: [{ nama: "Pintu Atas", masuk: 8, keluar: 27, total: 35 }],
   },
@@ -187,6 +190,30 @@ export function tengah(r: RangeJt): number {
 export function persenTertangkap(s: SlotFigure): number {
   const pot = tengah(s.potensi);
   return pot > 0 ? Math.round((tengah(s.tertangkap) / pot) * 100) : 0;
+}
+
+/**
+ * Total kesenjangan belanja harian, dijumlah atas semua slot terukur kedua
+ * simpul. p50 diambil sebagai titik tengah rentang (P10/P90 dari pipeline;
+ * p50 sejati tak disimpan). Ini angka headline "duduk perkara" Beranda.
+ */
+export function totalGap(): { p10: number; p50: number; p90: number } {
+  let p10 = 0;
+  let p90 = 0;
+  for (const st of STASIUN) {
+    for (const s of st.slot) {
+      p10 += s.gap.p10;
+      p90 += s.gap.p90;
+    }
+  }
+  return { p10, p50: Math.round((p10 + p90) / 2), p90 };
+}
+
+/** Slot terukur diurutkan dari kesenjangan terbesar (untuk peringkat Insight). */
+export function slotUrutGap(): { stasiun: string; slot: SlotFigure }[] {
+  const rows: { stasiun: string; slot: SlotFigure }[] = [];
+  for (const st of STASIUN) for (const s of st.slot) rows.push({ stasiun: st.nama, slot: s });
+  return rows.sort((a, b) => tengah(b.slot.gap) - tengah(a.slot.gap));
 }
 
 /** Kategori dengan permintaan terbaca tapi belum ada di stasiun, urut demand. */

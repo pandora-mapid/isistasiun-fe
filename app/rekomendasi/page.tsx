@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
 import { RequireLogin } from "@/components/auth/RequireLogin";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
 
@@ -729,32 +728,25 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Risiko & penanganannya + foto — dua kartu datar.
+          Risiko & penanganannya — satu kartu penuh, tiga risiko sejajar.
           ============================================================ */}
-      <section
-        className="reveal runtuh-1"
-        style={{
-          ...seksi,
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-          gap: "var(--s2)",
-        }}
-      >
+      <section className="reveal" style={seksi}>
         <div className="kartu" style={{ padding: "var(--s3)" }}>
           <h2
             style={{
               font: "800 clamp(21px, 2vw, 26px)/1.15 var(--font-inter), system-ui, sans-serif",
               letterSpacing: "-0.02em",
-              margin: "0 0 var(--s3)",
+              margin: "0 0 var(--s4)",
             }}
           >
             Risiko dan penanganannya
           </h2>
           <div
+            className="runtuh-1"
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--s2)",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: "var(--s3)",
             }}
           >
             {RISIKO.map((r) => (
@@ -785,19 +777,6 @@ export default function RekomendasiPage() {
               </div>
             ))}
           </div>
-        </div>
-        <div
-          className="kartu"
-          style={{
-            overflow: "hidden",
-            background: "var(--surface)",
-            minHeight: 340,
-          }}
-        >
-          <ImagePlaceholder
-            label="Foto area komersial / gerai stasiun"
-            style={{ color: "var(--ink-faint)" }}
-          />
         </div>
       </section>
 

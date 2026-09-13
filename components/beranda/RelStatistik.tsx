@@ -27,7 +27,7 @@
  */
 
 import { rupiahRingkas } from "@/lib/format";
-import { useBeranda } from "./BerandaData";
+import { totalGap } from "@/lib/data/real-figures";
 
 type Kutipan = { nilai: string; keterangan: string; sumber: string };
 
@@ -61,22 +61,13 @@ const KUTIPAN: Kutipan[] = [
  * sampel tipis dan rentangnya tak terbaca, batang jatuh ke garis-rambut polos.
  */
 export function RelStatistikAngka() {
-  const { sorotan } = useBeranda();
-
-  const gap = sorotan?.metric.gap ?? null;
-  const angka = gap ? rupiahRingkas(gap.p50) : "—";
-  const keterangan = sorotan
-    ? `median kesenjangan belanja harian di ${sorotan.namaTitik}, ${sorotan.namaStasiun}. Pintu terbesar yang kami cacah`
-    : "median kesenjangan belanja harian pada pintu terbesar yang kami cacah";
+  const gap = totalGap();
+  const angka = rupiahRingkas(gap.p50);
+  const keterangan =
+    "median kesenjangan belanja harian dua simpul yang kami cacah, Manggarai dan Sudirman, dijumlah atas slot terukur. Angkanya masih estimasi awal karena sampel tipis";
 
   const posisi =
-    gap &&
-      gap.p10 !== null &&
-      gap.p50 !== null &&
-      gap.p90 !== null &&
-      gap.p90 > gap.p10
-      ? (gap.p50 - gap.p10) / (gap.p90 - gap.p10)
-      : null;
+    gap.p90 > gap.p10 ? (gap.p50 - gap.p10) / (gap.p90 - gap.p10) : null;
 
   return (
     <div style={{ width: "max-content", maxWidth: "100%" }}>

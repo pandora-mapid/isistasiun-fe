@@ -23,8 +23,15 @@
  */
 
 import { persen, ribuan, rupiah } from "@/lib/format";
-import { useBeranda } from "./BerandaData";
 import { KickerBernomor } from "@/components/paper/KickerBernomor";
+
+/**
+ * Contoh nyata satu slot yang benar-benar dicacah: Manggarai, sore.
+ * F = pejalan tercacah di depan gerai pada blok survei; E = masuk/lewat
+ * (31/152); C = konversi asumsi 0,95; V = nilai acuan makanan-minuman
+ * Rp25.000 (struk belum dikumpulkan). Sumber: entry-conversion lapangan.
+ */
+const CONTOH_NYATA = { F: 152, E: 0.2, C: 0.95, V: 25000 };
 
 type Suku = {
   huruf: string;
@@ -35,42 +42,38 @@ type Suku = {
   satuan?: string;
 };
 
-/** Ditampilkan kalau nilai contoh belum termuat. Bukan em-dash. */
-const KOSONG = "–";
-
 export function Persamaan() {
-  const { contohVariabel } = useBeranda();
-  const v = contohVariabel?.variables;
+  const v = CONTOH_NYATA;
 
   const suku: Suku[] = [
     {
       huruf: "F",
       nama: "Arus pejalan",
-      arti: "Pejalan kaki yang melintasi garis pengamatan di satu pintu, dicacah dalam blok menerus 15 menit.",
+      arti: "Pejalan kaki yang melintasi garis pengamatan di depan gerai, dicacah dalam blok menerus 15 menit.",
       sumber: "lapangan",
-      nilai: v ? ribuan(v.F) : KOSONG,
-      satuan: "org/jam",
+      nilai: ribuan(v.F),
+      satuan: "org tercacah",
     },
     {
       huruf: "E",
       nama: "Entry ratio",
       arti: "Bagian dari mereka yang berhenti dan benar-benar masuk ke dalam gerai.",
       sumber: "lapangan",
-      nilai: v ? persen(v.E) : KOSONG,
+      nilai: persen(v.E),
     },
     {
       huruf: "C",
       nama: "Konversi",
-      arti: "Bagian dari yang sudah masuk dan menyelesaikan pembayaran.",
+      arti: "Bagian dari yang sudah masuk dan menyelesaikan pembayaran. Masih asumsi acuan.",
       sumber: "lapangan",
-      nilai: v ? persen(v.C, 0) : KOSONG,
+      nilai: persen(v.C, 0),
     },
     {
       huruf: "V",
       nama: "Nilai transaksi",
-      arti: "Jumlah akhir yang dibayarkan, dibaca dari foto struk dengan aturan yang ditetapkan sebelum survei dimulai.",
+      arti: "Nilai acuan per kategori (struk belum dikumpulkan). Nantinya dibaca dari foto struk dengan aturan yang ditetapkan sebelum survei.",
       sumber: "ai",
-      nilai: v ? rupiah(v.V) : KOSONG,
+      nilai: rupiah(v.V),
     },
   ];
 
@@ -231,9 +234,7 @@ export function Persamaan() {
             color: "var(--ink-faint)",
           }}
         >
-          {contohVariabel
-            ? `nilai contoh · ${contohVariabel.namaStasiun} · ${contohVariabel.namaTitik} · slot ${contohVariabel.slot} (dicacah ${contohVariabel.jam})`
-            : "memuat nilai contoh…"}
+          nilai nyata · Manggarai · depan gerai · slot sore (dicacah 17.30)
         </p>
       </div>
     </section>
