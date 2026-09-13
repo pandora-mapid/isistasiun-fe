@@ -196,7 +196,7 @@ const NILAI: IsiInsight = (() => {
     V: 25000,
     jam: "17.30",
     slotLabel: "Sore",
-    namaTitik: "depan gerai",
+    namaTitik: "Pintu Atas",
     namaStasiun: "Manggarai",
   };
 
@@ -230,7 +230,7 @@ const NILAI: IsiInsight = (() => {
     },
     arusTitik: sudirman.gerbang[0]?.total ?? null,
     pembanding: {
-      namaTitik: "slot sore",
+      namaTitik: "Pintu Bawah",
       namaStasiun: "Manggarai",
       arus: manggarai.gerbang[0]?.total ?? null,
       gap: tengah(manggarai.slot.find((s) => s.slot === "sore")!.gap),
@@ -258,11 +258,11 @@ const NILAI: IsiInsight = (() => {
     sorotan,
     cakupan: {
       simpulDiamati: 2,
-      pintuDiamati: 15,
+      pintuDiamati: 6,
       strukTerbaca: 0,
       slot: 3,
       kategori: 5,
-      pintuDitahan: 0,
+      pintuDitahan: 3,
     },
     peringkat,
     instrumen,

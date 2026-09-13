@@ -25,7 +25,7 @@ import { MOCK_DEMO_DATA } from "./demo";
 import { MOCK_RENTAL_ASSETS } from "./rental-demo";
 
 const PROTOTYPE_STATION_IDS = new Set([1, 2]);
-const PROTOTYPE_POINT_IDS = new Set([11, 12, 13, 21, 22, 23, 24]);
+const PROTOTYPE_POINT_IDS = new Set([11, 12, 13, 21, 22, 23]);
 
 /**
  * DUA sumber, bukan satu sakelar.

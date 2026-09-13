@@ -332,7 +332,7 @@ export const FIT_PADDING = {
 /** Tampilan awal — dipakai sebelum data termuat. */
 export const INITIAL_VIEW = {
   center: [106.8395, -6.2145] as [number, number],
-  zoom: 12.4,
+  zoom: 13.2,
 } as const;
 
 /**
