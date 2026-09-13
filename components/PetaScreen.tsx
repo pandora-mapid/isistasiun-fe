@@ -157,15 +157,10 @@ const LAYER_ROWS: LayerRow[] = [
     dot: "#047857",
     tint: "rgba(4,120,87,.08)",
   },
-  {
-    key: "event",
-    label: "Event & aktivasi",
-    dot: "var(--ink-faint)",
-    tint: "rgba(22,19,15,.06)",
-  },
 ];
 
 const DEFAULT_ACTIVE_LAYERS = ["gap", "kepercayaan", "retail", "rental"];
+const MAPID_BASEMAPS = new Set<BasemapName>(["satellite", "building", "mapid"]);
 
 /** Warna titik kategori pada chip — murni hiasan, sepadan dengan legenda. */
 const CATEGORY_DOT: Record<string, string> = {
@@ -386,9 +381,11 @@ export function PetaScreen({
   const [activeBasemap, setActiveBasemap] = useState<BasemapName>(() => {
     if (typeof window !== "undefined") {
       const param = new URLSearchParams(window.location.search).get("basemap");
-      if (param && namaBasemapDikenali(param)) return param;
+      if (param && namaBasemapDikenali(param) && MAPID_BASEMAPS.has(param)) {
+        return param;
+      }
     }
-    return "liberty";
+    return "mapid";
   });
 
   const handleSelectBasemap = useCallback((newBasemap: BasemapName) => {
@@ -3140,20 +3137,19 @@ export function PetaScreen({
               >
                 Ringkasan &amp; Bandingkan Simpul
               </button>
-              <button
-                type="button"
-                className="b bp"
-                onClick={() => setShowBrief(true)}
-              >
-                Brief PDF
-              </button>
             </div>
           }
         />
       </div>
 
       {showBandingSimpul && (
-        <BandingSimpulOverlay onClose={() => setShowBandingSimpul(false)} />
+        <BandingSimpulOverlay
+          onClose={() => setShowBandingSimpul(false)}
+          onOpenBrief={() => {
+            setShowBandingSimpul(false);
+            setShowBrief(true);
+          }}
+        />
       )}
 
       {showTabel && analytics && entrances && (

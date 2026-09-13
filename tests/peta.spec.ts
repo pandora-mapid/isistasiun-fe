@@ -609,26 +609,16 @@ test("panel lapisan bisa dioperasikan tanpa tetikus", async ({ page }) => {
     .toBe("visible");
 });
 
-test("baris lapisan tanpa data tetap terbaca, tapi tidak mengubah apa pun", async ({
+test("panel lapisan tidak menampilkan event dan aktivitas", async ({
   page,
 }) => {
   await page.goto("/peta", { waitUntil: "domcontentloaded" });
   await waitForMapReady(page);
 
   await page.locator(".layers-toggle").click();
-  // "Event & aktivasi" adalah satu-satunya baris yang masih benar-benar tanpa
-  // data. Baris "Indeks sewa" dulu dipakai di sini dan sudah pindah ke sisi
-  // yang berfungsi — lihat tes di bawahnya.
-  const event = page.locator(".lyr").filter({ hasText: "Event & aktivasi" });
-  // `aria-disabled`, bukan `disabled`: barisnya tetap bisa dijangkau supaya
-  // keterangan "belum ada data" ikut terbaca pembaca layar. Playwright sendiri
-  // menolak mengkliknya — bukti bahwa atributnya memang terbaca sebagai "tidak
-  // tersedia" — jadi dicoba lewat jalur yang benar-benar tersisa: fokus + Enter.
-  await expect(event).toHaveAttribute("aria-disabled", "true");
-  await event.focus();
-  await expect(event).toBeFocused();
-  await page.keyboard.press("Enter");
-  await expect(event).toHaveAttribute("aria-pressed", "false");
+  await expect(
+    page.locator(".lyr").filter({ hasText: /Event|Aktivitas|aktivasi/i }),
+  ).toHaveCount(0);
 });
 
 /**
@@ -838,8 +828,15 @@ test("brief simpul tampil dan menyediakan cetak ke PDF", async ({ page }) => {
   await page.goto("/peta", { waitUntil: "domcontentloaded" });
   await waitForMapReady(page);
 
-  await page.getByRole("button", { name: "Brief PDF" }).click();
-  const dialog = page.getByRole("dialog", { name: "Brief PDF" });
+  await page
+    .getByRole("button", { name: "Ringkasan & Bandingkan Simpul" })
+    .click();
+  const ringkasan = page.getByRole("dialog", {
+    name: /Analisis Penempatan Tenant/,
+  });
+  await expect(ringkasan).toBeVisible();
+  await ringkasan.getByRole("button", { name: "Export PDF" }).click();
+  const dialog = page.getByRole("dialog", { name: "Export PDF" });
   await expect(dialog).toBeVisible();
 
   // Bentuk brief menurut isi-stasiun-ai-integration.md §2.2.
