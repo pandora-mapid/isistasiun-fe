@@ -15,7 +15,6 @@ const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
   { key: "beranda", href: "/", label: "Beranda" },
   { key: "peta", href: "/peta", label: "Peta" },
   { key: "insight", href: "/insight", label: "Insight" },
-  { key: "metodologi", href: "/metodologi", label: "Metodologi" },
   { key: "rekomendasi", href: "/rekomendasi", label: "Rekomendasi" },
 ];
 
