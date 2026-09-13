@@ -123,10 +123,7 @@ export default function MetodologiPage() {
   return (
     <RequireLogin next="/metodologi">
     <div className="page-canvas paper-canvas">
-      <NavBar
-        active="metodologi"
-        cta={<button className="b bs">Unduh protokol</button>}
-      />
+      <NavBar active="metodologi" cta={null} />
 
       {/* ============================================================
           Hero - dua kolom. Tulisan kiri, kartu tinta persamaan kanan.
@@ -548,17 +545,7 @@ export default function MetodologiPage() {
                 </div>
               ))}
             </div>
-            <div
-              style={{
-                display: "flex",
-                gap: 10,
-                marginTop: "var(--s4)",
-                flexWrap: "wrap",
-              }}
-            >
-              <button className="b bp">Unduh protokol pencacahan</button>
-              <button className="b bs">Catatan keterbatasan</button>
-            </div>
+
           </div>
         </div>
       </section>
