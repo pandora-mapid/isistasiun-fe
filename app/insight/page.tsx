@@ -2,9 +2,11 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
+import { RequireLogin } from "@/components/auth/RequireLogin";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
 import { InsightData } from "@/components/insight/InsightData";
+import { RingkasanSimpul } from "@/components/insight/RingkasanSimpul";
 import {
   BatangBersarang,
   DaftarTemuan,
@@ -63,6 +65,7 @@ function tint(bg: string): CSSProperties {
 
 export default function InsightPage() {
   return (
+    <RequireLogin next="/insight">
     <InsightData>
       <div className="page-canvas paper-canvas">
         <NavBar
@@ -85,6 +88,7 @@ export default function InsightPage() {
           }}
         >
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns:
@@ -134,6 +138,19 @@ export default function InsightPage() {
         </section>
 
         {/* ============================================================
+            Ringkasan & perbandingan antarsimpul — potret per kawasan,
+            satu tingkat di atas panel per-pintu. Kebutuhan Persona 2.
+            ============================================================ */}
+        <section className="reveal" style={seksi}>
+          <Kepala
+            kicker="Dua simpul, berdampingan"
+            judul="Manggarai memikul kesenjangan harian yang lebih besar."
+            catatan="Angka simpul adalah hasil simulasi Monte Carlo setingkat kawasan — bukan penjumlahan angka pintu di bawahnya. Porsi tertangkap dua simpul praktis sama; pembedanya skala arus dan entry ratio."
+          />
+          <RingkasanSimpul />
+        </section>
+
+        {/* ============================================================
             1 · Duduk perkara — peringkat pintu + batang bersarang.
             ============================================================ */}
         <section className="reveal" style={seksi}>
@@ -143,6 +160,7 @@ export default function InsightPage() {
             catatan="Gerai di dalam stasiun menangkap sekitar sepertiga potensi yang lewat pintu terbesar; sisanya batas atas peluang pendapatan non-tiket."
           />
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(0, 1.55fr) minmax(0, 1fr)",
@@ -172,6 +190,7 @@ export default function InsightPage() {
             catatan="Kesenjangan per slot di pintu dengan selisih terbesar, dan instrumen F × E × C × V yang menyusunnya."
           />
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns:
@@ -205,6 +224,7 @@ export default function InsightPage() {
             catatan="Terisi · Kurang · Kosong dibaca dari jumlah gerai yang tercacah terhadap ambang 3 per kategori, bukan dari data sewa."
           />
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(0, 1fr) minmax(0, 300px)",
@@ -255,6 +275,7 @@ export default function InsightPage() {
           }}
         >
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns: "minmax(0, 1fr) minmax(0, 320px)",
@@ -330,5 +351,6 @@ export default function InsightPage() {
         </footer>
       </div>
     </InsightData>
+    </RequireLogin>
   );
 }

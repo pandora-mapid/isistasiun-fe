@@ -2,6 +2,16 @@ import { test, expect } from "@playwright/test";
 import { validateStyleMin } from "@maplibre/maplibre-gl-style-spec";
 
 import { SOURCE } from "../lib/map/config";
+import { retailCircleLayer, retailLabelLayer } from "../lib/map/retail-style";
+import {
+  rentalCircleLayer,
+  rentalIndexLayer,
+  rentalLabelLayer,
+} from "../lib/map/rental-style";
+import {
+  stationCircleLayer,
+  stationLabelLayer,
+} from "../lib/map/station-style";
 import {
   isochroneFillLayer,
   isochroneLineLayer,
@@ -9,6 +19,8 @@ import {
   pointCircleLayer,
   pointConfidenceLayer,
   pointLabelLayer,
+  confidenceBoundaryLayer,
+  confidenceFillLayer,
   scaleDependentPaint,
 } from "../lib/map/style";
 import type { Domain } from "../lib/analytics/select";
@@ -33,6 +45,10 @@ function styleWith(layers: unknown[]) {
       [SOURCE.points]: { type: "geojson", data: EMPTY_FC },
       [SOURCE.isochrones]: { type: "geojson", data: EMPTY_FC },
       [SOURCE.pointLabels]: { type: "geojson", data: EMPTY_FC },
+      [SOURCE.retail]: { type: "geojson", data: EMPTY_FC },
+      [SOURCE.confidenceGrid]: { type: "geojson", data: EMPTY_FC },
+      [SOURCE.stationMarkers]: { type: "geojson", data: EMPTY_FC },
+      [SOURCE.rental]: { type: "geojson", data: EMPTY_FC },
     },
     layers,
   };
@@ -57,10 +73,22 @@ const CONF_UJI: Domain = { min: 0.77, max: 0.92 };
 const LAYERS: { nama: string; buat: () => unknown }[] = [
   { nama: "isochrone-fill", buat: isochroneFillLayer },
   { nama: "isochrone-line", buat: isochroneLineLayer },
-  { nama: "point-confidence", buat: () => pointConfidenceLayer(DOMAIN_UJI, CONF_UJI) },
+  {
+    nama: "point-confidence",
+    buat: () => pointConfidenceLayer(DOMAIN_UJI, CONF_UJI),
+  },
+  { nama: "confidence-fill", buat: confidenceFillLayer },
+  { nama: "confidence-boundary", buat: confidenceBoundaryLayer },
   { nama: "point-circle", buat: () => pointCircleLayer(DOMAIN_UJI) },
   { nama: "point-label", buat: pointLabelLayer },
   { nama: "point-arus", buat: pointArusLayer },
+  { nama: "retail-circle", buat: retailCircleLayer },
+  { nama: "retail-label", buat: retailLabelLayer },
+  { nama: "station-circle", buat: stationCircleLayer },
+  { nama: "station-label", buat: stationLabelLayer },
+  { nama: "rental-circle", buat: rentalCircleLayer },
+  { nama: "rental-label", buat: rentalLabelLayer },
+  { nama: "rental-index", buat: rentalIndexLayer },
 ];
 
 for (const { nama, buat } of LAYERS) {
@@ -75,9 +103,21 @@ for (const { nama, buat } of LAYERS) {
 }
 
 test("seluruh layer bisa dipasang bersamaan", () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const errors = validateStyleMin(styleWith(LAYERS.map((l) => l.buat())) as any);
+  const errors = validateStyleMin(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    styleWith(LAYERS.map((l) => l.buat())) as any,
+  );
   expect(errors.map((e) => `${e.message}`)).toEqual([]);
+});
+
+test("confidence grid memiliki fill dan garis batas", () => {
+  const layer = confidenceFillLayer();
+  const boundary = confidenceBoundaryLayer();
+  const paint = (layer as { paint: Record<string, unknown> }).paint;
+  expect(paint["fill-color"]).toBeDefined();
+  expect(paint["fill-opacity"]).toBe(0.38);
+  expect(boundary.type).toBe("line");
+  expect(boundary.source).toBe(SOURCE.confidenceGrid);
 });
 
 test("tidak ada feature-state di dalam filter", () => {
@@ -144,9 +184,9 @@ for (const conf of [
     const opacity = JSON.stringify(
       (layer as { paint: Record<string, unknown> }).paint["circle-opacity"],
     );
-    for (const n of JSON.parse(opacity).flat(9).filter(
-      (v: unknown) => typeof v === "number",
-    ) as number[]) {
+    for (const n of JSON.parse(opacity)
+      .flat(9)
+      .filter((v: unknown) => typeof v === "number") as number[]) {
       expect(n, `nilai ${n} keluar dari rentang 0–1`).toBeLessThanOrEqual(1);
       expect(n).toBeGreaterThanOrEqual(0);
     }

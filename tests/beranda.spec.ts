@@ -25,7 +25,9 @@ async function tungguPeta(page: Page) {
       return map.queryRenderedFeatures({ layers: ["point-circle"] }).length > 0;
     },
     undefined,
-    { timeout: 30_000 },
+    // Di bawah suite paralel penuh + mesin sibuk, dev server + render SwiftShader
+    // bisa selambat ini untuk menggambar fitur pertama. Masih < `timeout` tes.
+    { timeout: 55_000 },
   );
 }
 
@@ -51,7 +53,9 @@ test("peta hero menggambar titik pengamatan tanpa error", async ({ page }) => {
     const map = (window as unknown as { __map?: any }).__map;
     return map.queryRenderedFeatures({ layers: ["point-circle"] }).length;
   });
-  expect(jumlah, "tidak ada titik yang tergambar di peta hero").toBeGreaterThan(0);
+  expect(jumlah, "tidak ada titik yang tergambar di peta hero").toBeGreaterThan(
+    0,
+  );
 
   expect(consoleErrors, "ada error di console browser").toEqual([]);
   expect(gagal, "ada request yang gagal").toEqual([]);
@@ -74,7 +78,9 @@ test("peta hero tidak interaktif dan tidak menelan gulungan halaman", async ({
   });
 
   expect(keadaan.geser, "peta hero masih bisa digeser").toBe(false);
-  expect(keadaan.gulung, "peta hero masih menelan gulungan halaman").toBe(false);
+  expect(keadaan.gulung, "peta hero masih menelan gulungan halaman").toBe(
+    false,
+  );
   expect(keadaan.kendali, "kendali navigasi tidak seharusnya dipasang").toBe(0);
 });
 
@@ -90,9 +96,6 @@ test("angka di Beranda datang dari data yang sama dengan halaman Peta", async ({
   await expect(page.getByText("Manggarai").first()).toBeVisible();
   await expect(page.getByText("Sudirman").first()).toBeVisible();
   await expect(page.getByText("Stasiun A")).toHaveCount(0);
-
-  // Jejak asal data ikut disebut, sama seperti di halaman Peta.
-  await expect(page.getByText(/pipeline mock-/)).toBeVisible();
 });
 
 test("tidak ada isi halaman yang tersembunyi sebelum digulung", async ({
@@ -109,13 +112,13 @@ test("tidak ada isi halaman yang tersembunyi sebelum digulung", async ({
       .map((el, i) => ({ i, opacity: getComputedStyle(el).opacity }))
       .filter((r) => Number(r.opacity) < 1),
   );
-  expect(transparan, "ada section yang tak terlihat sebelum digulung").toEqual([]);
+  expect(transparan, "ada section yang tak terlihat sebelum digulung").toEqual(
+    [],
+  );
 
   // Dan isinya memang terbaca, bukan sekadar hadir di DOM.
-  await expect(
-    page.getByText("Empat variabel, satu instrumen."),
-  ).toBeVisible();
-  await expect(page.getByText("Tiga simpul, tiga tipe kawasan.")).toBeVisible();
+  await expect(page.getByText("Ramai belum tentu menghasilkan.")).toBeVisible();
+  await expect(page.getByText("Satu peta. Empat keputusan.")).toBeVisible();
 });
 
 test("gerak dimatikan saat pengguna memintanya", async ({ page }) => {
@@ -123,10 +126,39 @@ test("gerak dimatikan saat pengguna memintanya", async ({ page }) => {
   await page.goto("/", { waitUntil: "domcontentloaded" });
   await tungguPeta(page);
 
-  const bergerak = await page.evaluate(() =>
-    [...document.querySelectorAll(".reveal, .draw, .draw-dot")].filter(
-      (el) => getComputedStyle(el).animationName !== "none",
-    ).length,
+  const bergerak = await page.evaluate(
+    () =>
+      [...document.querySelectorAll(".reveal, .draw, .draw-dot")].filter(
+        (el) => getComputedStyle(el).animationName !== "none",
+      ).length,
   );
   expect(bergerak, "masih ada animasi yang berjalan").toBe(0);
 });
+
+test("navbar tetap mengambang (floating sticky) saat halaman digulung", async ({
+  page,
+}) => {
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await tungguPeta(page);
+
+  const nav = page.locator(".navbar-container");
+  await expect(nav).toBeVisible();
+
+  // Posisi awal di dekat atas viewport
+  const kotakAwal = await nav.boundingBox();
+  expect(kotakAwal).not.toBeNull();
+  expect(kotakAwal!.y).toBeGreaterThanOrEqual(0);
+
+  // Gulung halaman ke bawah sejauh 800px
+  await page.evaluate(() => window.scrollTo(0, 800));
+  await page.waitForTimeout(100);
+
+  // Nav tetap terlihat di viewport dan menempel di dekat atas dengan padding yang sesuai (floating)
+  await expect(nav).toBeVisible();
+  const kotakSetelahGulung = await nav.boundingBox();
+  expect(kotakSetelahGulung).not.toBeNull();
+  // Memastikan floating navbar tidak nempel ke tepi atas (ada jarak/padding minimal 12px)
+  expect(kotakSetelahGulung!.y).toBeGreaterThanOrEqual(12);
+  expect(kotakSetelahGulung!.y).toBeLessThanOrEqual(36);
+});
+

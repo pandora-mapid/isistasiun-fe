@@ -1,0 +1,80 @@
+# Deploy ke VPS langsung dari source, bukan lagi lewat image GHCR.
+#
+# VPS punya checkout git sendiri per environment — ~/isistasiun-fe (development)
+# dan ~/isistasiun-fe-prod (main). Setiap push ke salah satu branch, workflow
+# ini SSH ke VPS, `git fetch` + `reset --hard` ke commit yang baru saja
+# di-push pada checkout yang sesuai, lalu build image lewat
+# `deploy/docker-compose.deploy.yml` (build dari Dockerfile di repo ini,
+# bukan pull) dan `up -d`. NEXT_PUBLIC_* dibaca dari `deploy/.env` milik VPS
+# saat build (nilainya beda per checkout: dev.isistasiun.* vs
+# isistasiun.trackster.cloud) — ubah di sana, deploy ulang, tidak ada lagi
+# variabel yang perlu disetel di GitHub.
+#
+# `main` = production, auto-deploy tiap push (skala aplikasi masih kecil,
+# tidak butuh gerbang manual terpisah).
+#
+# Deploy key per-repo dimatikan oleh kebijakan org pandora-mapid, jadi VPS
+# tidak fetch pakai SSH key sendiri. Sebagai gantinya, workflow ini
+# menyuntikkan fine-grained PAT (scope: Contents read-only, cuma repo ini +
+# isistasiun-be) lewat secret `REPO_PULL_TOKEN`, dipakai sebentar sebagai git
+# credential helper lalu langsung di-unset — tidak pernah ditulis ke disk VPS.
+
+name: Deploy
+
+on:
+  push:
+    branches:
+      - development
+      - main
+
+concurrency:
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy ke VPS (${{ github.ref_name }})
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH deploy
+        uses: appleboy/ssh-action@v1
+        env:
+          REPO_PULL_TOKEN: ${{ secrets.REPO_PULL_TOKEN }}
+          BRANCH: ${{ github.ref_name }}
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          envs: REPO_PULL_TOKEN,BRANCH
+          # Tanpa ini, perintah yang gagal di tengah skrip tidak menggagalkan
+          # langkah — deploy bisa "hijau" padahal container-nya tidak naik.
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            if [ "$BRANCH" = "main" ]; then
+              REPO_DIR=~/isistasiun-fe-prod
+            else
+              REPO_DIR=~/isistasiun-fe
+            fi
+            cd "$REPO_DIR"
+
+            # Credential helper sementara — hanya hidup selama fetch ini,
+            # tidak pernah ditulis ke .git/config atau file lain di disk.
+            git config --local credential.helper \
+              '!f() { echo "username=x-access-token"; echo "password=$REPO_PULL_TOKEN"; }; f'
+            git fetch origin "$BRANCH"
+            git config --local --unset credential.helper
+            git reset --hard "origin/$BRANCH"
+
+            compose="docker compose -f deploy/docker-compose.deploy.yml --env-file deploy/.env"
+
+            $compose build frontend
+            $compose up -d frontend
+
+            # Image lama yang sudah tidak dirujuk container mana pun. `-f`
+            # supaya tidak menunggu konfirmasi interaktif.
+            docker image prune -f
+
+            $compose ps frontend

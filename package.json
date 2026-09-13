@@ -10,6 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "playwright test",
+    "test:fast": "playwright test tests/map-style.spec.ts tests/select.spec.ts tests/scale.spec.ts --reporter=dot",
+    "test:map": "playwright test tests/peta.spec.ts tests/rental.spec.ts --reporter=dot",
     "test:style": "playwright test tests/map-style.spec.ts",
     "test:visual": "VISUAL=1 playwright test tests/kamera.visual.spec.ts tests/basemap-compare.visual.spec.ts"
   },

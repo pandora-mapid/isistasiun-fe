@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
+import { RequireLogin } from "@/components/auth/RequireLogin";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
@@ -33,7 +34,13 @@ function tint(bg: string): CSSProperties {
 /* --- Data ilustratif (tidak berubah dari versi slate) --------------------- */
 
 /** Tiga ringkasan di hero. */
-const STAT: { label: string; nilai: string; bg: string; warna: string; dot?: boolean }[] = [
+const STAT: {
+  label: string;
+  nilai: string;
+  bg: string;
+  warna: string;
+  dot?: boolean;
+}[] = [
   {
     label: "Total kesenjangan tiga simpul",
     nilai: "Rp 6.400.000",
@@ -178,7 +185,13 @@ const REKOMENDASI: KartuRekomendasi[] = [
 ];
 
 /** Tiga fase pelaksanaan (kartu gelap). */
-const FASE: { dot: string; kicker: string; judul: string; isi: string; garis: boolean }[] = [
+const FASE: {
+  dot: string;
+  kicker: string;
+  judul: string;
+  isi: string;
+  garis: boolean;
+}[] = [
   {
     dot: "var(--data)",
     kicker: "Fase 1 · Kuartal ini",
@@ -223,6 +236,7 @@ const RISIKO: { dot: string; judul: string; isi: string }[] = [
 
 export default function RekomendasiPage() {
   return (
+    <RequireLogin next="/rekomendasi">
     <div className="page-canvas paper-canvas">
       <NavBar
         active="rekomendasi"
@@ -234,7 +248,7 @@ export default function RekomendasiPage() {
           Grid, tipografi & jarak disamakan dengan hero Metodologi.
           ============================================================ */}
       <section
-        className="reveal"
+        className="reveal runtuh-1"
         style={{
           display: "grid",
           gridTemplateColumns:
@@ -337,22 +351,25 @@ export default function RekomendasiPage() {
             margin: "0 0 var(--s3)",
           }}
         >
-          {["Semua simpul", "Stasiun A", "Stasiun B", "Stasiun C"].map((c, i) => (
-            <span
-              key={c}
-              className="eyebrow-chip eyebrow"
-              style={
-                i === 0
-                  ? { background: "var(--ink)", color: "var(--paper)" }
-                  : undefined
-              }
-            >
-              {c}
-            </span>
-          ))}
+          {["Semua simpul", "Stasiun A", "Stasiun B", "Stasiun C"].map(
+            (c, i) => (
+              <span
+                key={c}
+                className="eyebrow-chip eyebrow"
+                style={
+                  i === 0
+                    ? { background: "var(--ink)", color: "var(--paper)" }
+                    : undefined
+                }
+              >
+                {c}
+              </span>
+            ),
+          )}
         </div>
 
         <div
+          className="tabel-geser"
           style={{
             border: "1px solid var(--rule)",
             borderRadius: "var(--r-md)",
@@ -544,6 +561,7 @@ export default function RekomendasiPage() {
           catatan="Setiap rekomendasi menyebut dasar datanya, dan apa yang harus diukur ulang setelah dijalankan."
         />
         <div
+          className="runtuh-1"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
@@ -662,6 +680,7 @@ export default function RekomendasiPage() {
             </span>
           </div>
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
@@ -725,7 +744,7 @@ export default function RekomendasiPage() {
           Risiko & penanganannya + foto — dua kartu datar.
           ============================================================ */}
       <section
-        className="reveal"
+        className="reveal runtuh-1"
         style={{
           ...seksi,
           display: "grid",
@@ -744,7 +763,11 @@ export default function RekomendasiPage() {
             Risiko dan penanganannya
           </h2>
           <div
-            style={{ display: "flex", flexDirection: "column", gap: "var(--s2)" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "var(--s2)",
+            }}
           >
             {RISIKO.map((r) => (
               <div key={r.judul}>
@@ -757,9 +780,7 @@ export default function RekomendasiPage() {
                   }}
                 >
                   <span className="dot" style={{ background: r.dot }} />
-                  <span
-                    style={{ fontSize: "var(--t-body)", fontWeight: 600 }}
-                  >
+                  <span style={{ fontSize: "var(--t-body)", fontWeight: 600 }}>
                     {r.judul}
                   </span>
                 </div>
@@ -803,6 +824,7 @@ export default function RekomendasiPage() {
         }}
       >
         <div
+          className="runtuh-1"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 1fr) minmax(0, 320px)",
@@ -871,5 +893,6 @@ export default function RekomendasiPage() {
         </Link>
       </footer>
     </div>
+    </RequireLogin>
   );
 }

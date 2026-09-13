@@ -48,7 +48,7 @@ Karena visual bisa berubah kapan saja saat jeda, kode di Fase 0 dan 1 **wajib** 
 
 ### Jeda itu justru waktu yang tepat untuk
 
-- **Responsivitas** — lihat §6, ini janji proposal yang belum ada pemiliknya
+- ~~**Responsivitas**~~ — ✅ selesai 2026-09-12, lihat §6 nomor 3.1 dan §7
 - Perbaikan tipografi, spasi, dan konsistensi warna
 - Penyesuaian tampilan setelah desain dinilai ulang
 - Utang teknis di §6
@@ -104,12 +104,18 @@ Karena semuanya pekerjaan visual, semuanya aman dikerjakan di jeda tanpa menggan
 > | Kesenjangan belanja | Lingkaran berwarna dan berukuran |
 > | Kepercayaan data | Halo abu — makin tebal, makin lemah datanya |
 > | **Arus pintu stasiun** | **Angka `org/jam` di bawah nama titik** |
-> | Indeks sewa / arus | — belum ada data |
+> | **Aset sewa & indeks arus** | **Bulatan petak sewa (status) + angka indeks Rp/orang** |
 > | Event & aktivasi | — belum ada data |
 >
 Baris yang ditebalkan sempat ditandai "belum ada data" **padahal variabel `F` sudah ada sejak Fase 1**. Yang belum ada waktu itu bentuk visualnya, bukan datanya — dan label yang keliru itu membuat panel ini ikut menyesatkan, persis hal yang paling dihindari proyek ini.
 >
-> Dua baris terakhir benar-benar kosong: `/analytics/rent-flow-index` dan `/analytics/event-potential` ada di spesifikasi backend, tapi belum ada data contohnya.
+> ~~Dua baris terakhir benar-benar kosong~~ — tinggal satu. Sewa sudah tersambung: inventaris petak (`MOCK_RENTAL_ASSETS`) digambar sebagai bulatan berwarna status, dengan angka indeks Rp/orang di bawahnya mulai zoom 16 (`rent-flow-index.json`, bentuknya menyamai response Go persis). Angkanya nyata, bukan karangan: petak Space KAI Manggarai dibagi arus pintu terukur, dan kios Sudirman dari koordinat survei sendiri. *Event & aktivasi* masih benar-benar kosong: `/analytics/event-potential` ada di spesifikasi backend, tapi belum ada data contohnya.
+>
+> **Satu baris, bukan dua.** "Indeks sewa / arus" dan "Aset sewa stasiun" sempat dibangun terpisah di dua cabang, masing-masing dengan source, layer, dan sakelar panelnya sendiri — dan keduanya menggambar petak Space KAI yang sama, dengan `source_id` yang sama pula, jadi satu petak fisik tergambar dua kali. Disatukan saat merge: satu source (`rental-assets`), satu sakelar, indeks menumpang sebagai atribut petak lewat `gabungSewa()`. Lihat [`DATA_CONTRACT.md`](DATA_CONTRACT.md) §B5.
+>
+> `is_outlier` **tidak** digambar di peta. Sempat jadi tepi tebal, lalu dicabut karena dua hal: efek pemilihan petak menulis ulang `circle-stroke-width` di keempat cabangnya, dan tepi tebal tanpa baris legenda adalah lambang yang tidak menjelaskan dirinya. Pencilan muncul sebagai kalimat di panel detail, di tempat alasannya bisa disebutkan.
+>
+> Petak yang tidak punya baris indeks **tidak diberi label sama sekali**, bukan "Rp 0" — nol berarti gratis, dan itu bukan yang terjadi. Listing pasar sekitar (99.co) tidak ikut ke peta karena seluruhnya tanpa koordinat; menaruhnya di titik karangan akan melanggar janji keterlacakan.
 >
 > **Baris "Kategori hilang" dihapus dari panel lapisan.** Sempat digambar sebagai lencana angka di sudut lingkaran, tapi panel kanan sudah menyajikannya jauh lebih baik: nama kategorinya, persen permintaan, jumlah gerai, subjudul yang menerangkan perbandingannya, dan barisnya bisa diklik untuk menyaring peta. Lencana itu cuma salinan yang kehilangan seluruh keterangan tadi dan menyisakan satu angka yang tidak bisa ditafsirkan sendirian.
 >
@@ -238,15 +244,21 @@ Fitur-fitur yang **dijanjikan di proposal** tapi belum ada di kode. Sebagian bis
 
 | # | Pekerjaan | Sumber janji | Butuh backend? |
 |---|---|---|---|
-| 3.1 | **Responsivitas** — layout sekarang memakai kolom lebar tetap dan akan berantakan di bawah ±1100px | §5.3 Tahap 4 | ❌ Tidak — **cocok dikerjakan saat jeda** |
-| 3.2 | **Ekspor CSV** tabel analisis | §3.2 | ❌ Tidak — bisa sepenuhnya di frontend |
-| 3.3 | **Ekspor PDF** brief simpul | §3.2 | ❌ Tidak — bisa sepenuhnya di frontend |
-| 3.4 | **Tabel atribut** | §3.2 | ⚠️ Sebagian |
-| 3.5 | **Bandingkan dua simpul berdampingan** | §3.2 | ⚠️ Sebagian |
+| 3.1 | ~~**Responsivitas**~~ | §5.3 Tahap 4 | ✅ Selesai — kelima rute bersih 1600→320px, dijaga `tests/responsif.spec.ts`; rinciannya di §7 |
+| 3.2 | ~~**Ekspor CSV** tabel analisis~~ | §3.2 | ✅ Selesai — `lib/export/` |
+| 3.3 | ~~**Ekspor PDF** brief simpul~~ | §3.2 | ✅ Selesai — cetak browser, tanpa library PDF |
+| 3.4 | ~~**Tabel atribut**~~ | §3.2 | ✅ Selesai — bisa diurutkan, satu sumber baris dengan CSV-nya |
+| 3.5 | ~~**Bandingkan dua simpul berdampingan**~~ | §3.2 | ✅ Selesai — overlay 2 kolom di `/peta` (keadaan "batas tercapai · upgrade" ditunda bersama premium) |
 | 3.6 | **Copilot AI** tersambung ke `POST /copilot/query` | §3.4 | ✅ Ya |
 | 3.7 | **Pembanding akhir pekan** — proposal menjanjikan satu sampel akhir pekan sebagai pembanding. UI-nya sudah ada tempatnya di panel slot (ditandai "belum dicacah"), tapi belum ada datanya dan belum ada cara memilihnya | §5.2 | ✅ Ya — butuh survei akhir pekan + `day_type` dari backend |
 
-> Tombol "Bandingkan", "Tabel atribut", "Unduh brief", dan "Brief PDF" di UI sekarang sengaja dibuat mati. Semuanya adalah janji proposal, bukan hiasan — jadi perlu masuk daftar pekerjaan sadar, bukan dilupakan.
+> ~~Tombol "Bandingkan", "Tabel atribut", "Unduh brief", dan "Brief PDF" di UI sekarang sengaja dibuat mati.~~ **Keempatnya sudah hidup (2026-09-12).** "Bandingkan" → `ComparisonDialog`; "Ringkasan & Bandingkan Simpul" → overlay 2 kolom (§3.5); "Tabel atribut" → tabel seluruh titik dengan kolom F/E/C/V/gap, bisa diurutkan, plus "Unduh CSV"; "Unduh brief" → CSV potongan aktif langsung; "Brief PDF" → brief simpul + cetak lewat dialog browser (tanpa library PDF — lihat `@media print` di `globals.css`). Baris CSV dan baris tabel disusun modul yang sama (`lib/export/rows.ts`) supaya berkas yang diunduh tidak bisa berbeda isi dari tabel yang baru dilihat; nilai yang tidak diestimasi ditulis **kosong**, bukan `0`, supaya tidak ikut terjumlah di spreadsheet penerimanya. Teks aslinya: Semuanya adalah janji proposal, bukan hiasan — jadi perlu masuk daftar pekerjaan sadar, bukan dilupakan.
+
+> **3.5 — fondasinya sudah ada (2026-09-10).** "Ringkasan & perbandingan antarsimpul" (data + logika) selesai: bentuk `StationSummary` di [`DATA_CONTRACT.md`](DATA_CONTRACT.md) §B4, data contoh `public/mock/station-summary.json` (dikunci konsisten dengan `spending-gap.json` oleh `tests/summary.spec.ts`), pemilih murni `lib/analytics/summary.ts`, dan strip **"Ringkasan simpul"** read-only di `/insight` yang menyandingkan Manggarai vs Sudirman. Backend: `GET /analytics/station-summary` (paket `internal/summary/`, milik Arzaka — `02-BACKEND-SPEC §2`). ~~Yang belum: UI "Bandingkan" penuh~~ — **selesai (2026-09-12)**: overlay 2 kolom di `/peta`, komponen `BandingSimpulOverlay`, entry point sendiri berlabel **"Ringkasan & Bandingkan Simpul"**.
+
+> Labelnya sengaja panjang dan berbeda dari tombol **"Bandingkan"** yang sudah lebih dulu ada. Keduanya hidup berdampingan dan **tidak** disatukan: yang lama (`ComparisonDialog`) menjumlah p50 titik pada slot × kategori yang sedang aktif di peta, yang baru membaca rollup Monte Carlo setingkat simpul dengan rentang P10–P90 dan stempel `basis`. Angkanya untuk pasangan stasiun yang sama memang berbeda — itu dua hitungan, bukan bug. `tests/peta.spec.ts` mengunci bahwa kedua tombol tetap ada dan overlay baru tidak membuka dialog lama.
+>
+> Keadaan "batas tercapai · upgrade" untuk multi-simpul **tidak dibangun** — itu fitur premium yang ditunda, dan scope studi memang cuma 2 simpul gratis-tier.
 
 > **Catatan 3.7.** `day_type` sudah ada di `lib/data/types.ts` sejak Fase 0, tapi nilainya selalu `weekday` dan tidak ada satu pun kendali yang mengubahnya. Jadi jenis hari sekarang adalah sumbu yang terpasang di tipe data tapi belum terpasang di UI — perlu diputuskan bentuk kendalinya saat datanya ada.
 
@@ -291,8 +303,10 @@ Kecil-kecil, bisa disisipkan kapan saja. Semuanya aman dikerjakan saat jeda.
 | **`F × E × C × V` tidak menghasilkan `gap`** | Di data contoh, mengalikan keempat variabel tidak menghasilkan angka kesenjangan yang ditampilkan di sebelahnya — keduanya dikarang terpisah saat Fase 0. Panelnya jujur menampilkan apa yang ada di data, jadi ini bukan bug kode, tapi bertabrakan dengan janji "setiap angka bisa dilacak" (§9 nomor 4). Perlu diputuskan saat Fase 2: backend mengirim variabel yang konsisten, atau data contohnya yang diturunkan dari rumus |
 | **Definisi "kategori hilang" masih rancu** | Saringannya memakai ambang 3 gerai, padahal angka itu di proposal §5.2 adalah ambang **kecukupan sampel**, bukan ambang peluang pasar. Akibatnya "kategori hilang" dan "sampel tipis" jadi kondisi yang persis sama, dan persentase permintaan cuma dipakai mengurutkan — tidak menentukan. Perlu diputuskan: "hilang" itu berarti gerai = 0, atau permintaan tinggi dengan gerai sedikit? Terkait langsung dengan urutan daftarnya, yang sekarang membuat Apotek dengan **nol gerai** terpotong dari tiga besar. Insight kini menampilkannya sebagai matriks Terisi/Kurang/Kosong (`gerai_count` vs ambang 3) plus kolom "Menahan" (gap kategori pada slot pagi) dan kartu sorotan "paling menganga" — itu ember tampilan, bukan jawaban atas definisinya; keputusannya tetap terbuka |
 | **Potensi belanja tidak punya lapisan peta** | Angkanya tetap tampil di panel kanan dan di situ sudah tepat. Yang dihapus lapisan petanya, karena cincin berskala terpisah membuat jarak antar-titik tidak bisa dibandingkan. Kalau suatu saat potensi perlu tampil di peta, syaratnya skala berlabuh nol berbasis luas yang dipakai bersama lingkaran kesenjangan |
-| **Dua baris lapisan tanpa data** | *Indeks sewa / arus* dan *Event & aktivasi*. Keduanya punya endpoint di spesifikasi backend (`/analytics/rent-flow-index`, `/analytics/event-potential`) tapi belum ada data contohnya. *Kategori hilang* dan *Arus pintu* sudah selesai — lihat catatan §3 |
+| ~~**Dua baris lapisan tanpa data**~~ → **satu baris** | Tinggal *Event & aktivasi* (`/analytics/event-potential`) yang belum punya data contoh. *Aset sewa & indeks arus* sudah tersambung — satu lapisan gabungan dari dua sumber berbentuk persis seperti `AssetResponse`/`RentFlowIndexResponse` Go, layer `sewa-petak` + `sewa-indeks`, lihat catatan §3. *Kategori hilang* dan *Arus pintu* sudah selesai lebih dulu |
 | ~~**Tidak ada variabel lingkungan sama sekali**~~ | ✅ Selesai di §4.2. `NEXT_PUBLIC_API_BASE_URL` dan `NEXT_PUBLIC_BASEMAP_URL` keduanya dirujuk literal — Next.js menyisipkan nilainya dengan mencocokkan teks, jadi rujukan lewat variabel perantara menghasilkan `undefined` |
+| ~~**Responsivitas baru selesai di `/peta`**~~ | ✅ Selesai untuk kelima layar. `/peta`: enam panel mengambang (nav, pencarian stasiun, chip stasiun, legenda, slot, ringkasan) disusun jadi satu antrean tegak — panel ringkasan turun jadi lembar bawah (bukan disembunyikan: panel itu yang membawa angkanya), legenda dan deretan slot digeser di dalam dirinya sendiri alih-alih membungkus (tiap baris tambahan diambil dari tinggi petanya), dialog penuh layar di bawah 760px, NavBar digeser di dalam dirinya sendiri. Tinggi lembar jadi satu variabel `--sheet` yang dirujuk elemen di atasnya lewat `calc()`, bukan empat nilai `vh` terpisah yang harus dihitung ulang dengan tangan — itu cara dua panel berakhir saling menindih waktu `development` menambah pencarian stasiun di atasnya. Dijaga `tests/peta.spec.ts` → "panel /peta mengantre tanpa menindih" di 1024/760/390px, yang juga menuntut peta masih terlihat di antara panel-panelnya. Beranda/Insight/Metodologi/Rekomendasi menyusul: dua kelas utilitas (`.runtuh-1` → satu kolom di bawah 900px, `.runtuh-2` → dua kolom di bawah 760px lalu satu di bawah 430px) diterapkan ke grid tata letak yang ditulis sebagai `style` sebaris, plus empat perbaikan setempat — grid `.g12` yang anaknya ditempatkan di garis eksplisit, dua hiasan `position: absolute` yang menjorok ke selokan `--page-x`, dan dua teks `white-space: nowrap`. Satu bug yang ikut ketahuan dan diperbaiki di sumbernya: trek `1fr` telanjang (`repeat(3, 1fr)` dst.) tertahan `min-width: auto` milik grid item, jadi ia meluber **di lebar berapa pun** begitu isinya panjang — mis. saat metrik jatuh ke "tidak diestimasi" dan bukan "Rp 4,2 jt"; semuanya kini `minmax(0, 1fr)`. Terukur bersih di 1600/1280/1024/900/760/600/430/390/360/320px untuk kelima rute, dijaga `tests/responsif.spec.ts` |
+| **Dua tes `stage-one-demo.spec.ts` merah** | `rekomendasi difilter, menandai sampel tipis…` (mengharap "1 lokasi", dapat "14 slot") dan `filter kategori menyaring panel retail…` (tautan "kosong" di baris Apotek tidak pernah muncul). **Bukan akibat penggabungan cabang** — sudah diperiksa: keduanya juga merah di `development` yang belum disentuh, dijalankan terisolasi di worktree sendiri. Angka/markup yang diharap tesnya tidak cocok lagi dengan yang dirender `/rekomendasi`. Milik Adiansyah; tidak ikut diperbaiki di sini supaya tidak menebak maksud asersinya |
 | **Modal transparansi belum menjebak fokus** | Sudah punya `role="dialog"`, Esc, dan fokus awal yang pindah ke dalam. Yang belum: Tab masih bisa keluar dan menyusuri panel di baliknya yang sedang tertutup lapisan gelap. Dikerjakan bersama responsivitas, karena menyentuh JSX yang sama |
 | **`setFeatureState` dan `setFilter` dipanggil pada setiap `sourcedata`** | `sourcedata` juga menyala untuk tile basemap, jadi selama peta digeser keduanya dipanggil berkali-kali per detik dengan nilai yang identik — MapLibre tidak membandingkan isinya, layer ditandai kotor tiap kali. Tak terasa pada 10 titik. **Kerjakan tepat sebelum Fase 2**, bukan sekarang: saring `e.sourceId` lebih dulu, dan bentuk akhirnya baru jelas setelah source-nya jadi tile vektor (2.1) |
 | ~~**Autentikasi belum pernah dibahas**~~ | ✅ Terjawab. `02-BACKEND-SPEC.md` §1 memakai JWT, tapi enam endpoint peta ada di tier gratis dan tidak butuh token. Pekerjaan auth pindah ke §6.1 sebagai jalur terpisah |
@@ -313,7 +327,7 @@ Ringkasan apa yang memblokir apa:
 | Fase 2 seluruhnya | Kesiapan backend (tile + endpoint) — **belum siap** |
 | 2.8 sisip header `Authorization` | **Tidak ada** — bisa dicicil sekarang, bukan prasyarat |
 | 6.1 auth dan tier berbayar | Kesiapan endpoint `/auth/*` dan `/premium/*` — **jalur terpisah, tidak memblokir Fase 2** |
-| 3.1 responsivitas | **Tidak ada** — cocok saat jeda, dan sebaiknya sekalian dengan jebakan fokus modal (§7). Beranda sudah memakai `clamp()` dan grid 12 kolom sehingga bertahan sampai ±1100px; tiga layar lain belum |
+| 3.1 responsivitas | ✅ **Selesai** untuk kelima layar (§7). Jebakan fokus modal — yang dulu direncanakan sekalian — belum, dan sekarang berdiri sendiri |
 | 3.2 dan 3.3 ekspor | **Tidak ada** — murni frontend |
 | 3.6 copilot | Kontrak `POST /copilot/query`, belum dibahas |
 | 3.7 pembanding akhir pekan | Survei akhir pekan + `day_type` dari backend |

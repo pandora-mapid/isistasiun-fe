@@ -4,6 +4,7 @@ import {
   biggestGapPoint,
   confidenceDomainOf,
   domainOf,
+  findConfidence,
   findPoint,
   metricFor,
   metricsFor,
@@ -18,6 +19,7 @@ import { ALL_CATEGORIES } from "../lib/data/dimensions";
 import type {
   CategoryAnalytics,
   CategoryKey,
+  ConfidenceLayerEntry,
   PointAnalytics,
   Range,
   SlotAnalytics,
@@ -105,6 +107,24 @@ function payload(points: PointAnalytics[]): SpendingGapPayload {
     pipeline_version: "uji-0.1",
     day_type: "weekday",
     points,
+  };
+}
+
+function confidence(
+  point_id: number,
+  time_slot: SlotKey,
+  opsi: Partial<ConfidenceLayerEntry> = {},
+): ConfidenceLayerEntry {
+  return {
+    station_id: 1,
+    point_id,
+    time_slot,
+    confidence_score: 0.75,
+    is_thin_sample: false,
+    sample_count: 8,
+    sample_meta: { flow_blocks: 2, store_count: 3, valid_store_blocks: 6 },
+    reasons: [],
+    ...opsi,
   };
 }
 
@@ -199,6 +219,27 @@ test("metricsFor mengunci hasilnya berdasarkan id titik", () => {
   const map = metricsFor(payload([titik(11), titik(12)]), "pagi", ALL_CATEGORIES);
   expect([...map.keys()].sort()).toEqual([11, 12]);
   expect(map.get(12)?.pointId).toBe(12);
+});
+
+test("confidence layer dipilih berdasarkan titik dan slot", () => {
+  const rows = [
+    confidence(11, "pagi", { confidence_score: 0.41, is_thin_sample: true }),
+    confidence(11, "sore", { confidence_score: 0.88 }),
+  ];
+
+  expect(findConfidence(rows, 11, "pagi")?.confidence_score).toBe(0.41);
+  expect(findConfidence(rows, 11, "sore")?.confidence_score).toBe(0.88);
+  expect(findConfidence(rows, 12, "pagi")).toBeNull();
+});
+
+test("confidence endpoint menggantikan confidence bawaan spending gap", () => {
+  const rows = [
+    confidence(11, "pagi", { confidence_score: 0.41, is_thin_sample: true }),
+  ];
+  const m = metricsFor(payload([titik(11)]), "pagi", ALL_CATEGORIES, rows).get(11);
+
+  expect(m?.confidence).toBe(0.41);
+  expect(m?.sampelTipis).toBe(true);
 });
 
 test("findPoint mengembalikan null untuk id yang tidak ada", () => {

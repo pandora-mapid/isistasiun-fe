@@ -101,11 +101,269 @@ export type SpendingGapPayload = {
   points: PointAnalytics[];
 };
 
+/** Alasan terstruktur mengapa data satu titik belum cukup kuat. */
+export type ConfidenceReason =
+  | "missing_flow_blocks"
+  | "insufficient_stores"
+  | "insufficient_conversion_blocks"
+  | "missing_denominator";
+
+/** Mutu data satu titik pada satu slot dari `GET /confidence-layer`. */
+export type ConfidenceLayerEntry = {
+  station_id: number;
+  point_id: number;
+  time_slot: SlotKey;
+  /** Skor absolut 0-1. */
+  confidence_score: number;
+  is_thin_sample: boolean;
+  sample_count: number;
+  sample_meta: {
+    flow_blocks: number;
+    store_count: number;
+    valid_store_blocks: number;
+  };
+  reasons: ConfidenceReason[];
+};
+
+/** Geometri grid kawasan untuk visual confidence layer. */
+export type ConfidenceGridProps = {
+  zone_id: string;
+  station_id: number | null;
+  confidence_score: number;
+  sample_count: number;
+  is_thin_sample: boolean;
+};
+
 export type Station = {
   id: number;
   name: string;
   typology: string;
   point_count: number;
+  /** Titik tujuan pencarian; kosong selama lokasi stasiun belum ditetapkan. */
+  longitude?: number;
+  latitude?: number;
+};
+
+export type MockStation = Station;
+export type MockPointAnalytics = PointAnalytics;
+
+export type RetailKind = "existing" | "potential" | "shopfront";
+
+export type MockRetailLocation = {
+  id: string;
+  name: string;
+  kind: RetailKind;
+  station_id: number;
+  longitude: number;
+  latitude: number;
+  status: "tersedia" | "kandidat" | "perlu_verifikasi";
+  category: CategoryKey | null;
+  note: string;
+};
+
+export type RentalAssetStatus = "occupied" | "available" | "needs_verification";
+export type RentalAssetSource = "space_kai" | "field_survey";
+
+export type RentalAsset = {
+  id: string;
+  station_id: number;
+  station_code: string;
+  station_name: string;
+  source_id: string;
+  data_source: RentalAssetSource;
+  location_name: string;
+  plot_name: string;
+  area_name: string | null;
+  latitude: number;
+  longitude: number;
+  land_area: number | null;
+  building_area: number | null;
+  rented: boolean;
+  availability_status: RentalAssetStatus;
+  commercial_value: number | null;
+  commercial_value_visible: boolean;
+  source_updated_at: string | null;
+  note: string | null;
+};
+export type MockCategoryStatus = {
+  station_id: number;
+  category: CategoryKey;
+  status: "terisi" | "kurang" | "kosong";
+  demand_share: number;
+  gerai_count: number;
+};
+
+export type MockRecommendation = {
+  id: string;
+  station_id: number;
+  point_id: number;
+  retail_location_id: string | null;
+  title: string;
+  category: CategoryKey;
+  slot: SlotKey;
+  gap_p50: number | null;
+  confidence: number;
+  sampel_tipis: boolean;
+  reason: string;
+  next_measurement: string;
+};
+
+export type MockComparisonSummary = {
+  station_id: number;
+  station_name: string;
+  potential_p50: number;
+  captured_p50: number;
+  gap_p50: number;
+  capture_rate: number | null;
+  pedestrian_flow: number;
+  confidence_average: number;
+  thin_sample_points: number;
+  missing_categories: CategoryKey[];
+};
+
+export type MockEvidence = {
+  point_id: number;
+  types: Array<"struk" | "gerai" | "properti">;
+  sources: string[];
+  dataset: string;
+  surveyed_at: string;
+  photo_label: string;
+  receipt_total: number;
+  receipt_readable: number;
+  receipt_ambiguous: number;
+  confidence: number;
+  mock: true;
+};
+
+export type MockDemoData = {
+  retail: MockRetailLocation[];
+  category_statuses: MockCategoryStatus[];
+  recommendations: MockRecommendation[];
+  evidence: MockEvidence[];
+};
+
+/* -------------------------------------------------------------------------
+ * Ringkasan & perbandingan antarsimpul
+ *
+ * Naik satu tingkat dari `SpendingGapPayload`: yang di sana per titik
+ * pengamatan, yang di sini per **stasiun** — potret satu simpul sebagai
+ * kawasan, plus sumbu pembanding Persona 2 (pengusaha: "buka toko di simpul
+ * mana"). Mengikuti `DATA_CONTRACT.md` §B "Ringkasan simpul".
+ *
+ * Fase 2: `GET /api/v1/analytics/station-summary`. Sekarang dibaca dari
+ * `public/mock/station-summary.json`, yang dikarang KONSISTEN dengan
+ * `spending-gap.json` (titik puncak & jumlah gerai kategori sama persis) —
+ * `tests/summary.spec.ts` mengunci supaya keduanya tidak bisa menyimpang.
+ * ---------------------------------------------------------------------- */
+
+/** Rincian satu kategori usaha pada tingkat stasiun (bukan per slot). */
+export type CategoryComposition = {
+  category: CategoryKey;
+  /** Porsi permintaan kawasan untuk kategori ini, 0–1. */
+  demand_share: number;
+  /**
+   * Jumlah gerai kategori ini di dalam stasiun. Diambil dari titik
+   * berkesenjangan terbesar — titik yang sama yang dibaca matriks Insight,
+   * supaya strip dan matriks di halaman itu tidak berbeda angka.
+   */
+  gerai_count: number;
+  /**
+   * Permintaan terbaca tapi gerainya di bawah ambang (`AMBANG_GERAI`).
+   * Ini "kategori hilang" versi tingkat stasiun.
+   */
+  hilang: boolean;
+};
+
+/** Titik puncak sebuah simpul — pembawa karakter F/E/C/V-nya. */
+export type StationPeak = {
+  point_id: number;
+  point_label: string;
+  slot: SlotKey;
+  /** F × E × C × V pada slot puncak titik ini. `null` bila tidak dicacah. */
+  variables: Variables | null;
+  gap: Range;
+};
+
+/**
+ * Potret satu simpul sebagai kawasan.
+ *
+ * `gap`/`potensi`/`tertangkap` adalah hasil **simulasi Monte Carlo setingkat
+ * simpul** (`basis: "monte-carlo-simpul"`) — bukan penjumlahan angka titik
+ * yang tampil di layar. Menjumlahkan titik dilarang (ROADMAP §9.4: "summing
+ * invents a number nobody measured"); simulasi setingkat simpul adalah
+ * angka yang memang dihitung pipeline (`/pipeline/simulations/monte-carlo`
+ * "per simpul"). Di data contoh angkanya dikarang mendekati jumlah titik —
+ * karena secara nyata memang akan mendekati itu — tapi rentang P10–P90-nya
+ * lebih rapat, meniru efek diversifikasi simulasi gabungan.
+ */
+export type StationSummaryRow = {
+  station_id: number;
+  station_name: string;
+  typology: string;
+  /** Placeholder = simpul yang datanya belum dikumpulkan (mis. simpul ke-3). */
+  placeholder: boolean;
+  /** Titik pengamatan dalam scope survei simpul ini. */
+  pintu_dicacah: number;
+  /** Titik yang estimasinya ditahan karena sampel tipis. */
+  pintu_ditahan: number;
+  gap: Range;
+  potensi: Range;
+  tertangkap: Range;
+  /** `tertangkap.p50 / potensi.p50`, 0–1. `null` bila tak terhitung. */
+  capture_rate: number | null;
+  /** Rentang skor kepercayaan titik-titik yang diestimasi. */
+  confidence: { min: number; max: number } | null;
+  /** Jumlah struk yang terbaca OCR di seluruh titik simpul ini. */
+  struk_terbaca: number;
+  peak: StationPeak | null;
+  composition: CategoryComposition[];
+  basis: "monte-carlo-simpul" | "agregat-titik";
+};
+
+export type StationSummaryPayload = {
+  generated_at: string;
+  pipeline_version: string;
+  day_type: "weekday" | "weekend";
+  stations: StationSummaryRow[];
+};
+
+/* -------------------------------------------------------------------------
+ * Indeks sewa/arus
+ *
+ * Inventaris petaknya sendiri sudah punya bentuk di atas: `RentalAsset` —
+ * di mana, seberapa luas, terisi atau kosong, dari Space KAI + survei
+ * lapangan. Yang di sini cuma skornya: harga sewa ditawarkan dibagi arus
+ * terukur, jadi "rupiah per orang lewat".
+ *
+ * Sempat ada bentuk kedua di sini (`RentalAssetPayload`) yang menduplikasi
+ * `RentalAsset` medan demi medan — dua cabang membangun lapisan sewa masing-
+ * masing, lalu peta menggambar petak Space KAI yang sama dua kali. Bentuk
+ * duplikatnya dibuang; keduanya kini bertemu di `lib/data/rent.ts` lewat
+ * `source_id` yang sama.
+ *
+ * Nama medannya MENIRU PERSIS response Go (`internal/analytics/dto.go`
+ * `RentFlowIndexResponse`) — termasuk `index` yang bukan bahasa Indonesia dan
+ * `snake_case`-nya. Jangan diterjemahkan: Fase 2 hanya menukar isi
+ * `source.ts`, dan tiap medan yang di-rename di sini berarti satu lapisan
+ * pemetaan tambahan yang harus ditulis dan dijaga.
+ *
+ * Fase 2: `GET /api/v1/analytics/rent-flow-index`.
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Sewa ditawarkan dibanding arus terukur, per petak.
+ *
+ * `index` = `offered_rent / measured_flow` — makin tinggi, makin mahal tiap
+ * orang yang lewat. `is_outlier` ditandai backend, bukan dihitung ulang di
+ * sini; peta hanya menggambar apa yang sudah diputuskan.
+ */
+export type RentFlowIndexPayload = {
+  plot_id: string;
+  station_id: string;
+  offered_rent: number;
+  measured_flow: number;
+  index: number;
+  is_outlier: boolean;
 };
 
 /**

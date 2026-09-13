@@ -15,6 +15,7 @@ import {
 } from "@/lib/data/dimensions";
 import type {
   CategoryAnalytics,
+  ConfidenceLayerEntry,
   PointAnalytics,
   Range,
   SlotAnalytics,
@@ -90,6 +91,7 @@ export function metricFor(
   point: PointAnalytics,
   slot: SlotKey,
   category: CategoryFilter,
+  confidence: ConfidenceLayerEntry | null = null,
 ): PointMetric {
   const slotRow = slotOf(point, slot);
   const dasar: PointMetric = {
@@ -99,8 +101,11 @@ export function metricFor(
     potensi: slotRow?.potensi ?? NULL_RANGE,
     tertangkap: slotRow?.tertangkap ?? NULL_RANGE,
     variables: slotRow?.variables ?? null,
-    sampelTipis: point.sampel_tipis || (slotRow?.sampel_tipis ?? false),
-    confidence: point.confidence,
+    sampelTipis:
+      point.sampel_tipis ||
+      (slotRow?.sampel_tipis ?? false) ||
+      (confidence?.is_thin_sample ?? false),
+    confidence: confidence?.confidence_score ?? point.confidence,
     kategori: null,
     arus: slotRow?.variables?.F ?? null,
   };
@@ -162,12 +167,28 @@ export function metricsFor(
   payload: SpendingGapPayload,
   slot: SlotKey,
   category: CategoryFilter,
+  confidence: ConfidenceLayerEntry[] = [],
 ): Map<number, PointMetric> {
   const out = new Map<number, PointMetric>();
   for (const point of payload.points) {
-    out.set(point.point_id, metricFor(point, slot, category));
+    out.set(
+      point.point_id,
+      metricFor(point, slot, category, findConfidence(confidence, point.point_id, slot)),
+    );
   }
   return out;
+}
+
+/** Confidence aktif untuk join atribut API ke fitur peta. */
+export function findConfidence(
+  rows: ConfidenceLayerEntry[],
+  pointId: number | null,
+  slot: SlotKey,
+): ConfidenceLayerEntry | null {
+  if (pointId === null) return null;
+  return (
+    rows.find((row) => row.point_id === pointId && row.time_slot === slot) ?? null
+  );
 }
 
 /* -------------------------------------------------------------------------

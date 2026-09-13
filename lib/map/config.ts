@@ -24,8 +24,7 @@
  * `building-3d`. Karena itu keduanya tampak nyaris serupa, dan berpindah di
  * antara keduanya tidak mengubah tampilan secara mencolok.
  */
-export const BASEMAP_STYLE_URL =
-  "https://tiles.openfreemap.org/styles/liberty";
+export const BASEMAP_STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
 
 /**
  * Pilihan basemap yang sudah diperiksa: gratis, tanpa API key, dan bisa
@@ -48,6 +47,8 @@ export const BASEMAP_CHOICES: Record<string, string> = {
  * berkas ini dikomit. Alamatnya dibaca dari variabel lingkungan saat dipakai.
  */
 export const BASEMAP_NAMES = [
+  "satellite",
+  "building",
   "mapid",
   "liberty",
   "positron",
@@ -57,15 +58,88 @@ export const BASEMAP_NAMES = [
 
 export type BasemapName = (typeof BASEMAP_NAMES)[number];
 
+export type BasemapOption = {
+  id: BasemapName;
+  name: string;
+  category: "mapid" | "osm" | "carto";
+  description: string;
+  badge?: string;
+};
+
+export const BASEMAP_OPTIONS: BasemapOption[] = [
+  {
+    id: "satellite",
+    name: "MAPID Satelit",
+    category: "mapid",
+    description: "Citra satelit resolusi tinggi",
+    badge: "Foto Udara",
+  },
+  {
+    id: "building",
+    name: "MAPID 2D Bangunan",
+    category: "mapid",
+    description: "Footprint bangunan & tata ruang",
+    badge: "Building",
+  },
+  {
+    id: "mapid",
+    name: "MAPID Street",
+    category: "mapid",
+    description: "Peta jalan resmi GEO MAPID",
+    badge: "Street",
+  },
+  {
+    id: "liberty",
+    name: "OSM Liberty",
+    category: "osm",
+    description: "POI kawasan & bangunan 3D",
+    badge: "Default",
+  },
+  {
+    id: "positron",
+    name: "CARTO Positron",
+    category: "carto",
+    description: "Monokrom terang kontras tinggi",
+    badge: "Light",
+  },
+  {
+    id: "voyager",
+    name: "CARTO Voyager",
+    category: "carto",
+    description: "Peta perkotaan warna detail",
+    badge: "Urban",
+  },
+  {
+    id: "bright",
+    name: "OSM Bright",
+    category: "osm",
+    description: "Tampilan kontras tegas",
+    badge: "Vivid",
+  },
+];
+
 /** Apakah sebuah teks adalah nama basemap yang dikenali. */
-function namaBasemapDikenali(nama: string): nama is BasemapName {
+export function namaBasemapDikenali(nama: string): nama is BasemapName {
   return (BASEMAP_NAMES as readonly string[]).includes(nama);
 }
 
 /** Alamat satu pilihan basemap, atau `null` kalau namanya tidak dikenali. */
-function basemapChoiceUrl(nama: string): string | null {
+export function basemapChoiceUrl(nama: string): string | null {
   if (!namaBasemapDikenali(nama)) return null;
-  if (nama === "mapid") return process.env.NEXT_PUBLIC_BASEMAP_URL || null;
+  // Ketiga gaya MAPID membawa API key di URL-nya, jadi alamatnya HANYA datang
+  // dari variabel lingkungan (di produksi menunjuk proxy backend) — tidak
+  // pernah ditulis di repo. Kalau env-nya kosong, kembalikan null: pemanggil
+  // (`resolveBasemapUrl`) lalu jatuh ke basemap bawaan tanpa key (OpenFreeMap),
+  // bukan mengekspos kredensial di berkas yang dikomit.
+  if (nama === "mapid") {
+    return process.env.NEXT_PUBLIC_BASEMAP_URL || null;
+  }
+  if (nama === "satellite") {
+    return process.env.NEXT_PUBLIC_BASEMAP_SATELLITE_URL || null;
+  }
+  if (nama === "building") {
+    return process.env.NEXT_PUBLIC_BASEMAP_BUILDING_URL || null;
+  }
   return BASEMAP_CHOICES[nama] ?? null;
 }
 
@@ -120,6 +194,24 @@ export const SOURCE = {
    * Ongkosnya kecil: isinya hanya sebanyak titik pengamatan (belasan).
    */
   pointLabels: "point-label-values",
+  retail: "retail-locations",
+  confidenceGrid: "confidence-grid",
+  stationMarkers: "station-markers",
+  /**
+   * Petak sewa — inventaris ruang, bukan pengamatan.
+   *
+   * Terpisah dari `retail` walau sama-sama "tempat usaha": retail menandai
+   * gerai yang beroperasi, sewa menandai petak yang disewakan beserta
+   * harganya. Satu petak kosong adalah peluang; satu gerai yang ada adalah
+   * pasokan yang sudah terpakai.
+   *
+   * SATU source untuk dua hal yang sempat dibangun terpisah: atribut petak
+   * (`GET /analytics/rental-assets`) dan indeks sewa/arus
+   * (`GET /analytics/rent-flow-index`). Keduanya memberi kunci `source_id`
+   * yang sama, jadi digabung di `lib/data/rent.ts` sebelum jadi GeoJSON —
+   * kalau tidak, peta menggambar petak yang sama dua kali.
+   */
+  rental: "rental-assets",
 } as const;
 
 /**
@@ -144,10 +236,26 @@ export const LAYER = {
   isochroneFill: "isochrone-fill",
   isochroneLine: "isochrone-line",
   pointConfidence: "point-confidence",
+  confidenceFill: "confidence-fill",
+  confidenceBoundary: "confidence-boundary",
   pointCircle: "point-circle",
   pointLabel: "point-label",
   /** Angka arus pintu (F), tulisan kecil di bawah nama titik. */
   pointArus: "point-arus",
+  retailCircle: "retail-circle",
+  retailLabel: "retail-label",
+  stationCircle: "station-circle",
+  stationLabel: "station-label",
+  rentalCircle: "rental-circle",
+  rentalLabel: "rental-label",
+  /**
+   * Indeks sewa/arus — angka Rp/orang di bawah petak.
+   *
+   * Layer sendiri, bukan tambahan pada `rentalLabel`: nama petak selalu ada,
+   * indeksnya hanya ada untuk petak yang arusnya terukur. Satu layer untuk
+   * keduanya berarti petak tanpa indeks menulis label kosong.
+   */
+  rentalIndex: "rental-index",
 } as const;
 
 /**
@@ -160,8 +268,25 @@ export const LAYER = {
 export const LAYER_ORDER = [
   LAYER.isochroneFill,
   LAYER.isochroneLine,
+  LAYER.confidenceFill,
+  LAYER.confidenceBoundary,
+  LAYER.stationCircle,
+  LAYER.stationLabel,
+  LAYER.rentalCircle,
+  LAYER.rentalLabel,
   LAYER.pointConfidence,
   LAYER.pointCircle,
+  // Bulatan retail duduk di atas lingkaran kesenjangan (kecil, jadi tidak
+  // menutupi) tapi di bawah semua simbol tulisan.
+  LAYER.retailCircle,
+  // Nama retail dipasang PALING AWAL di antara simbol → prioritas tabrakan
+  // paling rendah. MapLibre menempatkan simbol dalam urutan terbalik: yang
+  // lebih akhir menang. Nama gerai retail hanya konteks tambahan, jadi ia yang
+  // pertama menyingkir saat ruang sempit — bukan nama titik pengamatan.
+  LAYER.retailLabel,
+  // Angka indeks sewa ikut kelompok simbol berprioritas rendah — sama seperti
+  // nama retail, ia konteks tambahan dan harus menyingkir sebelum nama titik.
+  LAYER.rentalIndex,
   // Arus sengaja SEBELUM nama titik. MapLibre menempatkan simbol dalam urutan
   // terbalik — layer yang lebih akhir menang saat kotak teksnya bertabrakan.
   // Waktu arus diletakkan sesudah nama, seluruh nama titik lenyap dari peta
@@ -182,8 +307,14 @@ export const LAYER_ORDER = [
  */
 export const LAYER_GROUPS: Record<string, readonly string[]> = {
   gap: [LAYER.pointCircle, LAYER.pointLabel],
-  kepercayaan: [LAYER.pointConfidence],
+  kepercayaan: [
+    LAYER.confidenceFill,
+    LAYER.confidenceBoundary,
+    LAYER.pointConfidence,
+  ],
   arus: [LAYER.pointArus],
+  retail: [LAYER.retailCircle, LAYER.retailLabel],
+  rental: [LAYER.rentalCircle, LAYER.rentalLabel, LAYER.rentalIndex],
 };
 
 /**
@@ -192,7 +323,7 @@ export const LAYER_GROUPS: Record<string, readonly string[]> = {
  * Angkanya mengikuti tata letak di PetaScreen.
  */
 export const FIT_PADDING = {
-  top: 104, // pil nav yang mengambang di atas peta
+  top: 180, // pil nav + ruang untuk titik Sudirman di tepi utara
   bottom: 200, // panel slot waktu + legenda
   left: 96, // kontrol zoom
   right: 470, // panel ringkasan (lebar 414 + jarak 24)

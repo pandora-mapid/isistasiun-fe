@@ -1,0 +1,70 @@
+{
+  "success": true,
+  "data": [
+    {
+      "plot_id": "75153818818957567",
+      "station_id": "a0000000-0000-4000-8000-000000000001",
+      "offered_rent": 1577342000.0,
+      "measured_flow": 62.0,
+      "index": 25441000.0,
+      "is_outlier": true
+    },
+    {
+      "plot_id": "75153818819205543",
+      "station_id": "a0000000-0000-4000-8000-000000000001",
+      "offered_rent": 250000000.0,
+      "measured_flow": 62.0,
+      "index": 4032258.0645,
+      "is_outlier": false
+    },
+    {
+      "plot_id": "75153818818422713",
+      "station_id": "a0000000-0000-4000-8000-000000000001",
+      "offered_rent": 200000000.0,
+      "measured_flow": 62.0,
+      "index": 3225806.4516,
+      "is_outlier": false
+    },
+    {
+      "plot_id": "75153818833728806",
+      "station_id": "a0000000-0000-4000-8000-000000000001",
+      "offered_rent": 150000000.0,
+      "measured_flow": 62.0,
+      "index": 2419354.8387,
+      "is_outlier": false
+    },
+    {
+      "plot_id": "75153818843382536",
+      "station_id": "a0000000-0000-4000-8000-000000000001",
+      "offered_rent": 594000000.0,
+      "measured_flow": 62.0,
+      "index": 9580645.1613,
+      "is_outlier": false
+    },
+    {
+      "plot_id": "75153818843418498",
+      "station_id": "a0000000-0000-4000-8000-000000000001",
+      "offered_rent": 594000000.0,
+      "measured_flow": 62.0,
+      "index": 9580645.1613,
+      "is_outlier": false
+    },
+    {
+      "plot_id": "75153818843418475",
+      "station_id": "a0000000-0000-4000-8000-000000000001",
+      "offered_rent": 594000000.0,
+      "measured_flow": 62.0,
+      "index": 9580645.1613,
+      "is_outlier": false
+    },
+    {
+      "plot_id": "75153818843418165",
+      "station_id": "a0000000-0000-4000-8000-000000000001",
+      "offered_rent": 594000000.0,
+      "measured_flow": 62.0,
+      "index": 9580645.1613,
+      "is_outlier": false
+    }
+  ],
+  "error": null
+}
