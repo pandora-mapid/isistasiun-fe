@@ -1,8 +1,8 @@
 {
   "success": true,
   "data": {
-    "generated_at": "2026-08-20T10:00:00Z",
-    "pipeline_version": "mock-0.1",
+    "generated_at": "2026-09-12T15:19:00Z",
+    "pipeline_version": "survei-lapangan-1",
     "day_type": "weekday",
     "stations": [
       {
@@ -10,76 +10,21 @@
         "station_name": "Manggarai",
         "typology": "transit",
         "placeholder": false,
-        "pintu_dicacah": 3,
+        "pintu_dicacah": 2,
         "pintu_ditahan": 0,
-        "gap": {
-          "p10": 5000000,
-          "p50": 5700000,
-          "p90": 7300000
-        },
-        "potensi": {
-          "p10": 7200000,
-          "p50": 8200000,
-          "p90": 10500000
-        },
-        "tertangkap": {
-          "p10": 2200000,
-          "p50": 2500000,
-          "p90": 3200000
-        },
-        "capture_rate": 0.3049,
-        "confidence": {
-          "min": 0.77,
-          "max": 0.87
-        },
-        "struk_terbaca": 713,
-        "peak": {
-          "point_id": 12,
-          "point_label": "Koridor Transit Utara",
-          "slot": "pagi",
-          "variables": {
-            "F": 1574,
-            "E": 0.07,
-            "C": 0.66,
-            "V": 30000
-          },
-          "gap": {
-            "p10": 860000,
-            "p50": 1100000,
-            "p90": 1520000
-          }
-        },
+        "gap": { "p10": 1200000, "p50": 1650000, "p90": 2100000 },
+        "potensi": { "p10": 2400000, "p50": 3300000, "p90": 4200000 },
+        "tertangkap": { "p10": 1200000, "p50": 1650000, "p90": 2100000 },
+        "capture_rate": 0.5,
+        "confidence": { "min": 0.45, "max": 0.5 },
+        "struk_terbaca": 0,
+        "peak": null,
         "composition": [
-          {
-            "category": "fnb",
-            "demand_share": 0.4666,
-            "gerai_count": 3,
-            "hilang": false
-          },
-          {
-            "category": "ritel",
-            "demand_share": 0.1837,
-            "gerai_count": 2,
-            "hilang": true
-          },
-          {
-            "category": "apotek",
-            "demand_share": 0.1061,
-            "gerai_count": 0,
-            "hilang": true
-          },
-          {
-            "category": "jasa",
-            "demand_share": 0.1257,
-            "gerai_count": 1,
-            "hilang": true
-          },
-          {
-            "category": "lainnya",
-            "demand_share": 0.1179,
-            "gerai_count": 2,
-            "hilang": true
-          }
+          { "category": "fnb", "demand_share": 0.2258, "gerai_count": 1, "hilang": false },
+          { "category": "ritel", "demand_share": 0.043, "gerai_count": 3, "hilang": false },
+          { "category": "apotek", "demand_share": 0.1398, "gerai_count": 0, "hilang": true },
+          { "category": "jasa", "demand_share": 0.5914, "gerai_count": 0, "hilang": true },
+          { "category": "lainnya", "demand_share": 0, "gerai_count": 0, "hilang": false }
         ],
         "basis": "monte-carlo-simpul"
       },
@@ -88,76 +33,21 @@
         "station_name": "Sudirman",
         "typology": "perkantoran",
         "placeholder": false,
-        "pintu_dicacah": 3,
-        "pintu_ditahan": 1,
-        "gap": {
-          "p10": 1490000,
-          "p50": 1700000,
-          "p90": 2180000
-        },
-        "potensi": {
-          "p10": 2140000,
-          "p50": 2440000,
-          "p90": 3130000
-        },
-        "tertangkap": {
-          "p10": 650000,
-          "p50": 740000,
-          "p90": 950000
-        },
-        "capture_rate": 0.3033,
-        "confidence": {
-          "min": 0.32,
-          "max": 0.86
-        },
-        "struk_terbaca": 672,
-        "peak": {
-          "point_id": 21,
-          "point_label": "Pintu Bawah Utama",
-          "slot": "pagi",
-          "variables": {
-            "F": 597,
-            "E": 0.05,
-            "C": 0.63,
-            "V": 39000
-          },
-          "gap": {
-            "p10": 330000,
-            "p50": 420000,
-            "p90": 580000
-          }
-        },
+        "pintu_dicacah": 1,
+        "pintu_ditahan": 0,
+        "gap": { "p10": 900000, "p50": 1250000, "p90": 1600000 },
+        "potensi": { "p10": 1100000, "p50": 1550000, "p90": 2000000 },
+        "tertangkap": { "p10": 200000, "p50": 300000, "p90": 400000 },
+        "capture_rate": 0.1935,
+        "confidence": { "min": 0.42, "max": 0.42 },
+        "struk_terbaca": 0,
+        "peak": null,
         "composition": [
-          {
-            "category": "fnb",
-            "demand_share": 0.5087,
-            "gerai_count": 5,
-            "hilang": false
-          },
-          {
-            "category": "ritel",
-            "demand_share": 0.1483,
-            "gerai_count": 3,
-            "hilang": false
-          },
-          {
-            "category": "apotek",
-            "demand_share": 0.1221,
-            "gerai_count": 1,
-            "hilang": true
-          },
-          {
-            "category": "jasa",
-            "demand_share": 0.124,
-            "gerai_count": 2,
-            "hilang": true
-          },
-          {
-            "category": "lainnya",
-            "demand_share": 0.0969,
-            "gerai_count": 3,
-            "hilang": false
-          }
+          { "category": "fnb", "demand_share": 0.24, "gerai_count": 4, "hilang": false },
+          { "category": "ritel", "demand_share": 0.16, "gerai_count": 1, "hilang": false },
+          { "category": "apotek", "demand_share": 0.032, "gerai_count": 0, "hilang": true },
+          { "category": "jasa", "demand_share": 0.568, "gerai_count": 0, "hilang": true },
+          { "category": "lainnya", "demand_share": 0, "gerai_count": 1, "hilang": false }
         ],
         "basis": "monte-carlo-simpul"
       }

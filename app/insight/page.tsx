@@ -186,8 +186,8 @@ export default function InsightPage() {
         <section className="reveal" style={seksi}>
           <Kepala
             kicker="Profil per slot"
-            judul="Pagi menahan kesenjangan terbesar."
-            catatan="Kesenjangan per slot di pintu dengan selisih terbesar, dan instrumen F × E × C × V yang menyusunnya."
+            judul="Sore menahan kesenjangan terbesar."
+            catatan="Kesenjangan tiap slot terukur, dan instrumen F × E × C × V yang menyusunnya."
           />
           <div
             className="runtuh-1"

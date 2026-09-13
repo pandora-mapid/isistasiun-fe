@@ -1,14 +1,14 @@
 "use client";
 
 /**
- * Peta hero — kolom kanan, satu blok utuh, dengan satu kartu kecil mengambang.
+ * Peta hero - kolom kanan, satu blok utuh, dengan satu kartu kecil mengambang.
  *
  * Riwayat singkat: putaran 1–4 sebuah `<figure>` di sisi kanan teks; putaran
  * 5 sudut kiri-bawahnya "digigit" bentuk organik dengan badge cincin
  * mengambang; putaran 6 dipecah jadi dua ubin `.bento` (peta + angka
  * sorotan) di bawah hero yang dipusatkan. Putaran 7 mengembalikan tata letak
  * dua-kolom (peta KIRI, tulisan KANAN); putaran 8 membaliknya lagi atas
- * permintaan eksplisit — peta KANAN, tulisan KIRI — dan mengecilkan petanya
+ * permintaan eksplisit - peta KANAN, tulisan KIRI - dan mengecilkan petanya
  * (kolom teks kini lebih lebar, `TINGGI_MIN` turun) supaya tipografi jadi
  * jangkar utama dan peta jadi pendukung. Putaran 10 menaruh kartu sorotan
  * INSET di dalam peta; user minta ia mengikuti model kartu overlap Section 2.
@@ -20,11 +20,11 @@
  * keluar tepi KANAN, agak turun dari pojok. Ukuran kartu kembali ringkas
  * setelah sempat jadi pita 440px yang user nilai kepanjangan. Sudut kanvas
  * MapLibre tetap dipaksa membulat lewat `isolation: isolate` + prop
- * `borderRadius` ke `MapCanvas`. (Bukan lagi gigitan organik/badge cincin —
+ * `borderRadius` ke `MapCanvas`. (Bukan lagi gigitan organik/badge cincin -
  * itu ornamen putaran 5 yang sudah dibuang putaran 6 dan tidak dikembalikan.)
  *
  * `HeroPeta` sekarang mengembalikan **satu blok**, bukan fragment dua ubin
- * grid — `page.tsx` menaruhnya langsung sebagai kolom kanan sebuah grid dua
+ * grid - `page.tsx` menaruhnya langsung sebagai kolom kanan sebuah grid dua
  * kolom, bukan sebagai anak `.bento`.
  *
  * Tiga hal yang membuat peta ini aman berdiri di landing page (tidak berubah
@@ -49,7 +49,7 @@ import { useBeranda } from "./BerandaData";
 
 /**
  * MapLibre baru diunduh sesudah halaman hidup. Beranda tetap tergambar penuh
- * tanpanya — yang muncul lebih dulu hanya bidang kertas kosong di tempat peta.
+ * tanpanya - yang muncul lebih dulu hanya bidang kertas kosong di tempat peta.
  */
 const MapCanvas = dynamic(
   () => import("@/components/MapCanvas").then((m) => m.MapCanvas),
@@ -75,7 +75,7 @@ const PADDING_KARTU = { top: 64, bottom: 72, left: 80, right: 44 } as const;
  * di putaran 8: peta sengaja jadi lebih kecil dari kolom teks di sebelahnya. */
 const TINGGI_MIN = 360;
 
-/** Tidak ada yang bisa dipilih di sini — peta ini bacaan, bukan alat. */
+/** Tidak ada yang bisa dipilih di sini - peta ini bacaan, bukan alat. */
 const abaikan = () => {};
 
 export function HeroPeta({
@@ -127,10 +127,10 @@ export function HeroPeta({
         )}
       </div>
 
-      {/* Kartu sorotan — ukuran ringkas (`max-content`, dibatasi), dua sel
+      {/* Kartu sorotan - ukuran ringkas (`max-content`, dibatasi), dua sel
          bertingkat dipisah garis-rambut (`gap: 1px` menyingkap `--rule`), kelas
          `.kartu`. Duduk di DASAR peta dan menjorok ~20% keluar tepi KIRI (ke
-         celah antar-kolom `--s5`) — cukup untuk terasa "keluar frame" tanpa
+         celah antar-kolom `--s5`) - cukup untuk terasa "keluar frame" tanpa
          menabrak kolom teks. Kredit MapLibre dipindah ke kiri-ATAS supaya tidak
          ketiban kartu ini. */}
       {showOverlayCards && sorotan && (
@@ -194,11 +194,11 @@ export function HeroPeta({
         </div>
       )}
 
-      {/* Legenda mini — satu-satunya kunci warna di peta hero (yang sengaja
+      {/* Legenda mini - satu-satunya kunci warna di peta hero (yang sengaja
          tanpa label). Pita gradiennya DIBANGUN dari `GAP_RAMP` yang sama persis
-         dipakai lingkaran di peta — kalau ramp-nya berubah, legenda ikut, tidak
+         dipakai lingkaran di peta - kalau ramp-nya berubah, legenda ikut, tidak
          bisa diam-diam berbohong. Ditaruh agak turun dari pojok dan menjorok
-         ~23% keluar tepi KANAN (ke selokan `--page-x`) — user minta ia sebagian
+         ~23% keluar tepi KANAN (ke selokan `--page-x`) - user minta ia sebagian
          keluar frame. */}
       {showOverlayCards && peta && (
         <div

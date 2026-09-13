@@ -13,17 +13,21 @@ export const MOCK_DEMO_DATA: MockDemoData = {
     { id: "mgg-shopfront-2", name: "Ruko depan Stasiun Manggarai 2", kind: "shopfront", station_id: 1, latitude: -6.2096379, longitude: 106.8504967, status: "perlu_verifikasi", category: null, note: "Ruko kawasan depan stasiun; perlu survei properti lanjutan." },
     { id: "mgg-shopfront-3", name: "Ruko depan Stasiun Manggarai 3", kind: "shopfront", station_id: 1, latitude: -6.2100542, longitude: 106.8510737, status: "perlu_verifikasi", category: null, note: "Ruko kawasan depan stasiun; belum masuk perhitungan spending gap." },
   ],
+  // Angka nyata: demand_share = demand_count POI (dalam 800 m) dinormalisasi
+  // per simpul; gerai_count = gerai di dalam stasiun (amatan konversi lapangan);
+  // status mengikuti ambang gerai (>=3 terisi, 1-2 kurang, 0 kosong).
+  // Manggarai total demand 93 POI; Sudirman 125 POI.
   category_statuses: [
-    { station_id: 1, category: "fnb", status: "terisi", demand_share: 0.34, gerai_count: 5 },
-    { station_id: 1, category: "ritel", status: "terisi", demand_share: 0.27, gerai_count: 4 },
-    { station_id: 1, category: "apotek", status: "kosong", demand_share: 0.21, gerai_count: 0 },
-    { station_id: 1, category: "jasa", status: "kurang", demand_share: 0.12, gerai_count: 1 },
-    { station_id: 1, category: "lainnya", status: "kurang", demand_share: 0.06, gerai_count: 1 },
-    { station_id: 2, category: "fnb", status: "terisi", demand_share: 0.31, gerai_count: 4 },
-    { station_id: 2, category: "ritel", status: "kurang", demand_share: 0.26, gerai_count: 2 },
-    { station_id: 2, category: "apotek", status: "kosong", demand_share: 0.24, gerai_count: 0 },
-    { station_id: 2, category: "jasa", status: "kosong", demand_share: 0.13, gerai_count: 0 },
-    { station_id: 2, category: "lainnya", status: "kurang", demand_share: 0.06, gerai_count: 1 },
+    { station_id: 1, category: "fnb", status: "kurang", demand_share: 0.2258, gerai_count: 1 },
+    { station_id: 1, category: "ritel", status: "terisi", demand_share: 0.043, gerai_count: 3 },
+    { station_id: 1, category: "apotek", status: "kosong", demand_share: 0.1398, gerai_count: 0 },
+    { station_id: 1, category: "jasa", status: "kosong", demand_share: 0.5914, gerai_count: 0 },
+    { station_id: 1, category: "lainnya", status: "kosong", demand_share: 0, gerai_count: 0 },
+    { station_id: 2, category: "fnb", status: "terisi", demand_share: 0.24, gerai_count: 4 },
+    { station_id: 2, category: "ritel", status: "kurang", demand_share: 0.16, gerai_count: 1 },
+    { station_id: 2, category: "apotek", status: "kosong", demand_share: 0.032, gerai_count: 0 },
+    { station_id: 2, category: "jasa", status: "kosong", demand_share: 0.568, gerai_count: 0 },
+    { station_id: 2, category: "lainnya", status: "kurang", demand_share: 0, gerai_count: 1 },
   ],
   recommendations: [
     { id: "rec-mgg-1", station_id: 1, point_id: 11, retail_location_id: "mgg-potential-1", title: "Uji gerai apotek berformat kecil", category: "apotek", slot: "pagi", gap_p50: 1180000, confidence: 0.86, sampel_tipis: false, reason: "Permintaan kebutuhan mendesak terbaca, sementara belum ada gerai apotek di dalam simpul.", next_measurement: "Ukur ulang setelah 6 minggu" },
