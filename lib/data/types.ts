@@ -129,6 +129,8 @@ export type ConfidenceLayerEntry = {
 export type ConfidenceGridProps = {
   zone_id: string;
   station_id: number | null;
+  /** Titik bukti terdekat; sel hanya visualisasi area pengaruhnya. */
+  source_point_id?: number;
   confidence_score: number;
   sample_count: number;
   is_thin_sample: boolean;

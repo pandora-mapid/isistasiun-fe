@@ -21,24 +21,6 @@
     },
     {
       "type": "Feature",
-      "id": 12,
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          106.85021581782942,
-          -6.209898745923517
-        ]
-      },
-      "properties": {
-        "id": 12,
-        "station_id": 1,
-        "station_name": "Manggarai",
-        "point_label": "Pintu Bawah Manggarai",
-        "type": "entrance"
-      }
-    },
-    {
-      "type": "Feature",
       "id": 13,
       "geometry": {
         "type": "Point",
