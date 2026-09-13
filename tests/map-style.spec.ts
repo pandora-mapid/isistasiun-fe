@@ -3,7 +3,11 @@ import { validateStyleMin } from "@maplibre/maplibre-gl-style-spec";
 
 import { SOURCE } from "../lib/map/config";
 import { retailCircleLayer, retailLabelLayer } from "../lib/map/retail-style";
-import { rentalCircleLayer, rentalLabelLayer } from "../lib/map/rental-style";
+import {
+  rentalCircleLayer,
+  rentalIndexLayer,
+  rentalLabelLayer,
+} from "../lib/map/rental-style";
 import {
   stationCircleLayer,
   stationLabelLayer,
@@ -84,6 +88,7 @@ const LAYERS: { nama: string; buat: () => unknown }[] = [
   { nama: "station-label", buat: stationLabelLayer },
   { nama: "rental-circle", buat: rentalCircleLayer },
   { nama: "rental-label", buat: rentalLabelLayer },
+  { nama: "rental-index", buat: rentalIndexLayer },
 ];
 
 for (const { nama, buat } of LAYERS) {

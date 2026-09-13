@@ -22,9 +22,9 @@ export const RENTAL_STATUS_LEGEND: Record<
   },
 };
 
-export function rentalGeoJSON(
-  assets: RentalAsset[],
-): FeatureCollection<Point, RentalAsset> {
+export function rentalGeoJSON<T extends RentalAsset>(
+  assets: T[],
+): FeatureCollection<Point, T> {
   return {
     type: "FeatureCollection",
     features: assets.map((asset) => ({

@@ -7,9 +7,15 @@ import { NavBar } from "./NavBar";
 import { MapCanvas } from "./MapCanvas";
 import { StationSearch } from "./StationSearch";
 import { ComparisonDialog } from "./ComparisonDialog";
+import { BandingSimpulOverlay } from "./BandingSimpulOverlay";
+import { TabelAtribut } from "./TabelAtribut";
+import { BriefSimpul } from "./BriefSimpul";
+import { barisAtribut, csvAtribut, namaBerkasAtribut } from "@/lib/export/rows";
+import { unduhTeks } from "@/lib/export/unduh";
 import { buildStationConfidenceGrid } from "@/lib/data/confidence";
 import { retailGeoJSON, type RetailLocation } from "@/lib/data/retail";
 import { rentalGeoJSON } from "@/lib/data/rental";
+import type { RentPlot } from "@/lib/data/rent";
 import {
   categoryStatusesFor,
   confidenceLabel,
@@ -40,7 +46,6 @@ import {
 } from "@/lib/data/dimensions";
 import type {
   PointFeatureState,
-  RentalAsset,
   SlotKey,
   Station,
 } from "@/lib/data/types";
@@ -134,15 +139,13 @@ const LAYER_ROWS: LayerRow[] = [
     dot: "var(--data)",
     tint: "var(--data-wash)",
   },
-  {
-    key: "sewa",
-    label: "Indeks sewa / arus",
-    dot: "var(--ink-2)",
-    tint: "rgba(22,19,15,.08)",
-  },
+  // Satu baris, bukan dua. "Indeks sewa / arus" dan "Aset sewa stasiun"
+  // sempat berdiri sendiri-sendiri dan menyalakan petak Space KAI yang sama —
+  // dua sakelar untuk satu himpunan petak. Inventaris dan indeksnya kini satu
+  // source (lihat `lib/data/rent.ts`), jadi sakelarnya juga satu.
   {
     key: "rental",
-    label: "Aset sewa stasiun",
+    label: "Aset sewa & indeks arus",
     dot: "#047857",
     tint: "rgba(4,120,87,.08)",
   },
@@ -220,7 +223,7 @@ const GARIS_SLOT: React.CSSProperties = {
 
 const QUESTIONS = [
   "pintu mana yang gapnya paling besar sore hari?",
-  "bandingkan Stasiun B dengan Stasiun C",
+  "bandingkan Manggarai dengan Sudirman",
   "kawasan mana yang sampelnya masih tipis?",
 ];
 
@@ -285,6 +288,14 @@ export function PetaScreen({
   const [cqLoading, setCqLoading] = useState(false);
   const [cqError, setCqError] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
+  /**
+   * Overlay "Ringkasan & Bandingkan Simpul" — fitur TERPISAH dari
+   * `showComparison` di atas. Dua tombol, dua label, dua sumber angka; lihat
+   * catatan di `components/BandingSimpulOverlay.tsx`.
+   */
+  const [showBandingSimpul, setShowBandingSimpul] = useState(false);
+  const [showTabel, setShowTabel] = useState(false);
+  const [showBrief, setShowBrief] = useState(false);
   const [stationTarget, setStationTarget] = useState<{
     longitude: number;
     latitude: number;
@@ -294,7 +305,7 @@ export function PetaScreen({
     RetailLocation | null | undefined
   >(undefined);
   const [selectedRentalChoice, setSelectedRental] = useState<
-    RentalAsset | null | undefined
+    RentPlot | null | undefined
   >(undefined);
 
   const handleRetailFilterChange = useCallback((filter: FilterCategory) => {
@@ -332,7 +343,7 @@ export function PetaScreen({
     setTab("retail");
   }, []);
 
-  const selectRental = useCallback((asset: RentalAsset) => {
+  const selectRental = useCallback((asset: RentPlot) => {
     setSelectedRental(asset);
     setSelectedRetail(null);
     setStationTarget({
@@ -774,6 +785,7 @@ export function PetaScreen({
           onSelect={handleSelectStation}
         />
         <div
+          className="peta-chip-stasiun"
           style={{
             position: "absolute",
             top: 158,
@@ -826,7 +838,7 @@ export function PetaScreen({
         </div>
 
         <div
-          className="row glass"
+          className="row glass peta-kontrol-kiri"
           style={{
             position: "absolute",
             left: 24,
@@ -1059,7 +1071,7 @@ export function PetaScreen({
         </div>
 
         <div
-          className="glass"
+          className="glass peta-bawah"
           style={{
             position: "absolute",
             left: 24,
@@ -1161,7 +1173,7 @@ export function PetaScreen({
         </div>
 
         <div
-          className="glass"
+          className="glass peta-panel"
           style={{
             position: "absolute",
             right: 24,
@@ -2262,10 +2274,33 @@ export function PetaScreen({
                   boxShadow: "0 -1px 0 var(--rule)",
                 }}
               >
-                <button className="b bs" style={{ flex: 1 }}>
+                <button
+                  type="button"
+                  className="b bs"
+                  style={{ flex: 1 }}
+                  onClick={() => setShowTabel(true)}
+                  disabled={!analytics || !entrances}
+                >
                   Tabel atribut
                 </button>
-                <button className="b bp" style={{ flex: 1 }}>
+                {/* "Unduh brief" mengunduh CSV potongan yang sedang tampil —
+                   tanpa membuka tabelnya dulu, karena itu memang jalan pintas
+                   yang dijanjikan tombolnya. Barisnya disusun modul yang sama
+                   dengan tabel, jadi isinya tidak bisa berbeda. */}
+                <button
+                  type="button"
+                  className="b bp"
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    if (!analytics || !entrances) return;
+                    const rows = barisAtribut(analytics, entrances, activeSlot, activeCategory);
+                    unduhTeks(
+                      namaBerkasAtribut(analytics, activeSlot, activeCategory),
+                      csvAtribut(rows),
+                    );
+                  }}
+                  disabled={!analytics || !entrances}
+                >
                   Unduh brief
                 </button>
               </div>
@@ -3110,11 +3145,42 @@ export function PetaScreen({
               >
                 Bandingkan
               </button>
-              <button className="b bp">Brief PDF</button>
+              {/* Label sengaja dibuat panjang dan berbeda: tombol di sebelahnya
+                 juga "membandingkan", tapi dari angka yang lain sama sekali. */}
+              <button
+                type="button"
+                className="b bs"
+                onClick={() => setShowBandingSimpul(true)}
+              >
+                Ringkasan &amp; Bandingkan Simpul
+              </button>
+              <button
+                type="button"
+                className="b bp"
+                onClick={() => setShowBrief(true)}
+              >
+                Brief PDF
+              </button>
             </div>
           }
         />
       </div>
+
+      {showBandingSimpul && (
+        <BandingSimpulOverlay onClose={() => setShowBandingSimpul(false)} />
+      )}
+
+      {showTabel && analytics && entrances && (
+        <TabelAtribut
+          payload={analytics}
+          entrances={entrances}
+          slot={activeSlot}
+          category={activeCategory}
+          onClose={() => setShowTabel(false)}
+        />
+      )}
+
+      {showBrief && <BriefSimpul onClose={() => setShowBrief(false)} />}
 
       {showComparison && analytics && stations && demo && (
         <ComparisonDialog

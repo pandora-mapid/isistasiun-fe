@@ -202,7 +202,7 @@ export function HeroPeta({
          keluar frame. */}
       {showOverlayCards && peta && (
         <div
-          className="kartu"
+          className="kartu legenda-hero"
           style={{
             position: "absolute",
             top: 54,

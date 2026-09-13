@@ -43,7 +43,7 @@ test("sakelar aset sewa mengubah visibilitas marker", async ({ page }) => {
     await layersToggle.click();
   }
 
-  const rental = page.locator(".lyr").filter({ hasText: "Aset sewa stasiun" });
+  const rental = page.locator(".lyr").filter({ hasText: "Aset sewa" });
   await expect(rental).toHaveAttribute("aria-pressed", "true");
   await rental.click();
   await expect

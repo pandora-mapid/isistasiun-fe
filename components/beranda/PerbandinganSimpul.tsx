@@ -176,7 +176,7 @@ function KartuSimpul({
 
 const GRID: CSSProperties = {
   display: "grid",
-  gridTemplateColumns: "repeat(3, 1fr)",
+  gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
   gap: "var(--s3)",
   alignItems: "start",
 };
@@ -186,7 +186,7 @@ export function PerbandinganSimpul() {
 
   if (!siap) {
     return (
-      <div style={GRID}>
+      <div className="runtuh-1" style={GRID}>
         {STAGGER.map((geser, i) => (
           <div
             key={i}
@@ -215,7 +215,7 @@ export function PerbandinganSimpul() {
   );
 
   return (
-    <div style={GRID}>
+    <div className="runtuh-1" style={GRID}>
       {baris.map((s, i) => (
         <KartuSimpul
           key={s.station.id}

@@ -131,7 +131,7 @@ export default function MetodologiPage() {
           Grid, tipografi & jarak disamakan dengan hero Insight.
           ============================================================ */}
       <section
-        className="reveal"
+        className="reveal runtuh-1"
         style={{
           display: "grid",
           gridTemplateColumns:
@@ -235,6 +235,7 @@ export default function MetodologiPage() {
           }
         />
         <div
+          className="runtuh-2"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
@@ -299,6 +300,7 @@ export default function MetodologiPage() {
           catatan="Setiap nilai V pada peta dapat dibuka sampai foto aslinya, lengkap dengan keyakinan bacaan dan alasan bila datanya dibuang."
         />
         <div
+          className="runtuh-1"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 320px) minmax(0, 1fr)",
@@ -402,9 +404,10 @@ export default function MetodologiPage() {
             </div>
 
             <div
+              className="runtuh-2"
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
+                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
                 gap: "var(--s2)",
                 marginTop: "var(--s2)",
               }}
@@ -452,6 +455,7 @@ export default function MetodologiPage() {
           catatan="Tiap variabel punya ketidakpastiannya sendiri; setelah dikalikan, yang jujur dilaporkan adalah P10–P90 — bukan satu angka."
         />
         <div
+          className="runtuh-1"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 1.1fr) minmax(0, 1fr)",
