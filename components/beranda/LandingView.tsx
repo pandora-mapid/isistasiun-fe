@@ -1192,7 +1192,7 @@ export function LandingView() {
             <span className="font-label-sm uppercase tracking-widest text-text-muted font-semibold">
               The Product
             </span>
-            <h2 className="font-headline-lg text-text-primary tracking-tight mt-2 font-normal">
+            <h2 className="font-headline-lg text-text-primary tracking-tight mt-2 font-bold">
               Dari peta ke keputusan.
             </h2>
             <p className="font-body-lg text-text-secondary leading-relaxed mt-2">
