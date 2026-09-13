@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
+import { Footer } from "@/components/Footer";
 import { RequireLogin } from "@/components/auth/RequireLogin";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
@@ -332,23 +333,7 @@ export default function InsightPage() {
           </div>
         </section>
 
-        <footer
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "var(--s3)",
-            flexWrap: "wrap",
-            padding: "var(--s3) var(--page-x) var(--s4)",
-            borderTop: "1px solid var(--rule)",
-          }}
-        >
-          <span style={{ fontSize: 11.5, color: "var(--ink-faint)" }}>
-            Isi Stasiun · dibangun di atas GEO MAPID · seluruh angka pada
-            halaman ini bersifat ilustratif
-          </span>
-          <JejakInsight />
-        </footer>
+        <Footer />
       </div>
     </InsightData>
     </RequireLogin>

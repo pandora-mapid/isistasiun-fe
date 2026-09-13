@@ -6,6 +6,7 @@ import { useEffect } from "react";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { NavBar } from "@/components/NavBar";
+import { Footer } from "@/components/Footer";
 import { CreateOperatorForm } from "./CreateOperatorForm";
 
 export function AdminDashboard() {
@@ -72,6 +73,7 @@ export function AdminDashboard() {
           <CreateOperatorForm />
         </div>
       </section>
+      <Footer />
     </main>
   );
 }
