@@ -330,7 +330,10 @@
         "store_count": 1,
         "valid_store_blocks": 1
       },
-      "reasons": ["insufficient_stores", "insufficient_conversion_blocks"]
+      "reasons": [
+        "insufficient_stores",
+        "insufficient_conversion_blocks"
+      ]
     },
     {
       "station_id": 2,
@@ -349,62 +352,6 @@
         "insufficient_stores",
         "insufficient_conversion_blocks"
       ]
-    },
-    {
-      "station_id": 2,
-      "point_id": 24,
-      "time_slot": "pagi",
-      "confidence_score": 0.86,
-      "is_thin_sample": false,
-      "sample_count": 8,
-      "sample_meta": {
-        "flow_blocks": 2,
-        "store_count": 3,
-        "valid_store_blocks": 6
-      },
-      "reasons": []
-    },
-    {
-      "station_id": 2,
-      "point_id": 24,
-      "time_slot": "siang",
-      "confidence_score": 0.84,
-      "is_thin_sample": false,
-      "sample_count": 8,
-      "sample_meta": {
-        "flow_blocks": 2,
-        "store_count": 3,
-        "valid_store_blocks": 6
-      },
-      "reasons": []
-    },
-    {
-      "station_id": 2,
-      "point_id": 24,
-      "time_slot": "sore",
-      "confidence_score": 0.92,
-      "is_thin_sample": false,
-      "sample_count": 8,
-      "sample_meta": {
-        "flow_blocks": 2,
-        "store_count": 3,
-        "valid_store_blocks": 6
-      },
-      "reasons": []
-    },
-    {
-      "station_id": 2,
-      "point_id": 24,
-      "time_slot": "malam",
-      "confidence_score": 0.81,
-      "is_thin_sample": false,
-      "sample_count": 8,
-      "sample_meta": {
-        "flow_blocks": 2,
-        "store_count": 3,
-        "valid_store_blocks": 6
-      },
-      "reasons": []
     }
   ],
   "error": null

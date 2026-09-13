@@ -174,9 +174,10 @@ test("perbandingan: rasio kesenjangan, selisih capture, entry ratio, arus", () =
   expect(d.entryRatio.b).toBe(b.peak?.variables?.E ?? null);
   expect(d.arus.a).toBe(a.peak?.variables?.F ?? null);
 
-  // Di data contoh keduanya cuma punya cukup gerai F&B — sisanya hilang di
-  // dua-duanya. Itu contoh konkret value prop Persona 2.
-  expect(d.hilangBersama.sort()).toEqual(["apotek", "jasa", "lainnya", "ritel"]);
+  // Di data contoh keduanya kekurangan apotek & jasa — ritel dan lainnya
+  // sudah cukup gerainya di titik puncak Sudirman (koreksi koordinat pintu
+  // 2026-09-13 memindahkan titik puncak ke data pintu asli).
+  expect(d.hilangBersama.sort()).toEqual(["apotek", "jasa"]);
 });
 
 test("kategori hilang diurutkan dari permintaan terbesar", () => {
