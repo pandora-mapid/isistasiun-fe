@@ -560,6 +560,12 @@ export function MapCanvas({
     const targetUrl = basemapChoiceUrl(basemap);
     if (!targetUrl) return;
 
+    // Resetting readiness here is the intended synchronization, not a cascade:
+    // setStyle() below tears down every custom layer, so the layer-adding
+    // effects must re-run against the new style — which they only do once these
+    // flags flip back to false and then true on style.load. The
+    // set-state-in-effect rule can't see that this responds to a basemap change.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLayersReady(false);
     setStyleReady(false);
 

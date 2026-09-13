@@ -75,9 +75,9 @@ test("menampilkan status memuat sebelum jawaban tiba", async ({ page }) => {
   await page.getByLabel("Tanya data peta").fill("kawasan mana yang sampelnya masih tipis?");
   await page.getByLabel("Tanya data peta").press("Enter");
 
-  await expect(page.getByText("Menyusun jawaban…")).toBeVisible();
+  await expect(page.getByText("Menyusun jawaban")).toBeVisible();
   await expect(page.getByText("Jawaban setelah menunggu.")).toBeVisible();
-  await expect(page.getByText("Menyusun jawaban…")).toHaveCount(0);
+  await expect(page.getByText("Menyusun jawaban")).toHaveCount(0);
 });
 
 test("kegagalan jaringan menampilkan pesan error, bukan layar kosong", async ({
@@ -117,4 +117,40 @@ test("jawaban tanpa suggested_layers atau spatial_filter tidak menampilkan chip"
   await expect(page.getByText(/^Lapisan →/)).toHaveCount(0);
   await expect(page.getByText(/^Kategori →/)).toHaveCount(0);
   await expect(page.getByText(/^Slot →/)).toHaveCount(0);
+});
+
+test("percakapan menumpuk: pertanyaan baru menambah bubble, tidak menimpa", async ({
+  page,
+}) => {
+  // Echo the query back so each turn's answer is distinguishable.
+  await page.route("**/copilot/query", async (route) => {
+    const q = route.request().postDataJSON()?.query ?? "";
+    await route.fulfill({
+      json: {
+        success: true,
+        data: { answer: `Jawaban untuk: ${q}`, suggested_layers: null, spatial_filter: null },
+        error: null,
+      },
+    });
+  });
+
+  await openCopilotTab(page);
+  const input = page.getByLabel("Tanya data peta");
+
+  await input.fill("pertanyaan pertama");
+  await input.press("Enter");
+  await expect(page.getByText("Jawaban untuk: pertanyaan pertama")).toBeVisible();
+
+  await input.fill("pertanyaan kedua");
+  await input.press("Enter");
+  await expect(page.getByText("Jawaban untuk: pertanyaan kedua")).toBeVisible();
+
+  // Riwayat menumpuk: giliran pertama TETAP ada, tidak ditimpa.
+  await expect(page.getByText("pertanyaan pertama", { exact: true })).toBeVisible();
+  await expect(page.getByText("pertanyaan kedua", { exact: true })).toBeVisible();
+  await expect(page.getByText(/^Jawaban untuk:/)).toHaveCount(2);
+
+  // "Bersihkan" mengosongkan seluruh percakapan.
+  await page.getByRole("button", { name: "Bersihkan" }).click();
+  await expect(page.getByText(/^Jawaban untuk:/)).toHaveCount(0);
 });

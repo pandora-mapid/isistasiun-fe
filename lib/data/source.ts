@@ -56,6 +56,23 @@ const MOCK_BASE = "/mock";
 const API_READY = API_BASE !== "";
 
 /**
+ * Alamat khusus AI Copilot — SENGAJA dipisah dari `API_BASE`.
+ *
+ * Rencana lomba: peta jalan di atas data beku (mock/GeoJSON) sementara copilot
+ * hidup lewat BE→AI. Kalau copilot ikut `API_BASE`, mengisi `API_BASE` untuk
+ * menyalakan copilot memaksa loader peta yang kontraknya belum cocok pindah ke
+ * BE juga — mis. `/confidence-layer` yang per-zona (bukan per-titik) → layer
+ * confidence peta jadi kosong. Dengan variabel sendiri, copilot bisa menunjuk
+ * BE tanpa menyentuh sumber data peta. Jatuh ke `API_BASE` bila tak diisi,
+ * jadi menyetel keduanya tetap sah.
+ *
+ * Rujukan literal ke `process.env.NEXT_PUBLIC_…` (Next.js menyisipkan saat build
+ * dengan mencocokkan teks).
+ */
+const AI_BASE =
+  (process.env.NEXT_PUBLIC_AI_BASE_URL || "").replace(/\/$/, "") || API_BASE;
+
+/**
  * Token yang disisipkan ke setiap permintaan, kalau ada.
  *
  * ⚠️ Halaman Peta **tidak boleh** menuntut token. `02-BACKEND-SPEC.md` §1
@@ -301,7 +318,14 @@ export async function askCopilot(
   query: string,
   stationId?: string,
 ): Promise<CopilotAnswer> {
-  const res = await fetch(`${API_BASE}/copilot/query`, {
+  if (!AI_BASE) {
+    // Tanpa alamat, fetch("/copilot/query") menembak origin Next sendiri dan
+    // 404 — gejalanya "Gagal menghubungi layanan data". Beri pesan jelas.
+    throw new Error(
+      "Copilot belum tersambung: isi NEXT_PUBLIC_AI_BASE_URL (atau NEXT_PUBLIC_API_BASE_URL) ke alamat backend.",
+    );
+  }
+  const res = await fetch(`${AI_BASE}/copilot/query`, {
     method: "POST",
     cache: "no-store",
     headers: { "Content-Type": "application/json", ...(headers() ?? {}) },

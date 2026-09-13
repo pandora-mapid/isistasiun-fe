@@ -369,9 +369,9 @@ test("klik titik mengisi panel ringkasan dengan titik itu", async ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const map = (window as unknown as { __map?: any }).__map;
     const rect = map.getCanvas().getBoundingClientRect();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const feats = map.queryRenderedFeatures({
       layers: ["point-circle"],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }) as any[];
 
     for (const f of feats) {
@@ -895,17 +895,22 @@ test("peta tetap terbaca di lebar sempit", async ({ page }) => {
  * lolos tes di atas — tapi enam panel menumpuk jadi satu tumpukan tak terbaca
  * di sepertiga layar teratas.
  *
- * Karena itu yang diperiksa posisinya, bukan lebarnya: keenam panel harus
- * mengantre tegak, satu di bawah yang lain, dan harus masih menyisakan peta
- * yang terlihat di antaranya. Peta yang tertutup habis bukan versi kecil
- * halaman ini.
+ * Karena itu yang diperiksa posisinya, bukan lebarnya: lembar-lembar penuh
+ * yang memang dimaksud terbaca harus mengantre tegak, satu di bawah yang lain,
+ * dan harus masih menyisakan peta yang terlihat di antaranya. Peta yang
+ * tertutup habis bukan versi kecil halaman ini.
+ *
+ * Catatan (#11): tata letak `/peta` dirombak jadi mengambang — toolbar kiri
+ * (`.map-floating-toolbar`, ~34px), legenda, dan dok bawah kini kontrol
+ * mengambang sempit, bukan lagi lembar penuh yang ikut mengantre; kelas lama
+ * `.peta-kontrol-kiri`/`.peta-bawah` yang dulu diuji sudah tidak ada. Jadi
+ * yang diperiksa di sini hanya tiga lembar penuh yang benar-benar harus
+ * terbaca dan mengantre: nav atas, pencarian stasiun, dan panel. Jaminan
+ * bahwa kontrol mengambang tak menindih ketiganya perlu tesnya sendiri.
  */
 const PANEL_PETA = [
   ".peta-nav-float",
   ".station-search",
-  ".peta-chip-stasiun",
-  ".peta-kontrol-kiri",
-  ".peta-bawah",
   ".peta-panel",
 ] as const;
 
@@ -962,11 +967,11 @@ for (const { lebar, tinggi } of [
       ).toBeGreaterThanOrEqual(urut[i - 1].bottom);
     }
 
-    // Harus masih ada peta yang terlihat di antara chip stasiun dan legenda.
-    const chip = ada.find((k) => k.q === ".peta-chip-stasiun")!;
-    const legenda = ada.find((k) => k.q === ".peta-kontrol-kiri")!;
+    // Harus masih ada peta yang terlihat di antara pencarian dan panel.
+    const pencarian = ada.find((k) => k.q === ".station-search")!;
+    const panel = ada.find((k) => k.q === ".peta-panel")!;
     expect(
-      legenda.top - chip.bottom,
+      panel.top - pencarian.bottom,
       "peta tidak tersisa di antara panel",
     ).toBeGreaterThan(40);
   });

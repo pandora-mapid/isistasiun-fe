@@ -1,6 +1,13 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { FeatureCollection, Point } from "geojson";
 import Link from "next/link";
 import { NavBar } from "./NavBar";
@@ -248,6 +255,23 @@ const AI_SLOT_TO_FE: Record<string, SlotKey> = {
   night: "malam",
 };
 
+/**
+ * Satu giliran percakapan copilot. Riwayat disimpan sebagai daftar giliran
+ * supaya "Tanya Data" menjadi obrolan sungguhan — pertanyaan baru menambah
+ * bubble, bukan menimpa yang sebelumnya. `answer === null && !error` berarti
+ * giliran masih menunggu jawaban (bubble "mengetik"). `appliedCategory`/
+ * `appliedSlot` merekam filter yang DITERAPKAN giliran ini, jadi chip tiap
+ * bubble tetap benar meski filter peta berubah oleh giliran berikutnya.
+ */
+type CopilotTurn = {
+  id: number;
+  question: string;
+  answer: CopilotAnswer | null;
+  error: boolean;
+  appliedCategory: CategoryFilter | null;
+  appliedSlot: SlotKey | null;
+};
+
 export function PetaScreen({
   initialQuery,
 }: {
@@ -336,12 +360,11 @@ export function PetaScreen({
     });
   };
   const [showTransparansi, setShowTransparansi] = useState(false);
-  const [showCopilotResult, setShowCopilotResult] = useState(false);
   const [cqInput, setCqInput] = useState("");
-  const [cqAsked, setCqAsked] = useState<string | null>(null);
-  const [cqAnswer, setCqAnswer] = useState<CopilotAnswer | null>(null);
+  const [cqTurns, setCqTurns] = useState<CopilotTurn[]>([]);
   const [cqLoading, setCqLoading] = useState(false);
-  const [cqError, setCqError] = useState(false);
+  const cqIdRef = useRef(0);
+  const cqEndRef = useRef<HTMLDivElement | null>(null);
   const [showComparison, setShowComparison] = useState(false);
   /**
    * Overlay "Ringkasan & Bandingkan Simpul" — fitur TERPISAH dari
@@ -469,33 +492,61 @@ export function PetaScreen({
     async (raw: string) => {
       const query = raw.trim();
       if (!query || cqLoading) return;
-      setCqAsked(query);
+      const id = ++cqIdRef.current;
+      // Append the new turn (pending) — never replace the history.
+      setCqTurns((prev) => [
+        ...prev,
+        {
+          id,
+          question: query,
+          answer: null,
+          error: false,
+          appliedCategory: null,
+          appliedSlot: null,
+        },
+      ]);
       setCqInput("");
       setCqLoading(true);
-      setCqError(false);
-      setShowCopilotResult(true);
       try {
         const ans = await askCopilot(query);
-        setCqAnswer(ans);
+        let appliedCategory: CategoryFilter | null = null;
+        let appliedSlot: SlotKey | null = null;
         const cat = ans.spatial_filter?.category;
-        if (cat && AI_CATEGORY_TO_FE[cat])
-          setActiveCategory(AI_CATEGORY_TO_FE[cat]);
+        if (cat && AI_CATEGORY_TO_FE[cat]) {
+          appliedCategory = AI_CATEGORY_TO_FE[cat];
+          setActiveCategory(appliedCategory);
+        }
         const slot = ans.spatial_filter?.time_slot;
-        if (slot && AI_SLOT_TO_FE[slot]) setActiveSlot(AI_SLOT_TO_FE[slot]);
+        if (slot && AI_SLOT_TO_FE[slot]) {
+          appliedSlot = AI_SLOT_TO_FE[slot];
+          setActiveSlot(appliedSlot);
+        }
         const layers = (ans.suggested_layers ?? []).filter(
           (key) => key in LAYER_GROUPS,
         );
         if (layers.length) {
           setActiveLayers((prev) => Array.from(new Set([...prev, ...layers])));
         }
+        setCqTurns((prev) =>
+          prev.map((t) =>
+            t.id === id ? { ...t, answer: ans, appliedCategory, appliedSlot } : t,
+          ),
+        );
       } catch {
-        setCqError(true);
+        setCqTurns((prev) =>
+          prev.map((t) => (t.id === id ? { ...t, error: true } : t)),
+        );
       } finally {
         setCqLoading(false);
       }
     },
     [cqLoading],
   );
+
+  // Keep the newest turn in view as the conversation grows.
+  useEffect(() => {
+    cqEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [cqTurns]);
 
   /**
    * Titik yang dipilih pengguna.
@@ -2361,124 +2412,183 @@ export function PetaScreen({
                   padding: "4px 22px 12px",
                 }}
               >
-                <div className="row" style={{ gap: 8, marginBottom: 14 }}>
-                  <span className="dot" style={{ background: "var(--data)" }} />
-                  <span className="k">Tanya data peta</span>
-                </div>
-
-                {/* User's question — right-aligned, solid ink bubble. */}
-                {cqAsked && (
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                    <div style={{ maxWidth: "82%" }}>
-                      <div
-                        className="k"
-                        style={{
-                          textAlign: "right",
-                          color: "var(--ink-faint)",
-                          marginBottom: 4,
-                        }}
-                      >
-                        Kamu
-                      </div>
-                      <div
-                        style={{
-                          borderRadius: "var(--r-md)",
-                          borderBottomRightRadius: 4,
-                          background: "var(--ink)",
-                          padding: "11px 15px",
-                          fontSize: 13,
-                          color: "var(--surface)",
-                        }}
-                      >
-                        {cqAsked}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* AI's answer — left-aligned, neutral bubble with a small
-                   sparkle avatar, so the two speakers are never ambiguous.
-                   Isinya masih contoh: copilot baru tersambung di Fase 3.6. */}
-                {showCopilotResult && (
-                  <div
-                    className="row"
-                    style={{ gap: 8, alignItems: "flex-start", marginTop: 12 }}
-                  >
+                <div
+                  className="row"
+                  style={{
+                    gap: 8,
+                    marginBottom: 6,
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <span className="row" style={{ gap: 8 }}>
                     <span
+                      className="dot"
+                      style={{ background: "var(--data)" }}
+                    />
+                    <span className="k">Tanya data peta</span>
+                  </span>
+                  {cqTurns.length > 0 && (
+                    <button
+                      type="button"
+                      className="btn-reset k"
+                      onClick={() => setCqTurns([])}
+                      disabled={cqLoading}
                       style={{
-                        width: 22,
-                        height: 22,
-                        borderRadius: 999,
-                        background: "var(--data-wash)",
-                        flex: "none",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginTop: 17,
+                        color: "var(--ink-muted)",
+                        cursor: "pointer",
+                        padding: "2px 4px",
                       }}
                     >
-                      <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="var(--data)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z" />
-                      </svg>
-                    </span>
-                    <div style={{ maxWidth: "82%" }}>
-                      <div
-                        className="k"
-                        style={{ color: "var(--ink-faint)", marginBottom: 4 }}
-                      >
-                        Asisten data
+                      Bersihkan
+                    </button>
+                  )}
+                </div>
+                <div
+                  style={{
+                    fontSize: 11.5,
+                    lineHeight: 1.5,
+                    color: "var(--ink-muted)",
+                    marginBottom: 14,
+                  }}
+                >
+                  Jawaban menyesuaikan lapisan &amp; filter peta. Angka hanya
+                  dari slot yang dicacah.
+                </div>
+
+                {/* Riwayat percakapan — tiap giliran MENAMBAH bubble, tidak
+                   menimpa yang sebelumnya. Giliran yang belum ada jawaban &
+                   belum error = sedang menunggu (bubble "mengetik"). */}
+                {cqTurns.map((turn) => (
+                  <Fragment key={turn.id}>
+                    {/* Pertanyaan pengguna — kanan, bubble tinta pekat. */}
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        marginTop: 12,
+                      }}
+                    >
+                      <div style={{ maxWidth: "82%" }}>
+                        <div
+                          className="k"
+                          style={{
+                            textAlign: "right",
+                            color: "var(--ink-faint)",
+                            marginBottom: 4,
+                          }}
+                        >
+                          Kamu
+                        </div>
+                        <div
+                          style={{
+                            borderRadius: "var(--r-md)",
+                            borderBottomRightRadius: 4,
+                            background: "var(--ink)",
+                            padding: "11px 15px",
+                            fontSize: 13,
+                            color: "var(--surface)",
+                          }}
+                        >
+                          {turn.question}
+                        </div>
                       </div>
-                      <div
+                    </div>
+
+                    {/* Jawaban asisten — kiri, bubble netral + avatar kilau. */}
+                    <div
+                      className="row"
+                      style={{
+                        gap: 8,
+                        alignItems: "flex-start",
+                        marginTop: 12,
+                      }}
+                    >
+                      <span
                         style={{
-                          borderRadius: "var(--r-md)",
-                          borderTopLeftRadius: 4,
-                          background: "var(--paper-2)",
-                          padding: "16px 18px",
+                          width: 22,
+                          height: 22,
+                          borderRadius: 999,
+                          background: "var(--data-wash)",
+                          flex: "none",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          marginTop: 17,
                         }}
                       >
-                        {cqLoading ? (
-                          <div
-                            style={{
-                              fontSize: 13.5,
-                              lineHeight: 1.55,
-                              color: "var(--ink-muted)",
-                            }}
-                          >
-                            Menyusun jawaban…
-                          </div>
-                        ) : cqError ? (
-                          <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
-                            Gagal menghubungi layanan data. Coba lagi sebentar.
-                          </div>
-                        ) : cqAnswer ? (
-                          <>
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="var(--data)"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M12 3l1.9 5.6L19.5 10l-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.4z" />
+                        </svg>
+                      </span>
+                      <div style={{ maxWidth: "82%" }}>
+                        <div
+                          className="k"
+                          style={{
+                            color: "var(--ink-faint)",
+                            marginBottom: 4,
+                          }}
+                        >
+                          Asisten data
+                        </div>
+                        <div
+                          style={{
+                            borderRadius: "var(--r-md)",
+                            borderTopLeftRadius: 4,
+                            background: "var(--paper-2)",
+                            padding: "16px 18px",
+                          }}
+                        >
+                          {turn.error ? (
                             <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
-                              {cqAnswer.answer}
+                              Gagal menghubungi layanan data. Coba lagi sebentar.
                             </div>
-                            {((cqAnswer.suggested_layers?.length ?? 0) > 0 ||
-                              cqAnswer.spatial_filter?.category ||
-                              cqAnswer.spatial_filter?.time_slot) && (
+                          ) : turn.answer ? (
+                            <>
                               <div
-                                style={{
-                                  display: "flex",
-                                  flexWrap: "wrap",
-                                  gap: 6,
-                                  marginTop: 14,
-                                }}
+                                className="copilot-answer"
+                                style={{ fontSize: 13.5, lineHeight: 1.55 }}
                               >
-                                {(cqAnswer.suggested_layers ?? []).map(
-                                  (layer) => (
+                                {turn.answer.answer}
+                              </div>
+                              {((turn.answer.suggested_layers?.length ?? 0) > 0 ||
+                                turn.appliedCategory ||
+                                turn.appliedSlot) && (
+                                <div
+                                  style={{
+                                    display: "flex",
+                                    flexWrap: "wrap",
+                                    gap: 6,
+                                    marginTop: 14,
+                                  }}
+                                >
+                                  {(turn.answer.suggested_layers ?? []).map(
+                                    (layer) => (
+                                      <span
+                                        key={layer}
+                                        className="chip"
+                                        style={{
+                                          background: "var(--data-wash)",
+                                          borderColor: "transparent",
+                                          color: "var(--data)",
+                                        }}
+                                      >
+                                        Lapisan →{" "}
+                                        {LAYER_ROWS.find((r) => r.key === layer)
+                                          ?.label ?? layer}
+                                      </span>
+                                    ),
+                                  )}
+                                  {turn.appliedCategory && (
                                     <span
-                                      key={layer}
                                       className="chip"
                                       style={{
                                         background: "var(--data-wash)",
@@ -2486,55 +2596,53 @@ export function PetaScreen({
                                         color: "var(--data)",
                                       }}
                                     >
-                                      Lapisan →{" "}
-                                      {LAYER_ROWS.find((r) => r.key === layer)
-                                        ?.label ?? layer}
+                                      Kategori →{" "}
+                                      {categoryLabel(turn.appliedCategory)}
                                     </span>
-                                  ),
-                                )}
-                                {cqAnswer.spatial_filter?.category && (
-                                  <span
-                                    className="chip"
-                                    style={{
-                                      background: "var(--data-wash)",
-                                      borderColor: "transparent",
-                                      color: "var(--data)",
-                                    }}
-                                  >
-                                    Kategori → {categoryLabel(activeCategory)}
-                                  </span>
-                                )}
-                                {cqAnswer.spatial_filter?.time_slot && (
-                                  <span
-                                    className="chip"
-                                    style={{
-                                      background: "var(--data-wash)",
-                                      borderColor: "transparent",
-                                      color: "var(--data)",
-                                    }}
-                                  >
-                                    Slot → {slotLabel(activeSlot)}
-                                  </span>
-                                )}
-                              </div>
-                            )}
+                                  )}
+                                  {turn.appliedSlot && (
+                                    <span
+                                      className="chip"
+                                      style={{
+                                        background: "var(--data-wash)",
+                                        borderColor: "transparent",
+                                        color: "var(--data)",
+                                      }}
+                                    >
+                                      Slot → {slotLabel(turn.appliedSlot)}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </>
+                          ) : (
                             <div
                               style={{
-                                fontSize: 11.5,
-                                lineHeight: 1.5,
+                                fontSize: 13.5,
+                                lineHeight: 1.55,
                                 color: "var(--ink-muted)",
-                                marginTop: 14,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
                               }}
                             >
-                              Jawaban menyesuaikan lapisan &amp; filter peta.
-                              Angka hanya dari slot yang dicacah.
+                              Menyusun jawaban
+                              <span
+                                className="copilot-typing"
+                                aria-hidden="true"
+                              >
+                                <span />
+                                <span />
+                                <span />
+                              </span>
                             </div>
-                          </>
-                        ) : null}
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  </Fragment>
+                ))}
+                <div ref={cqEndRef} />
                 <div className="k" style={{ margin: "20px 0 10px" }}>
                   Pertanyaan lain
                 </div>
