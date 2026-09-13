@@ -12,7 +12,9 @@
  * ⚠️ CAVEAT WAJIB DITAMPILKAN: semua slot masih **sampel tipis** (2–4 blok).
  * Angka di sini estimasi awal P10–P90, bukan nilai mapan. Slot **siang belum
  * terukur** (hanya pagi & sore) - jangan tampilkan angka siang seolah terukur.
- * Tidak ada angka per-PINTU/gerai: arus hanya terukur per gerbang stasiun.
+ * Arus pintu hanya dicantumkan untuk tiga gerbang yang memang ada pada fixture
+ * tally: dua Manggarai dan Pintu Bawah Utama Sudirman. Dua pintu Sudirman lain
+ * punya koordinat hasil ukur ulang, tetapi belum punya hitungan arus.
  */
 
 export type SlotKey = "pagi" | "sore";
@@ -126,7 +128,7 @@ export const STASIUN: StasiunFigure[] = [
     ],
     gerbang: [
       { nama: "Pintu Bawah", masuk: 44, keluar: 32, total: 76 },
-      { nama: "Pintu Atas", masuk: 19, keluar: 11, total: 30 },
+      { nama: "Pintu Atas", masuk: 18, keluar: 9, total: 27 },
     ],
   },
   {
@@ -155,8 +157,6 @@ export const STASIUN: StasiunFigure[] = [
     ],
     gerbang: [
       { nama: "Pintu Bawah Utama", masuk: 8, keluar: 27, total: 35 },
-      { nama: "Pintu Atas", masuk: 22, keluar: 14, total: 36 },
-      { nama: "Pintu Bawah Belakang", masuk: 4, keluar: 3, total: 7 },
     ],
   },
 ];

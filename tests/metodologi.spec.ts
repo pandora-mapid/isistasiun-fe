@@ -21,12 +21,11 @@ test("halaman memakai sistem desain paper", async ({ page }) => {
   await expect(page.locator(".page-canvas.paper-canvas")).toBeVisible();
 });
 
-test("nav menandai Metodologi sebagai halaman aktif", async ({ page }) => {
+test("Metodologi tidak ditampilkan sebagai tab navigasi utama", async ({ page }) => {
   await page.goto("/metodologi", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("link", { name: "Metodologi" })).toHaveAttribute(
-    "aria-current",
-    "page",
-  );
+  await expect(
+    page.getByRole("navigation").getByRole("link", { name: "Metodologi" }),
+  ).toHaveCount(0);
 });
 
 test("judul & persamaan terbaca, bukan sekadar hadir di DOM", async ({
