@@ -4,6 +4,9 @@ export type AuthUser = {
   id: string;
   email: string;
   role: AuthRole;
+  // Present only for "operator" — the single station it represents (section
+  // 4.1). Always absent for "admin", which sees every station.
+  station_id?: string;
 };
 
 export type AuthSession = {
