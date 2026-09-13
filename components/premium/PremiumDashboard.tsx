@@ -233,7 +233,7 @@ export function PremiumDashboard() {
         <div>
           <span className="eyebrow-chip">Analisis premium</span>
           <h1>Analisis mendalam per simpul</h1>
-          <p>
+          <p className="premium-header-copy">
             Masuk sebagai{" "}
             <b>
               {user?.role === "admin"
@@ -250,7 +250,9 @@ export function PremiumDashboard() {
           </p>
         </div>
         <label className="premium-station-picker">
-          <span>{canPickAnyStation ? "Pilih simpul" : "Simpul anda"}</span>
+          <span className="premium-picker-label">
+            {canPickAnyStation ? "Simpul yang dianalisis" : "Simpul anda"}
+          </span>
           <select
             value={stationID}
             onChange={(event) => {
@@ -268,6 +270,10 @@ export function PremiumDashboard() {
               </option>
             ))}
           </select>
+          <small>
+            Data ditampilkan sebagai rentang agar keputusan tetap membaca
+            ketidakpastian survei.
+          </small>
         </label>
       </header>
 

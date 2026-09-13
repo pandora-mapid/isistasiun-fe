@@ -369,10 +369,13 @@ test("klik titik mengisi panel ringkasan dengan titik itu", async ({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const map = (window as unknown as { __map?: any }).__map;
     const rect = map.getCanvas().getBoundingClientRect();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const feats = map.queryRenderedFeatures({
       layers: ["point-circle"],
-    }) as any[];
+    }) as Array<{
+      id: number;
+      properties: { point_label: string };
+      geometry: { coordinates: [number, number] };
+    }>;
 
     for (const f of feats) {
       // Titik yang BUKAN pilihan awal, supaya perubahannya benar-benar terlihat.

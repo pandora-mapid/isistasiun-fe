@@ -1787,6 +1787,58 @@ a.kartu:focus-visible {
   position: static;
 }
 
+/* Aksi peta memang lebih banyak daripada halaman lain (bandingkan, ringkasan
+   simpul, dan brief). Di layar menengah, meletakkannya di satu baris dengan
+   lima rute dan identitas akun membuat label navigasi terpotong. Baris kedua
+   memberi setiap kelompok ruang yang cukup tanpa menghapus satu pun aksi. */
+.nav-brand {
+  flex: none;
+}
+
+.map-nav-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+@media (min-width: 761px) and (max-width: 1500px) {
+  .peta-nav-float .navbar-container {
+    flex-wrap: wrap;
+    gap: 14px !important;
+    padding: 14px 20px !important;
+  }
+
+  .peta-nav-float .nav-links {
+    flex: 1 1 480px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .peta-nav-float .nav-links::-webkit-scrollbar {
+    display: none;
+  }
+
+  .peta-nav-float .nav-actions {
+    display: flex;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--nav-border);
+  }
+
+  .peta-nav-float .map-nav-actions {
+    flex: 1 1 0;
+  }
+
+  .peta-nav-float .station-search {
+    top: 176px;
+  }
+
+  .peta-nav-float .peta-chip-stasiun {
+    top: 230px;
+  }
+}
+
 /* ==========================================================================
    Kotak "Cari stasiun" — panel mengambang di kiri peta.
    Rel kiri dari atas ke bawah: pil nav → kotak cari → kontrol zoom MapLibre
@@ -3612,32 +3664,60 @@ a.kartu:focus-visible {
 }
 
 .premium-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 32px;
-  padding: clamp(56px, 8vw, 104px) var(--page-x) var(--s4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(290px, 360px);
+  align-items: end;
+  gap: clamp(28px, 5vw, 72px);
+  margin: clamp(28px, 4vw, 56px) var(--page-x) var(--s3);
+  padding: clamp(28px, 4vw, 52px);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-xl);
+  background:
+    linear-gradient(120deg, rgba(201, 154, 60, 0.11), transparent 46%),
+    var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .premium-header h1 {
-  margin-bottom: 14px;
-  font-size: clamp(38px, 4.6vw, 66px);
+  max-width: 13ch;
+  margin: 14px 0 12px;
+  font-size: clamp(36px, 4.4vw, 62px);
 }
 
-.premium-header p {
+.premium-header-copy {
+  max-width: 64ch;
   margin: 0;
   color: var(--ink-2);
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .premium-station-picker {
   display: grid;
-  flex: 0 1 340px;
-  gap: 8px;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid var(--rule);
+  border-radius: var(--r-md);
+  background: rgba(250, 248, 244, 0.78);
+}
+
+.premium-picker-label {
+  color: var(--ink-muted) !important;
+  font-family: var(--font-mono);
+  font-size: 10px !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .premium-station-picker select {
   padding: 0 42px 0 14px;
   cursor: pointer;
+}
+
+.premium-station-picker small {
+  color: var(--ink-muted);
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .premium-content {
@@ -3649,33 +3729,32 @@ a.kartu:focus-visible {
 .premium-kpis {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1px;
   overflow: hidden;
-  border: 1px solid var(--rule);
+  border: 1px solid var(--rule-soft);
   border-radius: var(--r-xl);
-  background: var(--surface);
+  background: var(--rule-soft);
+  box-shadow: var(--shadow-soft);
 }
 
 .premium-kpis article {
   display: grid;
   align-content: space-between;
-  min-height: 170px;
-  padding: 24px;
-  border-right: 1px solid var(--rule);
-}
-
-.premium-kpis article:last-child {
-  border-right: 0;
+  min-height: 154px;
+  padding: clamp(18px, 2vw, 26px);
+  background: var(--surface);
 }
 
 .premium-kpis span,
 .premium-kpis small {
-  color: var(--ink-faint);
+  color: var(--ink-muted);
   font-size: 11px;
 }
 
 .premium-kpis strong {
   color: var(--data);
-  font: 650 clamp(21px, 2vw, 31px) / 1 var(--font-mono);
+  overflow-wrap: anywhere;
+  font: 650 clamp(20px, 2.1vw, 31px) / 1.05 var(--font-mono);
   letter-spacing: -0.04em;
 }
 
@@ -3685,6 +3764,7 @@ a.kartu:focus-visible {
   border: 1px solid var(--rule);
   border-radius: var(--r-xl);
   background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .premium-panel-head {
@@ -3711,6 +3791,8 @@ a.kartu:focus-visible {
 
 .premium-table-wrap {
   overflow-x: auto;
+  border: 1px solid var(--rule-soft);
+  border-radius: var(--r-md);
 }
 
 .premium-table-wrap table {
@@ -3722,9 +3804,18 @@ a.kartu:focus-visible {
 .premium-table-wrap th,
 .premium-table-wrap td {
   padding: 14px 12px;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule-soft);
   text-align: left;
   white-space: nowrap;
+}
+
+.premium-table-wrap tbody tr:last-child th,
+.premium-table-wrap tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.premium-table-wrap tbody tr:nth-child(even) {
+  background: var(--paper);
 }
 
 .premium-table-wrap thead th {
@@ -3759,6 +3850,11 @@ a.kartu:focus-visible {
   font-size: 12.5px;
 }
 
+.premium-list li > :last-child {
+  flex: none;
+  text-align: right;
+}
+
 .premium-list li:last-child {
   border-bottom: 0;
 }
@@ -3774,10 +3870,27 @@ a.kartu:focus-visible {
 
 .premium-gate {
   display: grid;
-  min-height: 100vh;
+  min-height: calc(100svh - 96px);
   place-content: center;
-  padding: var(--page-x);
+  max-width: 760px;
+  margin: auto;
+  padding: clamp(32px, 8vw, 96px) var(--page-x);
   text-align: center;
+}
+
+.premium-gate > .eyebrow-chip {
+  justify-self: center;
+}
+
+.premium-gate > p {
+  max-width: 56ch;
+  margin: 0 auto 24px;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+.premium-gate > .b {
+  justify-self: center;
 }
 
 @media (max-width: 980px) {
@@ -3791,24 +3904,16 @@ a.kartu:focus-visible {
   }
 
   .premium-header {
+    grid-template-columns: 1fr;
     align-items: stretch;
-    flex-direction: column;
   }
 
   .premium-station-picker {
-    flex-basis: auto;
+    max-width: 520px;
   }
 
   .premium-kpis {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .premium-kpis article:nth-child(2) {
-    border-right: 0;
-  }
-
-  .premium-kpis article:nth-child(-n + 2) {
-    border-bottom: 1px solid var(--rule);
   }
 }
 
@@ -3845,11 +3950,29 @@ a.kartu:focus-visible {
   }
 
   .premium-kpis article {
-    border-right: 0;
-    border-bottom: 1px solid var(--rule);
+    min-height: 132px;
   }
 
-  .premium-kpis article:last-child {
-    border-bottom: 0;
+  .premium-header {
+    margin-top: 26px;
+    padding: 24px;
+  }
+
+  .premium-header h1 {
+    font-size: clamp(34px, 11vw, 48px);
+  }
+
+  .premium-station-picker {
+    max-width: none;
+  }
+
+  .premium-list li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .premium-list li > :last-child {
+    text-align: left;
   }
 }

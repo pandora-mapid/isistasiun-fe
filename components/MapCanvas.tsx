@@ -560,8 +560,13 @@ export function MapCanvas({
     const targetUrl = basemapChoiceUrl(basemap);
     if (!targetUrl) return;
 
-    setLayersReady(false);
-    setStyleReady(false);
+    // Perubahan status datang dari event MapLibre, bukan langsung dari efek.
+    // Selain mencegah render bertingkat, ini menyelaraskan React dengan saat
+    // style lama benar-benar mulai dilepas oleh map.
+    map.once("styledataloading", () => {
+      setLayersReady(false);
+      setStyleReady(false);
+    });
 
     map.setStyle(targetUrl);
 
