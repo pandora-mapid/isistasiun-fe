@@ -1,136 +1,227 @@
 "use client";
 
 /**
- * Brief satu simpul — tampil di layar, dan dicetak menjadi PDF.
+ * Export PDF formal: satu simpul per halaman A4.
  *
- * **Tanpa library PDF.** `jspdf` dan kawan-kawannya berarti satu dependensi
- * baru (±350 kB) yang harus merender ulang tata letak dan tipografinya
- * sendiri, dan hasilnya selalu meleset dari yang tampil di layar. Dialog cetak
- * browser sudah menghasilkan PDF di semua platform target, memakai tipografi
- * halaman ini apa adanya, dan "Simpan sebagai PDF" ada di setiap dialog itu.
- * Yang dibutuhkan cuma aturan `@media print` — lihat `globals.css`.
- *
- * Isinya mengikuti bentuk brief di `isi-stasiun-ai-integration.md §2.2`
- * (headline, rentang capture, asumsi, kategori hilang teratas, catatan
- * kepercayaan), tapi datanya dari `StationSummaryRow` yang sudah ada — bukan
- * dari AI service, yang memang belum dipanggil dari sini.
+ * Markup laporan sengaja berdiri sendiri dari dashboard peta. Mode print hanya
+ * mempertahankan `.brief-cetak`, sehingga kontrol peta tidak masuk ke PDF.
  */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
-import {
-  arusPuncak,
-  entryRatioPuncak,
-  kategoriHilang,
-  ringkasanSimpul,
-} from "@/lib/analytics/summary";
-import { categoryLabel, slotLabel } from "@/lib/data/dimensions";
+import { kategoriHilang, ringkasanSimpul } from "@/lib/analytics/summary";
+import { categoryLabel, SLOTS, slotLabel } from "@/lib/data/dimensions";
 import { loadStationSummary } from "@/lib/data/source";
-import type { StationSummaryPayload, StationSummaryRow } from "@/lib/data/types";
-import { desimal, persen, rentangRingkas, ribuan } from "@/lib/format";
+import type {
+  StationSummaryPayload,
+  StationSummaryRow,
+} from "@/lib/data/types";
+import {
+  desimal,
+  persen,
+  rentangRingkas,
+  ribuan,
+  rupiahRingkas,
+} from "@/lib/format";
 
-const BASIS_LABEL: Record<StationSummaryRow["basis"], string> = {
-  "monte-carlo-simpul": "simulasi Monte Carlo setingkat simpul",
-  "agregat-titik": "agregat titik (sementara, bukan simulasi)",
-};
+function jamPuncak(row: StationSummaryRow): string {
+  const slot = row.peak?.slot;
+  if (!slot) return "belum ditetapkan";
+  const definition = SLOTS.find((item) => item.key === slot);
+  if (!definition) return slotLabel(slot);
+  const [start, end] = definition.label.split("–").map((part) => part.trim());
+  return start && end ? `${start}:00 - ${end}:00` : slotLabel(slot);
+}
 
-function Bagian({ judul, children }: { judul: string; children: React.ReactNode }) {
+function dasarAngka(row: StationSummaryRow): string {
+  return row.basis === "monte-carlo-simpul"
+    ? "Simulasi Monte Carlo setingkat simpul."
+    : "Agregat titik sementara, menunggu simulasi setingkat simpul."
+}
+
+function jenisHari(payload: StationSummaryPayload): string {
+  return payload.day_type === "weekday" ? "Hari Kerja" : "Akhir Pekan";
+}
+
+function metodePencacahan(row: StationSummaryRow): string {
+  if (row.pintu_ditahan === 0) {
+    return `Melibatkan ${row.pintu_dicacah} pintu stasiun.`;
+  }
+  return `${row.pintu_dicacah} pintu dicacah (${row.pintu_ditahan} pintu estimasinya ditahan karena sampel tipis sehingga angka merupakan batas bawah).`;
+}
+
+function jumlahGerai(value: number): string {
+  if (value === 0) return "Belum ada gerai";
+  return `Baru ${ribuan(value)} gerai`;
+}
+
+function LabeledItem({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
   return (
-    <section style={{ marginTop: 16 }}>
-      <div className="k" style={{ marginBottom: 6 }}>{judul}</div>
-      {children}
-    </section>
+    <li>
+      <strong>{label}:</strong> {children}
+    </li>
   );
 }
 
-function IsiBrief({
+function StationReportPage({
   row,
   payload,
+  index,
+  total,
 }: {
   row: StationSummaryRow;
   payload: StationSummaryPayload;
+  index: number;
+  total: number;
 }) {
-  const hilang = kategoriHilang(row);
-  const E = entryRatioPuncak(row);
-  const F = arusPuncak(row);
+  const missing = kategoriHilang(row).slice(0, 3);
+  const confidence = row.confidence
+    ? `${desimal(row.confidence.min)} - ${desimal(row.confidence.max)}`
+    : "belum tersedia";
+  const flow = row.peak?.variables?.F;
+  const entryRatio = row.peak?.variables?.E;
 
   return (
-    <article>
-      <div style={{ fontSize: 12, color: "var(--ink-muted)" }}>
-        Brief simpul · {payload.day_type === "weekday" ? "hari kerja" : "akhir pekan"}
-      </div>
-      <h3 style={{ fontSize: 22, margin: "2px 0 8px" }}>{row.station_name}</h3>
+    <article
+      className={`formal-report-page${index === 0 ? " formal-report-page--first" : ""}`}
+    >
+      {index === 0 && (
+        <header className="formal-report-cover">
+          <h1>Laporan Analisis Potensi Ritel</h1>
+          <p>Ringkasan Simpul {jenisHari(payload)} Stasiun Kereta</p>
+        </header>
+      )}
 
-      <p style={{ fontSize: 13.5, lineHeight: 1.6, margin: 0 }}>
-        Kesenjangan belanja di {row.station_name} diperkirakan{" "}
-        <strong className="fig">{rentangRingkas(row.gap)}</strong> per hari, dari
-        potensi <span className="fig">{rentangRingkas(row.potensi)}</span> yang
-        baru tertangkap <span className="fig">{persen(row.capture_rate)}</span>{" "}
-        oleh gerai di dalam simpul.
-      </p>
+      <div className="formal-report-body">
+        <section className="formal-station-heading">
+          <h2>{index + 1}. Stasiun {row.station_name}</h2>
+        </section>
 
-      <Bagian judul="Rentang tertangkap">
-        <div style={{ fontSize: 13, lineHeight: 1.6 }}>
-          Tertangkap <span className="fig">{rentangRingkas(row.tertangkap)}</span>{" "}
-          dari potensi <span className="fig">{rentangRingkas(row.potensi)}</span>.
-          Dilaporkan sebagai rentang P10–P90, bukan satu angka tunggal.
-        </div>
-      </Bagian>
+        <section className="formal-summary-callout">
+          <p>
+            <strong>Kesenjangan Belanja:</strong> Diperkirakan mencapai{" "}
+            {rentangRingkas(row.gap)} per hari, dengan nilai tengah{" "}
+            {rupiahRingkas(row.gap.p50)}. Potensi total sebesar{" "}
+            {rentangRingkas(row.potensi)}, namun baru tertangkap sekitar{" "}
+            {persen(row.capture_rate, 1)} oleh gerai yang berada di dalam simpul
+            stasiun.
+          </p>
+        </section>
 
-      <Bagian judul="Asumsi yang dipakai">
-        <ul style={{ fontSize: 12.5, lineHeight: 1.65, margin: 0, paddingLeft: 18 }}>
-          <li>
-            Dasar angka: {BASIS_LABEL[row.basis]}, bukan penjumlahan angka titik
-            di layar.
-          </li>
-          <li>
-            Titik puncak{" "}
-            {row.peak
-              ? `${row.peak.point_label} pada slot ${slotLabel(row.peak.slot)}`
-              : "belum ditetapkan"}
-            {F !== null ? `, arus ${ribuan(F)} org/jam` : ""}
-            {E !== null ? `, rasio masuk ${persen(E)}` : ""}.
-          </li>
-          <li>
-            {row.pintu_dicacah} pintu dicacah
-            {row.pintu_ditahan > 0
-              ? `, ${row.pintu_ditahan} pintu estimasinya ditahan karena sampel tipis — angka di atas adalah batas bawah`
-              : ""}
-            .
-          </li>
-          <li>Konversi beli (C) dikunci 0,95 sebagai keputusan produk.</li>
-        </ul>
-      </Bagian>
+        <section className="formal-report-section">
+          <h3>A. Rentang tertangkap</h3>
+          <p>
+            Nilai yang tertangkap berada pada rentang{" "}
+            {rentangRingkas(row.tertangkap)} dari potensi total{" "}
+            {rentangRingkas(row.potensi)}. Data ini dilaporkan sebagai rentang
+            P10-P90; nilai tengahnya masing-masing{" "}
+            {rupiahRingkas(row.tertangkap.p50)} dan{" "}
+            {rupiahRingkas(row.potensi.p50)}.
+          </p>
+        </section>
 
-      <Bagian judul="Kategori hilang teratas">
-        {hilang.length === 0 ? (
-          <div style={{ fontSize: 12.5 }}>Tidak ada kategori di bawah ambang.</div>
-        ) : (
-          <ul style={{ fontSize: 12.5, lineHeight: 1.65, margin: 0, paddingLeft: 18 }}>
-            {hilang.slice(0, 3).map((c) => (
-              <li key={c.category}>
-                <strong>{categoryLabel(c.category)}</strong> — permintaan{" "}
-                <span className="fig">{persen(c.demand_share, 0)}</span>, baru{" "}
-                <span className="fig">{c.gerai_count}</span> gerai.
-              </li>
-            ))}
+        <section className="formal-report-section">
+          <h3>B. Asumsi yang dipakai &amp; Ringkasan data simpul</h3>
+          <ul className="formal-method-list">
+            <LabeledItem label="Dasar Angka">{dasarAngka(row)}</LabeledItem>
+            <LabeledItem label="Titik Puncak">
+              {row.peak?.point_label ?? "Belum ditentukan"} pada slot waktu{" "}
+              {jamPuncak(row)}.
+            </LabeledItem>
+            <LabeledItem label="Arus Pejalan Puncak (F)">
+              {flow !== undefined
+                ? `${ribuan(flow)} orang/jam dengan rasio masuk sebesar ${persen(entryRatio)}.`
+                : "Belum tersedia."}
+            </LabeledItem>
+            <LabeledItem label="Metode Pencacahan">
+              {metodePencacahan(row)}
+            </LabeledItem>
+            <LabeledItem label="Porsi Tertangkap">
+              {persen(row.capture_rate)} dari potensi belanja simpul.
+            </LabeledItem>
           </ul>
-        )}
-      </Bagian>
+        </section>
 
-      <Bagian judul="Catatan kepercayaan">
-        <div style={{ fontSize: 12.5, lineHeight: 1.6 }}>
-          {row.confidence
-            ? `Skor kepercayaan titik-titik yang diestimasi berkisar ${desimal(row.confidence.min)}–${desimal(row.confidence.max)}.`
-            : "Belum ada titik yang bisa diestimasi."}{" "}
-          {row.struk_terbaca > 0
-            ? `${ribuan(row.struk_terbaca)} struk terbaca menjadi dasar nilai transaksi.`
-            : "Belum ada struk terbaca; nilai transaksi memakai asumsi bersumber, bukan hasil OCR."}{" "}
-          Sampel lapangan 2 hari — seluruh angka rupiah adalah estimasi.
-        </div>
-      </Bagian>
+        <section className="formal-report-section formal-category-section">
+          <h3>C. Kategori hilang teratas</h3>
+          {missing.length > 0 ? (
+            <table className="formal-category-table">
+              <thead>
+                <tr>
+                  <th>Kategori</th>
+                  <th>Permintaan</th>
+                  <th>Ketersediaan Saat Ini</th>
+                </tr>
+              </thead>
+              <tbody>
+                {missing.map((category) => (
+                  <tr key={category.category}>
+                    <td>{categoryLabel(category.category)}</td>
+                    <td>{persen(category.demand_share, 0)}</td>
+                    <td>{jumlahGerai(category.gerai_count)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>Tidak ada kategori yang berada di bawah ambang ketersediaan.</p>
+          )}
+        </section>
+
+        <section className="formal-report-section formal-confidence-section">
+          <h3>D. Catatan kepercayaan</h3>
+          <p>
+            Skor kepercayaan titik-titik yang diestimasi berkisar antara{" "}
+            {confidence}. Dasar nilai transaksi diperoleh dari{" "}
+            {ribuan(row.struk_terbaca)} struk terbaca yang tercatat pada
+            ringkasan simpul. Seluruh angka rupiah merupakan nilai estimasi.
+          </p>
+          {row.pintu_ditahan > 0 && (
+            <p className="formal-report-note">
+              *Estimasi {row.pintu_ditahan} pintu ditahan karena sampel tipis;
+              ringkasan simpul diperlakukan sebagai batas bawah.
+            </p>
+          )}
+        </section>
+
+        <footer className="formal-report-footer">
+          <strong>{index + 1} / {total}</strong>
+        </footer>
+      </div>
     </article>
   );
+}
+
+function FormalReport({
+  payload,
+  rows,
+}: {
+  payload: StationSummaryPayload;
+  rows: StationSummaryRow[];
+}) {
+  return (
+    <div className="formal-report">
+      {rows.map((row, index) => (
+        <StationReportPage
+          key={row.station_id}
+          row={row}
+          payload={payload}
+          index={index}
+          total={rows.length}
+        />
+      ))}
+    </div>
+  );
+}
+
+function EmptyBrief({ children }: { children: ReactNode }) {
+  return <p className="brief-state">{children}</p>;
 }
 
 export function BriefSimpul({ onClose }: { onClose: () => void }) {
@@ -139,29 +230,29 @@ export function BriefSimpul({ onClose }: { onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    let batal = false;
+    let canceled = false;
     loadStationSummary()
-      .then((p) => !batal && setPayload(p))
-      .catch(() => !batal && setGagal(true));
+      .then((value) => !canceled && setPayload(value))
+      .catch(() => !canceled && setGagal(true));
     return () => {
-      batal = true;
+      canceled = true;
     };
   }, []);
 
   useEffect(() => {
     closeRef.current?.focus();
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const baris = payload ? ringkasanSimpul(payload) : [];
+  const rows = payload ? ringkasanSimpul(payload) : [];
 
   return (
     <div
-      className="dialog-backdrop"
+      className="dialog-backdrop node-dashboard-backdrop"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -171,94 +262,38 @@ export function BriefSimpul({ onClose }: { onClose: () => void }) {
         aria-modal="true"
         aria-labelledby="brief-simpul-title"
         className="brief-cetak"
-        style={{
-          width: "min(760px, calc(100vw - 48px))",
-          maxHeight: "calc(100vh - 96px)",
-          overflowY: "auto",
-          background: "var(--surface)",
-          border: "1px solid var(--rule)",
-          borderRadius: 14,
-          padding: "20px 26px 26px",
-          boxShadow: "0 18px 48px rgba(22,19,15,.18)",
-        }}
       >
-        <header
-          className="row cetak-sembunyi"
-          style={{ alignItems: "flex-start", gap: 16 }}
-        >
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <span className="k">Brief simpul · estimasi</span>
-            <h2 id="brief-simpul-title" style={{ fontSize: 18, margin: "2px 0 0" }}>
-              Brief PDF
-            </h2>
-            <p style={{ fontSize: 11.5, color: "var(--ink-muted)", margin: "4px 0 0" }}>
-              Pilih &ldquo;Simpan sebagai PDF&rdquo; di dialog cetak.
-            </p>
+        <header className="brief-modal-toolbar cetak-sembunyi">
+          <div>
+            <span className="brief-modal-eyebrow">Formal report · A4</span>
+            <h2 id="brief-simpul-title">Export PDF</h2>
+            <p>Pratinjau laporan dua halaman · hasil export hanya berisi dokumen.</p>
           </div>
-          <button
-            type="button"
-            className="b bp"
-            style={{ flex: "none" }}
-            onClick={() => window.print()}
-            disabled={baris.length === 0}
-          >
-            Cetak / simpan PDF
-          </button>
-          <button
-            ref={closeRef}
-            type="button"
-            className="btn-reset"
-            aria-label="Tutup brief simpul"
-            onClick={onClose}
-            style={{ fontSize: 18, lineHeight: 1, color: "var(--ink-muted)", flex: "none" }}
-          >
-            ×
-          </button>
+          <div className="brief-modal-actions">
+            <button
+              type="button"
+              className="b bp"
+              onClick={() => window.print()}
+              disabled={rows.length === 0}
+            >
+              Cetak / simpan PDF
+            </button>
+            <button
+              ref={closeRef}
+              type="button"
+              className="btn-reset brief-modal-close"
+              aria-label="Tutup brief simpul"
+              onClick={onClose}
+            >
+              ×
+            </button>
+          </div>
         </header>
 
-        {gagal && (
-          <p style={{ fontSize: 12.5, color: "var(--ink-muted)", marginTop: 18 }}>
-            Brief gagal dimuat.
-          </p>
-        )}
-
-        {!gagal && payload === null && (
-          <p style={{ fontSize: 12.5, color: "var(--ink-muted)", marginTop: 18 }}>
-            Memuat brief…
-          </p>
-        )}
-
-        {payload &&
-          baris.map((row, i) => (
-            <div
-              key={row.station_id}
-              style={{
-                marginTop: i === 0 ? 18 : 26,
-                paddingTop: i === 0 ? 0 : 20,
-                borderTop: i === 0 ? undefined : "1px solid var(--rule)",
-                // Tiap simpul mulai di halaman baru saat dicetak; dua brief yang
-                // terpotong di tengah halaman tidak bisa dibagikan terpisah.
-                breakBefore: i === 0 ? "auto" : "page",
-              }}
-            >
-              <IsiBrief row={row} payload={payload} />
-            </div>
-          ))}
-
-        {payload && (
-          <p
-            className="cetak-sumber"
-            style={{
-              fontSize: 10.5,
-              color: "var(--ink-faint)",
-              marginTop: 18,
-              lineHeight: 1.5,
-            }}
-          >
-            Sumber: Isi Stasiun · {payload.pipeline_version} · dihasilkan{" "}
-            {payload.generated_at}. Setiap angka dapat ditelusuri ke sumbernya di
-            panel transparansi aplikasi.
-          </p>
+        {gagal && <EmptyBrief>Brief gagal dimuat.</EmptyBrief>}
+        {!gagal && payload === null && <EmptyBrief>Memuat brief…</EmptyBrief>}
+        {payload && rows.length > 0 && (
+          <FormalReport payload={payload} rows={rows} />
         )}
       </section>
     </div>
