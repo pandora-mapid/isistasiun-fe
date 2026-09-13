@@ -64,7 +64,6 @@ import {
   TIDAK_DIESTIMASI,
 } from "@/lib/format";
 import {
-  CATCHMENT_MINUTES,
   LAYER_GROUPS,
   namaBasemapDikenali,
   type BasemapName,
@@ -166,8 +165,6 @@ const LAYER_ROWS: LayerRow[] = [
   },
 ];
 
-/** Baris yang benar-benar menggerakkan peta. */
-const LAYER_TERSEDIA = LAYER_ROWS.filter((r) => r.key in LAYER_GROUPS);
 const DEFAULT_ACTIVE_LAYERS = ["gap", "kepercayaan", "retail", "rental"];
 
 /** Warna titik kategori pada chip — murni hiasan, sepadan dengan legenda. */
@@ -3122,7 +3119,7 @@ export function PetaScreen({
         <NavBar
           active="peta"
           cta={
-            <div className="row" style={{ gap: 10 }}>
+            <div className="row map-nav-actions" style={{ gap: 10 }}>
               <button
                 type="button"
                 className="b bs"

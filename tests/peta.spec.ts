@@ -371,8 +371,11 @@ test("klik titik mengisi panel ringkasan dengan titik itu", async ({
     const rect = map.getCanvas().getBoundingClientRect();
     const feats = map.queryRenderedFeatures({
       layers: ["point-circle"],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }) as any[];
+    }) as Array<{
+      id: number;
+      properties: { point_label: string };
+      geometry: { coordinates: [number, number] };
+    }>;
 
     for (const f of feats) {
       // Titik yang BUKAN pilihan awal, supaya perubahannya benar-benar terlihat.
