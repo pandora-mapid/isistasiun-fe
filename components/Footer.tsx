@@ -8,14 +8,14 @@ export function Footer() {
           {/* Column 1: Brand */}
           <div className="md:col-span-6 flex flex-col gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center shadow-xs border border-white/15">
-                <div className="w-3.5 h-3.5 rounded border border-accent-yellow flex items-center justify-center">
-                  <div className="w-1.5 h-1.5 rounded-full bg-accent-yellow"></div>
-                </div>
-              </div>
-              <span className="font-headline-sm text-lg font-semibold text-white tracking-tight">
-                Isi Stasiun
-              </span>
+              <Link href="/" className="inline-block">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/Logo.png"
+                  alt="Isi Stasiun"
+                  style={{ height: 32, width: "auto", objectFit: "contain" }}
+                />
+              </Link>
             </div>
             <p className="font-serif italic text-base lg:text-lg text-stone-300 max-w-md leading-snug">
               Melihat nilai ekonomi di balik pergerakan kota.

@@ -147,7 +147,7 @@ export default function MetodologiPage() {
           <Lencana label="Protokol pengukuran" warna="brand" dot />
           <h1
             style={{
-              font: "800 var(--t-h1)/1.04 var(--font-inter), system-ui, sans-serif",
+              font: "800 var(--t-h1)/1.04 var(--font-serif), Newsreader, Georgia, serif",
               letterSpacing: "-0.025em",
               margin: "var(--s3) 0 0",
               maxWidth: "24ch",
@@ -270,7 +270,7 @@ export default function MetodologiPage() {
               </div>
               <div
                 style={{
-                  font: "700 var(--t-body)/1.25 var(--font-inter), system-ui, sans-serif",
+                  font: "700 var(--t-body)/1.25 var(--font-serif), Newsreader, Georgia, serif",
                   margin: "var(--s3) 0 var(--s1)",
                 }}
               >
