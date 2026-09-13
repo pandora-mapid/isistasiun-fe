@@ -58,6 +58,16 @@ export function PremiumDashboard() {
     }
   }, [status, router]);
 
+  const isAdmin = user?.role === "admin";
+  // An operator's dropdown never shows another station's data — the backend
+  // enforces the same scope, this just keeps the UI from offering a choice
+  // that would 403.
+  const visibleStations = useMemo(
+    () =>
+      isAdmin ? stations : stations.filter((row) => row.id === user?.station_id),
+    [stations, isAdmin, user?.station_id],
+  );
+
   useEffect(() => {
     if (status !== "authenticated") return;
     let active = true;
@@ -66,7 +76,11 @@ export function PremiumDashboard() {
         if (!active) return;
         setStations(rows);
         setError(null);
-        setStationID((current) => current || rows[0]?.id || "");
+        setStationID((current) => {
+          if (current) return current;
+          if (!isAdmin) return user?.station_id || "";
+          return rows[0]?.id || "";
+        });
         if (!rows.length) setLoading(false);
       })
       .catch((cause: unknown) => {
@@ -82,7 +96,7 @@ export function PremiumDashboard() {
     return () => {
       active = false;
     };
-  }, [status, request]);
+  }, [status, request, isAdmin, user?.station_id]);
 
   useEffect(() => {
     if (status !== "authenticated" || !stationID) return;
@@ -132,6 +146,18 @@ export function PremiumDashboard() {
     );
   }
 
+  if (!isAdmin && !user?.station_id) {
+    return (
+      <main className="page-canvas paper-canvas premium-page">
+        <div className="premium-gate" role="alert">
+          <span className="eyebrow-chip">Akses premium</span>
+          <h1>Akun operator ini belum ditautkan ke stasiun.</h1>
+          <p>Hubungi admin Isi Stasiun untuk menautkan akun ke stasiunnya.</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="page-canvas paper-canvas premium-page">
       <NavBar
@@ -148,12 +174,15 @@ export function PremiumDashboard() {
           <span className="eyebrow-chip">Analisis operator</span>
           <h1>Analisis mendalam per simpul</h1>
           <p>
-            Rincian ini dilindungi role API. Masuk sebagai <b>{user?.role}</b> ·{" "}
-            {user?.email}
+            Masuk sebagai <b>{isAdmin ? "Admin" : "Operator"}</b> · {user?.email}
+            {" — "}
+            {isAdmin
+              ? "bisa membuka semua stasiun."
+              : "hanya bisa membuka stasiun sendiri."}
           </p>
         </div>
         <label className="premium-station-picker">
-          <span>Pilih simpul</span>
+          <span>{isAdmin ? "Pilih simpul" : "Simpul anda"}</span>
           <select
             value={stationID}
             onChange={(event) => {
@@ -162,10 +191,10 @@ export function PremiumDashboard() {
               setLoading(true);
               setStationID(event.target.value);
             }}
-            disabled={!stations.length}
+            disabled={!visibleStations.length || !isAdmin}
           >
-            {!stations.length && <option value="">Memuat stasiun…</option>}
-            {stations.map((station) => (
+            {!visibleStations.length && <option value="">Memuat stasiun…</option>}
+            {visibleStations.map((station) => (
               <option key={station.id} value={station.id}>
                 {station.name} · {station.code}
               </option>
