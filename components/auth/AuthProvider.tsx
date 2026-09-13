@@ -21,6 +21,7 @@ import {
   SESSION_HINT_KEY,
 } from "@/lib/auth/client";
 import type { AuthSession, AuthUser } from "@/lib/auth/types";
+import { setAuthToken } from "@/lib/data/source";
 
 type AuthStatus = "loading" | "authenticated" | "anonymous";
 
@@ -61,6 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const applySession = useCallback((session: AuthSession | null) => {
     accessToken.current = session?.access_token ?? null;
+    // lib/data/source.ts's loaders (rental-assets, rent-flow-index,
+    // confidence-layer once API_READY) now hit endpoints that require login —
+    // without this they silently 401 for every logged-in user, because that
+    // module keeps its own token state, separate from this provider's.
+    setAuthToken(session?.access_token ?? null);
     setUser(session?.user ?? null);
     setStatus(session ? "authenticated" : "anonymous");
     writeSessionHint(Boolean(session));

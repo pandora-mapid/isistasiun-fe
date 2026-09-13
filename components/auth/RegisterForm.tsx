@@ -80,6 +80,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
             name="password"
             type={showPassword ? "text" : "password"}
             autoComplete="new-password"
+            placeholder="••••••••"
             minLength={8}
             required
           />
@@ -101,6 +102,7 @@ export function RegisterForm({ nextPath }: { nextPath: string }) {
           name="confirm"
           type={showPassword ? "text" : "password"}
           autoComplete="new-password"
+          placeholder="••••••••"
           minLength={8}
           required
         />
