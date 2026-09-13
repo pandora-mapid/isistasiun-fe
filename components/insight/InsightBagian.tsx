@@ -833,7 +833,7 @@ function Status({ v }: { v: IsiSel }) {
     Terisi: { color: "var(--ink-faint)" },
     Kurang: { color: "var(--ink-2)" },
     Kosong: { color: "var(--ink)", fontWeight: 700 },
-    "—": { color: "var(--ink-faint)" },
+    "-": { color: "var(--ink-faint)" },
   };
   return <span style={{ fontSize: "var(--t-small)", ...gaya[v] }}>{v}</span>;
 }

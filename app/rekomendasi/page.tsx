@@ -3,26 +3,27 @@ import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
 import { RequireLogin } from "@/components/auth/RequireLogin";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
 
 /**
- * Rekomendasi — layar "jadi saya harus melakukan apa".
+ * Rekomendasi - layar "jadi saya harus melakukan apa".
  *
  * Sama seperti Metodologi: layout & isinya TIDAK berubah (hero + tiga statistik,
  * tabel urutan prioritas, tiga kartu rekomendasi, kartu gelap urutan pelaksanaan,
- * panel risiko + foto, penutup, footer) — yang berubah cuma KULITNYA. Dipindah
+ * panel risiko + foto, penutup, footer) - yang berubah cuma KULITNYA. Dipindah
  * dari sistem slate lama ke `.paper-canvas` yang sama dengan Beranda, Insight, dan
  * Metodologi: section full-width di `--page-x`, kartu DATAR bertint yang bergilir
  * menempuh palet (`--tile-*`, `--data-wash`, `--field-wash`) di atas satu latar
  * `--paper` seragam, satu kartu `.ink-band` gelap, angka `.fig`, kicker `.eyebrow`,
  * kepala `Kepala`, nav pil emas, reveal scroll.
  *
- * Masih **server component** dan masih mockup ilustratif — belum baca data hidup,
- * dan label lama "Stasiun A/B/C" sengaja dipertahankan (menyambungkannya ke data
- * dua-stasiun sungguhan adalah pekerjaan terpisah). Footer tetap menyatakan
- * "angka ilustratif".
+ * Masih **server component**, tetapi angkanya kini NYATA: dari survei lapangan
+ * Manggarai dan Sudirman (seed BE = fixtures AI, diturunkan pipeline dari
+ * `isistasiun-ai/data/source/field/`). Semua slot masih sampel tipis (2 sampai
+ * 4 blok), jadi setiap angka disertai skor kepercayaannya dan tak ada yang
+ * disebut mapan. Tidak ada angka per-pintu (arus hanya terukur per gerbang);
+ * rekomendasi diberikan per stasiun x slot. Lihat `lib/data/real-figures.ts`.
  */
 
 const seksi: CSSProperties = { padding: "0 var(--page-x) var(--s4)" };
@@ -42,20 +43,20 @@ const STAT: {
   dot?: boolean;
 }[] = [
   {
-    label: "Total kesenjangan tiga simpul",
-    nilai: "Rp 6.400.000",
+    label: "Kesenjangan harian, slot terukur",
+    nilai: "Rp2,1–3,7 jt",
     bg: "var(--data-wash)",
     warna: "var(--data)",
   },
   {
-    label: "Slot layak direkomendasikan",
-    nilai: "34 dari 48",
+    label: "Slot dengan estimasi",
+    nilai: "3 slot",
     bg: "var(--tile-sky)",
     warna: "var(--ink)",
   },
   {
-    label: "Ditunda karena sampel tipis",
-    nilai: "14 slot",
+    label: "Semua slot masih sampel tipis",
+    nilai: "2–4 blok",
     bg: "var(--field-wash)",
     warna: "var(--ink-muted)",
     dot: true,
@@ -82,55 +83,44 @@ type BarisPrioritas = {
 const PRIORITAS: BarisPrioritas[] = [
   {
     rank: "01",
-    lokasi: "Stasiun B · Pintu 4",
-    kategori: "Apotek & kesehatan",
+    lokasi: "Sudirman",
+    kategori: "Jasa, apotek",
     dot: "var(--data)",
-    slot: "06–09",
-    gap: "Rp 1.800.000",
-    keyakinan: "tinggi",
-    isi: 86,
+    slot: "16–19",
+    gap: "Rp0,9–1,6 jt",
+    keyakinan: "tipis · 0,42",
+    isi: 42,
     isiWarna: "var(--data)",
   },
   {
     rank: "02",
-    lokasi: "Stasiun C · Pintu 2",
-    kategori: "F&B cepat",
+    lokasi: "Manggarai",
+    kategori: "Jasa, apotek",
     dot: "var(--data-mid)",
     slot: "16–19",
-    gap: "Rp 1.400.000",
-    keyakinan: "tinggi",
-    isi: 74,
+    gap: "Rp0,8–1,4 jt",
+    keyakinan: "tipis · 0,50",
+    isi: 50,
     isiWarna: "var(--data)",
   },
   {
     rank: "03",
-    lokasi: "Stasiun A · Pintu 1",
-    kategori: "Ritel kebutuhan harian",
+    lokasi: "Manggarai",
+    kategori: "Jasa, apotek",
     dot: "var(--data-soft)",
     slot: "06–09",
-    gap: "Rp 900.000",
-    keyakinan: "sedang",
-    isi: 58,
+    gap: "Rp0,4–0,7 jt",
+    keyakinan: "tipis · 0,45",
+    isi: 45,
     isiWarna: "var(--data-mid)",
   },
   {
-    rank: "04",
-    lokasi: "Stasiun B · Pintu 1",
-    kategori: "Jasa titip & kurir",
-    dot: "var(--data)",
-    slot: "11–14",
-    gap: "Rp 700.000",
-    keyakinan: "sedang",
-    isi: 52,
-    isiWarna: "var(--data-mid)",
-  },
-  {
-    rank: "—",
-    lokasi: "Stasiun B · Pintu 3",
-    kategori: "Belum direkomendasikan",
-    slot: "—",
+    rank: "·",
+    lokasi: "Sudirman",
+    kategori: "Pagi belum terukur",
+    slot: "06–09",
     gap: "tidak diestimasi",
-    keyakinan: "sampel tipis",
+    keyakinan: "tak berdenominator",
     tipis: true,
   },
 ];
@@ -149,37 +139,37 @@ const REKOMENDASI: KartuRekomendasi[] = [
   {
     prioritas: "Prioritas 01",
     tempo: "Kuartal ini",
-    judul: "Isi Pintu 4 dengan gerai apotek berformat kecil",
-    isi: "Permintaan kategori ini terbaca 37% pada slot 06–09 tanpa satu pun gerai di dalam stasiun, sementara arus pintu tergolong tertinggi.",
+    judul: "Buka gerai jasa di Sudirman untuk slot sore",
+    isi: "Sudirman hanya menangkap 19 persen dari potensi belanja sore, kesenjangan terbesar di antara dua simpul. Permintaan jasa terbaca kuat di kawasan (71 titik dalam 800 meter) tanpa satu pun gerai jasa di dalam stasiun.",
     tint: "var(--tile-sky)",
     baris: [
-      { k: "Potensi tertangkap", v: "Rp 1.800.000 / hari", data: true },
-      { k: "Ukur ulang setelah", v: "6 minggu" },
-      { k: "Dasar data", v: "4 slot · 96 struk" },
+      { k: "Kesenjangan sore", v: "Rp0,9–1,6 jt", data: true },
+      { k: "Permintaan jasa", v: "71 POI / 800 m" },
+      { k: "Dasar data", v: "sore, 4 blok (tipis)" },
     ],
   },
   {
     prioritas: "Prioritas 02",
-    tempo: "2 kuartal",
-    judul: "Ubah dasar sewa dari luas ruang ke arus pintu",
-    isi: "Indeks sewa terhadap arus menunjukkan pintu dengan arus tinggi dihargai setara pintu sepi, sehingga nilai ruang tidak tercermin.",
+    tempo: "Kuartal ini",
+    judul: "Lengkapi jasa dan apotek di Manggarai",
+    isi: "Manggarai kehilangan dua kategori yang berpermintaan di kawasan: jasa (55 titik) dan apotek (13 titik), tak satu pun ada di dalam stasiun. Kesenjangannya Rp0,8–1,4 jt pada sore dan Rp0,4–0,7 jt pada pagi.",
     tint: "var(--tile-mint)",
     baris: [
-      { k: "Cakupan", v: "24 titik sewa" },
-      { k: "Ukur ulang setelah", v: "3 bulan" },
-      { k: "Dasar data", v: "3 simpul · 4 slot" },
+      { k: "Kesenjangan sore", v: "Rp0,8–1,4 jt", data: true },
+      { k: "Jasa / apotek", v: "55 / 13 POI" },
+      { k: "Dasar data", v: "pagi + sore, 4 blok" },
     ],
   },
   {
     prioritas: "Prioritas 03",
     tempo: "Berjalan",
-    judul: "Perluas pencacahan ke simpul dengan sampel tipis",
-    isi: "Kawasan bertanda sampel tipis menahan sebagian rekomendasi. Satu putaran tambahan cukup untuk menaikkannya ke tingkat kepercayaan yang sama.",
+    judul: "Tambah putaran pencacahan sebelum menyimpulkan",
+    isi: "Ketiga slot yang terukur masih sampel tipis, dengan skor kepercayaan 0,15 sampai 0,50. Satu putaran pencacahan lagi menaikkannya ke tingkat yang layak dipakai untuk keputusan sewa.",
     tint: "var(--tile-violet)",
     baris: [
-      { k: "Slot terbuka", v: "14 slot" },
-      { k: "Kebutuhan", v: "5 hari kerja" },
-      { k: "Hasil", v: "lapisan penuh" },
+      { k: "Slot terestimasi", v: "3 slot" },
+      { k: "Skor kepercayaan", v: "0,15–0,50" },
+      { k: "Kebutuhan", v: "1 putaran" },
     ],
   },
 ];
@@ -195,22 +185,22 @@ const FASE: {
   {
     dot: "var(--data)",
     kicker: "Fase 1 · Kuartal ini",
-    judul: "Isi slot prioritas pertama",
-    isi: "Satu gerai baru di pintu dengan gap terbesar, dengan pengukuran sebelum dan sesudah pada slot yang sama.",
+    judul: "Isi gerai jasa di Sudirman sore",
+    isi: "Slot dengan kesenjangan terbesar dan capture terendah, diukur sebelum dan sesudah pada slot yang sama untuk melihat dampaknya.",
     garis: true,
   },
   {
     dot: "var(--data-soft)",
     kicker: "Fase 2 · 2 kuartal",
-    judul: "Tinjau dasar penetapan sewa",
-    isi: "Indeks sewa terhadap arus dipakai sebagai salah satu dasar peninjauan harga di seluruh titik sewa.",
+    judul: "Lengkapi jasa dan apotek Manggarai",
+    isi: "Dua kategori berpermintaan yang absen di dalam stasiun, mengisi kesenjangan pagi dan sore secara bertahap.",
     garis: true,
   },
   {
     dot: "var(--data-mid)",
     kicker: "Fase 3 · Tahun berjalan",
-    judul: "Perluas ke simpul lain",
-    isi: "Protokol yang sama dijalankan di simpul berikutnya agar lapisannya dapat dibandingkan langsung.",
+    judul: "Tebalkan sampel kedua simpul",
+    isi: "Semua slot masih sampel tipis. Putaran pencacahan tambahan menaikkan skor kepercayaan sebelum angka dipakai untuk keputusan sewa.",
     garis: false,
   },
 ];
@@ -229,8 +219,8 @@ const RISIKO: { dot: string; judul: string; isi: string }[] = [
   },
   {
     dot: "var(--data-mid)",
-    judul: "Tiga simpul belum mewakili jaringan",
-    isi: "Hasilnya dinyatakan indikatif, dan protokolnya dibuka agar simpul lain dapat diukur dengan cara yang sama.",
+    judul: "Dua simpul belum mewakili jaringan",
+    isi: "Hasilnya dinyatakan indikatif dan masih sampel tipis, dan protokolnya dibuka agar simpul lain dapat diukur dengan cara yang sama.",
   },
 ];
 
@@ -238,13 +228,10 @@ export default function RekomendasiPage() {
   return (
     <RequireLogin next="/rekomendasi">
     <div className="page-canvas paper-canvas">
-      <NavBar
-        active="rekomendasi"
-        cta={<button className="b bs">Unduh paket rekomendasi</button>}
-      />
+      <NavBar active="rekomendasi" cta={null} />
 
       {/* ============================================================
-          Hero — dua kolom. Tulisan kiri, tiga kartu ringkasan kanan.
+          Hero - dua kolom. Tulisan kiri, tiga kartu ringkasan kanan.
           Grid, tipografi & jarak disamakan dengan hero Metodologi.
           ============================================================ */}
       <section
@@ -280,9 +267,9 @@ export default function RekomendasiPage() {
               color: "var(--ink-2)",
             }}
           >
-            Rekomendasi hanya diberikan untuk pintu dan slot yang sampelnya
-            memadai. Urutannya mengikuti besar kesenjangan, bukan luas ruang
-            yang tersedia.
+            Urutannya mengikuti besar kesenjangan, bukan luas ruang yang
+            tersedia. Semua angka masih estimasi awal karena sampelnya tipis,
+            jadi tiap rekomendasi menyertakan skor kepercayaannya.
           </p>
         </div>
 
@@ -334,13 +321,13 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Urutan prioritas — kepala + chip simpul + tabel grid.
+          Urutan prioritas - kepala + chip simpul + tabel grid.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <Kepala
           kicker="Petak kosong"
           judul="Urutan prioritas"
-          catatan="Diambil dari 34 slot yang datanya memadai. Kolom kepercayaan menandai ketebalan sampel di balik tiap estimasi."
+          catatan="Diurutkan dari besar kesenjangan. Semua slot masih sampel tipis, jadi kolom kepercayaan menampilkan skornya, bukan cap mapan."
         />
 
         <div
@@ -351,7 +338,7 @@ export default function RekomendasiPage() {
             margin: "0 0 var(--s3)",
           }}
         >
-          {["Semua simpul", "Stasiun A", "Stasiun B", "Stasiun C"].map(
+          {["Semua simpul", "Manggarai", "Sudirman"].map(
             (c, i) => (
               <span
                 key={c}
@@ -552,7 +539,7 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Tiga rekomendasi utama — kartu bertint bergilir.
+          Tiga rekomendasi utama - kartu bertint bergilir.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <Kepala
@@ -645,7 +632,7 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Urutan pelaksanaan — satu kartu gelap `.ink-band`.
+          Urutan pelaksanaan - satu kartu gelap `.ink-band`.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <div
@@ -741,32 +728,25 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Risiko & penanganannya + foto — dua kartu datar.
+          Risiko & penanganannya - satu kartu penuh, tiga risiko sejajar.
           ============================================================ */}
-      <section
-        className="reveal runtuh-1"
-        style={{
-          ...seksi,
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
-          gap: "var(--s2)",
-        }}
-      >
+      <section className="reveal" style={seksi}>
         <div className="kartu" style={{ padding: "var(--s3)" }}>
           <h2
             style={{
               font: "800 clamp(21px, 2vw, 26px)/1.15 var(--font-inter), system-ui, sans-serif",
               letterSpacing: "-0.02em",
-              margin: "0 0 var(--s3)",
+              margin: "0 0 var(--s4)",
             }}
           >
             Risiko dan penanganannya
           </h2>
           <div
+            className="runtuh-1"
             style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "var(--s2)",
+              display: "grid",
+              gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+              gap: "var(--s3)",
             }}
           >
             {RISIKO.map((r) => (
@@ -798,23 +778,10 @@ export default function RekomendasiPage() {
             ))}
           </div>
         </div>
-        <div
-          className="kartu"
-          style={{
-            overflow: "hidden",
-            background: "var(--surface)",
-            minHeight: 340,
-          }}
-        >
-          <ImagePlaceholder
-            label="Foto area komersial / gerai stasiun"
-            style={{ color: "var(--ink-faint)" }}
-          />
-        </div>
       </section>
 
       {/* ============================================================
-          Penutup — grid 1fr 320px, di atas kertas.
+          Penutup - grid 1fr 320px, di atas kertas.
           ============================================================ */}
       <section
         className="reveal"
@@ -860,12 +827,6 @@ export default function RekomendasiPage() {
               Kami siap menjalankan putaran pencacahan berikutnya di simpul
               pilihan Anda.
             </p>
-            <button
-              className="b bp"
-              style={{ padding: "14px 24px", fontSize: 14 }}
-            >
-              Unduh paket rekomendasi
-            </button>
           </div>
         </div>
       </section>
@@ -882,8 +843,8 @@ export default function RekomendasiPage() {
         }}
       >
         <span style={{ fontSize: 11.5, color: "var(--ink-faint)" }}>
-          Isi Stasiun · dibangun di atas GEO MAPID · seluruh angka pada halaman
-          ini bersifat ilustratif
+          Isi Stasiun · dibangun di atas GEO MAPID · angka dari survei lapangan
+          Manggarai dan Sudirman, masih sampel tipis (estimasi awal)
         </span>
         <Link
           href="/peta"

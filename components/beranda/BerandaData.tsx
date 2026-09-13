@@ -3,15 +3,15 @@
 /**
  * Satu-satunya tempat halaman Beranda mengambil angka.
  *
- * Sebelumnya seluruh angka di layar ini ditulis mati di dalam JSX — dan
+ * Sebelumnya seluruh angka di layar ini ditulis mati di dalam JSX - dan
  * angkanya **bertentangan dengan data yang dipakai halaman Peta**: nama stasiun
  * ("Stasiun A/B/C" vs Manggarai/Sudirman), tipologinya, bahkan jumlah pintunya
  * (5 vs 3). Halaman depan membantah halaman produknya sendiri, dan itu melanggar
- * janji utama proposal — setiap angka bisa dilacak asalnya (ROADMAP §9 nomor 4).
+ * janji utama proposal - setiap angka bisa dilacak asalnya (ROADMAP §9 nomor 4).
  *
  * Karena itu Beranda kini membaca sumber yang sama persis dengan Peta:
  * `usePetaData()` untuk memuat, `lib/analytics/select.ts` untuk memilih. Tidak
- * ada satu pun angka yang dihitung di sini maupun di dalam JSX — semuanya
+ * ada satu pun angka yang dihitung di sini maupun di dalam JSX - semuanya
  * dipetik dari payload.
  *
  * Dimuat **sekali** lewat satu provider, bukan sekali per komponen: peta hero
@@ -74,7 +74,7 @@ export type IsiBeranda = {
     gapDomain: Domain;
     confidenceDomain: Domain;
   } | null;
-  /** Simpul berkesenjangan terbesar — angka yang dipajang di hero. */
+  /** Simpul berkesenjangan terbesar - angka yang dipajang di hero. */
   sorotan: {
     namaStasiun: string;
     namaTitik: string;
@@ -85,7 +85,7 @@ export type IsiBeranda = {
   /**
    * Satu contoh nyata uraian F × E × C × V, dipakai section persamaan.
    *
-   * Selalu dari satu titik pada satu slot — tidak pernah dirata-ratakan antar
+   * Selalu dari satu titik pada satu slot - tidak pernah dirata-ratakan antar
    * slot. Keempat variabel itu hanya dicacah per slot, jadi angka "rata-rata
    * sehari" tidak pernah benar-benar diukur oleh siapa pun.
    */
@@ -112,7 +112,7 @@ const KOSONG: IsiBeranda = {
 
 const Konteks = createContext<IsiBeranda>(KOSONG);
 
-/** Angka Beranda. Aman dipanggil sebelum data termuat — nilainya `siap: false`. */
+/** Angka Beranda. Aman dipanggil sebelum data termuat - nilainya `siap: false`. */
 export function useBeranda(): IsiBeranda {
   return useContext(Konteks);
 }
@@ -166,7 +166,7 @@ export function BerandaData({ children }: { children: ReactNode }) {
         metric: teratas,
         namaTitik: teratas
           ? (namaTitik.get(teratas.pointId) ?? `#${teratas.pointId}`)
-          : "—",
+          : "-",
         slot: slotNilai(titik),
       };
     });
