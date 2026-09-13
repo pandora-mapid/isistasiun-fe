@@ -3582,6 +3582,8 @@ a.kartu:focus-visible {
   width: 100%;
   min-height: 48px;
   justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .auth-submit:disabled,
@@ -3591,11 +3593,22 @@ a.kartu:focus-visible {
 }
 
 .auth-help {
-  margin: -4px 0 0;
-  color: var(--ink-faint);
-  font-size: 10.5px;
+  margin: 2px 0 0;
+  color: var(--ink-2);
+  font-size: 13.5px;
   line-height: 1.55;
   text-align: center;
+}
+
+.auth-help a {
+  color: var(--data);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth-help a:hover {
+  color: var(--accent-900);
 }
 
 .premium-header {
