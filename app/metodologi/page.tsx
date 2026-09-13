@@ -7,18 +7,18 @@ import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
 
 /**
- * Metodologi — layar "bagaimana angkanya dibuat".
+ * Metodologi - layar "bagaimana angkanya dibuat".
  *
  * Layout-nya tidak berubah (hero + persamaan, lima langkah, panel transparansi,
- * histogram + kartu "yang dibuang", footer) — yang berubah cuma KULITNYA:
+ * histogram + kartu "yang dibuang", footer) - yang berubah cuma KULITNYA:
  * dipindah dari sistem slate lama ke `.paper-canvas` yang sama dengan Beranda
- * dan Insight, dan rupanya disamakan dengan Insight — section full-width di
+ * dan Insight, dan rupanya disamakan dengan Insight - section full-width di
  * `--page-x`, kartu DATAR bertint yang bergilir menempuh palet (`--tile-*`,
  * `--data-wash`, `--field-wash`) di atas satu latar `--paper` seragam, dua
  * kartu `.ink-band` gelap, angka `.fig`, kicker `.eyebrow`, kepala `Kepala`,
  * nav pil emas, reveal scroll.
  *
- * Masih **server component** dan masih mockup ilustratif — belum baca data
+ * Masih **server component** dan masih mockup ilustratif - belum baca data
  * hidup (itu pekerjaan terpisah; footer tetap menyatakan "angka ilustratif").
  */
 
@@ -128,7 +128,7 @@ export default function MetodologiPage() {
       />
 
       {/* ============================================================
-          Hero — dua kolom. Tulisan kiri, kartu tinta persamaan kanan.
+          Hero - dua kolom. Tulisan kiri, kartu tinta persamaan kanan.
           Grid, tipografi & jarak disamakan dengan hero Insight.
           ============================================================ */}
       <section
@@ -166,7 +166,7 @@ export default function MetodologiPage() {
           >
             Tiga variabel dicacah manusia di lapangan, satu variabel dibaca AI
             dari foto struk, dan hasilnya disajikan sebagai rentang. Halaman ini
-            memuat aturan yang dipakai — termasuk aturan untuk membuang data
+            memuat aturan yang dipakai - termasuk aturan untuk membuang data
             yang tidak layak dipakai.
           </p>
         </div>
@@ -216,14 +216,14 @@ export default function MetodologiPage() {
             }}
           >
             Keduanya diukur pada pintu yang sama, slot waktu yang sama, dan
-            instrumen yang sama — sehingga selisihnya dapat dibandingkan antar
+            instrumen yang sama - sehingga selisihnya dapat dibandingkan antar
             simpul.
           </p>
         </div>
       </section>
 
       {/* ============================================================
-          Lima langkah — kartu bertint bergilir.
+          Lima langkah - kartu bertint bergilir.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <Kepala
@@ -291,8 +291,8 @@ export default function MetodologiPage() {
       </section>
 
       {/* ============================================================
-          Panel transparansi — foto struk → satu angka. Grid kartu datar
-          langsung di atas kertas (bukan panel bersarang) — pola Insight.
+          Panel transparansi - foto struk → satu angka. Grid kartu datar
+          langsung di atas kertas (bukan panel bersarang) - pola Insight.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <Kepala
@@ -301,7 +301,7 @@ export default function MetodologiPage() {
           catatan="Contoh metode pembacaan struk. Pada survei ini V masih memakai nilai acuan (Rp25.000 makanan-minuman, Rp30.000 ritel) karena pengumpulan struk adalah langkah berikutnya; panel ini menunjukkan bagaimana tiap V akan dapat dibuka sampai foto aslinya."
         />
         <div style={{ maxWidth: 640 }}>
-          {/* Contoh pemetaan satu struk ke nilai V — ilustrasi metode, bukan
+          {/* Contoh pemetaan satu struk ke nilai V - ilustrasi metode, bukan
               data terkumpul (struk belum dicacah pada survei ini). */}
           <div
             style={{
@@ -380,13 +380,13 @@ export default function MetodologiPage() {
       </section>
 
       {/* ============================================================
-          Ketidakpastian & batas — histogram + kartu "yang dibuang".
+          Ketidakpastian & batas - histogram + kartu "yang dibuang".
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <Kepala
           kicker="Ketidakpastian & batas"
           judul="Kenapa jawabannya rentang, dan apa yang dibuang."
-          catatan="Tiap variabel punya ketidakpastiannya sendiri; setelah dikalikan, yang jujur dilaporkan adalah P10–P90 — bukan satu angka."
+          catatan="Tiap variabel punya ketidakpastiannya sendiri; setelah dikalikan, yang jujur dilaporkan adalah P10–P90 - bukan satu angka."
         />
         <div
           className="runtuh-1"
@@ -397,7 +397,7 @@ export default function MetodologiPage() {
             alignItems: "start",
           }}
         >
-          {/* KIRI — sebaran simulasi */}
+          {/* KIRI - sebaran simulasi */}
           <div style={tint("var(--data-wash)")}>
             <div className="eyebrow" style={{ marginBottom: "var(--s3)" }}>
               Sebaran hasil simulasi
@@ -489,7 +489,7 @@ export default function MetodologiPage() {
             </div>
           </div>
 
-          {/* KANAN — yang dibuang */}
+          {/* KANAN - yang dibuang */}
           <div
             className="kartu ink-band"
             style={{
@@ -592,7 +592,7 @@ export default function MetodologiPage() {
 /* --- Kartu "Persamaan potensi" di hero ------------------------------------- */
 
 /**
- * Ukuran font tiap bagian persamaan, dalam px. **Atur di sini** — ini satu-
+ * Ukuran font tiap bagian persamaan, dalam px. **Atur di sini** - ini satu-
  * satunya tempatnya. `suku` = huruf F/E/C/V (baris 1); `sukuBaris2` = kata
  * "Potensi"/"Tertangkap" (baris 2); `hasil` = pil hasil "Potensi" & "Kesenjangan";
  * `operator` = tanda × − =.
@@ -607,7 +607,7 @@ const FONT_PERSAMAAN = {
 /**
  * Satu baris persamaan. Default `space-between` (membentang selebar kartu);
  * `kiri` mengunci ke kiri (sisi kanan boleh kosong). `flex-wrap` supaya turun
- * ke bawah — bukan terpotong — kalau kartunya sempit.
+ * ke bawah - bukan terpotong - kalau kartunya sempit.
  */
 function Baris({
   children,

@@ -1,9 +1,9 @@
 /**
- * Angka NYATA hasil survei lapangan + pipeline — sumber kebenaran untuk
+ * Angka NYATA hasil survei lapangan + pipeline - sumber kebenaran untuk
  * halaman naratif (Insight, Metodologi, Rekomendasi).
  *
  * Beda dari `public/mock/` (model peta per-titik yang masih prototipe): berkas
- * ini hanya memuat granularitas yang benar-benar TERUKUR — **per stasiun ×
+ * ini hanya memuat granularitas yang benar-benar TERUKUR - **per stasiun ×
  * slot**, kategori, dan arus per gerbang. Persis mencerminkan `isistasiun-be`
  * seed (`backend/seed/isi_stasiun_seed.sql`) = `isistasiun-ai` fixtures, yang
  * diturunkan pipeline dari `isistasiun-ai/data/source/field/`
@@ -11,7 +11,7 @@
  *
  * ⚠️ CAVEAT WAJIB DITAMPILKAN: semua slot masih **sampel tipis** (2–4 blok).
  * Angka di sini estimasi awal P10–P90, bukan nilai mapan. Slot **siang belum
- * terukur** (hanya pagi & sore) — jangan tampilkan angka siang seolah terukur.
+ * terukur** (hanya pagi & sore) - jangan tampilkan angka siang seolah terukur.
  * Tidak ada angka per-PINTU/gerai: arus hanya terukur per gerbang stasiun.
  */
 

@@ -3,13 +3,13 @@
 /**
  * F × E × C × V sebagai persamaan, bukan sebagai empat kartu.
  *
- * Ini inti intelektual produknya — satu-satunya alasan angka kesenjangan bisa
+ * Ini inti intelektual produknya - satu-satunya alasan angka kesenjangan bisa
  * ada sama sekali. Sebelumnya ia disajikan sebagai empat kotak abu berukuran
  * sama, persis seperti setiap kelompok empat hal lain di halaman ini, sehingga
  * tidak ada apa pun yang memberi tahu pembaca bahwa keempatnya **dikalikan**.
  *
  * Bentuk persamaan mengembalikan hubungan itu, dan angkanya diambil dari satu
- * titik pada satu slot yang benar-benar dicacah — bukan rata-rata karangan.
+ * titik pada satu slot yang benar-benar dicacah - bukan rata-rata karangan.
  *
  * Putaran 12: kicker "Instrumen" jadi `<KickerBernomor n={2}>`; band ini
  * diperlakukan sebagai bab bernomor. `--ink-faint` pada angka otomatis jadi
@@ -18,7 +18,7 @@
  * Putaran berikut: kepala bab jadi baris flex (bukan `.g12`) supaya judul
  * "Empat variabel, satu instrumen." bisa `nowrap` selebar isinya. Paragraf
  * pengantar dipersingkat, RATA-KANAN (`margin-left: auto` + `text-align:
- * right`, menempel tepi band), dan ditulis kalimat biasa saja — tanpa em-dash,
+ * right`, menempel tepi band), dan ditulis kalimat biasa saja - tanpa em-dash,
  * titik-dua, atau titik-koma (permintaan user).
  */
 
@@ -125,7 +125,7 @@ export function Persamaan() {
         </div>
 
         {/* Persamaannya sendiri. Tanda kali duduk di antara huruf, sejajar
-            dengan garis dasarnya — itu yang membuat hubungan antar-suku
+            dengan garis dasarnya - itu yang membuat hubungan antar-suku
             terbaca sebelum satu kata pun dibaca. */}
         <div
           className="runtuh-2"
@@ -134,7 +134,7 @@ export function Persamaan() {
             gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
             gap: "var(--s3)",
             // Sengaja lebih lega (`--s5`) dari jarak kicker→judul (`--s3`) di
-            // atas — dua jeda itu tidak boleh sama besar.
+            // atas - dua jeda itu tidak boleh sama besar.
             marginTop: "var(--s5)",
           }}
         >
@@ -223,7 +223,7 @@ export function Persamaan() {
           ))}
         </div>
 
-        {/* Angka di atas bukan hiasan — ini alamat persisnya di dalam data. */}
+        {/* Angka di atas bukan hiasan - ini alamat persisnya di dalam data. */}
         <p
           className="fig"
           style={{

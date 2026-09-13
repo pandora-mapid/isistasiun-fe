@@ -27,7 +27,7 @@ import {
 } from "@/lib/data/real-figures";
 import type { Range } from "@/lib/data/types";
 
-export type IsiSel = "Terisi" | "Kurang" | "Kosong" | "—";
+export type IsiSel = "Terisi" | "Kurang" | "Kosong" | "-";
 
 export type IsiInsight = {
   siap: boolean;
@@ -39,12 +39,12 @@ export type IsiInsight = {
     gap: Range;
     potensi: Range;
     tertangkap: Range;
-    /** Bagian potensi yang tertangkap, 0–100 — dipakai mengisi batang. */
+    /** Bagian potensi yang tertangkap, 0–100 - dipakai mengisi batang. */
     isiPersen: number;
     /** Porsi potensi yang tertangkap gerai, 0–100. `null` bila tak terhitung. */
     capturePersen: number | null;
   } | null;
-  /** Angka cakupan pencacahan — dasar bukti di balik seluruh halaman. */
+  /** Angka cakupan pencacahan - dasar bukti di balik seluruh halaman. */
   cakupan: {
     simpulDiamati: number;
     pintuDiamati: number;
@@ -135,7 +135,7 @@ export function useInsight(): IsiInsight {
   return useContext(Konteks);
 }
 
-/** Batas atas skala yang enak dibaca — bulatkan ke atas ke setengah magnitudo. */
+/** Batas atas skala yang enak dibaca - bulatkan ke atas ke setengah magnitudo. */
 function niceCeil(v: number): number {
   if (v <= 0) return 1_000_000;
   const mag = 10 ** Math.floor(Math.log10(v));
@@ -160,7 +160,7 @@ function demandShare(st: StasiunFigure, key: string): number | null {
   return total > 0 && k ? k.demandCount / total : null;
 }
 
-/** Dihitung sekali dari data statis — tidak bergantung fetch apa pun. */
+/** Dihitung sekali dari data statis - tidak bergantung fetch apa pun. */
 const NILAI: IsiInsight = (() => {
   const manggarai = STASIUN.find((s) => s.id === 1)!;
   const sudirman = STASIUN.find((s) => s.id === 2)!;
@@ -216,7 +216,7 @@ const NILAI: IsiInsight = (() => {
 
   // Semua slot memenuhi ambang gerai x blok tetapi skor kepercayaannya masih
   // rendah (0,15-0,50), jadi tak ada satu slot yang "gagal ambang" untuk
-  // disorot spesifik — tampilkan pernyataan aturan umum (sampelTipis null).
+  // disorot spesifik - tampilkan pernyataan aturan umum (sampelTipis null).
   const sampelTipis = null;
 
   const jasaSudirman = sudirman.kategori.find((k) => k.key === "jasa")!;

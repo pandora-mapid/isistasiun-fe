@@ -5,7 +5,7 @@
  *
  * Kembaran dari baris yang sudah ada di halaman Peta. Ada di sini karena
  * Beranda kini memakai sumber yang sama persis: kalau angkanya berasal dari
- * suatu tempat, tempatnya harus disebut — termasuk saat tempatnya masih data
+ * suatu tempat, tempatnya harus disebut - termasuk saat tempatnya masih data
  * contoh.
  */
 

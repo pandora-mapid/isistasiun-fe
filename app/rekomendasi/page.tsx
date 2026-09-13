@@ -7,11 +7,11 @@ import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
 
 /**
- * Rekomendasi — layar "jadi saya harus melakukan apa".
+ * Rekomendasi - layar "jadi saya harus melakukan apa".
  *
  * Sama seperti Metodologi: layout & isinya TIDAK berubah (hero + tiga statistik,
  * tabel urutan prioritas, tiga kartu rekomendasi, kartu gelap urutan pelaksanaan,
- * panel risiko + foto, penutup, footer) — yang berubah cuma KULITNYA. Dipindah
+ * panel risiko + foto, penutup, footer) - yang berubah cuma KULITNYA. Dipindah
  * dari sistem slate lama ke `.paper-canvas` yang sama dengan Beranda, Insight, dan
  * Metodologi: section full-width di `--page-x`, kartu DATAR bertint yang bergilir
  * menempuh palet (`--tile-*`, `--data-wash`, `--field-wash`) di atas satu latar
@@ -231,7 +231,7 @@ export default function RekomendasiPage() {
       <NavBar active="rekomendasi" cta={null} />
 
       {/* ============================================================
-          Hero — dua kolom. Tulisan kiri, tiga kartu ringkasan kanan.
+          Hero - dua kolom. Tulisan kiri, tiga kartu ringkasan kanan.
           Grid, tipografi & jarak disamakan dengan hero Metodologi.
           ============================================================ */}
       <section
@@ -321,7 +321,7 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Urutan prioritas — kepala + chip simpul + tabel grid.
+          Urutan prioritas - kepala + chip simpul + tabel grid.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <Kepala
@@ -539,7 +539,7 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Tiga rekomendasi utama — kartu bertint bergilir.
+          Tiga rekomendasi utama - kartu bertint bergilir.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <Kepala
@@ -632,7 +632,7 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Urutan pelaksanaan — satu kartu gelap `.ink-band`.
+          Urutan pelaksanaan - satu kartu gelap `.ink-band`.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <div
@@ -728,7 +728,7 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Risiko & penanganannya — satu kartu penuh, tiga risiko sejajar.
+          Risiko & penanganannya - satu kartu penuh, tiga risiko sejajar.
           ============================================================ */}
       <section className="reveal" style={seksi}>
         <div className="kartu" style={{ padding: "var(--s3)" }}>
@@ -781,7 +781,7 @@ export default function RekomendasiPage() {
       </section>
 
       {/* ============================================================
-          Penutup — grid 1fr 320px, di atas kertas.
+          Penutup - grid 1fr 320px, di atas kertas.
           ============================================================ */}
       <section
         className="reveal"
