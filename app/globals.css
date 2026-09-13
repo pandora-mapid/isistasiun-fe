@@ -1805,6 +1805,12 @@ a.kartu:focus-visible {
     flex-wrap: wrap;
     gap: 14px !important;
     padding: 14px 20px !important;
+    /* --nav-radius is the full pill (999px) on .paper-canvas. A two-line-tall
+       box at that radius pinches in at the vertical midpoint — the corners
+       curve so aggressively they eat into the middle row, reading as two
+       separate floating bars stacked with a gap instead of one wrapped nav.
+       A normal card radius doesn't have that failure mode at any height. */
+    border-radius: var(--r-xl) !important;
   }
 
   .peta-nav-float .nav-links {
@@ -1830,11 +1836,16 @@ a.kartu:focus-visible {
     flex: 1 1 0;
   }
 
-  .peta-nav-float .station-search {
+  /* NOT `.peta-nav-float .station-search` — .station-search is a sibling of
+     .peta-nav-float in the DOM (both float directly over the map), not its
+     descendant, so that selector could never match and this override was
+     dead: the search box stayed at its single-row top:124px default no
+     matter how tall the wrapped nav got, overlapping it. */
+  .station-search {
     top: 176px;
   }
 
-  .peta-nav-float .peta-chip-stasiun {
+  .peta-chip-stasiun {
     top: 230px;
   }
 }
