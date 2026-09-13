@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
+import { RequireLogin } from "@/components/auth/RequireLogin";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
@@ -235,6 +236,7 @@ const RISIKO: { dot: string; judul: string; isi: string }[] = [
 
 export default function RekomendasiPage() {
   return (
+    <RequireLogin next="/rekomendasi">
     <div className="page-canvas paper-canvas">
       <NavBar
         active="rekomendasi"
@@ -891,5 +893,6 @@ export default function RekomendasiPage() {
         </Link>
       </footer>
     </div>
+    </RequireLogin>
   );
 }

@@ -45,12 +45,14 @@ function percent(value: number | null): string {
 
 export function PremiumDashboard() {
   const router = useRouter();
-  const { status, user, request } = useAuth();
+  const { status, user, request, upgrade } = useAuth();
   const [stations, setStations] = useState<BackendStation[]>([]);
   const [stationID, setStationID] = useState("");
   const [analysis, setAnalysis] = useState<DeepAnalysis | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [upgrading, setUpgrading] = useState(false);
+  const [upgradeError, setUpgradeError] = useState<string | null>(null);
 
   useEffect(() => {
     if (status === "anonymous") {
@@ -58,18 +60,22 @@ export function PremiumDashboard() {
     }
   }, [status, router]);
 
-  const isAdmin = user?.role === "admin";
-  // An operator's dropdown never shows another station's data — the backend
-  // enforces the same scope, this just keeps the UI from offering a choice
-  // that would 403.
+  const isEntitled = user?.role === "premium" || user?.role === "operator" || user?.role === "admin";
+  // Admin and premium have no fixed station — both see the full picker.
+  // Only operator (organization-provisioned, one station per account) is
+  // locked to its own row; the backend enforces the same scope, this just
+  // keeps the UI from offering a choice that would 403.
+  const canPickAnyStation = user?.role === "admin" || user?.role === "premium";
   const visibleStations = useMemo(
     () =>
-      isAdmin ? stations : stations.filter((row) => row.id === user?.station_id),
-    [stations, isAdmin, user?.station_id],
+      canPickAnyStation
+        ? stations
+        : stations.filter((row) => row.id === user?.station_id),
+    [stations, canPickAnyStation, user?.station_id],
   );
 
   useEffect(() => {
-    if (status !== "authenticated") return;
+    if (status !== "authenticated" || !isEntitled) return;
     let active = true;
     request<BackendStation[]>("/stations")
       .then((rows) => {
@@ -78,7 +84,7 @@ export function PremiumDashboard() {
         setError(null);
         setStationID((current) => {
           if (current) return current;
-          if (!isAdmin) return user?.station_id || "";
+          if (!canPickAnyStation) return user?.station_id || "";
           return rows[0]?.id || "";
         });
         if (!rows.length) setLoading(false);
@@ -96,7 +102,7 @@ export function PremiumDashboard() {
     return () => {
       active = false;
     };
-  }, [status, request, isAdmin, user?.station_id]);
+  }, [status, isEntitled, request, canPickAnyStation, user?.station_id]);
 
   useEffect(() => {
     if (status !== "authenticated" || !stationID) return;
@@ -146,7 +152,61 @@ export function PremiumDashboard() {
     );
   }
 
-  if (!isAdmin && !user?.station_id) {
+  if (user?.role === "user") {
+    return (
+      <main className="page-canvas paper-canvas premium-page">
+        <NavBar
+          active="premium"
+          cta={
+            <Link href="/peta" className="b bs">
+              Buka peta
+            </Link>
+          }
+        />
+        <div className="premium-gate" role="status">
+          <span className="eyebrow-chip">Akses premium</span>
+          <h1>Lapisan ini butuh langganan premium.</h1>
+          <p>
+            Analisis mendalam per simpul — kesenjangan per slot, plot sewa
+            yang menyimpang, dan mutu sampel di balik tiap angka.
+          </p>
+          {upgradeError && (
+            <p className="premium-error" role="alert">
+              {upgradeError}
+            </p>
+          )}
+          <button
+            type="button"
+            className="b bp"
+            disabled={upgrading}
+            onClick={async () => {
+              setUpgrading(true);
+              setUpgradeError(null);
+              try {
+                await upgrade();
+              } catch (cause) {
+                setUpgradeError(
+                  cause instanceof Error
+                    ? cause.message
+                    : "Upgrade gagal. Coba kembali.",
+                );
+              } finally {
+                setUpgrading(false);
+              }
+            }}
+          >
+            {upgrading ? "Memproses…" : "Bayar & upgrade ke premium"}
+          </button>
+          <p className="auth-help">
+            Demo: tidak ada gerbang pembayaran sungguhan, akun langsung
+            ter-upgrade begitu ditekan.
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  if (user?.role === "operator" && !user?.station_id) {
     return (
       <main className="page-canvas paper-canvas premium-page">
         <div className="premium-gate" role="alert">
@@ -171,18 +231,26 @@ export function PremiumDashboard() {
 
       <header className="premium-header">
         <div>
-          <span className="eyebrow-chip">Analisis operator</span>
+          <span className="eyebrow-chip">Analisis premium</span>
           <h1>Analisis mendalam per simpul</h1>
           <p>
-            Masuk sebagai <b>{isAdmin ? "Admin" : "Operator"}</b> · {user?.email}
+            Masuk sebagai{" "}
+            <b>
+              {user?.role === "admin"
+                ? "Admin"
+                : user?.role === "operator"
+                  ? "Operator"
+                  : "Premium"}
+            </b>{" "}
+            · {user?.email}
             {" — "}
-            {isAdmin
+            {canPickAnyStation
               ? "bisa membuka semua stasiun."
               : "hanya bisa membuka stasiun sendiri."}
           </p>
         </div>
         <label className="premium-station-picker">
-          <span>{isAdmin ? "Pilih simpul" : "Simpul anda"}</span>
+          <span>{canPickAnyStation ? "Pilih simpul" : "Simpul anda"}</span>
           <select
             value={stationID}
             onChange={(event) => {
@@ -191,7 +259,7 @@ export function PremiumDashboard() {
               setLoading(true);
               setStationID(event.target.value);
             }}
-            disabled={!visibleStations.length || !isAdmin}
+            disabled={!visibleStations.length || !canPickAnyStation}
           >
             {!visibleStations.length && <option value="">Memuat stasiun…</option>}
             {visibleStations.map((station) => (

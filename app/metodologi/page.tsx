@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
+import { RequireLogin } from "@/components/auth/RequireLogin";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
@@ -120,6 +121,7 @@ const WARNA_GRUP = ["var(--rule)", "var(--data-mid)", "var(--data)"];
 
 export default function MetodologiPage() {
   return (
+    <RequireLogin next="/metodologi">
     <div className="page-canvas paper-canvas">
       <NavBar
         active="metodologi"
@@ -651,6 +653,7 @@ export default function MetodologiPage() {
         </Link>
       </footer>
     </div>
+    </RequireLogin>
   );
 }
 

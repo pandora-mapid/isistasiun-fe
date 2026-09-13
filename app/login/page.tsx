@@ -5,7 +5,7 @@ import { NavBar } from "@/components/NavBar";
 
 function safeNext(value: string | string[] | undefined): string {
   const path = Array.isArray(value) ? value[0] : value;
-  return path?.startsWith("/") && !path.startsWith("//") ? path : "/premium";
+  return path?.startsWith("/") && !path.startsWith("//") ? path : "/peta";
 }
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
@@ -25,11 +25,11 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       />
       <section className="auth-shell" aria-labelledby="login-title">
         <div className="auth-intro">
-          <span className="eyebrow-chip">Akses operator</span>
-          <h1 id="login-title">Masuk untuk membaca lapisan yang lebih dalam.</h1>
+          <span className="eyebrow-chip">Masuk diperlukan</span>
+          <h1 id="login-title">Masuk untuk membuka peta dan analitiknya.</h1>
           <p>
-            Peta dan analitik dasar tetap terbuka untuk siapa pun. Akun ini
-            hanya diperlukan untuk lapisan yang lebih rinci:
+            Akun gratis sudah cukup untuk peta dan analitik dasar. Yang butuh
+            langganan atau akun operator hanya lapisan yang lebih rinci:
           </p>
           <ul>
             <li>Kesenjangan belanja per slot waktu, bukan hanya totalnya.</li>
@@ -39,7 +39,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
         </div>
         <div className="auth-card">
           <div className="auth-card-head">
-            <span className="k">Akun operator</span>
+            <span className="k">Masuk</span>
             <span className="auth-lock" aria-hidden="true">
               ↗
             </span>
