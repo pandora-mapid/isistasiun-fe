@@ -75,6 +75,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
             name="password"
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
+            placeholder="••••••••"
             minLength={8}
             required
           />
@@ -103,7 +104,6 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
         <Link href={`/register?next=${encodeURIComponent(nextPath)}`}>
           Daftar
         </Link>
-        . Akun operator dibuat khusus oleh admin Isi Stasiun.
       </p>
     </form>
   );
