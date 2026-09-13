@@ -33,33 +33,14 @@ const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
  */
 function Brand() {
   return (
-    <div className="row nav-brand" style={{ gap: 10, marginRight: 8 }}>
-      <span
-        style={{
-          width: 22,
-          height: 22,
-          borderRadius: "var(--nav-brand-radius, 12px)",
-          background: "var(--nav-brand-bg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          font: "800 11px/1 var(--font-inter)",
-          color: "var(--nav-brand-fg)",
-        }}
-      >
-        IS
-      </span>
-      <span
-        className="nav-wordmark"
-        style={{
-          font: "800 16px/1 var(--font-inter)",
-          letterSpacing: "-.01em",
-          color: "var(--nav-wordmark)",
-        }}
-      >
-        Isi Stasiun
-      </span>
-    </div>
+    <Link href="/" className="row nav-brand" style={{ gap: 10, marginRight: 8, alignItems: "center", textDecoration: "none" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/Logo.png"
+        alt="Isi Stasiun"
+        style={{ height: 28, width: "auto", objectFit: "contain" }}
+      />
+    </Link>
   );
 }
 

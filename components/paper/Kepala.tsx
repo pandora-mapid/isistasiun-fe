@@ -40,8 +40,8 @@ export function Kepala({
         </div>
         <h2
           style={{
-            font: "800 clamp(25px, 2.5vw, 32px)/1.12 var(--font-inter), system-ui, sans-serif",
-            letterSpacing: "-0.02em",
+            font: "400 clamp(25px, 2.5vw, 32px)/1.12 var(--font-serif), Newsreader, Georgia, serif",
+            letterSpacing: "-0.015em",
             margin: 0,
             maxWidth: "24ch",
           }}
