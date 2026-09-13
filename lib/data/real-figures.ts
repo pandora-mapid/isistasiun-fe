@@ -125,8 +125,8 @@ export const STASIUN: StasiunFigure[] = [
       kat("lainnya", 0, false, 0),
     ],
     gerbang: [
-      { nama: "Pintu A", masuk: 44, keluar: 32, total: 76 },
-      { nama: "Pintu B", masuk: 18, keluar: 9, total: 27 },
+      { nama: "Pintu Bawah", masuk: 44, keluar: 32, total: 76 },
+      { nama: "Pintu Atas", masuk: 19, keluar: 11, total: 30 },
     ],
   },
   {
@@ -153,7 +153,11 @@ export const STASIUN: StasiunFigure[] = [
       kat("jasa", 71, false, 0),
       kat("lainnya", 0, false, 1),
     ],
-    gerbang: [{ nama: "Pintu Atas", masuk: 8, keluar: 27, total: 35 }],
+    gerbang: [
+      { nama: "Pintu Bawah Utama", masuk: 8, keluar: 27, total: 35 },
+      { nama: "Pintu Atas", masuk: 22, keluar: 14, total: 36 },
+      { nama: "Pintu Bawah Belakang", masuk: 4, keluar: 3, total: 7 },
+    ],
   },
 ];
 

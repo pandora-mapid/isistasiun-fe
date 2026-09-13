@@ -25,16 +25,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.85048,
-          -6.21452
+          106.85021581782942,
+          -6.209898745923517
         ]
       },
       "properties": {
         "id": 12,
         "station_id": 1,
         "station_name": "Manggarai",
-        "point_label": "Koridor Transit Utara",
-        "type": "transit_corridor"
+        "point_label": "Pintu Bawah Manggarai",
+        "type": "entrance"
       }
     },
     {
@@ -43,30 +43,12 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.85052,
-          -6.21532
-        ]
-      },
-      "properties": {
-        "id": 13,
-        "station_id": 1,
-        "station_name": "Manggarai",
-        "point_label": "Koridor Transit Selatan",
-        "type": "transit_corridor"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": 14,
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
           106.8492864593219,
           -6.210112908837247
         ]
       },
       "properties": {
-        "id": 14,
+        "id": 13,
         "station_id": 1,
         "station_name": "Manggarai",
         "point_label": "Pintu Atas",
@@ -97,15 +79,15 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.8246451141926,
-          -6.20262664463407
+          106.82357353948973,
+          -6.202413019184441
         ]
       },
       "properties": {
         "id": 22,
         "station_id": 2,
         "station_name": "Sudirman",
-        "point_label": "Pintu Bawah Belakang",
+        "point_label": "Pintu Atas",
         "type": "entrance"
       }
     },
@@ -115,15 +97,15 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.82357353948973,
-          -6.202413019184441
+          106.8246451141926,
+          -6.20262664463407
         ]
       },
       "properties": {
         "id": 23,
         "station_id": 2,
         "station_name": "Sudirman",
-        "point_label": "Pintu Atas",
+        "point_label": "Pintu Bawah Belakang",
         "type": "entrance"
       }
     }

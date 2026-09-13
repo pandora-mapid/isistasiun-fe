@@ -1,7 +1,7 @@
 {
   "success": true,
   "data": {
-    "generated_at": "2026-09-12T15:19:00Z",
+    "generated_at": "2026-09-13T21:00:00Z",
     "pipeline_version": "survei-lapangan-1",
     "day_type": "weekday",
     "stations": [
@@ -10,13 +10,13 @@
         "station_name": "Manggarai",
         "typology": "transit",
         "placeholder": false,
-        "pintu_dicacah": 2,
-        "pintu_ditahan": 0,
+        "pintu_dicacah": 3,
+        "pintu_ditahan": 2,
         "gap": { "p10": 1200000, "p50": 1650000, "p90": 2100000 },
         "potensi": { "p10": 2400000, "p50": 3300000, "p90": 4200000 },
         "tertangkap": { "p10": 1200000, "p50": 1650000, "p90": 2100000 },
         "capture_rate": 0.5,
-        "confidence": { "min": 0.77, "max": 0.87 },
+        "confidence": { "min": 0.45, "max": 0.77 },
         "struk_terbaca": 0,
         "peak": {
           "point_id": 1,
@@ -64,13 +64,13 @@
         "station_name": "Sudirman",
         "typology": "perkantoran",
         "placeholder": false,
-        "pintu_dicacah": 1,
-        "pintu_ditahan": 0,
+        "pintu_dicacah": 3,
+        "pintu_ditahan": 1,
         "gap": { "p10": 900000, "p50": 1250000, "p90": 1600000 },
         "potensi": { "p10": 1100000, "p50": 1550000, "p90": 2000000 },
         "tertangkap": { "p10": 200000, "p50": 300000, "p90": 400000 },
         "capture_rate": 0.1935,
-        "confidence": { "min": 0.77, "max": 0.92 },
+        "confidence": { "min": 0.32, "max": 0.86 },
         "struk_terbaca": 0,
         "peak": {
           "point_id": 4,
