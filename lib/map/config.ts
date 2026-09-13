@@ -201,6 +201,20 @@ export const SOURCE = {
   retail: "retail-locations",
   confidenceGrid: "confidence-grid",
   stationMarkers: "station-markers",
+  /**
+   * Petak sewa — inventaris ruang, bukan pengamatan.
+   *
+   * Terpisah dari `retail` walau sama-sama "tempat usaha": retail menandai
+   * gerai yang beroperasi, sewa menandai petak yang disewakan beserta
+   * harganya. Satu petak kosong adalah peluang; satu gerai yang ada adalah
+   * pasokan yang sudah terpakai.
+   *
+   * SATU source untuk dua hal yang sempat dibangun terpisah: atribut petak
+   * (`GET /analytics/rental-assets`) dan indeks sewa/arus
+   * (`GET /analytics/rent-flow-index`). Keduanya memberi kunci `source_id`
+   * yang sama, jadi digabung di `lib/data/rent.ts` sebelum jadi GeoJSON —
+   * kalau tidak, peta menggambar petak yang sama dua kali.
+   */
   rental: "rental-assets",
 } as const;
 
@@ -238,6 +252,14 @@ export const LAYER = {
   stationLabel: "station-label",
   rentalCircle: "rental-circle",
   rentalLabel: "rental-label",
+  /**
+   * Indeks sewa/arus — angka Rp/orang di bawah petak.
+   *
+   * Layer sendiri, bukan tambahan pada `rentalLabel`: nama petak selalu ada,
+   * indeksnya hanya ada untuk petak yang arusnya terukur. Satu layer untuk
+   * keduanya berarti petak tanpa indeks menulis label kosong.
+   */
+  rentalIndex: "rental-index",
 } as const;
 
 /**
@@ -266,6 +288,9 @@ export const LAYER_ORDER = [
   // lebih akhir menang. Nama gerai retail hanya konteks tambahan, jadi ia yang
   // pertama menyingkir saat ruang sempit — bukan nama titik pengamatan.
   LAYER.retailLabel,
+  // Angka indeks sewa ikut kelompok simbol berprioritas rendah — sama seperti
+  // nama retail, ia konteks tambahan dan harus menyingkir sebelum nama titik.
+  LAYER.rentalIndex,
   // Arus sengaja SEBELUM nama titik. MapLibre menempatkan simbol dalam urutan
   // terbalik — layer yang lebih akhir menang saat kotak teksnya bertabrakan.
   // Waktu arus diletakkan sesudah nama, seluruh nama titik lenyap dari peta
@@ -293,7 +318,7 @@ export const LAYER_GROUPS: Record<string, readonly string[]> = {
   ],
   arus: [LAYER.pointArus],
   retail: [LAYER.retailCircle, LAYER.retailLabel],
-  rental: [LAYER.rentalCircle, LAYER.rentalLabel],
+  rental: [LAYER.rentalCircle, LAYER.rentalLabel, LAYER.rentalIndex],
 };
 
 /**

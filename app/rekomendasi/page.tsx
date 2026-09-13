@@ -246,7 +246,7 @@ export default function RekomendasiPage() {
           Grid, tipografi & jarak disamakan dengan hero Metodologi.
           ============================================================ */}
       <section
-        className="reveal"
+        className="reveal runtuh-1"
         style={{
           display: "grid",
           gridTemplateColumns:
@@ -367,6 +367,7 @@ export default function RekomendasiPage() {
         </div>
 
         <div
+          className="tabel-geser"
           style={{
             border: "1px solid var(--rule)",
             borderRadius: "var(--r-md)",
@@ -558,6 +559,7 @@ export default function RekomendasiPage() {
           catatan="Setiap rekomendasi menyebut dasar datanya, dan apa yang harus diukur ulang setelah dijalankan."
         />
         <div
+          className="runtuh-1"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
@@ -676,6 +678,7 @@ export default function RekomendasiPage() {
             </span>
           </div>
           <div
+            className="runtuh-1"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
@@ -739,7 +742,7 @@ export default function RekomendasiPage() {
           Risiko & penanganannya + foto — dua kartu datar.
           ============================================================ */}
       <section
-        className="reveal"
+        className="reveal runtuh-1"
         style={{
           ...seksi,
           display: "grid",
@@ -819,6 +822,7 @@ export default function RekomendasiPage() {
         }}
       >
         <div
+          className="runtuh-1"
           style={{
             display: "grid",
             gridTemplateColumns: "minmax(0, 1fr) minmax(0, 320px)",

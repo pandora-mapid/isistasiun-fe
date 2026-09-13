@@ -15,6 +15,7 @@ import type {
   IsochroneProps,
   MockDemoData,
   ObservationPointProps,
+  RentFlowIndexPayload,
   SpendingGapPayload,
   Station,
   RentalAsset,
@@ -155,6 +156,22 @@ export async function loadConfidenceGrid(): Promise<
 export async function loadStationSummary(): Promise<StationSummaryPayload> {
   return unwrap(
     await getJson<ApiEnvelope<StationSummaryPayload>>("station-summary.json"),
+  );
+}
+
+/**
+ * Indeks sewa/arus per petak — sewa ditawarkan dibagi arus terukur.
+ *
+ * Isinya hanya petak Manggarai: sewa in-station Sudirman tidak ada di API KAI
+ * (sudah diperiksa per koordinat), dan listing pasar sekitar tidak punya
+ * denominator arus yang sepadan. Petak tanpa baris di sini memang belum punya
+ * indeks — jangan diisi nol, karena nol berarti "gratis", bukan "tak terukur".
+ *
+ * Fase 2: `GET /api/v1/analytics/rent-flow-index`.
+ */
+export async function loadRentFlowIndex(): Promise<RentFlowIndexPayload[]> {
+  return unwrap(
+    await getJson<ApiEnvelope<RentFlowIndexPayload[]>>("rent-flow-index.json"),
   );
 }
 

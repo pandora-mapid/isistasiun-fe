@@ -19,10 +19,11 @@ import {
   loadConfidenceGrid,
   loadIsochrones,
   loadObservationPoints,
+  loadRentalAssets,
+  loadRentFlowIndex,
   loadSpendingGap,
   loadStations,
   loadDemoData,
-  loadRentalAssets,
 } from "./source";
 import type {
   IsochroneProps,
@@ -32,8 +33,8 @@ import type {
   SpendingGapPayload,
   Station,
   MockDemoData,
-  RentalAsset,
 } from "./types";
+import { gabungSewa, type RentPlot } from "./rent";
 
 export type PetaData = {
   points: FeatureCollection<Point, ObservationPointProps> | null;
@@ -51,7 +52,16 @@ export type PetaData = {
    */
   entrances: ObservationPointProps[] | null;
   demo: MockDemoData | null;
-  rentals: RentalAsset[] | null;
+  /**
+   * Petak sewa: inventaris aset dengan indeks sewa/arus sudah menempel.
+   *
+   * Digabung di sini, sekali, karena backend menyajikan keduanya terpisah
+   * sementara peta perlu satu fitur per petak — dan karena dua koleksi petak
+   * yang berdiri sendiri pernah membuat peta menggambar petak yang sama dua
+   * kali. `RentPlot` memperluas `RentalAsset`, jadi pemakai yang cuma butuh
+   * atribut petak (panel retail, misalnya) tetap bisa menerimanya apa adanya.
+   */
+  rentals: RentPlot[] | null;
   /** Pesan kegagalan yang layak ditampilkan, bukan hanya dicatat di console. */
   error: string | null;
 };
@@ -85,9 +95,22 @@ export function usePetaData(): PetaData {
       loadEntrances(),
       loadDemoData(),
       loadRentalAssets(),
+      loadRentFlowIndex(),
     ])
-      .then(([points, isochrones, analytics, confidence, confidenceGrid, stations, entrances, demo, rentals]) => {
+      .then((hasil) => {
         if (cancelled) return;
+        const [
+          points,
+          isochrones,
+          analytics,
+          confidence,
+          confidenceGrid,
+          stations,
+          entrances,
+          demo,
+          rentalAssets,
+          rentFlowIndex,
+        ] = hasil;
         setData({
           points,
           isochrones,
@@ -97,7 +120,9 @@ export function usePetaData(): PetaData {
           stations,
           entrances,
           demo,
-          rentals,
+          // Indeks sewa/arus ditempelkan ke inventaris petak DI SINI, bukan di
+          // komponen: satu petak fisik harus jadi satu fitur peta.
+          rentals: gabungSewa(rentalAssets, rentFlowIndex),
           error: null,
         });
       })

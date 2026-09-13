@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { RETAIL_LEGEND } from "@/lib/map/retail-style";
 import type { RetailLocation } from "@/lib/data/retail";
 import type { RentalAsset } from "@/lib/data/types";
+import { labelIndeks, type RentPlot } from "@/lib/data/rent";
 import { categoryLabel } from "@/lib/data/dimensions";
 import { RENTAL_STATUS_LEGEND, rentalStatusLabel } from "@/lib/data/rental";
 
@@ -160,13 +161,13 @@ function RentalSwatch({
 
 export interface RetailPanelProps {
   locations: RetailLocation[];
-  rentalAssets?: RentalAsset[];
+  rentalAssets?: RentPlot[];
   selected: RetailLocation | null;
-  selectedRental?: RentalAsset | null;
+  selectedRental?: RentPlot | null;
   activeFilter?: FilterCategory;
   onFilterChange?: (filter: FilterCategory) => void;
   onSelect: (location: RetailLocation) => void;
-  onSelectRental?: (asset: RentalAsset) => void;
+  onSelectRental?: (asset: RentPlot) => void;
   onClose: () => void;
   onCloseRental?: () => void;
 }
@@ -1464,6 +1465,28 @@ export function RetailPanel({
                     {m.recommendedStore}
                   </span>
                 </div>
+                {/* Indeks sewa/arus — sewa yang ditawarkan dibagi arus yang
+                    benar-benar tercacah, jadi "rupiah per orang lewat". Petak
+                    yang arusnya belum terukur ditulis begitu, BUKAN Rp 0: nol
+                    berarti gratis, dan itu bukan yang terjadi. */}
+                <div className="retail-detail-metric">
+                  <span className="retail-metric-label">Arus Terukur</span>
+                  <span className="retail-metric-value">
+                    {selectedRental.measured_flow == null
+                      ? "belum terukur"
+                      : `${Math.round(selectedRental.measured_flow)} org/15 mnt`}
+                  </span>
+                </div>
+                <div className="retail-detail-metric">
+                  <span className="retail-metric-label">
+                    Sewa per Orang Lewat
+                  </span>
+                  <span className="retail-metric-value bold">
+                    {selectedRental.index == null
+                      ? "belum terukur"
+                      : labelIndeks(selectedRental.index)}
+                  </span>
+                </div>
                 <div className="retail-detail-metric full-width">
                   <span className="retail-metric-label">Koordinat Spasial</span>
                   <span className="retail-metric-value mono">
@@ -1481,6 +1504,13 @@ export function RetailPanel({
                 RENTAL_STATUS_LEGEND[selectedRental.availability_status]
                   .description}
             </p>
+            {selectedRental.is_outlier && (
+              <p>
+                Indeks petak ini pencilan terhadap petak lain di stasiun yang
+                sama (di luar Q3 + 1,5 × IQR) — periksa luas dan arus
+                pembandingnya sebelum dipakai menyimpulkan.
+              </p>
+            )}
           </div>
 
           <div className="retail-detail-action">
