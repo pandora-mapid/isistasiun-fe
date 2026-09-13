@@ -57,19 +57,21 @@ const MapCanvas = dynamic(
 );
 
 /**
- * Hanya lingkaran kesenjangan dan halo kepercayaannya.
+ * Hanya titik pengamatan. Layer analitik lain sengaja dimatikan agar hero
+ * terbaca sebagai basemap yang tenang, bukan cuplikan dashboard aktif.
  *
  * Tanpa label: label menuntut glyph dari jaringan, dan satu permintaan glyph
  * yang gagal membuat seluruh tulisan hilang tanpa pesan. Di halaman depan,
  * peta tanpa nama titik tetap terbaca; peta dengan lubang-lubang kosong tidak.
  */
-const LAPISAN_HERO = [LAYER.pointConfidence, LAYER.pointCircle] as const;
+const LAPISAN_HERO = [LAYER.pointCircle] as const;
 
 /** Ruang yang disisakan saat memfokuskan peta. Asimetris: kartu sorotan
  * menutup pojok KIRI-BAWAH (sebagian sudah keluar frame), kredit ada di
  * KIRI-ATAS, chip legenda menggantung di KANAN. Angkanya menjauhkan lingkaran
  * data dari ketiganya. */
 const PADDING_KARTU = { top: 64, bottom: 72, left: 80, right: 44 } as const;
+const PADDING_TITIK = { top: 40, bottom: 40, left: 40, right: 40 } as const;
 
 /** Tinggi minimum kalau kolom teks di sebelahnya kebetulan pendek. Diturunkan
  * di putaran 8: peta sengaja jadi lebih kecil dari kolom teks di sebelahnya. */
@@ -120,7 +122,7 @@ export function HeroPeta({
             onSelectPoint={abaikan}
             dataError={error}
             interactive={false}
-            fitPadding={PADDING_KARTU}
+            fitPadding={showOverlayCards ? PADDING_KARTU : PADDING_TITIK}
             borderRadius="var(--r-xl)"
             attributionPosition="top-left"
           />

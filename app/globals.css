@@ -629,7 +629,11 @@
   border: 1px solid #bfdbfe;
   border-radius: 16px;
   background:
-    radial-gradient(circle at 100% 0%, rgba(147, 197, 253, 0.48), transparent 37%),
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(147, 197, 253, 0.48),
+      transparent 37%
+    ),
     linear-gradient(135deg, #eff6ff 0%, #f8fbff 100%);
   break-inside: avoid;
 }
@@ -897,7 +901,8 @@
 
 /* Glow lembut untuk elemen map overlay yang "hidup" */
 @keyframes map-glow-breathe {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
   }
   50% {
@@ -5096,6 +5101,235 @@ a.kartu:focus-visible {
     opacity: 0;
   }
   to {
+    opacity: 1;
+  }
+}
+
+/* ==========================================================================
+   Transit Simulation Keyframes (Train Arrival -> Dining Spots -> Infinite Loop)
+   ========================================================================== */
+@keyframes train-transit-loop {
+  0% {
+    transform: translate(-60px, 335px) rotate(-11deg);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  28% {
+    transform: translate(190px, 260px) rotate(-8deg);
+    opacity: 1;
+  }
+  32%,
+  72% {
+    /* Docked at west platform gate, illuminating station without covering emblem */
+    transform: translate(205px, 256px) rotate(-8deg);
+    opacity: 1;
+  }
+  78% {
+    transform: translate(370px, 218px) rotate(-9deg);
+    opacity: 1;
+  }
+  88% {
+    transform: translate(540px, 182px) rotate(-11deg);
+    opacity: 1;
+  }
+  94% {
+    transform: translate(630px, 160px) rotate(-11deg);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(630px, 160px) rotate(-11deg);
+    opacity: 0;
+  }
+}
+
+@keyframes station-arrival-pulse {
+  0%,
+  30% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  34% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  44% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  60% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+  74%,
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes flow-dashes-active {
+  0%,
+  30% {
+    stroke-dashoffset: 80;
+    opacity: 0.3;
+  }
+  36%,
+  72% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  78%,
+  100% {
+    stroke-dashoffset: -80;
+    opacity: 0.3;
+  }
+}
+
+@keyframes food-spot-reveal-1 {
+  0%,
+  34% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  38% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  42%,
+  72% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  78%,
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes food-spot-reveal-2 {
+  0%,
+  38% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  42% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  46%,
+  73% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  79%,
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes food-spot-reveal-3 {
+  0%,
+  42% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  46% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  50%,
+  74% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  80%,
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes food-spot-reveal-4 {
+  0%,
+  46% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  54%,
+  75% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  81%,
+  100% {
+    transform: scale(0);
+    opacity: 0;
+  }
+}
+
+.anim-train-transit {
+  animation: train-transit-loop 10s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.anim-station-pulse {
+  animation: station-arrival-pulse 10s ease-out infinite;
+  transform-box: view-box;
+  transform-origin: 300px 240px;
+}
+.anim-flow-dashes {
+  animation: flow-dashes-active 10s linear infinite;
+}
+.anim-food-spot-1 {
+  animation: food-spot-reveal-1 10s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  transform-box: view-box;
+  transform-origin: 420px 150px;
+}
+.anim-food-spot-2 {
+  animation: food-spot-reveal-2 10s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  transform-box: view-box;
+  transform-origin: 485px 285px;
+}
+.anim-food-spot-3 {
+  animation: food-spot-reveal-3 10s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  transform-box: view-box;
+  transform-origin: 165px 235px;
+}
+.anim-food-spot-4 {
+  animation: food-spot-reveal-4 10s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  transform-box: view-box;
+  transform-origin: 230px 130px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-train-transit,
+  .anim-station-pulse,
+  .anim-flow-dashes,
+  .anim-food-spot-1,
+  .anim-food-spot-2,
+  .anim-food-spot-3,
+  .anim-food-spot-4 {
+    animation: none !important;
+  }
+  .anim-train-transit {
+    transform: translate(205px, 256px) rotate(-8deg);
+    opacity: 1;
+  }
+  .anim-food-spot-1,
+  .anim-food-spot-2,
+  .anim-food-spot-3,
+  .anim-food-spot-4 {
+    transform: scale(1);
     opacity: 1;
   }
 }
