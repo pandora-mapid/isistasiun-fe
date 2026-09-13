@@ -271,13 +271,9 @@ export function BandingSimpulOverlay({
                 </details>
 
                 <p className="text-[11px] text-text-muted text-center m-0">
-                  Dasar angka:{" "}
-                  {basis
-                    ? BASIS_LABEL[basis]
-                    : "—"}
-                  . Rentang P10–P90, bukan satu angka tunggal. Nilai rupiah
-                  adalah estimasi dan tidak mengikuti filter peta yang sedang
-                  aktif.
+                  Dasar angka: {basis ? BASIS_LABEL[basis] : "—"}. Rentang
+                  P10–P90, bukan satu angka tunggal. Nilai rupiah adalah
+                  estimasi dan tidak mengikuti filter peta yang sedang aktif.
                 </p>
               </div>
             </>
@@ -322,6 +318,8 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
   const gapPct = gapB > 0 ? Math.round((gapDiff / gapB) * 100) : 0;
 
   // 2. Arus Pejalan Puncak (F)
+  const labelA = a.peak?.point_label ?? "Titik puncak";
+  const labelB = b.peak?.point_label ?? "Titik puncak";
   const arusA = a.peak?.variables?.F ?? 0;
   const arusB = b.peak?.variables?.F ?? 0;
   const maxArus = Math.max(arusA, arusB, 1);
@@ -465,10 +463,10 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
                 Arus Pejalan Puncak (F)
               </h4>
               <p className="text-[11px] text-text-muted m-0">
-                Intensitas volume komuter pada titik tersibuk
+                Ekstrapolasi arus per jam dari amatan 15 menit gerbang tersibuk
               </p>
             </div>
-            <span className="text-xs font-bold px-2 py-0.5 rounded bg-accent-green/10 text-accent-green border border-accent-green/30">
+            <span className="text-xs font-bold px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200/80">
               +{ribuan(arusDiff)}/jam (+{arusPct}%)
             </span>
           </div>
@@ -477,18 +475,16 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
           <div className="flex items-end justify-center space-x-12 h-32 pt-2 pb-1 border-b border-border-subtle">
             {/* Manggarai Column */}
             <div className="flex flex-col items-center h-full justify-end group">
-              <span className="text-xs font-bold text-[var(--data)] mb-0.5 font-mono">
+              <span className="text-xs font-bold text-blue-800 mb-0.5 font-mono">
                 {ribuan(arusA)} /jam
               </span>
-              <span className="text-[10px] text-text-muted mb-1">
-                {a.peak?.point_label ?? "Titik Puncak"}
-              </span>
+              <span className="text-[10px] text-text-muted mb-1">{labelA}</span>
               <div
                 style={{ height: `${hArusA}px` }}
-                className="w-14 bg-gradient-to-t from-[var(--data)] to-[var(--data-mid)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
+                className="w-14 bg-gradient-to-t from-blue-900 to-blue-700 rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
               >
                 <svg
-                  className="w-4 h-4 text-inverse-on-surface/40"
+                  className="w-4 h-4 text-white/40"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -507,18 +503,16 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
 
             {/* Sudirman Column */}
             <div className="flex flex-col items-center h-full justify-end group">
-              <span className="text-xs font-bold text-[var(--data-mid)] mb-0.5 font-mono">
+              <span className="text-xs font-bold text-sky-700 mb-0.5 font-mono">
                 {ribuan(arusB)} /jam
               </span>
-              <span className="text-[10px] text-text-muted mb-1">
-                {b.peak?.point_label ?? "Titik Puncak"}
-              </span>
+              <span className="text-[10px] text-text-muted mb-1">{labelB}</span>
               <div
                 style={{ height: `${hArusB}px` }}
-                className="w-14 bg-gradient-to-t from-[var(--data-mid)] to-[var(--data-soft)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
+                className="w-14 bg-gradient-to-t from-sky-600 to-sky-400 rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
               >
                 <svg
-                  className="w-4 h-4 text-inverse-on-surface/40"
+                  className="w-4 h-4 text-white/40"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -772,7 +766,6 @@ function CategoryVerticalBarSection({ banding }: { banding: BandingSimpul }) {
             })}
           </div>
         </div>
-
       </div>
     </div>
   );
