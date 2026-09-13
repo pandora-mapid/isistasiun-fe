@@ -9,7 +9,7 @@ export type NavKey =
   | "metodologi"
   | "rekomendasi";
 
-export type PageKey = NavKey | "login" | "premium";
+export type PageKey = NavKey | "login" | "register" | "premium" | "admin";
 
 const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
   { key: "beranda", href: "/", label: "Beranda" },
@@ -33,7 +33,7 @@ const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
  */
 function Brand() {
   return (
-    <div className="row" style={{ gap: 10, marginRight: 8 }}>
+    <div className="row nav-brand" style={{ gap: 10, marginRight: 8 }}>
       <span
         style={{
           width: 22,

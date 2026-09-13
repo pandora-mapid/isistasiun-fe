@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
+import { RequireLogin } from "@/components/auth/RequireLogin";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
 import { InsightData } from "@/components/insight/InsightData";
@@ -64,6 +65,7 @@ function tint(bg: string): CSSProperties {
 
 export default function InsightPage() {
   return (
+    <RequireLogin next="/insight">
     <InsightData>
       <div className="page-canvas paper-canvas">
         <NavBar
@@ -349,5 +351,6 @@ export default function InsightPage() {
         </footer>
       </div>
     </InsightData>
+    </RequireLogin>
   );
 }

@@ -17,16 +17,32 @@ export function AuthNavAction() {
 
   if (status === "anonymous") {
     return (
-      <Link href="/login" className="b bs auth-nav-login">
-        Masuk
-      </Link>
+      <div className="auth-nav-user">
+        <Link href="/register" className="b bs">
+          Daftar
+        </Link>
+        <Link href="/login" className="b bp auth-nav-login">
+          Masuk
+        </Link>
+      </div>
     );
   }
 
+  const roleLabel: Record<string, string> = {
+    admin: "Admin",
+    operator: "Operator",
+    premium: "Premium",
+    user: "User",
+  };
+
   return (
     <div className="auth-nav-user">
-      <Link href="/premium" className="auth-nav-identity" title={user?.email}>
-        <span>{user?.role === "admin" ? "Admin" : "Operator"}</span>
+      <Link
+        href={user?.role === "admin" ? "/admin" : "/premium"}
+        className="auth-nav-identity"
+        title={user?.email}
+      >
+        <span>{roleLabel[user?.role ?? "user"]}</span>
         <small>{user?.email}</small>
       </Link>
       <button

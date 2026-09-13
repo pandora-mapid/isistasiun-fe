@@ -17,9 +17,11 @@ import {
   loginRequest,
   logoutRequest,
   refreshSessionRequest,
+  registerRequest,
   SESSION_HINT_KEY,
 } from "@/lib/auth/client";
 import type { AuthSession, AuthUser } from "@/lib/auth/types";
+import { setAuthToken } from "@/lib/data/source";
 
 type AuthStatus = "loading" | "authenticated" | "anonymous";
 
@@ -27,6 +29,9 @@ type AuthContextValue = {
   status: AuthStatus;
   user: AuthUser | null;
   login(email: string, password: string): Promise<void>;
+  register(email: string, password: string): Promise<void>;
+  /** Pretend-payment: no gateway, no form — flips the current user to premium. */
+  upgrade(): Promise<void>;
   logout(): Promise<void>;
   request<T>(path: string, init?: RequestInit): Promise<T>;
 };
@@ -57,6 +62,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const applySession = useCallback((session: AuthSession | null) => {
     accessToken.current = session?.access_token ?? null;
+    // lib/data/source.ts's loaders (rental-assets, rent-flow-index,
+    // confidence-layer once API_READY) now hit endpoints that require login —
+    // without this they silently 401 for every logged-in user, because that
+    // module keeps its own token state, separate from this provider's.
+    setAuthToken(session?.access_token ?? null);
     setUser(session?.user ?? null);
     setStatus(session ? "authenticated" : "anonymous");
     writeSessionHint(Boolean(session));
@@ -105,6 +115,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applySession],
   );
 
+  const register = useCallback(
+    async (email: string, password: string) => {
+      const session = await registerRequest(email, password);
+      applySession(session);
+    },
+    [applySession],
+  );
+
   const logout = useCallback(async () => {
     try {
       await logoutRequest();
@@ -129,9 +147,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [refresh],
   );
 
+  const upgrade = useCallback(async () => {
+    const session = await request<AuthSession>("/auth/upgrade", {
+      method: "POST",
+    });
+    applySession(session);
+  }, [request, applySession]);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, login, logout, request }),
-    [status, user, login, logout, request],
+    () => ({ status, user, login, register, upgrade, logout, request }),
+    [status, user, login, register, upgrade, logout, request],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

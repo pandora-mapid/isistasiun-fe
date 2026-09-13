@@ -1,9 +1,14 @@
-export type AuthRole = "operator" | "admin";
+export type AuthRole = "user" | "premium" | "operator" | "admin";
 
 export type AuthUser = {
   id: string;
   email: string;
   role: AuthRole;
+  // Present only for "operator" — the single station it represents (section
+  // 4.1). Never set for user/premium/admin: premium has no fixed station
+  // (self-upgraded, not organization-provisioned) and admin sees every
+  // station.
+  station_id?: string;
 };
 
 export type AuthSession = {

@@ -28,17 +28,49 @@ const PROTOTYPE_STATION_IDS = new Set([1, 2]);
 const PROTOTYPE_POINT_IDS = new Set([11, 12, 13, 21, 22, 23, 24]);
 
 /**
- * Alamat sumber data.
+ * DUA sumber, bukan satu sakelar.
  *
- * Selama masih data contoh, nilainya `/mock`. Fase 2 cukup mengisi
- * `NEXT_PUBLIC_API_BASE_URL` dengan `…/api/v1` — tanpa menyentuh kode.
+ * Fase 2 berjalan per-endpoint, bukan sekaligus: sebagian data sudah punya
+ * endpoint di Go API, sebagian belum punya sama sekali (geometri menunggu tile
+ * vektor) atau bentuknya belum cocok. Karena itu setiap loader di bawah memilih
+ * sumbernya sendiri lewat `fromApi` atau `fromMock`, dan tidak ada satu `BASE`
+ * yang diam-diam berlaku untuk semuanya.
+ *
+ * Versi sebelumnya memakai satu `BASE`: begitu `NEXT_PUBLIC_API_BASE_URL`
+ * diisi di CI, SELURUH loader ikut pindah ke sana — termasuk enam yang masih
+ * meminta nama berkas contoh. Hasilnya `GET /api/v1/stations.json` dan lima
+ * saudaranya menjawab 404 di situs dev, sementara `npm run dev` lokal (env
+ * kosong) tetap mulus. Kegagalan yang cuma muncul di produksi.
+ *
+ * `NEXT_PUBLIC_API_BASE_URL` tetap wajib terisi di build produksi — login dan
+ * dashboard premium membacanya lewat `lib/auth/client.ts`.
  *
  * Ditulis sebagai rujukan literal ke `process.env.NEXT_PUBLIC_…`, bukan lewat
  * variabel perantara: Next.js menyisipkan nilainya saat build dengan mencocokkan
  * teks, jadi rujukan dinamis tidak akan tergantikan dan hasilnya `undefined`.
  */
-const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "/mock";
-const USING_LOCAL_MOCK = BASE === "/mock";
+const API_BASE = (process.env.NEXT_PUBLIC_API_BASE_URL || "").replace(/\/$/, "");
+const MOCK_BASE = "/mock";
+
+/** Apakah alamat API sudah diisi. Kalau belum, loader API ikut jatuh ke mock. */
+const API_READY = API_BASE !== "";
+
+/**
+ * Alamat khusus AI Copilot — SENGAJA dipisah dari `API_BASE`.
+ *
+ * Rencana lomba: peta jalan di atas data beku (mock/GeoJSON) sementara copilot
+ * hidup lewat BE→AI. Kalau copilot ikut `API_BASE`, mengisi `API_BASE` untuk
+ * menyalakan copilot memaksa loader peta yang kontraknya belum cocok pindah ke
+ * BE juga — mis. `/confidence-layer` yang per-zona (bukan per-titik) → layer
+ * confidence peta jadi kosong. Dengan variabel sendiri, copilot bisa menunjuk
+ * BE tanpa menyentuh sumber data peta. Jatuh ke `API_BASE` bila tak diisi,
+ * jadi menyetel keduanya tetap sah.
+ *
+ * Rujukan literal ke `process.env.NEXT_PUBLIC_…` (Next.js menyisipkan saat build
+ * dengan mencocokkan teks).
+ */
+const AI_BASE =
+  (process.env.NEXT_PUBLIC_AI_BASE_URL || "").replace(/\/$/, "") || API_BASE;
 
 /**
  * Token yang disisipkan ke setiap permintaan, kalau ada.
@@ -63,15 +95,25 @@ function headers(): HeadersInit | undefined {
   return { Authorization: `Bearer ${authToken}` };
 }
 
-async function getJson<T>(path: string): Promise<T> {
-  const res = await fetch(`${BASE}/${path}`, {
+async function getJson<T>(url: string): Promise<T> {
+  const res = await fetch(url, {
     cache: "no-store",
     headers: headers(),
   });
   if (!res.ok) {
-    throw new Error(`Gagal memuat ${path}: ${res.status} ${res.statusText}`);
+    throw new Error(`Gagal memuat ${url}: ${res.status} ${res.statusText}`);
   }
   return (await res.json()) as T;
+}
+
+/** Data contoh yang ikut di repo (`public/mock/`), disajikan origin ini sendiri. */
+function fromMock<T>(file: string): Promise<T> {
+  return getJson<T>(`${MOCK_BASE}/${file}`);
+}
+
+/** Endpoint Go API yang sudah benar-benar ada. */
+function fromApi<T>(path: string): Promise<T> {
+  return getJson<T>(`${API_BASE}/${path}`);
 }
 
 /**
@@ -87,11 +129,11 @@ function unwrap<T>(envelope: ApiEnvelope<T>): T {
   return envelope.data;
 }
 
-/** Geometri titik pengamatan. Fase 2: diganti tile vektor. */
+/** Geometri titik pengamatan. Mock: Go API tidak menyajikan geometri sama sekali — Fase 2 menggantinya dengan tile vektor. */
 export function loadObservationPoints(): Promise<
   FeatureCollection<Point, ObservationPointProps>
 > {
-  return getJson<FeatureCollection<Point, ObservationPointProps>>("observation-points.geojson")
+  return fromMock<FeatureCollection<Point, ObservationPointProps>>("observation-points.geojson")
     .then((collection) => ({
       ...collection,
       features: collection.features.filter((feature) =>
@@ -100,11 +142,11 @@ export function loadObservationPoints(): Promise<
     }));
 }
 
-/** Geometri isochrone. Fase 2: diganti tile vektor. */
+/** Geometri isochrone. Mock: sama seperti titik pengamatan, belum ada endpoint geometri. */
 export function loadIsochrones(): Promise<
   FeatureCollection<Polygon, IsochroneProps>
 > {
-  return getJson<FeatureCollection<Polygon, IsochroneProps>>("isochrones.geojson")
+  return fromMock<FeatureCollection<Polygon, IsochroneProps>>("isochrones.geojson")
     .then((collection) => ({
       ...collection,
       features: collection.features.filter((feature) =>
@@ -113,9 +155,16 @@ export function loadIsochrones(): Promise<
     }));
 }
 
-/** Hasil analisis. Fase 2: `GET /api/v1/analytics/spending-gap`. */
+/**
+ * Hasil analisis. Masih mock.
+ *
+ * `GET /api/v1/analytics/spending-gap` sudah hidup, tapi bentuknya belum bisa
+ * dipakai di sini: ia menjawab per stasiun × slot, sedangkan peta butuh per
+ * titik × slot × kategori berikut P50 dan blok `variables` F/E/C/V. Menukarnya
+ * sekarang berarti mengarang angka yang tidak ada di jawabannya.
+ */
 export async function loadSpendingGap(): Promise<SpendingGapPayload> {
-  const payload = unwrap(await getJson<ApiEnvelope<SpendingGapPayload>>("spending-gap.json"));
+  const payload = unwrap(await fromMock<ApiEnvelope<SpendingGapPayload>>("spending-gap.json"));
   return {
     ...payload,
     points: payload.points.filter((point) => PROTOTYPE_STATION_IDS.has(point.station_id)),
@@ -125,9 +174,9 @@ export async function loadSpendingGap(): Promise<SpendingGapPayload> {
 /** Mutu data per titik dan slot. Fase API: `GET /api/v1/confidence-layer`. */
 export async function loadConfidenceLayer(): Promise<ConfidenceLayerEntry[]> {
   const rows = unwrap(
-    await getJson<ApiEnvelope<ConfidenceLayerEntry[]>>(
-      USING_LOCAL_MOCK ? "confidence-layer.json" : "confidence-layer",
-    ),
+    await (API_READY
+      ? fromApi<ApiEnvelope<ConfidenceLayerEntry[]>>("confidence-layer")
+      : fromMock<ApiEnvelope<ConfidenceLayerEntry[]>>("confidence-layer.json")),
   );
   return rows
     .filter((row) => PROTOTYPE_POINT_IDS.has(row.point_id))
@@ -141,7 +190,7 @@ export async function loadConfidenceLayer(): Promise<ConfidenceLayerEntry[]> {
 export async function loadConfidenceGrid(): Promise<
   FeatureCollection<Polygon, ConfidenceGridProps>
 > {
-  return getJson<FeatureCollection<Polygon, ConfidenceGridProps>>(
+  return fromMock<FeatureCollection<Polygon, ConfidenceGridProps>>(
     "confidence-grid.geojson",
   );
 }
@@ -149,35 +198,52 @@ export async function loadConfidenceGrid(): Promise<
 /**
  * Ringkasan per stasiun + bahan perbandingan antarsimpul.
  *
- * Fase 2: `GET /api/v1/analytics/station-summary`. Bentuknya di
- * `DATA_CONTRACT.md` §B "Ringkasan simpul"; angkanya adalah hasil simulasi
- * Monte Carlo setingkat simpul, bukan penjumlahan titik.
+ * Masih mock. `GET /api/v1/analytics/station-summary` sudah hidup dan bentuknya
+ * ada di `DATA_CONTRACT.md` §B "Ringkasan simpul", tapi ia memakai `station_id`
+ * UUID — sama seperti `/stations` di bawah, jadi keduanya ikut penukaran yang
+ * sama, bukan sebelumnya. Angkanya hasil simulasi Monte Carlo setingkat simpul,
+ * bukan penjumlahan titik.
  */
 export async function loadStationSummary(): Promise<StationSummaryPayload> {
   return unwrap(
-    await getJson<ApiEnvelope<StationSummaryPayload>>("station-summary.json"),
+    await fromMock<ApiEnvelope<StationSummaryPayload>>("station-summary.json"),
   );
 }
 
 /**
  * Indeks sewa/arus per petak — sewa ditawarkan dibagi arus terukur.
  *
+ * `GET /api/v1/analytics/rent-flow-index` sudah hidup dan aman dipakai
+ * langsung — beda dari `stations`/`station-summary`/`entrances` di bawah,
+ * `station_id` pada jawabannya tidak pernah dibaca di sisi frontend:
+ * `gabungSewa()` (`lib/data/rent.ts`) mencocokkan tiap baris ke inventaris
+ * petak lewat `plot_id`, bukan `station_id`, jadi UUID vs integer tidak jadi
+ * masalah di sini. Tetap jatuh ke mock saat `NEXT_PUBLIC_API_BASE_URL` kosong
+ * (dev lokal tanpa backend), sama seperti `loadConfidenceLayer`.
+ *
  * Isinya hanya petak Manggarai: sewa in-station Sudirman tidak ada di API KAI
  * (sudah diperiksa per koordinat), dan listing pasar sekitar tidak punya
  * denominator arus yang sepadan. Petak tanpa baris di sini memang belum punya
  * indeks — jangan diisi nol, karena nol berarti "gratis", bukan "tak terukur".
- *
- * Fase 2: `GET /api/v1/analytics/rent-flow-index`.
  */
 export async function loadRentFlowIndex(): Promise<RentFlowIndexPayload[]> {
   return unwrap(
-    await getJson<ApiEnvelope<RentFlowIndexPayload[]>>("rent-flow-index.json"),
+    await (API_READY
+      ? fromApi<ApiEnvelope<RentFlowIndexPayload[]>>("analytics/rent-flow-index")
+      : fromMock<ApiEnvelope<RentFlowIndexPayload[]>>("rent-flow-index.json")),
   );
 }
 
-/** Daftar stasiun. Fase 2: `GET /api/v1/stations`. */
+/**
+ * Daftar stasiun. Masih mock.
+ *
+ * `GET /api/v1/stations` sudah hidup, tapi `id`-nya UUID sementara seluruh
+ * frontend — `PROTOTYPE_STATION_IDS`, `station_id` di titik pengamatan,
+ * `STATION_ID_BY_CODE` di bawah — memakai integer. Menukar endpoint ini saja
+ * akan memutus sambungan titik ⇄ stasiun di peta tanpa satu pun error.
+ */
 export async function loadStations(): Promise<Station[]> {
-  return unwrap(await getJson<ApiEnvelope<Station[]>>("stations.json"))
+  return unwrap(await fromMock<ApiEnvelope<Station[]>>("stations.json"))
     .filter((station) => PROTOTYPE_STATION_IDS.has(station.id));
 }
 
@@ -191,12 +257,13 @@ export async function loadStations(): Promise<Station[]> {
  * layar — dan nama titik di luar layar menghilang. Gejalanya menyesatkan:
  * panel menampilkan `#24` alih-alih "Pintu 4". Lihat ROADMAP §4.1.
  *
- * Fase 2: `GET /api/v1/stations/:id/entrances`. Kalau backend hanya menyediakan
- * bentuk per stasiun, panggil sekali per stasiun lalu gabungkan di sini —
- * pemanggilnya tidak perlu tahu.
+ * Masih mock. `GET /api/v1/stations/:id/entrances` ada, tapi per stasiun dan
+ * ber-`id` UUID: penukarannya berarti memanggil sekali per stasiun lalu
+ * menggabungkannya di sini, dan itu baru masuk akal setelah `/stations` ikut
+ * ditukar — pemanggilnya tidak perlu tahu.
  */
 export async function loadEntrances(): Promise<ObservationPointProps[]> {
-  return unwrap(await getJson<ApiEnvelope<ObservationPointProps[]>>("entrances.json"))
+  return unwrap(await fromMock<ApiEnvelope<ObservationPointProps[]>>("entrances.json"))
     .filter((entrance) => PROTOTYPE_STATION_IDS.has(entrance.station_id));
 }
 
@@ -208,10 +275,10 @@ const STATION_ID_BY_CODE: Record<string, number> = { MRI: 1, SUD: 2 };
 
 /** Inventaris titik sewa; atribut datang dari `/analytics/rental-assets`. */
 export async function loadRentalAssets(): Promise<RentalAsset[]> {
-  if (USING_LOCAL_MOCK) return MOCK_RENTAL_ASSETS;
+  if (!API_READY) return MOCK_RENTAL_ASSETS;
 
   const rows = unwrap(
-    await getJson<ApiEnvelope<ApiRentalAsset[]>>("analytics/rental-assets"),
+    await fromApi<ApiEnvelope<ApiRentalAsset[]>>("analytics/rental-assets"),
   );
   return rows
     .map((row) => ({
@@ -251,7 +318,14 @@ export async function askCopilot(
   query: string,
   stationId?: string,
 ): Promise<CopilotAnswer> {
-  const res = await fetch(`${BASE}/copilot/query`, {
+  if (!AI_BASE) {
+    // Tanpa alamat, fetch("/copilot/query") menembak origin Next sendiri dan
+    // 404 — gejalanya "Gagal menghubungi layanan data". Beri pesan jelas.
+    throw new Error(
+      "Copilot belum tersambung: isi NEXT_PUBLIC_AI_BASE_URL (atau NEXT_PUBLIC_API_BASE_URL) ke alamat backend.",
+    );
+  }
+  const res = await fetch(`${AI_BASE}/copilot/query`, {
     method: "POST",
     cache: "no-store",
     headers: { "Content-Type": "application/json", ...(headers() ?? {}) },

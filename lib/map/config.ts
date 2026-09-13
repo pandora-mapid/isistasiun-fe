@@ -126,23 +126,19 @@ export function namaBasemapDikenali(nama: string): nama is BasemapName {
 /** Alamat satu pilihan basemap, atau `null` kalau namanya tidak dikenali. */
 export function basemapChoiceUrl(nama: string): string | null {
   if (!namaBasemapDikenali(nama)) return null;
+  // Ketiga gaya MAPID membawa API key di URL-nya, jadi alamatnya HANYA datang
+  // dari variabel lingkungan (di produksi menunjuk proxy backend) — tidak
+  // pernah ditulis di repo. Kalau env-nya kosong, kembalikan null: pemanggil
+  // (`resolveBasemapUrl`) lalu jatuh ke basemap bawaan tanpa key (OpenFreeMap),
+  // bukan mengekspos kredensial di berkas yang dikomit.
   if (nama === "mapid") {
-    return (
-      process.env.NEXT_PUBLIC_BASEMAP_URL ||
-      "https://basemap.mapid.io/styles/basic/style.json?key=6a92654453df37905b3a5d93"
-    );
+    return process.env.NEXT_PUBLIC_BASEMAP_URL || null;
   }
   if (nama === "satellite") {
-    return (
-      process.env.NEXT_PUBLIC_BASEMAP_SATELLITE_URL ||
-      "https://basemap.mapid.io/styles/satellite/style.json?key=6a92654453df37905b3a5d93"
-    );
+    return process.env.NEXT_PUBLIC_BASEMAP_SATELLITE_URL || null;
   }
   if (nama === "building") {
-    return (
-      process.env.NEXT_PUBLIC_BASEMAP_BUILDING_URL ||
-      "https://basemap.mapid.io/styles/street-2d-building/style.json?key=6a92654453df37905b3a5d93"
-    );
+    return process.env.NEXT_PUBLIC_BASEMAP_BUILDING_URL || null;
   }
   return BASEMAP_CHOICES[nama] ?? null;
 }

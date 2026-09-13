@@ -1,11 +1,5 @@
 import { expect, test, type Page, type Route } from "@playwright/test";
 
-const user = {
-  id: "11111111-1111-1111-1111-111111111111",
-  email: "operator@example.com",
-  role: "operator",
-};
-
 const stations = [
   {
     id: "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
@@ -17,7 +11,24 @@ const stations = [
     longitude: 106.85,
     entrance_count: 4,
   },
+  {
+    id: "dddddddd-dddd-dddd-dddd-dddddddddddd",
+    name: "Sudirman",
+    code: "SUD",
+    operator: "KAI Commuter",
+    area_type: "office",
+    latitude: -6.2,
+    longitude: 106.82,
+    entrance_count: 3,
+  },
 ];
+
+const user = {
+  id: "11111111-1111-1111-1111-111111111111",
+  email: "operator@example.com",
+  role: "operator",
+  station_id: stations[0].id,
+};
 
 const analysis = {
   station: stations[0],
@@ -131,6 +142,33 @@ test("operator dapat login dan membuka deep analysis", async ({ page }) => {
   ).toBeVisible();
   await expect(page.getByText("Peluang yang belum terisi")).toBeVisible();
   await expect(page.getByText("apotek", { exact: true })).toBeVisible();
+
+  // Operator's picker is locked to its own station — Sudirman never appears.
+  const picker = page.getByLabel("Simpul anda");
+  await expect(picker).toBeDisabled();
+  await expect(picker.locator("option")).toHaveCount(1);
+  await expect(picker.locator("option")).toHaveText("Manggarai · MRI");
+});
+
+test("admin dapat memilih stasiun mana pun", async ({ page }) => {
+  const admin = { ...user, role: "admin", station_id: undefined };
+  await mockPremiumData(page);
+  await page.route("**/api/v1/auth/login", async (route) => {
+    await fulfillJSON(
+      route,
+      envelope({ access_token: "access-admin", expires_in: 900, user: admin }),
+    );
+  });
+
+  await page.goto("/login?next=/premium");
+  await page.getByLabel("Email").fill(admin.email);
+  await page.getByLabel("Kata sandi").fill("correct-password");
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+
+  await expect(page).toHaveURL(/\/premium$/);
+  const picker = page.getByLabel("Pilih simpul");
+  await expect(picker).toBeEnabled();
+  await expect(picker.locator("option")).toHaveCount(2);
 });
 
 test("sesi dipulihkan dan request 401 direfresh satu kali", async ({ page }) => {
