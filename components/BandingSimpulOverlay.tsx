@@ -395,7 +395,7 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
           </div>
 
           {/* Vertical Column Bars Container */}
-          <div className="flex items-end justify-center space-x-12 h-32 pt-2 pb-1 border-b border-border-subtle">
+          <div className="flex items-end justify-center space-x-12 h-40 pt-2 pb-1 border-b border-border-subtle">
             {/* Manggarai Column */}
             <div className="flex flex-col items-center h-full justify-end group">
               <span className="text-xs font-bold text-[var(--data)] mb-0.5 font-mono">
@@ -406,7 +406,7 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
               </span>
               <div
                 style={{ height: `${hGapA}px` }}
-                className="w-14 bg-gradient-to-t from-[var(--data)] to-[var(--data-mid)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
+                className="w-14 shrink-0 bg-gradient-to-t from-[var(--data)] to-[var(--data-mid)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
               >
                 <svg
                   className="w-4 h-4 text-inverse-on-surface/40"
@@ -434,7 +434,7 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
               </span>
               <div
                 style={{ height: `${hGapB}px` }}
-                className="w-14 bg-gradient-to-t from-[var(--data-mid)] to-[var(--data-soft)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
+                className="w-14 shrink-0 bg-gradient-to-t from-[var(--data-mid)] to-[var(--data-soft)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
               >
                 <svg
                   className="w-4 h-4 text-inverse-on-surface/40"
@@ -470,7 +470,7 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
           </div>
 
           {/* Vertical Column Bars Container */}
-          <div className="flex items-end justify-center space-x-12 h-32 pt-2 pb-1 border-b border-border-subtle">
+          <div className="flex items-end justify-center space-x-12 h-40 pt-2 pb-1 border-b border-border-subtle">
             {/* Manggarai Column */}
             <div className="flex flex-col items-center h-full justify-end group">
               <span className="text-xs font-bold text-[var(--data)] mb-0.5 font-mono">
@@ -481,7 +481,7 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
               </span>
               <div
                 style={{ height: `${hArusA}px` }}
-                className="w-14 bg-gradient-to-t from-[var(--data)] to-[var(--data-mid)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
+                className="w-14 shrink-0 bg-gradient-to-t from-[var(--data)] to-[var(--data-mid)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
               >
                 <svg
                   className="w-4 h-4 text-inverse-on-surface/40"
@@ -511,7 +511,7 @@ function VerticalMetricCharts({ banding }: { banding: BandingSimpul }) {
               </span>
               <div
                 style={{ height: `${hArusB}px` }}
-                className="w-14 bg-gradient-to-t from-[var(--data-mid)] to-[var(--data-soft)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
+                className="w-14 shrink-0 bg-gradient-to-t from-[var(--data-mid)] to-[var(--data-soft)] rounded-t-lg shadow-2xs transition-all duration-300 group-hover:brightness-110 flex items-center justify-center"
               >
                 <svg
                   className="w-4 h-4 text-inverse-on-surface/40"
