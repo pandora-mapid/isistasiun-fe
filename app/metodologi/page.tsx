@@ -299,7 +299,7 @@ export default function MetodologiPage() {
         <Kepala
           kicker="Panel transparansi"
           judul="Dari foto struk ke satu angka."
-          catatan="Setiap nilai V pada peta dapat dibuka sampai foto aslinya, lengkap dengan keyakinan bacaan dan alasan bila datanya dibuang."
+          catatan="Contoh metode pembacaan struk. Pada survei ini V masih memakai nilai acuan (Rp25.000 makanan-minuman, Rp30.000 ritel) karena pengumpulan struk adalah langkah berikutnya; panel ini menunjukkan bagaimana tiap V akan dapat dibuka sampai foto aslinya."
         />
         <div
           className="runtuh-1"
