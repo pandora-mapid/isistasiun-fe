@@ -16,15 +16,46 @@
         "potensi": { "p10": 2400000, "p50": 3300000, "p90": 4200000 },
         "tertangkap": { "p10": 1200000, "p50": 1650000, "p90": 2100000 },
         "capture_rate": 0.5,
-        "confidence": { "min": 0.45, "max": 0.77 },
+        "confidence": { "min": 0.77, "max": 0.87 },
         "struk_terbaca": 0,
-        "peak": null,
+        "peak": {
+          "point_id": 1,
+          "point_label": "Pintu Bawah",
+          "slot": "pagi",
+          "variables": { "F": 304, "E": 0.58, "C": 0.95, "V": 25000 },
+          "gap": { "p10": 400000, "p50": 700000, "p90": 1100000 }
+        },
         "composition": [
-          { "category": "fnb", "demand_share": 0.2258, "gerai_count": 1, "hilang": false },
-          { "category": "ritel", "demand_share": 0.043, "gerai_count": 3, "hilang": false },
-          { "category": "apotek", "demand_share": 0.1398, "gerai_count": 0, "hilang": true },
-          { "category": "jasa", "demand_share": 0.5914, "gerai_count": 0, "hilang": true },
-          { "category": "lainnya", "demand_share": 0, "gerai_count": 0, "hilang": false }
+          {
+            "category": "fnb",
+            "demand_share": 0.2258,
+            "gerai_count": 1,
+            "hilang": false
+          },
+          {
+            "category": "ritel",
+            "demand_share": 0.043,
+            "gerai_count": 3,
+            "hilang": false
+          },
+          {
+            "category": "apotek",
+            "demand_share": 0.1398,
+            "gerai_count": 0,
+            "hilang": true
+          },
+          {
+            "category": "jasa",
+            "demand_share": 0.5914,
+            "gerai_count": 0,
+            "hilang": true
+          },
+          {
+            "category": "lainnya",
+            "demand_share": 0,
+            "gerai_count": 0,
+            "hilang": false
+          }
         ],
         "basis": "monte-carlo-simpul"
       },
@@ -39,15 +70,46 @@
         "potensi": { "p10": 1100000, "p50": 1550000, "p90": 2000000 },
         "tertangkap": { "p10": 200000, "p50": 300000, "p90": 400000 },
         "capture_rate": 0.1935,
-        "confidence": { "min": 0.32, "max": 0.86 },
+        "confidence": { "min": 0.77, "max": 0.92 },
         "struk_terbaca": 0,
-        "peak": null,
+        "peak": {
+          "point_id": 4,
+          "point_label": "Pintu Atas",
+          "slot": "sore",
+          "variables": { "F": 144, "E": 0.23, "C": 0.95, "V": 25000 },
+          "gap": { "p10": 900000, "p50": 1250000, "p90": 1600000 }
+        },
         "composition": [
-          { "category": "fnb", "demand_share": 0.24, "gerai_count": 4, "hilang": false },
-          { "category": "ritel", "demand_share": 0.16, "gerai_count": 1, "hilang": false },
-          { "category": "apotek", "demand_share": 0.032, "gerai_count": 0, "hilang": true },
-          { "category": "jasa", "demand_share": 0.568, "gerai_count": 0, "hilang": true },
-          { "category": "lainnya", "demand_share": 0, "gerai_count": 1, "hilang": false }
+          {
+            "category": "fnb",
+            "demand_share": 0.24,
+            "gerai_count": 5,
+            "hilang": false
+          },
+          {
+            "category": "ritel",
+            "demand_share": 0.16,
+            "gerai_count": 2,
+            "hilang": false
+          },
+          {
+            "category": "apotek",
+            "demand_share": 0.032,
+            "gerai_count": 0,
+            "hilang": true
+          },
+          {
+            "category": "jasa",
+            "demand_share": 0.568,
+            "gerai_count": 0,
+            "hilang": true
+          },
+          {
+            "category": "lainnya",
+            "demand_share": 0,
+            "gerai_count": 1,
+            "hilang": false
+          }
         ],
         "basis": "monte-carlo-simpul"
       }

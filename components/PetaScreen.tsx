@@ -802,8 +802,13 @@ export function PetaScreen({
 
   const dynamicConfidenceGrid = useMemo(
     () =>
-      buildStationConfidenceGrid(currentStation, activeSlot, confidence ?? []),
-    [currentStation, activeSlot, confidence],
+      buildStationConfidenceGrid(
+        currentStation,
+        activeSlot,
+        confidence ?? [],
+        points,
+      ),
+    [currentStation, activeSlot, confidence, points],
   );
 
   const handleSelectStation = useCallback(

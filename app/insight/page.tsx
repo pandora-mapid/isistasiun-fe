@@ -106,7 +106,7 @@ export default function InsightPage() {
               />
               <h1
                 style={{
-                  font: "800 var(--t-h1)/1.04 var(--font-inter), system-ui, sans-serif",
+                  font: "800 var(--t-h1)/1.04 var(--font-serif), Newsreader, Georgia, serif",
                   letterSpacing: "-0.025em",
                   margin: "var(--s3) 0 0",
                   maxWidth: "17ch",
@@ -290,7 +290,7 @@ export default function InsightPage() {
               </div>
               <h2
                 style={{
-                  font: "800 clamp(25px, 2.5vw, 32px)/1.12 var(--font-inter), system-ui, sans-serif",
+                  font: "800 clamp(25px, 2.5vw, 32px)/1.12 var(--font-serif), Newsreader, Georgia, serif",
                   letterSpacing: "-0.02em",
                   margin: 0,
                   maxWidth: "24ch",

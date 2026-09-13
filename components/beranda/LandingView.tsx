@@ -6,15 +6,7 @@ import { HeroPeta } from "./HeroPeta";
 import { Icon } from "./Icon";
 import { Footer } from "@/components/Footer";
 
-type ProductTabKey =
-  | "spending-gap"
-  | "missing-category"
-  | "pedestrian-flow"
-  | "rent-flow"
-  | "confidence";
-
 export function LandingView() {
-  const [activeTab, setActiveTab] = useState<ProductTabKey>("spending-gap");
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [activeBuffer, setActiveBuffer] = useState<"3" | "5" | "10">("3");
 
@@ -83,10 +75,6 @@ export function LandingView() {
 
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const handleTabChange = (tab: ProductTabKey) => {
-    setActiveTab(tab);
-  };
 
   return (
     <div className="bg-canvas-warm text-on-surface font-body-md antialiased min-h-screen relative selection:bg-accent-yellow/30">
@@ -471,116 +459,8 @@ export function LandingView() {
               <div className="relative w-full rounded-3xl bg-surface-card shadow-2xl p-3 sm:p-5 overflow-hidden border border-border-subtle">
                 <div className="relative w-full aspect-[4/3] sm:aspect-[16/11] rounded-2xl bg-[#EBE8DF] overflow-hidden">
                   {/* Real Live MapCanvas mounted in background to satisfy Playwright test queries */}
-                  <div className="absolute inset-0 opacity-85">
+                  <div className="absolute inset-0">
                     <HeroPeta showOverlayCards={false} />
-                  </div>
-
-                  {/* Top Left HUD */}
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-surface-card/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-border-subtle z-20">
-                    <span className="w-2 h-2 rounded-full bg-accent-green animate-pulse"></span>
-                    <span className="font-label-sm text-text-primary font-semibold">
-                      Manggarai Central Hub
-                    </span>
-                    <span className="text-text-muted font-body-sm text-xs">
-                      · Isochrone 5m
-                    </span>
-                  </div>
-
-                  {/* Top Right HUD Controls */}
-                  <div className="absolute top-3 right-3 flex items-center gap-1 bg-surface-card/90 backdrop-blur-md p-1 rounded-full shadow-sm border border-border-subtle z-20">
-                    <button
-                      type="button"
-                      aria-label="Perbesar"
-                      className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-surface-container text-text-primary"
-                    >
-                      <Icon name="add" className="text-[16px]" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Perkecil"
-                      className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-surface-container text-text-primary"
-                    >
-                      <Icon name="remove" className="text-[16px]" />
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Lapisan peta"
-                      className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-surface-container text-text-primary"
-                    >
-                      <Icon name="layers" className="text-[16px]" />
-                    </button>
-                  </div>
-
-                  {/* Floating Insight Card A */}
-                  <div className="absolute top-16 right-4 sm:right-6 w-56 sm:w-64 bg-surface-card/95 backdrop-blur-md rounded-xl p-3.5 shadow-xl border border-border-subtle transition-transform hover:scale-[1.02] cursor-default z-20">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="font-label-sm text-[10px] tracking-wider uppercase text-text-muted">
-                        Manggarai · Pintu Timur
-                      </span>
-                      <span className="w-2 h-2 rounded-full bg-accent-yellow"></span>
-                    </div>
-                    <div className="font-label-sm text-xs text-text-secondary">
-                      Potential Spending:
-                    </div>
-                    <div className="font-stat-numeric text-xl sm:text-2xl text-text-primary">
-                      Rp 2,3–4,0 jt
-                    </div>
-                    <div className="font-body-sm text-[11px] text-text-muted mt-0.5">
-                      per window observasi 2 jam
-                    </div>
-                  </div>
-
-                  {/* Floating Insight Card B: Spending Gap */}
-                  <div className="absolute bottom-16 left-4 sm:left-6 w-60 sm:w-72 bg-surface-card/95 backdrop-blur-md rounded-xl p-3.5 shadow-xl border border-border-subtle transition-transform hover:scale-[1.02] cursor-default z-20">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center gap-1.5">
-                        <Icon
-                          name="trending_up"
-                          className="text-accent-yellow-dark text-[18px]"
-                        />
-                        <span className="font-label-sm text-xs font-semibold text-text-primary">
-                          SPENDING GAP
-                        </span>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-full bg-accent-green/20 text-[#245431] font-label-sm text-[10px] font-semibold">
-                        High Opp.
-                      </span>
-                    </div>
-                    <div className="font-stat-numeric text-2xl sm:text-3xl text-text-primary tracking-tight">
-                      Rp 1,8–3,1 jt
-                    </div>
-                    <div className="w-full bg-surface-container h-1.5 rounded-full overflow-hidden my-2">
-                      <div
-                        className="bg-accent-yellow h-full rounded-full"
-                        style={{ width: "72%" }}
-                      ></div>
-                    </div>
-                    <div className="flex justify-between items-center text-[10px] font-label-sm text-text-muted">
-                      <span>Tertangkap: Rp 1,2 jt</span>
-                      <span className="text-text-primary font-medium">
-                        Uncaptured: 68%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Floating Insight Card C: Category Opportunity */}
-                  <div className="absolute bottom-4 right-4 sm:right-6 w-auto bg-surface-dark/95 backdrop-blur-md text-surface-bright rounded-xl p-3 sm:px-4 sm:py-3 shadow-2xl border border-white/15 transition-transform hover:scale-[1.02] cursor-default z-20">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-                        <Icon
-                          name="storefront"
-                          className="text-accent-yellow text-[18px]"
-                        />
-                      </div>
-                      <div className="flex flex-col min-w-0 pr-1">
-                        <span className="font-label-sm text-[10px] tracking-wider uppercase text-white/75 font-semibold whitespace-nowrap">
-                          Top Recommendation
-                        </span>
-                        <span className="font-label-md text-xs sm:text-sm font-semibold text-white whitespace-nowrap">
-                          Convenience Retail
-                        </span>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -1200,35 +1080,6 @@ export function LandingView() {
               memperbarui insight spasial secara kontekstual berbasis data
               pergerakan aktual.
             </p>
-
-            {/* Map Feature Tabs Strip */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-8 p-1.5 bg-surface-container-low rounded-full shadow-inner border border-border-subtle">
-              {(
-                [
-                  ["spending-gap", "Spending Gap"],
-                  ["missing-category", "Missing Category"],
-                  ["pedestrian-flow", "Pedestrian Flow"],
-                  ["rent-flow", "Rent–Flow Ratio"],
-                  ["confidence", "Confidence Ledger"],
-                ] as const
-              ).map(([key, label]) => {
-                const isActive = activeTab === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => handleTabChange(key)}
-                    className={`px-4 py-2 rounded-full font-label-md transition-all ${
-                      isActive
-                        ? "bg-surface-card text-text-primary shadow-xs font-semibold"
-                        : "text-text-secondary hover:text-text-primary hover:bg-surface-card/60"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           {/* Central High-Fidelity WebGIS Mockup */}
@@ -1465,6 +1316,18 @@ export function LandingView() {
                     opacity="0.85"
                     stroke="#4B7FF7"
                     strokeWidth="3.5"
+                  />
+
+                  {/* Station Arrival Ripple Pulse */}
+                  <circle
+                    className="anim-station-pulse"
+                    cx="300"
+                    cy="240"
+                    fill="none"
+                    opacity="0"
+                    r="52"
+                    stroke="#D8A72E"
+                    strokeWidth="2.5"
                   />
 
                   {/* Station Hub Building with Station Logo */}

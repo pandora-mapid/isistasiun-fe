@@ -123,10 +123,7 @@ export default function MetodologiPage() {
   return (
     <RequireLogin next="/metodologi">
     <div className="page-canvas paper-canvas">
-      <NavBar
-        active="metodologi"
-        cta={<button className="b bs">Unduh protokol</button>}
-      />
+      <NavBar active="metodologi" cta={null} />
 
       {/* ============================================================
           Hero - dua kolom. Tulisan kiri, kartu tinta persamaan kanan.
@@ -147,7 +144,7 @@ export default function MetodologiPage() {
           <Lencana label="Protokol pengukuran" warna="brand" dot />
           <h1
             style={{
-              font: "800 var(--t-h1)/1.04 var(--font-inter), system-ui, sans-serif",
+              font: "800 var(--t-h1)/1.04 var(--font-serif), Newsreader, Georgia, serif",
               letterSpacing: "-0.025em",
               margin: "var(--s3) 0 0",
               maxWidth: "24ch",
@@ -270,7 +267,7 @@ export default function MetodologiPage() {
               </div>
               <div
                 style={{
-                  font: "700 var(--t-body)/1.25 var(--font-inter), system-ui, sans-serif",
+                  font: "700 var(--t-body)/1.25 var(--font-serif), Newsreader, Georgia, serif",
                   margin: "var(--s3) 0 var(--s1)",
                 }}
               >
@@ -548,17 +545,7 @@ export default function MetodologiPage() {
                 </div>
               ))}
             </div>
-            <div
-              style={{
-                display: "flex",
-                gap: 10,
-                marginTop: "var(--s4)",
-                flexWrap: "wrap",
-              }}
-            >
-              <button className="b bp">Unduh protokol pencacahan</button>
-              <button className="b bs">Catatan keterbatasan</button>
-            </div>
+
           </div>
         </div>
       </section>

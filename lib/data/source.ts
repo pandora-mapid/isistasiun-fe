@@ -25,7 +25,7 @@ import { MOCK_DEMO_DATA } from "./demo";
 import { MOCK_RENTAL_ASSETS } from "./rental-demo";
 
 const PROTOTYPE_STATION_IDS = new Set([1, 2]);
-const PROTOTYPE_POINT_IDS = new Set([11, 12, 13, 21, 22, 23]);
+const PROTOTYPE_POINT_IDS = new Set([11, 13, 21, 22, 23]);
 
 /**
  * DUA sumber, bukan satu sakelar.
@@ -171,12 +171,17 @@ export async function loadSpendingGap(): Promise<SpendingGapPayload> {
   };
 }
 
-/** Mutu data per titik dan slot. Fase API: `GET /api/v1/confidence-layer`. */
+/**
+ * Mutu data per titik dan slot.
+ *
+ * Backend saat ini menyajikan confidence per `zone_id` dengan `station_id`
+ * UUID, sedangkan peta frozen memakai `point_id` numerik. Jangan memindahkan
+ * loader ini hanya karena API login/copilot aktif: hasilnya lolos HTTP tetapi
+ * semua baris tersaring dan lapisan confidence menghilang di produksi.
+ */
 export async function loadConfidenceLayer(): Promise<ConfidenceLayerEntry[]> {
   const rows = unwrap(
-    await (API_READY
-      ? fromApi<ApiEnvelope<ConfidenceLayerEntry[]>>("confidence-layer")
-      : fromMock<ApiEnvelope<ConfidenceLayerEntry[]>>("confidence-layer.json")),
+    await fromMock<ApiEnvelope<ConfidenceLayerEntry[]>>("confidence-layer.json"),
   );
   return rows
     .filter((row) => PROTOTYPE_POINT_IDS.has(row.point_id))
@@ -271,7 +276,7 @@ type ApiRentalAsset = Omit<RentalAsset, "station_id"> & {
   station_id: string;
 };
 
-const STATION_ID_BY_CODE: Record<string, number> = { MRI: 1, SUD: 2 };
+const STATION_ID_BY_CODE: Record<string, number> = { MRI: 1, SUD: 2, SDM: 2 };
 
 /** Inventaris titik sewa; atribut datang dari `/analytics/rental-assets`. */
 export async function loadRentalAssets(): Promise<RentalAsset[]> {

@@ -250,7 +250,7 @@ export default function RekomendasiPage() {
             <Lencana label="Urutan tindakan" warna="brand" dot />
             <h1
               style={{
-                font: "800 var(--t-h1)/1.04 var(--font-inter), system-ui, sans-serif",
+                font: "800 var(--t-h1)/1.04 var(--font-serif), Newsreader, Georgia, serif",
                 letterSpacing: "-0.025em",
                 margin: "var(--s3) 0 0",
                 maxWidth: "24ch",
@@ -578,7 +578,7 @@ export default function RekomendasiPage() {
                 </div>
                 <h3
                   style={{
-                    font: "700 var(--t-lead)/1.2 var(--font-inter), system-ui, sans-serif",
+                    font: "700 var(--t-lead)/1.2 var(--font-serif), Newsreader, Georgia, serif",
                     letterSpacing: "-0.015em",
                     margin: "var(--s3) 0 var(--s2)",
                   }}
@@ -652,7 +652,7 @@ export default function RekomendasiPage() {
             >
               <h2
                 style={{
-                  font: "800 clamp(22px, 2.4vw, 30px)/1.1 var(--font-inter), system-ui, sans-serif",
+                  font: "800 clamp(22px, 2.4vw, 30px)/1.1 var(--font-serif), Newsreader, Georgia, serif",
                   letterSpacing: "-0.02em",
                   color: "var(--paper)",
                   margin: 0,
@@ -705,7 +705,7 @@ export default function RekomendasiPage() {
                   </div>
                   <div
                     style={{
-                      font: "700 var(--t-lead)/1.25 var(--font-inter), system-ui, sans-serif",
+                      font: "700 var(--t-lead)/1.25 var(--font-serif), Newsreader, Georgia, serif",
                       color: "var(--paper)",
                       marginBottom: "var(--s2)",
                     }}
@@ -735,7 +735,7 @@ export default function RekomendasiPage() {
           <div className="kartu" style={{ padding: "var(--s3)" }}>
             <h2
               style={{
-                font: "800 clamp(21px, 2vw, 26px)/1.15 var(--font-inter), system-ui, sans-serif",
+                font: "800 clamp(21px, 2vw, 26px)/1.15 var(--font-serif), Newsreader, Georgia, serif",
                 letterSpacing: "-0.02em",
                 margin: "0 0 var(--s4)",
               }}
@@ -806,7 +806,7 @@ export default function RekomendasiPage() {
               </div>
               <h2
                 style={{
-                  font: "800 clamp(25px, 2.5vw, 32px)/1.12 var(--font-inter), system-ui, sans-serif",
+                  font: "800 clamp(25px, 2.5vw, 32px)/1.12 var(--font-serif), Newsreader, Georgia, serif",
                   letterSpacing: "-0.02em",
                   margin: 0,
                   maxWidth: "28ch",

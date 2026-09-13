@@ -1,4 +1,3 @@
-import { RequireLogin } from "@/components/auth/RequireLogin";
 import { PetaScreen, type PetaInitialQuery } from "@/components/PetaScreen";
 import {
   ALL_CATEGORIES,
@@ -44,9 +43,5 @@ export default async function PetaPage({
         ? (categoryValue as PetaInitialQuery["category"])
         : ALL_CATEGORIES,
   };
-  return (
-    <RequireLogin next="/peta">
-      <PetaScreen initialQuery={initialQuery} />
-    </RequireLogin>
-  );
+  return <PetaScreen initialQuery={initialQuery} />;
 }

@@ -258,7 +258,7 @@ const NILAI: IsiInsight = (() => {
     sorotan,
     cakupan: {
       simpulDiamati: 2,
-      pintuDiamati: 6,
+      pintuDiamati: 3,
       strukTerbaca: 0,
       slot: 3,
       kategori: 5,

@@ -12,6 +12,12 @@ export const MOCK_DEMO_DATA: MockDemoData = {
     { id: "mgg-shopfront-1", name: "Ruko depan Stasiun Manggarai 1", kind: "shopfront", station_id: 1, latitude: -6.2097402, longitude: 106.8502965, status: "perlu_verifikasi", category: null, note: "Status ketersediaan dan harga sewa belum diverifikasi." },
     { id: "mgg-shopfront-2", name: "Ruko depan Stasiun Manggarai 2", kind: "shopfront", station_id: 1, latitude: -6.2096379, longitude: 106.8504967, status: "perlu_verifikasi", category: null, note: "Ruko kawasan depan stasiun; perlu survei properti lanjutan." },
     { id: "mgg-shopfront-3", name: "Ruko depan Stasiun Manggarai 3", kind: "shopfront", station_id: 1, latitude: -6.2100542, longitude: 106.8510737, status: "perlu_verifikasi", category: null, note: "Ruko kawasan depan stasiun; belum masuk perhitungan spending gap." },
+    { id: "sdr-lawson", name: "Lawson", kind: "existing", station_id: 2, latitude: -6.20234887272958, longitude: 106.82327222163873, status: "tersedia", category: "ritel", note: "Status aset: Gerai Beroperasi, luas: 40–50 m². Prediksi toko cocok: Ritel (Tingkat kesesuaian: Gerai Beroperasi)." },
+    { id: "sdr-bakso-malang", name: "Bakso Malang St. Oasis", kind: "existing", station_id: 2, latitude: -6.202451402365541, longitude: 106.82363378478033, status: "tersedia", category: "fnb", note: "Status aset: Gerai Beroperasi, luas: 35–40 m². Prediksi toko cocok: Ritel (Tingkat kesesuaian: Gerai Beroperasi)." },
+    { id: "sdr-rotio", name: "Roti'O", kind: "existing", station_id: 2, latitude: -6.202464736463842, longitude: 106.8234943110981, status: "tersedia", category: "fnb", note: "Status aset: Gerai Beroperasi, luas: 45-60 m². Prediksi toko cocok: Ritel (Tingkat kesesuaian: Gerai Beroperasi)." },
+    { id: "sdr-indomaret", name: "Indomaret Point", kind: "existing", station_id: 2, latitude: -6.202379408195747, longitude: 106.823402445441, status: "tersedia", category: "ritel", note: "Status aset: Gerai Beroperasi, luas: 45-60 m². Prediksi toko cocok: Ritel (Tingkat kesesuaian: Gerai Beroperasi)." },
+    { id: "sdr-teh-kotjok", name: "Teh Kotjok", kind: "existing", station_id: 2, latitude: -6.202438738008624, longitude: 106.82338501108275, status: "tersedia", category: "fnb", note: "Status aset: Gerai Beroperasi, luas: 15-20 m². Prediksi toko cocok: Ritel (Tingkat kesesuaian: Gerai Beroperasi)." },
+    { id: "sdr-bolu-kukus", name: "Siliwangi Bolu Kukus Stasiun", kind: "existing", station_id: 2, latitude: -6.202406073281017, longitude: 106.82363311541205, status: "tersedia", category: "fnb", note: "Status aset: Gerai Beroperasi, luas: 30-40 m². Prediksi toko cocok: Ritel (Tingkat kesesuaian: Gerai Beroperasi)." },
   ],
   // Angka nyata: demand_share = demand_count POI (dalam 800 m) dinormalisasi
   // per simpul; gerai_count = gerai di dalam stasiun (amatan konversi lapangan);
@@ -23,8 +29,8 @@ export const MOCK_DEMO_DATA: MockDemoData = {
     { station_id: 1, category: "apotek", status: "kosong", demand_share: 0.1398, gerai_count: 0 },
     { station_id: 1, category: "jasa", status: "kosong", demand_share: 0.5914, gerai_count: 0 },
     { station_id: 1, category: "lainnya", status: "kosong", demand_share: 0, gerai_count: 0 },
-    { station_id: 2, category: "fnb", status: "terisi", demand_share: 0.24, gerai_count: 4 },
-    { station_id: 2, category: "ritel", status: "kurang", demand_share: 0.16, gerai_count: 1 },
+    { station_id: 2, category: "fnb", status: "terisi", demand_share: 0.24, gerai_count: 5 },
+    { station_id: 2, category: "ritel", status: "kurang", demand_share: 0.16, gerai_count: 2 },
     { station_id: 2, category: "apotek", status: "kosong", demand_share: 0.032, gerai_count: 0 },
     { station_id: 2, category: "jasa", status: "kosong", demand_share: 0.568, gerai_count: 0 },
     { station_id: 2, category: "lainnya", status: "kurang", demand_share: 0, gerai_count: 1 },
@@ -32,7 +38,7 @@ export const MOCK_DEMO_DATA: MockDemoData = {
   recommendations: [
     { id: "rec-mgg-1", station_id: 1, point_id: 11, retail_location_id: "mgg-potential-1", title: "Uji gerai apotek berformat kecil", category: "apotek", slot: "pagi", gap_p50: 1180000, confidence: 0.86, sampel_tipis: false, reason: "Permintaan kebutuhan mendesak terbaca, sementara belum ada gerai apotek di dalam simpul.", next_measurement: "Ukur ulang setelah 6 minggu" },
     { id: "rec-sdr-1", station_id: 2, point_id: 24, retail_location_id: null, title: "Tambah retail kebutuhan cepat", category: "ritel", slot: "sore", gap_p50: 940000, confidence: 0.82, sampel_tipis: false, reason: "Arus pulang kerja tinggi dan pasokan retail masih terbatas di pintu ini.", next_measurement: "Ukur ulang setelah 6 minggu" },
-    { id: "rec-mgg-2", station_id: 1, point_id: 12, retail_location_id: "mgg-potential-3", title: "Uji layanan titip dan kurir", category: "jasa", slot: "siang", gap_p50: 710000, confidence: 0.76, sampel_tipis: false, reason: "Koridor transit memiliki dwell-time tinggi dan kategori jasa masih kurang.", next_measurement: "Ukur ulang setelah 8 minggu" },
+    { id: "rec-mgg-2", station_id: 1, point_id: 13, retail_location_id: "mgg-potential-3", title: "Uji layanan titip dan kurir", category: "jasa", slot: "siang", gap_p50: 710000, confidence: 0.76, sampel_tipis: false, reason: "Koridor transit memiliki dwell-time tinggi dan kategori jasa masih kurang.", next_measurement: "Ukur ulang setelah 8 minggu" },
     { id: "rec-sdr-2", station_id: 2, point_id: 23, retail_location_id: null, title: "Lengkapi sampel pintu 3", category: "apotek", slot: "malam", gap_p50: null, confidence: 0.48, sampel_tipis: true, reason: "Data malam belum memadai sehingga lokasi belum layak diberi estimasi.", next_measurement: "Tambah 2 blok pencacahan" },
   ],
   evidence: [
