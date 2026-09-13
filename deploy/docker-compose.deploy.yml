@@ -1,10 +1,12 @@
 # Stack frontend di server. Berdiri sendiri — bukan overlay dari compose lokal.
 #
-# Berkas ini REFERENSI: salin manual ke /opt/isistasiun-fe/ di VPS, sejajar
-# dengan `.env` yang dibuat sekali dari `.env.deploy.example`. Tidak ada satu
-# pun nilai khusus environment di sini; semuanya lewat `.env`.
+# Dijalankan langsung dari checkout git di VPS (~/isistasiun-fe), bukan lagi
+# menarik image dari GHCR. `.env` di direktori ini milik server (dibuat sekali
+# dari `.env.deploy.example`, di-gitignore) dan sekarang benar-benar dibaca
+# saat build — lihat catatan build-args di service `frontend` di bawah.
 #
-#   docker compose -f docker-compose.deploy.yml --env-file .env up -d
+#   docker compose -f deploy/docker-compose.deploy.yml --env-file deploy/.env build frontend
+#   docker compose -f deploy/docker-compose.deploy.yml --env-file deploy/.env up -d frontend
 #
 # TLS dan routing ditangani reverse proxy bersama yang sudah ada di box
 # (trackster-nginx-1 di network `shared-web-net`). Stack ini hanya memaparkan
@@ -23,18 +25,20 @@ networks:
 
 services:
   frontend:
-    image: ghcr.io/pandora-mapid/isistasiun-fe:${IMAGE_TAG:-development}
-
-    # CD memakai tag yang bergerak; tanpa ini compose akan memakai image lama
-    # yang sudah ada di lokal kalau namanya kebetulan sama.
-    pull_policy: always
+    # Context `..` karena compose file ini ada di deploy/, Dockerfile di root
+    # repo. Build jalan langsung di VPS dari checkout git, bukan pull image.
+    build:
+      context: ..
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL}
+        NEXT_PUBLIC_BASEMAP_URL: ${NEXT_PUBLIC_BASEMAP_URL}
 
     restart: always
 
-    # Catatan: alamat API dan basemap (NEXT_PUBLIC_*) SUDAH TERSISIP ke dalam
-    # bundel saat image dibangun. Mengubahnya di `.env` tidak mengubah apa pun
-    # yang jalan di browser — perubahan alamat perlu build ulang lewat CI.
-    # `.env` tetap dibaca di sini supaya isinya tercatat di satu tempat.
+    # NEXT_PUBLIC_* sekarang beneran dibaca dari `.env` di VPS ini — lewat
+    # build args di atas, karena Next.js menyisipkannya saat build, bukan saat
+    # container jalan. Ubah nilainya di sini lalu deploy ulang; tidak perlu
+    # lagi menyentuh GitHub Actions variables.
     env_file: .env
 
     environment:

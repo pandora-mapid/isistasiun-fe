@@ -1,22 +1,23 @@
-# Membangun image frontend, mendorongnya ke GHCR, lalu men-deploy-nya ke VPS.
+# Deploy ke VPS langsung dari source, bukan lagi lewat image GHCR.
 #
-# Build dan deploy sengaja hidup di SATU workflow yang dipicu `push`, bukan dua
-# workflow yang dirantai `workflow_run`. Sebabnya bukan kerapian: workflow
-# `workflow_run` tidak pernah muncul sebagai check di commit, jadi deploy yang
-# gagal bersembunyi di balik centang hijau "All checks have passed" — persis
-# yang terjadi pada 12 September 2026, dua deploy gagal beruntun tanpa ada
-# yang menyadarinya sampai situsnya diperiksa manual. `needs:` memberi jaminan
-# urutan yang sama (deploy hanya jalan kalau build sukses) sambil tetap tampil
-# di daftar check.
+# VPS punya checkout git sendiri di ~/isistasiun-fe. Setiap push ke
+# `development`, workflow ini SSH ke VPS, `git fetch` + `reset --hard` ke
+# commit yang baru saja di-push, lalu build image lewat
+# `deploy/docker-compose.deploy.yml` (build dari Dockerfile di repo ini,
+# bukan pull) dan `up -d`. NEXT_PUBLIC_* dibaca dari `deploy/.env` milik VPS
+# saat build — ubah di sana, deploy ulang, tidak ada lagi variabel yang perlu
+# disetel di GitHub.
 #
-# Dua tag per commit:
-#   {branch}-{short_sha}  — tetap, menunjuk satu commit; ini yang dipakai deploy
-#   {branch}              — bergerak, selalu menunjuk build terakhir cabang itu
+# `main` sengaja tidak ikut auto-deploy — promosi ke produksi masih manual,
+# sama seperti arsitektur sebelumnya.
 #
-# Auth memakai GITHUB_TOKEN bawaan (bukan PAT): cukup `packages: write` di
-# level job, dan token itu otomatis punya akses ke package milik repo ini.
+# Deploy key per-repo dimatikan oleh kebijakan org pandora-mapid, jadi VPS
+# tidak fetch pakai SSH key sendiri. Sebagai gantinya, workflow ini
+# menyuntikkan fine-grained PAT (scope: Contents read-only, cuma repo ini +
+# isistasiun-be) lewat secret `REPO_PULL_TOKEN`, dipakai sebentar sebagai git
+# credential helper lalu langsung di-unset — tidak pernah ditulis ke disk VPS.
 
-name: CI
+name: Deploy
 
 on:
   push:
@@ -24,168 +25,46 @@ on:
       - development
       - main
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: pandora-mapid/isistasiun-fe
-
-# Push beruntun ke cabang yang sama membatalkan build lama — kecuali di
-# `development`, karena di sana run-nya ikut men-deploy dan membatalkan deploy
-# di tengah jalan bisa meninggalkan server dengan container setengah tertukar.
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref_name != 'development' }}
+  group: deploy-${{ github.ref_name }}
+  cancel-in-progress: false
 
 jobs:
-  build-push:
-    name: Build & push image
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
-
-    # Tag diteruskan ke job deploy, bukan dihitung ulang di sana: yang
-    # di-deploy harus persis image yang baru saja dibangun run ini.
-    outputs:
-      sha_tag: ${{ steps.meta.outputs.sha_tag }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      # Nama cabang dan sha pendek dihitung sekali di sini supaya bentuk tag
-      # tinggal dibaca, tidak diulang-ulang di langkah berikutnya.
-      - name: Tentukan tag
-        id: meta
-        run: |
-          set -euo pipefail
-          branch="${GITHUB_REF_NAME//\//-}"
-          short_sha="${GITHUB_SHA::7}"
-          echo "branch=${branch}"           >> "$GITHUB_OUTPUT"
-          echo "sha_tag=${branch}-${short_sha}" >> "$GITHUB_OUTPUT"
-
-      # NEXT_PUBLIC_* disisipkan saat build, jadi alamat API ikut terkunci di
-      # dalam image dan harus ditentukan DI SINI, bukan di `.env` pada VPS.
-      # Itu sebabnya pemetaannya per cabang.
-      #
-      # Nilainya boleh ditimpa lewat Repository variables (Settings →
-      # Secrets and variables → Actions → Variables) tanpa menyentuh berkas ini.
-      - name: Tentukan environment
-        id: env
-        run: |
-          set -euo pipefail
-          if [ "${{ steps.meta.outputs.branch }}" = "main" ]; then
-            api_default="https://api.isistasiun.trackster.cloud/api/v1"
-            basemap_default="https://api.isistasiun.trackster.cloud/api/v1/basemap/style.json"
-          else
-            api_default="https://api.dev.isistasiun.trackster.cloud/api/v1"
-            basemap_default="https://api.dev.isistasiun.trackster.cloud/api/v1/basemap/style.json"
-          fi
-          echo "api_base_url=${API_OVERRIDE:-$api_default}"     >> "$GITHUB_OUTPUT"
-          echo "basemap_url=${BASEMAP_OVERRIDE:-$basemap_default}" >> "$GITHUB_OUTPUT"
-        env:
-          API_OVERRIDE: ${{ vars.NEXT_PUBLIC_API_BASE_URL }}
-          BASEMAP_OVERRIDE: ${{ vars.NEXT_PUBLIC_BASEMAP_URL }}
-
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login ke GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build & push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.sha_tag }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.branch }}
-          build-args: |
-            NEXT_PUBLIC_API_BASE_URL=${{ steps.env.outputs.api_base_url }}
-            NEXT_PUBLIC_BASEMAP_URL=${{ steps.env.outputs.basemap_url }}
-          # Cache lapisan disimpan di GitHub Actions cache. `mode=max` ikut
-          # menyimpan lapisan antara (termasuk hasil `npm ci`), yang memang
-          # bagian paling mahal dari build ini.
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          provenance: false
-
-      - name: Ringkasan
-        run: |
-          {
-            echo "### Image terdorong"
-            echo
-            echo '```'
-            echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.sha_tag }}"
-            echo "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.branch }}"
-            echo '```'
-            echo
-            echo "NEXT_PUBLIC_API_BASE_URL = \`${{ steps.env.outputs.api_base_url }}\`"
-          } >> "$GITHUB_STEP_SUMMARY"
-
   deploy:
     name: Deploy ke VPS (development)
-    needs: build-push
-    # `main` tetap dibangun dan didorong ke GHCR, tapi promosi ke produksi
-    # dilakukan manual — sama seperti sebelumnya.
     if: github.ref_name == 'development'
     runs-on: ubuntu-latest
-
-    # `packages: read` supaya GITHUB_TOKEN di bawah sah dipakai VPS untuk
-    # menarik image.
-    permissions:
-      contents: read
-      packages: read
 
     steps:
       - name: SSH deploy
         uses: appleboy/ssh-action@v1
         env:
-          IMAGE_TAG: ${{ needs.build-push.outputs.sha_tag }}
-          GHCR_USER: ${{ github.actor }}
-          # Sebelumnya VPS menarik image tanpa login sama sekali, jadi deploy
-          # diam-diam bergantung pada package tetap publik. Begitu visibility-
-          # nya berubah, `pull` mati dengan `error from registry: denied` dan
-          # tidak ada satu pun berkas di repo ini yang bisa menjelaskan kenapa.
-          # GITHUB_TOKEN hanya sah selama run berjalan dan dibuang lagi di
-          # akhir skrip, jadi tidak ada kredensial yang mengendap di server.
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO_PULL_TOKEN: ${{ secrets.REPO_PULL_TOKEN }}
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          envs: IMAGE_TAG,GHCR_USER,GHCR_TOKEN
+          envs: REPO_PULL_TOKEN
           # Tanpa ini, perintah yang gagal di tengah skrip tidak menggagalkan
           # langkah — deploy bisa "hijau" padahal container-nya tidak naik.
           script_stop: true
           script: |
             set -euo pipefail
 
-            cd /opt/isistasiun-fe
+            cd ~/isistasiun-fe
 
-            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            # Credential helper sementara — hanya hidup selama fetch ini,
+            # tidak pernah ditulis ke .git/config atau file lain di disk.
+            git config --local credential.helper \
+              '!f() { echo "username=x-access-token"; echo "password=$REPO_PULL_TOKEN"; }; f'
+            git fetch origin development
+            git config --local --unset credential.helper
+            git reset --hard origin/development
 
-            # `.env` adalah milik server, bukan repo — workflow ini hanya
-            # menyentuh satu baris di dalamnya.
-            if grep -q '^IMAGE_TAG=' .env; then
-              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${IMAGE_TAG}|" .env
-            else
-              echo "IMAGE_TAG=${IMAGE_TAG}" >> .env
-            fi
-            echo "IMAGE_TAG -> ${IMAGE_TAG}"
+            compose="docker compose -f deploy/docker-compose.deploy.yml --env-file deploy/.env"
 
-            compose="docker compose -f docker-compose.deploy.yml --env-file .env"
-
-            $compose pull frontend
+            $compose build frontend
             $compose up -d frontend
-
-            docker logout ghcr.io || true
 
             # Image lama yang sudah tidak dirujuk container mana pun. `-f`
             # supaya tidak menunggu konfirmasi interaktif.
