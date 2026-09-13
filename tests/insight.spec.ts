@@ -35,7 +35,7 @@ test("judul terbaca, bukan sekadar hadir di DOM", async ({ page }) => {
     page.getByRole("heading", { name: /dari dua simpul/i }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: /Pagi menahan kesenjangan terbesar/i }),
+    page.getByRole("heading", { name: /Sore menahan kesenjangan terbesar/i }),
   ).toBeVisible();
 });
 
@@ -68,12 +68,13 @@ test("angka dipetik dari data yang sama dengan halaman Peta", async ({
 }) => {
   await page.goto("/insight", { waitUntil: "domcontentloaded" });
 
-  // Kesenjangan harian terbesar di dua simpul = titik 12 Manggarai, Rp 2,9 jt.
+  // Kesenjangan harian total dua simpul (slot terukur) = Rp 2,9 jt.
   await expect(page.getByText("Rp 2,9 jt").first()).toBeVisible(TUNGGU_DATA);
-  await expect(page.getByText("Koridor Transit Utara").first()).toBeVisible(TUNGGU_DATA);
+  // Slot dengan kesenjangan terbesar adalah Sudirman sore.
+  await expect(page.getByText(/slot sore/i).first()).toBeVisible(TUNGGU_DATA);
 
-  // Jejak asal data ikut disebut, sama seperti di Beranda dan Peta.
-  await expect(page.getByText(/pipeline mock-/)).toBeVisible(TUNGGU_DATA);
+  // Jejak asal data ikut disebut, kini survei lapangan (bukan data contoh).
+  await expect(page.getByText(/survei-lapangan/)).toBeVisible(TUNGGU_DATA);
 });
 
 test("strip ringkasan antarsimpul menyandingkan dua simpul", async ({
@@ -88,8 +89,8 @@ test("strip ringkasan antarsimpul menyandingkan dua simpul", async ({
   ).toBeVisible();
 
   // Kesenjangan harian setingkat simpul (Monte Carlo simpul), bukan angka pintu.
-  await expect(page.getByText("Rp 5,7 jt").first()).toBeVisible();
-  await expect(page.getByText("Rp 3,5 jt").first()).toBeVisible();
+  await expect(page.getByText("Rp 1,7 jt").first()).toBeVisible();
+  await expect(page.getByText("Rp 1,3 jt").first()).toBeVisible();
 
   // Baris pembacaan selisih muncul.
   await expect(page.getByText(/kesenjangan harian Manggarai sekitar/i)).toBeVisible();
