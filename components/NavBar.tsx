@@ -33,7 +33,7 @@ const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
  */
 function Brand() {
   return (
-    <div className="row" style={{ gap: 10, marginRight: 8 }}>
+    <div className="row nav-brand" style={{ gap: 10, marginRight: 8 }}>
       <span
         style={{
           width: 22,

@@ -112,10 +112,6 @@ export function MapToolbar({
     (l) => l.available && activeLayers.includes(l.key),
   ).length;
 
-  const currentBasemapOption = BASEMAP_OPTIONS.find(
-    (b) => b.id === activeBasemap,
-  );
-
   return (
     <div
       ref={toolbarRef}
