@@ -113,16 +113,17 @@ export function NavBar({
   showAuth?: boolean;
 }) {
   return (
-    <div
-      className="row"
+    <header
+      className="row navbar-container"
       style={{
         gap: 22,
         padding: "20px 28px",
         margin: "var(--nav-margin, 0)",
         background: "var(--nav-bg, transparent)",
         borderRadius: "var(--nav-radius, 0)",
-        borderBottom: "var(--nav-border-w, 1px) solid var(--nav-border)",
         boxShadow: "var(--nav-shadow, none)",
+        backdropFilter: "var(--nav-backdrop, none)",
+        WebkitBackdropFilter: "var(--nav-backdrop, none)",
       }}
     >
       <Brand />
@@ -131,6 +132,6 @@ export function NavBar({
         {cta}
         {showAuth && <AuthNavAction />}
       </div>
-    </div>
+    </header>
   );
 }

@@ -5,7 +5,6 @@ import { RETAIL_LEGEND } from "@/lib/map/retail-style";
 import type { RetailLocation } from "@/lib/data/retail";
 import type { RentalAsset } from "@/lib/data/types";
 import { categoryLabel } from "@/lib/data/dimensions";
-import { rupiahRingkas } from "@/lib/format";
 import { RENTAL_STATUS_LEGEND, rentalStatusLabel } from "@/lib/data/rental";
 
 const STATUS_LABEL: Record<RetailLocation["status"], string> = {
@@ -16,85 +15,118 @@ const STATUS_LABEL: Record<RetailLocation["status"], string> = {
 
 export type FilterCategory = "all" | "sewa" | "potensi" | "existing" | "ruko";
 
-// Helper metrik luas & harga sewa komersial
+// Helper metrik luas & rekomendasi jenis toko
 function getRentalAssetMetrics(asset: RentalAsset): {
   areaLabel: string;
-  monthlyPrice: string;
-  yearlyPrice: string;
+  recommendedStore: string;
 } {
   const areaLabel =
     asset.land_area !== null && asset.land_area > 0
       ? `${asset.land_area} m²`
       : asset.building_area !== null && asset.building_area > 0
         ? `${asset.building_area} m² bgn`
-        : "Belum dicatat";
+        : "Lahan komersial";
 
-  if (asset.commercial_value) {
-    const monthly = Math.round(asset.commercial_value / 12);
-    return {
-      areaLabel,
-      monthlyPrice: `Rp ${rupiahRingkas(monthly)}/bln`,
-      yearlyPrice: `Rp ${rupiahRingkas(asset.commercial_value)}/thn`,
-    };
-  }
-
-  // Estimasi tarif sewa Space KAI (~Rp 175 rb / m² / bln)
-  if (asset.land_area && asset.land_area > 0) {
-    const monthlyVal = Math.round(asset.land_area * 175_000);
-    const yearlyVal = monthlyVal * 12;
-    return {
-      areaLabel,
-      monthlyPrice: `Est. ${rupiahRingkas(monthlyVal)}/bln`,
-      yearlyPrice: `Est. ${rupiahRingkas(yearlyVal)}/thn`,
-    };
+  let recommendedStore = "Ritel / Toko Serbaguna";
+  if (asset.land_area && asset.land_area <= 25) {
+    recommendedStore = "Kios F&B / Minuman";
+  } else if (asset.land_area && asset.land_area <= 50) {
+    recommendedStore = "Minimarket / Apotek";
+  } else if (asset.land_area && asset.land_area > 50) {
+    recommendedStore = "Resto Transit / Kafe";
   }
 
   return {
     areaLabel,
-    monthlyPrice: "Est. Rp 2,5 – 4 jt/bln",
-    yearlyPrice: "Est. Rp 30 – 48 jt/thn",
+    recommendedStore,
   };
 }
 
 function getRetailLocationMetrics(location: RetailLocation): {
   areaLabel: string;
-  monthlyPrice: string;
-  yearlyPrice: string;
+  storeTypeLabel: string;
+  suitabilityScore: string;
+  suitabilityReason: string;
 } {
-  if (location.kind === "existing") {
-    return {
-      areaLabel: "± 35–50 m²",
-      monthlyPrice: "Operasional (Sewa aktif)",
-      yearlyPrice: "Kontrak beroperasi",
-    };
-  }
+  const areaMap: Record<string, string> = {
+    "mgg-potential-1": "± 20 m²",
+    "mgg-potential-2": "± 35 m²",
+    "mgg-potential-3": "± 18 m²",
+    "mgg-potential-4": "± 25 m²",
+    "mgg-potential-5": "± 30 m²",
+  };
+
+  const storeMap: Record<
+    string,
+    { type: string; score: string; reason: string }
+  > = {
+    "mgg-potential-1": {
+      type: "Farmasi & Apotek",
+      score: "Sangat Cocok",
+      reason:
+        "Dekat gerbang keluar stasiun, kebutuhan darurat obat & perawatan pribadi komuter tinggi.",
+    },
+    "mgg-potential-2": {
+      type: "F&B Grab-and-Go",
+      score: "Sangat Cocok",
+      reason:
+        "Arus pejalan kaki padat saat jam sibuk, ideal untuk transaksi cepat kopi/makanan ringan.",
+    },
+    "mgg-potential-3": {
+      type: "Layanan Jasa & ATM",
+      score: "Cocok",
+      reason:
+        "Area peron transfer antarmoda, potensi layanan kilat & transaksi harian tinggi.",
+    },
+    "mgg-potential-4": {
+      type: "Minimarket Komuter",
+      score: "Sangat Cocok",
+      reason:
+        "Koridor utama peron, volume pergerakan belanja kebutuhan perjalanan tinggi.",
+    },
+    "mgg-potential-5": {
+      type: "Kios Camilan & Roti",
+      score: "Cocok",
+      reason:
+        "Zona tunggu transfer, cocok untuk sarapan cepat dan jajanan praktis.",
+    },
+  };
 
   if (location.kind === "potential") {
-    const areaMap: Record<string, string> = {
-      "mgg-potential-1": "± 20 m² (Apotek)",
-      "mgg-potential-2": "± 35 m² (FnB)",
-      "mgg-potential-3": "± 18 m² (Jasa)",
-      "mgg-potential-4": "± 25 m² (Ritel)",
-      "mgg-potential-5": "± 30 m²",
-    };
-    const priceMap: Record<string, string> = {
-      "mgg-potential-1": "Est. Rp 4,8 jt/bln",
-      "mgg-potential-2": "Est. Rp 7,2 jt/bln",
-      "mgg-potential-3": "Est. Rp 3,6 jt/bln",
-      "mgg-potential-4": "Est. Rp 5,4 jt/bln",
-      "mgg-potential-5": "Est. Rp 4,5 – 6 jt/bln",
+    const p = storeMap[location.id] ?? {
+      type: location.category
+        ? `${categoryLabel(location.category)} Komuter`
+        : "Ritel / F&B",
+      score: "Potensi Tinggi",
+      reason:
+        "Tingkat sirkulasi penumpang stasiun mendukung pembukaan gerai baru.",
     };
     return {
       areaLabel: areaMap[location.id] ?? "± 25 m²",
-      monthlyPrice: priceMap[location.id] ?? "Est. Rp 4,5 – 6 jt/bln",
-      yearlyPrice: "Est. Rp 50 – 72 jt/thn",
+      storeTypeLabel: p.type,
+      suitabilityScore: p.score,
+      suitabilityReason: p.reason,
+    };
+  }
+
+  if (location.kind === "existing") {
+    return {
+      areaLabel: "± 35–50 m²",
+      storeTypeLabel: location.category
+        ? categoryLabel(location.category)
+        : "Retail Aktif",
+      suitabilityScore: "Gerai Beroperasi",
+      suitabilityReason:
+        "Toko sedang aktif melayani kebutuhan pengguna stasiun.",
     };
   }
 
   return {
-    areaLabel: "± 80–120 m² (2 lt)",
-    monthlyPrice: "Est. Rp 7,5 – 12 jt/bln",
-    yearlyPrice: "Est. Rp 90 – 140 jt/thn",
+    areaLabel: "± 80–120 m²",
+    storeTypeLabel: "Komersial Luar Stasiun / Kafe",
+    suitabilityScore: "Potensi Menengah",
+    suitabilityReason:
+      "Cocok untuk gerai singgah atau usaha dengan durasi kunjungan lebih lama.",
   };
 }
 
@@ -156,12 +188,22 @@ export function RetailPanel({
   const [internalFilter, setInternalFilter] = useState<FilterCategory>("all");
   const [filterOpen, setFilterOpen] = useState(false);
   const filterMenuRef = useRef<HTMLDivElement>(null);
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
+  const [collapsedGroups, setCollapsedGroups] = useState<
+    Record<string, boolean>
+  >({});
+  const [showAllGroups, setShowAllGroups] = useState<Record<string, boolean>>(
     {},
   );
 
-  const toggleGroup = (groupKey: string) => {
-    setExpandedGroups((prev) => ({
+  const toggleGroupCollapse = (groupKey: string) => {
+    setCollapsedGroups((prev) => ({
+      ...prev,
+      [groupKey]: !prev[groupKey],
+    }));
+  };
+
+  const toggleGroupShowAll = (groupKey: string) => {
+    setShowAllGroups((prev) => ({
       ...prev,
       [groupKey]: !prev[groupKey],
     }));
@@ -229,38 +271,49 @@ export function RetailPanel({
   const countRuko = listRuko.length;
   const totalCount = countSewa + matchedRetail.length;
 
-  const canToggleSewa =
+  const isCollapsedSewa =
+    (collapsedGroups["sewa"] ?? false) && !selectedRental && !q;
+  const canPaginateSewa =
     activeFilter === "all" && !q && countSewa > PREVIEW_LIMIT;
-  const isExpandedSewa = expandedGroups["sewa"] ?? Boolean(selectedRental);
+  const isShowAllSewa = showAllGroups["sewa"] ?? Boolean(selectedRental);
   const visibleRentals =
-    canToggleSewa && !isExpandedSewa
+    canPaginateSewa && !isShowAllSewa
       ? matchedRentals.slice(0, PREVIEW_LIMIT)
       : matchedRentals;
 
-  const canTogglePotensi =
+  const isCollapsedPotensi =
+    (collapsedGroups["potensi"] ?? false) &&
+    selected?.kind !== "potential" &&
+    !q;
+  const canPaginatePotensi =
     activeFilter === "all" && !q && countPotensi > PREVIEW_LIMIT;
-  const isExpandedPotensi =
-    expandedGroups["potensi"] ?? selected?.kind === "potential";
+  const isShowAllPotensi =
+    showAllGroups["potensi"] ?? selected?.kind === "potential";
   const visiblePotensi =
-    canTogglePotensi && !isExpandedPotensi
+    canPaginatePotensi && !isShowAllPotensi
       ? listPotensi.slice(0, PREVIEW_LIMIT)
       : listPotensi;
 
-  const canToggleExisting =
+  const isCollapsedExisting =
+    (collapsedGroups["existing"] ?? false) &&
+    selected?.kind !== "existing" &&
+    !q;
+  const canPaginateExisting =
     activeFilter === "all" && !q && countExisting > PREVIEW_LIMIT;
-  const isExpandedExisting =
-    expandedGroups["existing"] ?? selected?.kind === "existing";
+  const isShowAllExisting =
+    showAllGroups["existing"] ?? selected?.kind === "existing";
   const visibleExisting =
-    canToggleExisting && !isExpandedExisting
+    canPaginateExisting && !isShowAllExisting
       ? listExisting.slice(0, PREVIEW_LIMIT)
       : listExisting;
 
-  const canToggleRuko =
+  const isCollapsedRuko =
+    (collapsedGroups["ruko"] ?? false) && selected?.kind !== "shopfront" && !q;
+  const canPaginateRuko =
     activeFilter === "all" && !q && countRuko > PREVIEW_LIMIT;
-  const isExpandedRuko =
-    expandedGroups["ruko"] ?? selected?.kind === "shopfront";
+  const isShowAllRuko = showAllGroups["ruko"] ?? selected?.kind === "shopfront";
   const visibleRuko =
-    canToggleRuko && !isExpandedRuko
+    canPaginateRuko && !isShowAllRuko
       ? listRuko.slice(0, PREVIEW_LIMIT)
       : listRuko;
 
@@ -551,47 +604,155 @@ export function RetailPanel({
                     role="region"
                     aria-label="Aset sewa stasiun"
                   >
-                    <details
-                      open
-                      className="rental-details"
-                      style={{ all: "unset", display: "block" }}
-                    >
-                      <summary style={{ display: "none" }}>
-                        Aset sewa {matchedRentals.length} lokasi
-                      </summary>
-                      <div
-                        className={`retail-group-header ${canToggleSewa ? "clickable" : ""}`}
-                        onClick={() => canToggleSewa && toggleGroup("sewa")}
-                        role={canToggleSewa ? "button" : undefined}
-                        tabIndex={canToggleSewa ? 0 : undefined}
-                        aria-expanded={
-                          canToggleSewa ? isExpandedSewa : undefined
+                    <div
+                      className="retail-group-header clickable"
+                      onClick={() => toggleGroupCollapse("sewa")}
+                      role="button"
+                      tabIndex={0}
+                      aria-expanded={!isCollapsedSewa}
+                      aria-label={`Sewa Tempat (Aset Stasiun), ${matchedRentals.length} lokasi. ${isCollapsedSewa ? "Klik untuk menampilkan" : "Klik untuk menyembunyikan"}`}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          toggleGroupCollapse("sewa");
                         }
-                        onKeyDown={(e) => {
-                          if (
-                            canToggleSewa &&
-                            (e.key === "Enter" || e.key === " ")
-                          ) {
-                            e.preventDefault();
-                            toggleGroup("sewa");
-                          }
-                        }}
-                      >
-                        <div className="retail-group-label">
-                          <span
-                            className="retail-swatch"
-                            style={{
-                              background: "#2563eb",
-                              borderColor: "#60a5fa",
-                            }}
-                          />
-                          <span>Sewa Tempat (Aset Stasiun)</span>
+                      }}
+                    >
+                      <div className="retail-group-label">
+                        <span
+                          className="retail-swatch"
+                          style={{
+                            background: "#2563eb",
+                            borderColor: "#60a5fa",
+                          }}
+                        />
+                        <span>Sewa Tempat (Aset Stasiun)</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="retail-group-count">
+                          {matchedRentals.length} lokasi
+                        </span>
+                        <svg
+                          width="13"
+                          height="13"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="retail-group-chevron"
+                          style={{
+                            transform: isCollapsedSewa
+                              ? "rotate(-90deg)"
+                              : "rotate(0deg)",
+                            transition:
+                              "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                            color: "var(--ink-muted)",
+                          }}
+                        >
+                          <path d="m6 9 6 6 6-6" />
+                        </svg>
+                      </div>
+                    </div>
+                    {!isCollapsedSewa && (
+                      <>
+                        <div className="retail-group-items rental-asset-list">
+                          {visibleRentals.map((asset) => {
+                            const isSelected = selectedRental?.id === asset.id;
+                            const metrics = getRentalAssetMetrics(asset);
+                            return (
+                              <button
+                                key={asset.id}
+                                type="button"
+                                className={`retail-card-btn ${isSelected ? "selected" : ""}`}
+                                aria-label={asset.plot_name}
+                                aria-pressed={isSelected}
+                                onClick={() => {
+                                  if (onSelectRental) onSelectRental(asset);
+                                }}
+                              >
+                                <div className="retail-card-content">
+                                  <div className="retail-card-name">
+                                    {asset.plot_name}
+                                  </div>
+                                  <div className="retail-card-badges">
+                                    <span className="retail-badge-type type-sewa">
+                                      Sewa Tempat
+                                    </span>
+                                    <span
+                                      className="retail-badge-status"
+                                      style={{
+                                        background:
+                                          asset.availability_status ===
+                                          "available"
+                                            ? "rgba(16, 185, 129, 0.12)"
+                                            : asset.availability_status ===
+                                                "occupied"
+                                              ? "rgba(100, 116, 139, 0.12)"
+                                              : "rgba(245, 158, 11, 0.12)",
+                                        color:
+                                          asset.availability_status ===
+                                          "available"
+                                            ? "#047857"
+                                            : asset.availability_status ===
+                                                "occupied"
+                                              ? "#475569"
+                                              : "#b45309",
+                                      }}
+                                    >
+                                      {rentalStatusLabel(
+                                        asset.availability_status,
+                                      )}
+                                    </span>
+                                    <span className="retail-badge-source">
+                                      {asset.data_source === "space_kai"
+                                        ? "Space KAI"
+                                        : "Survei"}
+                                    </span>
+                                  </div>
+                                  <div className="retail-card-metrics">
+                                    <span className="retail-metric-chip">
+                                      📐 {metrics.areaLabel}
+                                    </span>
+                                    <span className="retail-metric-chip recommendation">
+                                      🎯 Saran: {metrics.recommendedStore}
+                                    </span>
+                                  </div>
+                                </div>
+                                <div
+                                  className="retail-card-arrow"
+                                  aria-hidden="true"
+                                >
+                                  <svg
+                                    width="14"
+                                    height="14"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="m9 18 6-6-6-6" />
+                                  </svg>
+                                </div>
+                              </button>
+                            );
+                          })}
                         </div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="retail-group-count">
-                            {matchedRentals.length} lokasi
-                          </span>
-                          {canToggleSewa && (
+                        {canPaginateSewa && (
+                          <button
+                            type="button"
+                            className="retail-expand-btn"
+                            onClick={() => toggleGroupShowAll("sewa")}
+                            aria-expanded={isShowAllSewa}
+                          >
+                            <span>
+                              {isShowAllSewa
+                                ? "Tampilkan lebih sedikit"
+                                : `Tampilkan ${countSewa - PREVIEW_LIMIT} lainnya`}
+                            </span>
                             <svg
                               width="13"
                               height="13"
@@ -599,134 +760,23 @@ export function RetailPanel({
                               fill="none"
                               stroke="currentColor"
                               strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="retail-expand-icon"
                               style={{
-                                transform: isExpandedSewa
+                                transform: isShowAllSewa
                                   ? "rotate(180deg)"
-                                  : "none",
-                                transition: "transform 0.2s ease",
-                                color: "var(--ink-muted)",
+                                  : "rotate(0deg)",
+                                transition:
+                                  "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
                               }}
                             >
                               <path d="m6 9 6 6 6-6" />
                             </svg>
-                          )}
-                        </div>
-                      </div>
-                      <div className="retail-group-items rental-asset-list">
-                        {visibleRentals.map((asset) => {
-                          const isSelected = selectedRental?.id === asset.id;
-                          const metrics = getRentalAssetMetrics(asset);
-                          return (
-                            <button
-                              key={asset.id}
-                              type="button"
-                              className={`retail-card-btn ${isSelected ? "selected" : ""}`}
-                              aria-label={asset.plot_name}
-                              aria-pressed={isSelected}
-                              onClick={() => {
-                                if (onSelectRental) onSelectRental(asset);
-                              }}
-                            >
-                              <div className="retail-card-content">
-                                <div className="retail-card-name">
-                                  {asset.plot_name}
-                                </div>
-                                <div className="retail-card-badges">
-                                  <span className="retail-badge-type type-sewa">
-                                    Sewa Tempat
-                                  </span>
-                                  <span
-                                    className="retail-badge-status"
-                                    style={{
-                                      background:
-                                        asset.availability_status ===
-                                        "available"
-                                          ? "rgba(16, 185, 129, 0.12)"
-                                          : asset.availability_status ===
-                                              "occupied"
-                                            ? "rgba(100, 116, 139, 0.12)"
-                                            : "rgba(245, 158, 11, 0.12)",
-                                      color:
-                                        asset.availability_status ===
-                                        "available"
-                                          ? "#047857"
-                                          : asset.availability_status ===
-                                              "occupied"
-                                            ? "#475569"
-                                            : "#b45309",
-                                    }}
-                                  >
-                                    {rentalStatusLabel(
-                                      asset.availability_status,
-                                    )}
-                                  </span>
-                                  <span className="retail-badge-source">
-                                    {asset.data_source === "space_kai"
-                                      ? "Space KAI"
-                                      : "Survei"}
-                                  </span>
-                                </div>
-                                <div className="retail-card-metrics">
-                                  <span className="retail-metric-chip">
-                                    📐 {metrics.areaLabel}
-                                  </span>
-                                  <span className="retail-metric-chip price">
-                                    💰 {metrics.monthlyPrice}
-                                  </span>
-                                </div>
-                              </div>
-                              <div
-                                className="retail-card-arrow"
-                                aria-hidden="true"
-                              >
-                                <svg
-                                  width="14"
-                                  height="14"
-                                  viewBox="0 0 24 24"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2.2"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                >
-                                  <path d="m9 18 6-6-6-6" />
-                                </svg>
-                              </div>
-                            </button>
-                          );
-                        })}
-                      </div>
-                      {canToggleSewa && (
-                        <button
-                          type="button"
-                          className="retail-expand-btn"
-                          onClick={() => toggleGroup("sewa")}
-                          aria-expanded={isExpandedSewa}
-                        >
-                          <span>
-                            {isExpandedSewa
-                              ? "Tampilkan lebih sedikit"
-                              : `Tampilkan ${countSewa - PREVIEW_LIMIT} lainnya`}
-                          </span>
-                          <svg
-                            width="12"
-                            height="12"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.5"
-                            style={{
-                              transform: isExpandedSewa
-                                ? "rotate(180deg)"
-                                : "none",
-                              transition: "transform 0.15s ease",
-                            }}
-                          >
-                            <path d="m6 9 6 6 6-6" />
-                          </svg>
-                        </button>
-                      )}
-                    </details>
+                          </button>
+                        )}
+                      </>
+                    )}
                   </section>
                 )}
 
@@ -741,22 +791,16 @@ export function RetailPanel({
                     {showPotensi && (
                       <div className="retail-group">
                         <div
-                          className={`retail-group-header ${canTogglePotensi ? "clickable" : ""}`}
-                          onClick={() =>
-                            canTogglePotensi && toggleGroup("potensi")
-                          }
-                          role={canTogglePotensi ? "button" : undefined}
-                          tabIndex={canTogglePotensi ? 0 : undefined}
-                          aria-expanded={
-                            canTogglePotensi ? isExpandedPotensi : undefined
-                          }
+                          className="retail-group-header clickable"
+                          onClick={() => toggleGroupCollapse("potensi")}
+                          role="button"
+                          tabIndex={0}
+                          aria-expanded={!isCollapsedPotensi}
+                          aria-label={`Potensi Toko Baru, ${countPotensi} lokasi. ${isCollapsedPotensi ? "Klik untuk menampilkan" : "Klik untuk menyembunyikan"}`}
                           onKeyDown={(e) => {
-                            if (
-                              canTogglePotensi &&
-                              (e.key === "Enter" || e.key === " ")
-                            ) {
+                            if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
-                              toggleGroup("potensi");
+                              toggleGroupCollapse("potensi");
                             }
                           }}
                         >
@@ -768,118 +812,129 @@ export function RetailPanel({
                             <span className="retail-group-count">
                               {countPotensi}
                             </span>
-                            {canTogglePotensi && (
-                              <svg
-                                width="13"
-                                height="13"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.2"
-                                style={{
-                                  transform: isExpandedPotensi
-                                    ? "rotate(180deg)"
-                                    : "none",
-                                  transition: "transform 0.2s ease",
-                                  color: "var(--ink-muted)",
-                                }}
-                              >
-                                <path d="m6 9 6 6 6-6" />
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                        <div className="retail-group-items">
-                          {visiblePotensi.map((location) => {
-                            const isSelected = selected?.id === location.id;
-                            const metrics = getRetailLocationMetrics(location);
-                            return (
-                              <button
-                                key={location.id}
-                                type="button"
-                                className={`retail-card-btn ${isSelected ? "selected" : ""}`}
-                                aria-label={location.name}
-                                aria-pressed={isSelected}
-                                onClick={() => onSelect(location)}
-                              >
-                                <div className="retail-card-content">
-                                  <div className="retail-card-name">
-                                    {location.name}
-                                  </div>
-                                  <div className="retail-card-badges">
-                                    <span className="retail-badge-type type-potensi">
-                                      Potensi Toko
-                                    </span>
-                                    <span
-                                      className={`retail-badge-status status-${location.status}`}
-                                    >
-                                      {STATUS_LABEL[location.status]}
-                                    </span>
-                                    {location.category && (
-                                      <span className="retail-badge-category">
-                                        {categoryLabel(location.category)}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="retail-card-metrics">
-                                    <span className="retail-metric-chip">
-                                      📐 {metrics.areaLabel}
-                                    </span>
-                                    <span className="retail-metric-chip price">
-                                      💰 {metrics.monthlyPrice}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div
-                                  className="retail-card-arrow"
-                                  aria-hidden="true"
-                                >
-                                  <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path d="m9 18 6-6-6-6" />
-                                  </svg>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {canTogglePotensi && (
-                          <button
-                            type="button"
-                            className="retail-expand-btn"
-                            onClick={() => toggleGroup("potensi")}
-                            aria-expanded={isExpandedPotensi}
-                          >
-                            <span>
-                              {isExpandedPotensi
-                                ? "Tampilkan lebih sedikit"
-                                : `Tampilkan ${countPotensi - PREVIEW_LIMIT} lainnya`}
-                            </span>
                             <svg
-                              width="12"
-                              height="12"
+                              width="13"
+                              height="13"
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
-                              strokeWidth="2.5"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="retail-group-chevron"
                               style={{
-                                transform: isExpandedPotensi
-                                  ? "rotate(180deg)"
-                                  : "none",
-                                transition: "transform 0.15s ease",
+                                transform: isCollapsedPotensi
+                                  ? "rotate(-90deg)"
+                                  : "rotate(0deg)",
+                                transition:
+                                  "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                color: "var(--ink-muted)",
                               }}
                             >
                               <path d="m6 9 6 6 6-6" />
                             </svg>
-                          </button>
+                          </div>
+                        </div>
+                        {!isCollapsedPotensi && (
+                          <>
+                            <div className="retail-group-items">
+                              {visiblePotensi.map((location) => {
+                                const isSelected = selected?.id === location.id;
+                                const metrics =
+                                  getRetailLocationMetrics(location);
+                                return (
+                                  <button
+                                    key={location.id}
+                                    type="button"
+                                    className={`retail-card-btn ${isSelected ? "selected" : ""}`}
+                                    aria-label={location.name}
+                                    aria-pressed={isSelected}
+                                    onClick={() => onSelect(location)}
+                                  >
+                                    <div className="retail-card-content">
+                                      <div className="retail-card-name">
+                                        {location.name}
+                                      </div>
+                                      <div className="retail-card-badges">
+                                        <span className="retail-badge-type type-potensi">
+                                          Potensi Toko
+                                        </span>
+                                        <span
+                                          className={`retail-badge-status status-${location.status}`}
+                                        >
+                                          {STATUS_LABEL[location.status]}
+                                        </span>
+                                        {location.category && (
+                                          <span className="retail-badge-category">
+                                            {categoryLabel(location.category)}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="retail-card-metrics">
+                                        <span className="retail-metric-chip">
+                                          📐 {metrics.areaLabel}
+                                        </span>
+                                        <span className="retail-metric-chip recommendation">
+                                          🎯 Cocok: {metrics.storeTypeLabel}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div
+                                      className="retail-card-arrow"
+                                      aria-hidden="true"
+                                    >
+                                      <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <path d="m9 18 6-6-6-6" />
+                                      </svg>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {canPaginatePotensi && (
+                              <button
+                                type="button"
+                                className="retail-expand-btn"
+                                onClick={() => toggleGroupShowAll("potensi")}
+                                aria-expanded={isShowAllPotensi}
+                              >
+                                <span>
+                                  {isShowAllPotensi
+                                    ? "Tampilkan lebih sedikit"
+                                    : `Tampilkan ${countPotensi - PREVIEW_LIMIT} lainnya`}
+                                </span>
+                                <svg
+                                  width="13"
+                                  height="13"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="retail-expand-icon"
+                                  style={{
+                                    transform: isShowAllPotensi
+                                      ? "rotate(180deg)"
+                                      : "rotate(0deg)",
+                                    transition:
+                                      "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                  }}
+                                >
+                                  <path d="m6 9 6 6 6-6" />
+                                </svg>
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     )}
@@ -888,22 +943,16 @@ export function RetailPanel({
                     {showExisting && (
                       <div className="retail-group">
                         <div
-                          className={`retail-group-header ${canToggleExisting ? "clickable" : ""}`}
-                          onClick={() =>
-                            canToggleExisting && toggleGroup("existing")
-                          }
-                          role={canToggleExisting ? "button" : undefined}
-                          tabIndex={canToggleExisting ? 0 : undefined}
-                          aria-expanded={
-                            canToggleExisting ? isExpandedExisting : undefined
-                          }
+                          className="retail-group-header clickable"
+                          onClick={() => toggleGroupCollapse("existing")}
+                          role="button"
+                          tabIndex={0}
+                          aria-expanded={!isCollapsedExisting}
+                          aria-label={`Retail Beroperasi, ${countExisting} lokasi. ${isCollapsedExisting ? "Klik untuk menampilkan" : "Klik untuk menyembunyikan"}`}
                           onKeyDown={(e) => {
-                            if (
-                              canToggleExisting &&
-                              (e.key === "Enter" || e.key === " ")
-                            ) {
+                            if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
-                              toggleGroup("existing");
+                              toggleGroupCollapse("existing");
                             }
                           }}
                         >
@@ -915,118 +964,129 @@ export function RetailPanel({
                             <span className="retail-group-count">
                               {countExisting}
                             </span>
-                            {canToggleExisting && (
-                              <svg
-                                width="13"
-                                height="13"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.2"
-                                style={{
-                                  transform: isExpandedExisting
-                                    ? "rotate(180deg)"
-                                    : "none",
-                                  transition: "transform 0.2s ease",
-                                  color: "var(--ink-muted)",
-                                }}
-                              >
-                                <path d="m6 9 6 6 6-6" />
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                        <div className="retail-group-items">
-                          {visibleExisting.map((location) => {
-                            const isSelected = selected?.id === location.id;
-                            const metrics = getRetailLocationMetrics(location);
-                            return (
-                              <button
-                                key={location.id}
-                                type="button"
-                                className={`retail-card-btn ${isSelected ? "selected" : ""}`}
-                                aria-label={location.name}
-                                aria-pressed={isSelected}
-                                onClick={() => onSelect(location)}
-                              >
-                                <div className="retail-card-content">
-                                  <div className="retail-card-name">
-                                    {location.name}
-                                  </div>
-                                  <div className="retail-card-badges">
-                                    <span className="retail-badge-type type-tersedia">
-                                      Retail Aktif
-                                    </span>
-                                    <span
-                                      className={`retail-badge-status status-${location.status}`}
-                                    >
-                                      {STATUS_LABEL[location.status]}
-                                    </span>
-                                    {location.category && (
-                                      <span className="retail-badge-category">
-                                        {categoryLabel(location.category)}
-                                      </span>
-                                    )}
-                                  </div>
-                                  <div className="retail-card-metrics">
-                                    <span className="retail-metric-chip">
-                                      📐 {metrics.areaLabel}
-                                    </span>
-                                    <span className="retail-metric-chip price">
-                                      💰 {metrics.monthlyPrice}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div
-                                  className="retail-card-arrow"
-                                  aria-hidden="true"
-                                >
-                                  <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path d="m9 18 6-6-6-6" />
-                                  </svg>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {canToggleExisting && (
-                          <button
-                            type="button"
-                            className="retail-expand-btn"
-                            onClick={() => toggleGroup("existing")}
-                            aria-expanded={isExpandedExisting}
-                          >
-                            <span>
-                              {isExpandedExisting
-                                ? "Tampilkan lebih sedikit"
-                                : `Tampilkan ${countExisting - PREVIEW_LIMIT} lainnya`}
-                            </span>
                             <svg
-                              width="12"
-                              height="12"
+                              width="13"
+                              height="13"
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
-                              strokeWidth="2.5"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="retail-group-chevron"
                               style={{
-                                transform: isExpandedExisting
-                                  ? "rotate(180deg)"
-                                  : "none",
-                                transition: "transform 0.15s ease",
+                                transform: isCollapsedExisting
+                                  ? "rotate(-90deg)"
+                                  : "rotate(0deg)",
+                                transition:
+                                  "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                color: "var(--ink-muted)",
                               }}
                             >
                               <path d="m6 9 6 6 6-6" />
                             </svg>
-                          </button>
+                          </div>
+                        </div>
+                        {!isCollapsedExisting && (
+                          <>
+                            <div className="retail-group-items">
+                              {visibleExisting.map((location) => {
+                                const isSelected = selected?.id === location.id;
+                                const metrics =
+                                  getRetailLocationMetrics(location);
+                                return (
+                                  <button
+                                    key={location.id}
+                                    type="button"
+                                    className={`retail-card-btn ${isSelected ? "selected" : ""}`}
+                                    aria-label={location.name}
+                                    aria-pressed={isSelected}
+                                    onClick={() => onSelect(location)}
+                                  >
+                                    <div className="retail-card-content">
+                                      <div className="retail-card-name">
+                                        {location.name}
+                                      </div>
+                                      <div className="retail-card-badges">
+                                        <span className="retail-badge-type type-tersedia">
+                                          Retail Aktif
+                                        </span>
+                                        <span
+                                          className={`retail-badge-status status-${location.status}`}
+                                        >
+                                          {STATUS_LABEL[location.status]}
+                                        </span>
+                                        {location.category && (
+                                          <span className="retail-badge-category">
+                                            {categoryLabel(location.category)}
+                                          </span>
+                                        )}
+                                      </div>
+                                      <div className="retail-card-metrics">
+                                        <span className="retail-metric-chip">
+                                          📐 {metrics.areaLabel}
+                                        </span>
+                                        <span className="retail-metric-chip">
+                                          🏪 {metrics.storeTypeLabel}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div
+                                      className="retail-card-arrow"
+                                      aria-hidden="true"
+                                    >
+                                      <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <path d="m9 18 6-6-6-6" />
+                                      </svg>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {canPaginateExisting && (
+                              <button
+                                type="button"
+                                className="retail-expand-btn"
+                                onClick={() => toggleGroupShowAll("existing")}
+                                aria-expanded={isShowAllExisting}
+                              >
+                                <span>
+                                  {isShowAllExisting
+                                    ? "Tampilkan lebih sedikit"
+                                    : `Tampilkan ${countExisting - PREVIEW_LIMIT} lainnya`}
+                                </span>
+                                <svg
+                                  width="13"
+                                  height="13"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="retail-expand-icon"
+                                  style={{
+                                    transform: isShowAllExisting
+                                      ? "rotate(180deg)"
+                                      : "rotate(0deg)",
+                                    transition:
+                                      "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                  }}
+                                >
+                                  <path d="m6 9 6 6 6-6" />
+                                </svg>
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     )}
@@ -1035,20 +1095,16 @@ export function RetailPanel({
                     {showRuko && (
                       <div className="retail-group">
                         <div
-                          className={`retail-group-header ${canToggleRuko ? "clickable" : ""}`}
-                          onClick={() => canToggleRuko && toggleGroup("ruko")}
-                          role={canToggleRuko ? "button" : undefined}
-                          tabIndex={canToggleRuko ? 0 : undefined}
-                          aria-expanded={
-                            canToggleRuko ? isExpandedRuko : undefined
-                          }
+                          className="retail-group-header clickable"
+                          onClick={() => toggleGroupCollapse("ruko")}
+                          role="button"
+                          tabIndex={0}
+                          aria-expanded={!isCollapsedRuko}
+                          aria-label={`Ruko Depan Stasiun, ${countRuko} lokasi. ${isCollapsedRuko ? "Klik untuk menampilkan" : "Klik untuk menyembunyikan"}`}
                           onKeyDown={(e) => {
-                            if (
-                              canToggleRuko &&
-                              (e.key === "Enter" || e.key === " ")
-                            ) {
+                            if (e.key === "Enter" || e.key === " ") {
                               e.preventDefault();
-                              toggleGroup("ruko");
+                              toggleGroupCollapse("ruko");
                             }
                           }}
                         >
@@ -1060,113 +1116,124 @@ export function RetailPanel({
                             <span className="retail-group-count">
                               {countRuko}
                             </span>
-                            {canToggleRuko && (
-                              <svg
-                                width="13"
-                                height="13"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2.2"
-                                style={{
-                                  transform: isExpandedRuko
-                                    ? "rotate(180deg)"
-                                    : "none",
-                                  transition: "transform 0.2s ease",
-                                  color: "var(--ink-muted)",
-                                }}
-                              >
-                                <path d="m6 9 6 6 6-6" />
-                              </svg>
-                            )}
-                          </div>
-                        </div>
-                        <div className="retail-group-items">
-                          {visibleRuko.map((location) => {
-                            const isSelected = selected?.id === location.id;
-                            const metrics = getRetailLocationMetrics(location);
-                            return (
-                              <button
-                                key={location.id}
-                                type="button"
-                                className={`retail-card-btn ${isSelected ? "selected" : ""}`}
-                                aria-label={location.name}
-                                aria-pressed={isSelected}
-                                onClick={() => onSelect(location)}
-                              >
-                                <div className="retail-card-content">
-                                  <div className="retail-card-name">
-                                    {location.name}
-                                  </div>
-                                  <div className="retail-card-badges">
-                                    <span className="retail-badge-type type-ruko">
-                                      Ruko Depan
-                                    </span>
-                                    <span
-                                      className={`retail-badge-status status-${location.status}`}
-                                    >
-                                      {STATUS_LABEL[location.status]}
-                                    </span>
-                                  </div>
-                                  <div className="retail-card-metrics">
-                                    <span className="retail-metric-chip">
-                                      📐 {metrics.areaLabel}
-                                    </span>
-                                    <span className="retail-metric-chip price">
-                                      💰 {metrics.monthlyPrice}
-                                    </span>
-                                  </div>
-                                </div>
-                                <div
-                                  className="retail-card-arrow"
-                                  aria-hidden="true"
-                                >
-                                  <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path d="m9 18 6-6-6-6" />
-                                  </svg>
-                                </div>
-                              </button>
-                            );
-                          })}
-                        </div>
-                        {canToggleRuko && (
-                          <button
-                            type="button"
-                            className="retail-expand-btn"
-                            onClick={() => toggleGroup("ruko")}
-                            aria-expanded={isExpandedRuko}
-                          >
-                            <span>
-                              {isExpandedRuko
-                                ? "Tampilkan lebih sedikit"
-                                : `Tampilkan ${countRuko - PREVIEW_LIMIT} lainnya`}
-                            </span>
                             <svg
-                              width="12"
-                              height="12"
+                              width="13"
+                              height="13"
                               viewBox="0 0 24 24"
                               fill="none"
                               stroke="currentColor"
-                              strokeWidth="2.5"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              className="retail-group-chevron"
                               style={{
-                                transform: isExpandedRuko
-                                  ? "rotate(180deg)"
-                                  : "none",
-                                transition: "transform 0.15s ease",
+                                transform: isCollapsedRuko
+                                  ? "rotate(-90deg)"
+                                  : "rotate(0deg)",
+                                transition:
+                                  "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                color: "var(--ink-muted)",
                               }}
                             >
                               <path d="m6 9 6 6 6-6" />
                             </svg>
-                          </button>
+                          </div>
+                        </div>
+                        {!isCollapsedRuko && (
+                          <>
+                            <div className="retail-group-items">
+                              {visibleRuko.map((location) => {
+                                const isSelected = selected?.id === location.id;
+                                const metrics =
+                                  getRetailLocationMetrics(location);
+                                return (
+                                  <button
+                                    key={location.id}
+                                    type="button"
+                                    className={`retail-card-btn ${isSelected ? "selected" : ""}`}
+                                    aria-label={location.name}
+                                    aria-pressed={isSelected}
+                                    onClick={() => onSelect(location)}
+                                  >
+                                    <div className="retail-card-content">
+                                      <div className="retail-card-name">
+                                        {location.name}
+                                      </div>
+                                      <div className="retail-card-badges">
+                                        <span className="retail-badge-type type-ruko">
+                                          Ruko Depan
+                                        </span>
+                                        <span
+                                          className={`retail-badge-status status-${location.status}`}
+                                        >
+                                          {STATUS_LABEL[location.status]}
+                                        </span>
+                                      </div>
+                                      <div className="retail-card-metrics">
+                                        <span className="retail-metric-chip">
+                                          📐 {metrics.areaLabel}
+                                        </span>
+                                        <span className="retail-metric-chip">
+                                          🏢 {metrics.storeTypeLabel}
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div
+                                      className="retail-card-arrow"
+                                      aria-hidden="true"
+                                    >
+                                      <svg
+                                        width="14"
+                                        height="14"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="2.2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <path d="m9 18 6-6-6-6" />
+                                      </svg>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                            {canPaginateRuko && (
+                              <button
+                                type="button"
+                                className="retail-expand-btn"
+                                onClick={() => toggleGroupShowAll("ruko")}
+                                aria-expanded={isShowAllRuko}
+                              >
+                                <span>
+                                  {isShowAllRuko
+                                    ? "Tampilkan lebih sedikit"
+                                    : `Tampilkan ${countRuko - PREVIEW_LIMIT} lainnya`}
+                                </span>
+                                <svg
+                                  width="13"
+                                  height="13"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2.2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  className="retail-expand-icon"
+                                  style={{
+                                    transform: isShowAllRuko
+                                      ? "rotate(180deg)"
+                                      : "rotate(0deg)",
+                                    transition:
+                                      "transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
+                                  }}
+                                >
+                                  <path d="m6 9 6 6 6-6" />
+                                </svg>
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     )}
@@ -1232,11 +1299,14 @@ export function RetailPanel({
                   </span>
                 </div>
                 <div className="retail-detail-metric">
-                  <span className="retail-metric-label">Kategori Gerai</span>
-                  <span className="retail-metric-value">
-                    {selected.category
-                      ? categoryLabel(selected.category)
-                      : "Belum ditentukan"}
+                  <span className="retail-metric-label">
+                    Prediksi Toko Cocok
+                  </span>
+                  <span
+                    className="retail-metric-value bold"
+                    style={{ color: "var(--brand-strong)" }}
+                  >
+                    {m.storeTypeLabel}
                   </span>
                 </div>
                 <div className="retail-detail-metric">
@@ -1244,9 +1314,24 @@ export function RetailPanel({
                   <span className="retail-metric-value">{m.areaLabel}</span>
                 </div>
                 <div className="retail-detail-metric">
-                  <span className="retail-metric-label">Estimasi Tarif</span>
-                  <span className="retail-metric-value bold price">
-                    {m.monthlyPrice}
+                  <span className="retail-metric-label">
+                    Tingkat Kesesuaian
+                  </span>
+                  <span className="retail-metric-value bold">
+                    {m.suitabilityScore}
+                  </span>
+                </div>
+                <div className="retail-detail-metric full-width">
+                  <span className="retail-metric-label">Alasan Prediksi</span>
+                  <span
+                    className="retail-metric-value"
+                    style={{
+                      fontSize: 12,
+                      lineHeight: 1.45,
+                      color: "var(--ink-2)",
+                    }}
+                  >
+                    {m.suitabilityReason}
                   </span>
                 </div>
                 <div className="retail-detail-metric full-width">
@@ -1370,10 +1455,13 @@ export function RetailPanel({
                 </div>
                 <div className="retail-detail-metric">
                   <span className="retail-metric-label">
-                    Estimasi Harga Sewa
+                    Prediksi Toko Cocok
                   </span>
-                  <span className="retail-metric-value bold price">
-                    {m.monthlyPrice}
+                  <span
+                    className="retail-metric-value bold"
+                    style={{ color: "var(--brand-strong)" }}
+                  >
+                    {m.recommendedStore}
                   </span>
                 </div>
                 <div className="retail-detail-metric full-width">

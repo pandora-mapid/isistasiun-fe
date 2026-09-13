@@ -857,7 +857,6 @@ export function LandingView() {
                 </div>
               </div>
             </div>
-
           </div>
         </section>
 
@@ -2345,9 +2344,8 @@ export function LandingView() {
           {/* Sub-footer */}
           <div className="pt-8">
             <p className="text-xs text-stone-500 font-normal">
-              © 2026 Isi Stasiun. All rights reserved. Data spasial dan
-              estimasi pergerakan penumpang dikembangkan untuk studi kelayakan
-              komersial.
+              © 2026 Isi Stasiun. All rights reserved. Data spasial dan estimasi
+              pergerakan penumpang dikembangkan untuk studi kelayakan komersial.
             </p>
           </div>
         </div>
