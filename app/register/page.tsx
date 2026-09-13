@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { NavBar } from "@/components/NavBar";
+import { Footer } from "@/components/Footer";
 
 function safeNext(value: string | string[] | undefined): string {
   const path = Array.isArray(value) ? value[0] : value;
@@ -50,6 +51,7 @@ export default async function RegisterPage({
           <RegisterForm nextPath={nextPath} />
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

@@ -1,20 +1,20 @@
 "use client";
 
 /**
- * Tiga simpul — tiga kartu staggered, satu skala rupiah bersama (small
+ * Tiga simpul - tiga kartu staggered, satu skala rupiah bersama (small
  * multiples).
  *
  * Riwayat: putaran 5–8 tiga kartu berdampingan (ditolak: "kotak seragam");
  * putaran 10 satu grafik sumbu polos (ditolak: "sampah, tidak kreatif").
  *
  * Putaran 11 (riset PolicyViz small-multiples + SAP staggered layout): tetap
- * tiga kartu, TAPI (a) tinggi awal berbeda-beda — komposisi, bukan baris rata;
+ * tiga kartu, TAPI (a) tinggi awal berbeda-beda - komposisi, bukan baris rata;
  * (b) tiap kartu = satu batang rentang mini dengan skala IDENTIK (`min = 0`,
  * `max` yang sama), endpoint `Rp 0` / `Rp {max}` dicetak di tiap kartu, jadi
  * ketiganya benar-benar bisa dibandingkan sekilas walau tidak sejajar piksel;
- * (c) kartu keluarga `.kartu` — satu sudut tajam, garis-rambut, tanpa bayangan.
+ * (c) kartu keluarga `.kartu` - satu sudut tajam, garis-rambut, tanpa bayangan.
  *
- * Semua angka dipetik dari `useBeranda()` — yang dihitung hanya posisi piksel
+ * Semua angka dipetik dari `useBeranda()` - yang dihitung hanya posisi piksel
  * di dalam batang. Sumbu dijangkar di 0, batas atas dibulatkan ke atas.
  */
 
@@ -38,7 +38,7 @@ function niceCeil(v: number): number {
 }
 
 /**
- * P10/P50/P90 kalau — dan hanya kalau — ketiganya benar-benar diestimasi dan
+ * P10/P50/P90 kalau - dan hanya kalau - ketiganya benar-benar diestimasi dan
  * bukan sampel tipis. `null` berarti "gambar garis putus".
  */
 function rentangTerbaca(
@@ -51,7 +51,7 @@ function rentangTerbaca(
   return { p10, p50, p90 };
 }
 
-/** Geseran tinggi awal per posisi kartu — bikin baris terasa dikomposisi. */
+/** Geseran tinggi awal per posisi kartu - bikin baris terasa dikomposisi. */
 const STAGGER = ["0", "var(--s5)", "var(--s3)"];
 
 function KartuSimpul({
@@ -93,7 +93,7 @@ function KartuSimpul({
         titik terbesar · {namaTitik}
       </div>
 
-      {/* Batang rentang — skala 0..max identik di ketiga kartu. */}
+      {/* Batang rentang - skala 0..max identik di ketiga kartu. */}
       <div
         style={{ position: "relative", height: 12, marginTop: "var(--s3)" }}
       >

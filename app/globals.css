@@ -3406,56 +3406,14 @@ a.kartu:focus-visible {
   position: static;
 }
 
-/* Aksi peta memang lebih banyak daripada halaman lain (bandingkan, ringkasan
-   simpul, dan brief). Di layar menengah, meletakkannya di satu baris dengan
-   lima rute dan identitas akun membuat label navigasi terpotong. Baris kedua
-   memberi setiap kelompok ruang yang cukup tanpa menghapus satu pun aksi. */
+/* Nav stays one row at every width above 760px on purpose (2026-09-13):
+   an earlier attempt wrapped it into two rows between 761-1500px to stop
+   labels truncating, but the user asked for that reverted — one row, full
+   stop, even if the account-tier buttons crowd it at medium widths. If this
+   needs revisiting, make the CONTENT narrower (shorter labels, fewer visible
+   actions) rather than wrapping the container again. */
 .nav-brand {
   flex: none;
-}
-
-.map-nav-actions {
-  flex-wrap: wrap;
-  justify-content: flex-end;
-}
-
-@media (min-width: 761px) and (max-width: 1500px) {
-  .peta-nav-float .navbar-container {
-    flex-wrap: wrap;
-    gap: 14px !important;
-    padding: 14px 20px !important;
-  }
-
-  .peta-nav-float .nav-links {
-    flex: 1 1 480px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .peta-nav-float .nav-links::-webkit-scrollbar {
-    display: none;
-  }
-
-  .peta-nav-float .nav-actions {
-    display: flex;
-    flex: 1 1 100%;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding-top: 12px;
-    border-top: 1px solid var(--nav-border);
-  }
-
-  .peta-nav-float .map-nav-actions {
-    flex: 1 1 0;
-  }
-
-  .peta-nav-float .station-search {
-    top: 176px;
-  }
-
-  .peta-nav-float .peta-chip-stasiun {
-    top: 230px;
-  }
 }
 
 /* ==========================================================================
