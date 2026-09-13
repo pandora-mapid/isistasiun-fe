@@ -91,7 +91,7 @@ export function RelStatistikAngka() {
           marginBottom: "var(--s4)",
         }}
       >
-        <span className="eyebrow" style={{ whiteSpace: "nowrap" }}>
+        <span className="eyebrow boleh-patah-kecil" style={{ whiteSpace: "nowrap" }}>
           Kesenjangan belanja · per hari kerja
         </span>
         <span style={{ flex: 1, height: 1, background: "var(--rule)" }} />
@@ -216,7 +216,7 @@ export function RelStatistikKutipan() {
           key={k.nilai}
           style={{
             display: "grid",
-            gridTemplateColumns: "1fr auto",
+            gridTemplateColumns: "minmax(0, 1fr) auto",
             gap: "var(--s3)",
             alignItems: "baseline",
             padding: "var(--s3) 0",

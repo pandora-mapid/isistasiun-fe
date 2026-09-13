@@ -27,7 +27,10 @@ test("dialog Bandingkan memakai filter aktif dan bisa membuka stasiun di peta", 
     { timeout: 30_000 },
   );
 
-  await page.getByRole("button", { name: "Bandingkan" }).click();
+  // `exact: true` wajib: sejak overlay "Ringkasan & Bandingkan Simpul" ada,
+  // pencocokan substring mengenai DUA tombol dan Playwright menolaknya. Dua
+  // fitur berbeda dengan angka berbeda — lihat lib/analytics/summary.ts.
+  await page.getByRole("button", { name: "Bandingkan", exact: true }).click();
   const dialog = page.getByRole("dialog", { name: "Manggarai dan Sudirman" });
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText("Spending gap")).toHaveCount(2);
@@ -47,7 +50,7 @@ test("dialog Bandingkan memakai filter aktif dan bisa membuka stasiun di peta", 
     .toBe(106.8224);
 
   // Esc menutup.
-  await page.getByRole("button", { name: "Bandingkan" }).click();
+  await page.getByRole("button", { name: "Bandingkan", exact: true }).click();
   await expect(dialog).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();

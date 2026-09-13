@@ -327,6 +327,45 @@ export type StationSummaryPayload = {
   stations: StationSummaryRow[];
 };
 
+/* -------------------------------------------------------------------------
+ * Indeks sewa/arus
+ *
+ * Inventaris petaknya sendiri sudah punya bentuk di atas: `RentalAsset` —
+ * di mana, seberapa luas, terisi atau kosong, dari Space KAI + survei
+ * lapangan. Yang di sini cuma skornya: harga sewa ditawarkan dibagi arus
+ * terukur, jadi "rupiah per orang lewat".
+ *
+ * Sempat ada bentuk kedua di sini (`RentalAssetPayload`) yang menduplikasi
+ * `RentalAsset` medan demi medan — dua cabang membangun lapisan sewa masing-
+ * masing, lalu peta menggambar petak Space KAI yang sama dua kali. Bentuk
+ * duplikatnya dibuang; keduanya kini bertemu di `lib/data/rent.ts` lewat
+ * `source_id` yang sama.
+ *
+ * Nama medannya MENIRU PERSIS response Go (`internal/analytics/dto.go`
+ * `RentFlowIndexResponse`) — termasuk `index` yang bukan bahasa Indonesia dan
+ * `snake_case`-nya. Jangan diterjemahkan: Fase 2 hanya menukar isi
+ * `source.ts`, dan tiap medan yang di-rename di sini berarti satu lapisan
+ * pemetaan tambahan yang harus ditulis dan dijaga.
+ *
+ * Fase 2: `GET /api/v1/analytics/rent-flow-index`.
+ * ---------------------------------------------------------------------- */
+
+/**
+ * Sewa ditawarkan dibanding arus terukur, per petak.
+ *
+ * `index` = `offered_rent / measured_flow` — makin tinggi, makin mahal tiap
+ * orang yang lewat. `is_outlier` ditandai backend, bukan dihitung ulang di
+ * sini; peta hanya menggambar apa yang sudah diputuskan.
+ */
+export type RentFlowIndexPayload = {
+  plot_id: string;
+  station_id: string;
+  offered_rent: number;
+  measured_flow: number;
+  index: number;
+  is_outlier: boolean;
+};
+
 /**
  * Nilai yang ditempelkan ke fitur peta lewat `setFeatureState`.
  *

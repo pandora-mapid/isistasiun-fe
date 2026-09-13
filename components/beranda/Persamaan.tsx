@@ -88,11 +88,12 @@ export function Persamaan() {
             flexWrap: "wrap",
           }}
         >
-          <div style={{ flex: "0 0 auto" }}>
+          <div className="blok-judul" style={{ flex: "0 0 auto" }}>
             <div style={{ marginBottom: "var(--s3)" }}>
               <KickerBernomor n={2} kicker="Instrumen" />
             </div>
             <h2
+              className="boleh-patah"
               style={{
                 font: `800 var(--t-h2)/1.06 var(--font-inter), system-ui, sans-serif`,
                 letterSpacing: "-0.02em",
@@ -124,9 +125,10 @@ export function Persamaan() {
             dengan garis dasarnya — itu yang membuat hubungan antar-suku
             terbaca sebelum satu kata pun dibaca. */}
         <div
+          className="runtuh-2"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
+            gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
             gap: "var(--s3)",
             // Sengaja lebih lega (`--s5`) dari jarak kicker→judul (`--s3`) di
             // atas — dua jeda itu tidak boleh sama besar.

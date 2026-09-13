@@ -13,15 +13,19 @@ import "maplibre-gl/dist/maplibre-gl.css";
 
 import type { Domain } from "@/lib/analytics/select";
 import type { RetailLocation } from "@/lib/data/retail";
+import type { RentPlot } from "@/lib/data/rent";
 import type { FilterCategory } from "./RetailPanel";
-import { rentalCircleLayer, rentalLabelLayer } from "@/lib/map/rental-style";
+import {
+  rentalCircleLayer,
+  rentalIndexLayer,
+  rentalLabelLayer,
+} from "@/lib/map/rental-style";
 import { stationCircleLayer, stationLabelLayer } from "@/lib/map/station-style";
 import type {
   ConfidenceGridProps,
   IsochroneProps,
   ObservationPointProps,
   PointFeatureState,
-  RentalAsset,
   Station,
 } from "@/lib/data/types";
 import {
@@ -57,7 +61,7 @@ const EMPTY_STATIONS: FeatureCollection<Point, Station> = {
   features: [],
 };
 
-const EMPTY_RENTALS: FeatureCollection<Point, RentalAsset> = {
+const EMPTY_RENTALS: FeatureCollection<Point, RentPlot> = {
   type: "FeatureCollection",
   features: [],
 };
@@ -106,9 +110,9 @@ type Props = {
   stationLocations?: FeatureCollection<Point, Station>;
   selectedStationId?: number | null;
   onSelectStation?: (station: Station) => void;
-  rentalLocations?: FeatureCollection<Point, RentalAsset>;
+  rentalLocations?: FeatureCollection<Point, RentPlot>;
   selectedRentalId?: string | null;
-  onSelectRental?: (asset: RentalAsset) => void;
+  onSelectRental?: (asset: RentPlot) => void;
   activeRetailFilter?: FilterCategory;
   /**
    * Boleh digeser, di-zoom, dan diklik. Bawaannya ya.
@@ -493,6 +497,9 @@ export function MapCanvas({
       // Nama retail dipasang lebih dulu → prioritas tabrakan simbol paling
       // rendah, jadi nama titik pengamatan tidak pernah tergeser olehnya.
       map.addLayer(retailLabelLayer());
+      // Angka indeks sewa/arus menumpang source petak yang sama — lihat
+      // LAYER_ORDER soal kenapa ia ikut kelompok simbol berprioritas rendah.
+      map.addLayer(rentalIndexLayer());
       // Urutannya mengikuti LAYER_ORDER: arus lebih dulu, nama titik sesudahnya
       // — lihat catatan di sana soal prioritas penempatan simbol.
       map.addLayer(pointArusLayer());

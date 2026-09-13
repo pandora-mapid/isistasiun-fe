@@ -586,16 +586,94 @@ test("baris lapisan tanpa data tetap terbaca, tapi tidak mengubah apa pun", asyn
   await waitForMapReady(page);
 
   await page.locator(".layers-toggle").click();
-  const sewa = page.locator(".lyr").filter({ hasText: "Indeks sewa" });
+  // "Event & aktivasi" adalah satu-satunya baris yang masih benar-benar tanpa
+  // data. Baris "Indeks sewa" dulu dipakai di sini dan sudah pindah ke sisi
+  // yang berfungsi — lihat tes di bawahnya.
+  const event = page.locator(".lyr").filter({ hasText: "Event & aktivasi" });
   // `aria-disabled`, bukan `disabled`: barisnya tetap bisa dijangkau supaya
   // keterangan "belum ada data" ikut terbaca pembaca layar. Playwright sendiri
   // menolak mengkliknya — bukti bahwa atributnya memang terbaca sebagai "tidak
   // tersedia" — jadi dicoba lewat jalur yang benar-benar tersisa: fokus + Enter.
-  await expect(sewa).toHaveAttribute("aria-disabled", "true");
-  await sewa.focus();
-  await expect(sewa).toBeFocused();
+  await expect(event).toHaveAttribute("aria-disabled", "true");
+  await event.focus();
+  await expect(event).toBeFocused();
   await page.keyboard.press("Enter");
+  await expect(event).toHaveAttribute("aria-pressed", "false");
+});
+
+/**
+ * Satu baris panel, satu himpunan petak, dua layer di atasnya.
+ *
+ * Inventaris petak (`rental-circle`) dan indeks sewa/arus (`rental-index`)
+ * sempat dibangun sebagai dua lapisan yang berdiri sendiri, masing-masing
+ * dengan source dan sakelar panelnya sendiri — dan keduanya menggambar petak
+ * Space KAI yang sama, dengan `source_id` yang sama pula. Hasilnya satu petak
+ * fisik tergambar dua kali. Tes ini mengunci hasil penyatuannya: satu baris
+ * panel, dan angka indeks yang menumpang source petak yang sama.
+ */
+test("lapisan aset sewa menyala, menggambar petak, dan membawa indeksnya", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.locator(".layers-toggle").click();
+  const sewa = page.locator(".lyr").filter({ hasText: "Aset sewa" });
+  // Satu baris saja — bukan "Indeks sewa / arus" DAN "Aset sewa stasiun".
+  await expect(sewa).toHaveCount(1);
+  await expect(sewa).toHaveAttribute("aria-disabled", "false");
+
+  // Baris ini menyala sejak awal (DEFAULT_ACTIVE_LAYERS), jadi yang diuji
+  // adalah sakelarnya benar-benar menggerakkan peta: matikan, lalu nyalakan.
+  await expect(sewa).toHaveAttribute("aria-pressed", "true");
+  await sewa.click();
   await expect(sewa).toHaveAttribute("aria-pressed", "false");
+  await sewa.click();
+  await expect(sewa).toHaveAttribute("aria-pressed", "true");
+
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const map = (window as unknown as { __map?: any }).__map;
+        return map.getLayoutProperty("rental-circle", "visibility");
+      }),
+    )
+    .toBe("visible");
+
+  // Bukan cuma layernya menyala: petaknya harus benar-benar tergambar.
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const map = (window as unknown as { __map?: any }).__map;
+        return map.queryRenderedFeatures({ layers: ["rental-circle"] }).length;
+      }),
+    )
+    .toBeGreaterThan(0);
+
+  // Indeksnya menumpang source yang sama — itu inti penyatuannya. Diperiksa
+  // lewat properti fitur, bukan lewat label tergambar: layer `rental-index`
+  // baru muncul dari zoom 16, dan memaksa kamera ke sana membuat tes ini
+  // menguji posisi kamera alih-alih data.
+  const berindeks = await page.evaluate(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const map = (window as unknown as { __map?: any }).__map;
+    const fitur = map.queryRenderedFeatures({
+      layers: ["rental-circle"],
+    }) as { properties: Record<string, unknown> }[];
+    return {
+      total: fitur.length,
+      berlabel: fitur.filter((f) => f.properties.index_label != null).length,
+      nol: fitur.filter((f) => f.properties.index === 0).length,
+    };
+  });
+  expect(berindeks.total).toBeGreaterThan(0);
+  // Setidaknya satu petak membawa indeksnya — itu yang membuktikan kedua
+  // sumber benar-benar bertemu di satu fitur, bukan di dua lapisan.
+  expect(berindeks.berlabel).toBeGreaterThan(0);
+  // Petak yang arusnya belum terukur TIDAK diisi nol — nol berarti gratis.
+  expect(berindeks.nol).toBe(0);
 });
 
 test("panel transparansi menerima fokus dan ditutup dengan Esc", async ({
@@ -616,3 +694,206 @@ test("panel transparansi menerima fokus dan ditutup dengan Esc", async ({
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 });
+
+test("overlay ringkasan simpul berdiri sendiri di samping tombol Bandingkan", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  // Dua tombol, dua fitur. Kalau suatu saat keduanya disatukan, tes ini yang
+  // pertama jatuh — dan memang harus, karena angkanya datang dari dua
+  // hitungan yang berbeda (lihat lib/analytics/summary.ts).
+  const lama = page.getByRole("button", { name: "Bandingkan", exact: true });
+  const baru = page.getByRole("button", { name: "Ringkasan & Bandingkan Simpul" });
+  await expect(lama).toBeVisible();
+  await expect(baru).toBeVisible();
+
+  await baru.click();
+  const dialog = page.getByRole("dialog", { name: "Ringkasan & Bandingkan Simpul" });
+  await expect(dialog).toBeVisible();
+
+  // Dua kolom simpul, dan angka yang memang datang dari rollup simpul:
+  // rentang P10-P90 plus stempel basisnya.
+  await expect(dialog.getByText("Manggarai", { exact: false }).first()).toBeVisible();
+  await expect(dialog.getByText("Sudirman", { exact: false }).first()).toBeVisible();
+  await expect(dialog.getByText("Kesenjangan (P10–P90)").first()).toBeVisible();
+  await expect(dialog.getByText("simulasi Monte Carlo setingkat simpul")).toBeVisible();
+
+  // Dialog lama TIDAK ikut terbuka.
+  await expect(
+    page.getByRole("dialog", { name: "Perbandingan dua simpul", exact: false }),
+  ).toHaveCount(0);
+
+  // Fokus masuk ke dalam modal, Esc menutupnya — sama seperti panel lain.
+  await expect(page.getByRole("button", { name: "Tutup ringkasan simpul" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
+test("tabel atribut terbuka, bisa diurutkan, dan mengunduh CSV", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.getByRole("button", { name: "Tabel atribut" }).click();
+  const dialog = page.getByRole("dialog", { name: /titik pengamatan/ });
+  await expect(dialog).toBeVisible();
+
+  // Kolom F/E/C/V memang ada — itu yang membedakan tabel ini dari panel.
+  for (const judul of ["Gap P50", "F (org/jam)", "E", "C", "V (Rp)"]) {
+    await expect(dialog.getByRole("columnheader", { name: new RegExp(judul.replace(/[()/]/g, ".")) }).first()).toBeVisible();
+  }
+
+  // Sortir harus sampai ke pembaca layar, bukan cuma panah visual.
+  const gapP50 = dialog.getByRole("columnheader", { name: /Gap P50/ });
+  await expect(gapP50).toHaveAttribute("aria-sort", "descending");
+  await gapP50.getByRole("button").click();
+  await expect(gapP50).toHaveAttribute("aria-sort", "ascending");
+
+  // Unduhan benar-benar terjadi, dan namanya membawa potongan filternya.
+  const unduhan = page.waitForEvent("download");
+  await dialog.getByRole("button", { name: "Unduh CSV" }).click();
+  const file = await unduhan;
+  expect(file.suggestedFilename()).toContain("tabel-atribut");
+  expect(file.suggestedFilename().endsWith(".csv")).toBe(true);
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
+test("tombol Unduh brief mengunduh CSV potongan aktif tanpa membuka tabel", async ({
+  page,
+}) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  const unduhan = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Unduh brief" }).click();
+  const file = await unduhan;
+  expect(file.suggestedFilename()).toContain("tabel-atribut");
+
+  // Isinya benar-benar CSV dengan header yang sama, bukan berkas kosong.
+  const stream = await file.createReadStream();
+  const isi = await new Promise<string>((resolve, reject) => {
+    let buf = "";
+    stream.on("data", (c) => (buf += c));
+    stream.on("end", () => resolve(buf));
+    stream.on("error", reject);
+  });
+  expect(isi).toContain("Gap P50");
+  expect(isi).toContain("Sampel tipis");
+});
+
+test("brief simpul tampil dan menyediakan cetak ke PDF", async ({ page }) => {
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  await page.getByRole("button", { name: "Brief PDF" }).click();
+  const dialog = page.getByRole("dialog", { name: "Brief PDF" });
+  await expect(dialog).toBeVisible();
+
+  // Bentuk brief menurut isi-stasiun-ai-integration.md §2.2.
+  await expect(dialog.getByText("Rentang tertangkap").first()).toBeVisible();
+  await expect(dialog.getByText("Asumsi yang dipakai").first()).toBeVisible();
+  await expect(dialog.getByText("Kategori hilang teratas").first()).toBeVisible();
+  await expect(dialog.getByText("Catatan kepercayaan").first()).toBeVisible();
+  await expect(dialog.getByRole("button", { name: "Cetak / simpan PDF" })).toBeEnabled();
+
+  // Kontrolnya tidak boleh ikut tercetak: tombol "Cetak" di dalam PDF-nya
+  // sendiri adalah tombol yang tak bisa ditekan siapa pun.
+  await page.emulateMedia({ media: "print" });
+  await expect(dialog.getByRole("button", { name: "Cetak / simpan PDF" })).toBeHidden();
+  await expect(dialog.getByText("Asumsi yang dipakai").first()).toBeVisible();
+  await page.emulateMedia({ media: "screen" });
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+});
+
+test("peta tetap terbaca di lebar sempit", async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 800 });
+  await page.goto("/peta", { waitUntil: "domcontentloaded" });
+  await waitForMapReady(page);
+
+  // Panel ringkasan turun jadi lembar bawah, tidak lagi kolom 414px yang
+  // menutupi hampir seluruh peta.
+  const panel = page.locator(".peta-panel");
+  const kotak = await panel.boundingBox();
+  expect(kotak).not.toBeNull();
+  expect(kotak!.width).toBeGreaterThan(700);
+  expect(kotak!.height).toBeLessThan(800 * 0.62);
+
+  // Dan halaman tidak boleh bisa digeser mendatar.
+  const meluber = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+  );
+  expect(meluber).toBe(false);
+});
+
+/**
+ * Panel mengambang `/peta` tidak boleh saling menindih di layar sempit.
+ *
+ * Ini penjaga yang lahir dari kegagalan nyata, dan gejalanya tidak terlihat
+ * oleh pemeriksaan overflow: waktu cabang `development` menambah pencarian
+ * stasiun dan chip stasiun di kiri atas, aturan responsif `/peta` yang sudah
+ * ada tidak tahu keduanya ada. Halaman tetap tidak bisa digeser mendatar —
+ * lolos tes di atas — tapi enam panel menumpuk jadi satu tumpukan tak terbaca
+ * di sepertiga layar teratas.
+ *
+ * Karena itu yang diperiksa posisinya, bukan lebarnya: keenam panel harus
+ * mengantre tegak, satu di bawah yang lain, dan harus masih menyisakan peta
+ * yang terlihat di antaranya. Peta yang tertutup habis bukan versi kecil
+ * halaman ini.
+ */
+const PANEL_PETA = [
+  ".peta-nav-float",
+  ".station-search",
+  ".peta-chip-stasiun",
+  ".peta-kontrol-kiri",
+  ".peta-bawah",
+  ".peta-panel",
+] as const;
+
+for (const { lebar, tinggi } of [
+  { lebar: 1024, tinggi: 900 },
+  { lebar: 760, tinggi: 900 },
+  { lebar: 390, tinggi: 844 },
+]) {
+  test(`panel /peta mengantre tanpa menindih di ${lebar}px`, async ({ page }) => {
+    await page.setViewportSize({ width: lebar, height: tinggi });
+    await page.goto("/peta", { waitUntil: "domcontentloaded" });
+    await waitForMapReady(page);
+
+    const kotak = await page.evaluate((selektor) => {
+      return selektor.map((q) => {
+        const el = document.querySelector(q);
+        if (!el) return null;
+        const r = el.getBoundingClientRect();
+        return { q, top: Math.round(r.top), bottom: Math.round(r.bottom), lebar: Math.round(r.width) };
+      });
+    }, PANEL_PETA as unknown as string[]);
+
+    for (const k of kotak) expect(k, `panel hilang: ${JSON.stringify(kotak)}`).not.toBeNull();
+    const ada = kotak as { q: string; top: number; bottom: number; lebar: number }[];
+
+    // Tidak ada yang menyusut jadi sisa piksel — pernah terjadi saat
+    // `max-width: calc(100% - 500px)` (jatah panel kanan) masih berlaku
+    // padahal panelnya sudah jadi lembar bawah: legenda tinggal 34px.
+    for (const k of ada) {
+      expect(k.lebar, `${k.q} terlalu sempit`).toBeGreaterThan(lebar * 0.4);
+    }
+
+    const urut = [...ada].sort((a, b) => a.top - b.top);
+    for (let i = 1; i < urut.length; i++) {
+      expect(
+        urut[i].top,
+        `${urut[i - 1].q} (…${urut[i - 1].bottom}) menindih ${urut[i].q} (${urut[i].top}…)`,
+      ).toBeGreaterThanOrEqual(urut[i - 1].bottom);
+    }
+
+    // Harus masih ada peta yang terlihat di antara chip stasiun dan legenda.
+    const chip = ada.find((k) => k.q === ".peta-chip-stasiun")!;
+    const legenda = ada.find((k) => k.q === ".peta-kontrol-kiri")!;
+    expect(legenda.top - chip.bottom, "peta tidak tersisa di antara panel").toBeGreaterThan(40);
+  });
+}

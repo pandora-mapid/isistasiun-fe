@@ -15,6 +15,7 @@ import type {
   IsochroneProps,
   MockDemoData,
   ObservationPointProps,
+  RentFlowIndexPayload,
   SpendingGapPayload,
   Station,
   RentalAsset,
@@ -193,6 +194,30 @@ export async function loadStationSummary(): Promise<StationSummaryPayload> {
 }
 
 /**
+ * Indeks sewa/arus per petak — sewa ditawarkan dibagi arus terukur.
+ *
+ * `GET /api/v1/analytics/rent-flow-index` sudah hidup dan aman dipakai
+ * langsung — beda dari `stations`/`station-summary`/`entrances` di bawah,
+ * `station_id` pada jawabannya tidak pernah dibaca di sisi frontend:
+ * `gabungSewa()` (`lib/data/rent.ts`) mencocokkan tiap baris ke inventaris
+ * petak lewat `plot_id`, bukan `station_id`, jadi UUID vs integer tidak jadi
+ * masalah di sini. Tetap jatuh ke mock saat `NEXT_PUBLIC_API_BASE_URL` kosong
+ * (dev lokal tanpa backend), sama seperti `loadConfidenceLayer`.
+ *
+ * Isinya hanya petak Manggarai: sewa in-station Sudirman tidak ada di API KAI
+ * (sudah diperiksa per koordinat), dan listing pasar sekitar tidak punya
+ * denominator arus yang sepadan. Petak tanpa baris di sini memang belum punya
+ * indeks — jangan diisi nol, karena nol berarti "gratis", bukan "tak terukur".
+ */
+export async function loadRentFlowIndex(): Promise<RentFlowIndexPayload[]> {
+  return unwrap(
+    await (API_READY
+      ? fromApi<ApiEnvelope<RentFlowIndexPayload[]>>("analytics/rent-flow-index")
+      : fromMock<ApiEnvelope<RentFlowIndexPayload[]>>("rent-flow-index.json")),
+  );
+}
+
+/**
  * Daftar stasiun. Masih mock.
  *
  * `GET /api/v1/stations` sudah hidup, tapi `id`-nya UUID sementara seluruh
@@ -249,4 +274,41 @@ export async function loadRentalAssets(): Promise<RentalAsset[]> {
 /** Data presentasi Tahap 1. Fase API mengganti implementasi fungsi ini saja. */
 export async function loadDemoData(): Promise<MockDemoData> {
   return MOCK_DEMO_DATA;
+}
+
+/** Bentuk jawaban AI Copilot — cermin `copilot/dto.go` di backend. */
+export interface CopilotAnswer {
+  answer: string;
+  suggested_layers: string[] | null;
+  spatial_filter: {
+    station_id?: string;
+    category?: string;
+    time_slot?: string;
+  } | null;
+}
+
+/**
+ * AI Copilot "Tanya Data" — `POST /api/v1/copilot/query`.
+ *
+ * Beda dari fungsi lain di berkas ini: ini **POST**, dan hanya berfungsi saat
+ * `NEXT_PUBLIC_API_BASE_URL` menunjuk ke backend nyata — endpoint copilot tidak
+ * ada di data `/mock`. Backend **selalu** balas 200 dengan jawaban deterministik
+ * saat layanan AI mati (`answer` tetap terisi, ada catatan "mode ringkas"),
+ * jadi pemanggil tak perlu menangani matinya AI secara khusus — cukup tangani
+ * kegagalan jaringan biasa. Lihat isi-stasiun-ai-integration.md §2.1.
+ */
+export async function askCopilot(
+  query: string,
+  stationId?: string,
+): Promise<CopilotAnswer> {
+  const res = await fetch(`${API_BASE}/copilot/query`, {
+    method: "POST",
+    cache: "no-store",
+    headers: { "Content-Type": "application/json", ...(headers() ?? {}) },
+    body: JSON.stringify({ query, station_id: stationId ?? null }),
+  });
+  if (!res.ok) {
+    throw new Error(`Gagal memuat copilot/query: ${res.status} ${res.statusText}`);
+  }
+  return unwrap((await res.json()) as ApiEnvelope<CopilotAnswer>);
 }
