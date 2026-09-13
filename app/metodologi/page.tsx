@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react";
 import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
+import { Footer } from "@/components/Footer";
 import { RequireLogin } from "@/components/auth/RequireLogin";
 import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Kepala } from "@/components/paper/Kepala";
@@ -630,28 +631,7 @@ export default function MetodologiPage() {
         </div>
       </section>
 
-      <footer
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "var(--s3)",
-          flexWrap: "wrap",
-          padding: "var(--s3) var(--page-x) var(--s4)",
-          borderTop: "1px solid var(--rule)",
-        }}
-      >
-        <span style={{ fontSize: 11.5, color: "var(--ink-faint)" }}>
-          Isi Stasiun · dibangun di atas GEO MAPID · seluruh angka pada halaman
-          ini bersifat ilustratif
-        </span>
-        <Link
-          href="/rekomendasi"
-          style={{ fontSize: 11.5, fontWeight: 600, color: "var(--ink)" }}
-        >
-          Lanjut ke rekomendasi →
-        </Link>
-      </footer>
+      <Footer />
     </div>
     </RequireLogin>
   );
