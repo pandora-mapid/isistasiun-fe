@@ -223,7 +223,7 @@ const GARIS_SLOT: React.CSSProperties = {
 
 const QUESTIONS = [
   "pintu mana yang gapnya paling besar sore hari?",
-  "bandingkan Stasiun B dengan Stasiun C",
+  "bandingkan Manggarai dengan Sudirman",
   "kawasan mana yang sampelnya masih tipis?",
 ];
 

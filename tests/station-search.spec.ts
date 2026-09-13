@@ -133,6 +133,7 @@ test("sepuluh lokasi retail dapat dipilih dari daftar dan marker, serta disembun
   page,
 }) => {
   await page.getByRole("button", { name: "Retail", exact: true }).click();
+  await expect(page.getByText("Potensi Toko Baru")).toBeVisible();
   const expandPotensi = page
     .locator(".retail-group")
     .filter({ hasText: "Potensi Toko Baru" })

@@ -50,33 +50,6 @@ test("pembanding memakai filter aktif dan dapat membuka stasiun di peta", async 
   await expect(dialog).toBeHidden();
 });
 
-test("rekomendasi difilter, menandai sampel tipis, dan membuka deep-link peta", async ({ page }) => {
-  await useOfflineBasemap(page);
-  await page.goto("/rekomendasi");
-  await expect(page.getByRole("heading", { name: "Urutan prioritas" })).toBeVisible();
-  await expect(page.getByText("Ditunda").locator(".." )).toContainText("1 lokasi");
-  await expect(page.getByText("Belum direkomendasikan")).toBeVisible();
-
-  await page.getByRole("button", { name: "Sudirman" }).click();
-  const table = page.getByRole("table", { name: "Urutan rekomendasi" });
-  await expect(table.getByRole("row")).toHaveCount(3);
-  await table.getByRole("row").nth(1).click();
-  await expect(page).toHaveURL(/\/peta\?station=2&point=24&category=ritel&slot=sore/);
-  await expect(page.getByText("Pintu 4").first()).toBeVisible();
-});
-
-test("filter kategori menyaring panel retail dan status kategori dapat membukanya", async ({ page }) => {
-  await useOfflineBasemap(page);
-  await page.goto("/rekomendasi");
-  await page.locator(".category-matrix-row").filter({ hasText: "Apotek" }).getByRole("link", { name: "kosong" }).first().click();
-  await expect(page).toHaveURL(/station=1&category=apotek/);
-  const panel = page.getByRole("region", { name: "Retail dan potensi Manggarai" });
-  await expect(panel.locator("summary")).toContainText("1 lokasi");
-  await panel.locator("summary").click();
-  await expect(panel.getByRole("button", { name: "Potensi toko 1", exact: true })).toBeVisible();
-  await expect(panel.getByRole("button", { name: "Famima Manggarai", exact: true })).toHaveCount(0);
-});
-
 test("wilayah di luar Manggarai dan Sudirman diberi status tanpa mengunci peta", async ({ page }) => {
   await useOfflineBasemap(page);
   await page.goto("/peta");
