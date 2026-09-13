@@ -77,6 +77,13 @@ export function loginRequest(email: string, password: string) {
   });
 }
 
+export function registerRequest(email: string, password: string) {
+  return apiRequest<AuthSession>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
 let refreshInFlight: Promise<AuthSession> | null = null;
 
 export function refreshSessionRequest(): Promise<AuthSession> {

@@ -9,7 +9,7 @@ export type NavKey =
   | "metodologi"
   | "rekomendasi";
 
-export type PageKey = NavKey | "login" | "premium";
+export type PageKey = NavKey | "login" | "register" | "premium" | "admin";
 
 const NAV_ITEMS: { key: NavKey; href: string; label: string }[] = [
   { key: "beranda", href: "/", label: "Beranda" },

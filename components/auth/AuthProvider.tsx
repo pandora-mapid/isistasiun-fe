@@ -17,6 +17,7 @@ import {
   loginRequest,
   logoutRequest,
   refreshSessionRequest,
+  registerRequest,
   SESSION_HINT_KEY,
 } from "@/lib/auth/client";
 import type { AuthSession, AuthUser } from "@/lib/auth/types";
@@ -27,6 +28,9 @@ type AuthContextValue = {
   status: AuthStatus;
   user: AuthUser | null;
   login(email: string, password: string): Promise<void>;
+  register(email: string, password: string): Promise<void>;
+  /** Pretend-payment: no gateway, no form — flips the current user to premium. */
+  upgrade(): Promise<void>;
   logout(): Promise<void>;
   request<T>(path: string, init?: RequestInit): Promise<T>;
 };
@@ -105,6 +109,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applySession],
   );
 
+  const register = useCallback(
+    async (email: string, password: string) => {
+      const session = await registerRequest(email, password);
+      applySession(session);
+    },
+    [applySession],
+  );
+
   const logout = useCallback(async () => {
     try {
       await logoutRequest();
@@ -129,9 +141,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [refresh],
   );
 
+  const upgrade = useCallback(async () => {
+    const session = await request<AuthSession>("/auth/upgrade", {
+      method: "POST",
+    });
+    applySession(session);
+  }, [request, applySession]);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, login, logout, request }),
-    [status, user, login, logout, request],
+    () => ({ status, user, login, register, upgrade, logout, request }),
+    [status, user, login, register, upgrade, logout, request],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
