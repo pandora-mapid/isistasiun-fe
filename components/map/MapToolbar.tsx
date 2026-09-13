@@ -7,6 +7,10 @@ import {
   type BasemapOption,
 } from "@/lib/map/config";
 
+const MAPID_BASEMAP_OPTIONS = BASEMAP_OPTIONS.filter(
+  (option) => option.category === "mapid",
+);
+
 export type LayerToggleItem = {
   key: string;
   label: string;
@@ -707,7 +711,7 @@ export function MapToolbar({
               paddingRight: 2,
             }}
           >
-            {BASEMAP_OPTIONS.map((opt: BasemapOption) => {
+            {MAPID_BASEMAP_OPTIONS.map((opt: BasemapOption) => {
               const isSelected = activeBasemap === opt.id;
               return (
                 <button

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { HeroPeta } from "./HeroPeta";
 import { Icon } from "./Icon";
+import { Footer } from "@/components/Footer";
 
 type ProductTabKey =
   | "spending-gap"
@@ -414,9 +415,9 @@ export function LandingView() {
                 </span>
               </div>
 
-              <h1 className="font-headline-lg text-text-primary tracking-tight font-normal">
+              <h1 className="font-headline-lg text-text-primary tracking-tight font-bold">
                 Berapa rupiah yang lewat, berapa yang{" "}
-                <span className="relative inline-block px-2.5 py-0.5 rounded-md bg-accent-yellow/25 text-text-primary font-serif italic">
+                <span className="relative inline-block px-2.5 py-0.5 rounded-md bg-accent-yellow/25 text-text-primary font-serif italic font-bold">
                   tertangkap.
                 </span>
               </h1>
@@ -868,7 +869,7 @@ export function LandingView() {
               <span className="text-[11px] lg:text-[12px] uppercase tracking-[0.08em] text-accent-yellow font-semibold font-mono">
                 What You Can Discover
               </span>
-              <h2 className="font-headline-lg text-3xl sm:text-4xl lg:text-[46px] leading-[1.15] font-normal text-surface-bright tracking-tight max-w-sm">
+              <h2 className="font-headline-lg text-2xl sm:text-4xl lg:text-[46px] leading-[1.15] font-normal text-surface-bright tracking-tight max-w-none whitespace-nowrap">
                 Satu peta. Empat keputusan.
               </h2>
               <p className="text-[16px] lg:text-[17px] text-stone-400 leading-relaxed font-normal">
@@ -1186,12 +1187,12 @@ export function LandingView() {
         </section>
 
         {/* SECTION 4: EXPLORE THE PRODUCT (WebGIS UI Showcase with AI Copilot & Evidence Drawer) */}
-        <section className="reveal w-full py-24 lg:py-32 px-gutter-sm lg:px-gutter max-w-7xl mx-auto relative z-10">
+        <section className="reveal w-full pt-24 pb-10 lg:pt-32 lg:pb-12 px-gutter-sm lg:px-gutter max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-12">
             <span className="font-label-sm uppercase tracking-widest text-text-muted font-semibold">
               The Product
             </span>
-            <h2 className="font-headline-lg text-text-primary tracking-tight mt-2 font-normal">
+            <h2 className="font-headline-lg text-text-primary tracking-tight mt-2 font-bold">
               Dari peta ke keputusan.
             </h2>
             <p className="font-body-lg text-text-secondary leading-relaxed mt-2">
@@ -2065,7 +2066,7 @@ export function LandingView() {
             )}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-6">
             <p className="font-headline-md font-serif italic text-text-secondary">
               “Jangan hanya percaya angkanya. Lihat dari mana angka itu
               berasal.”
@@ -2074,7 +2075,7 @@ export function LandingView() {
         </section>
 
         {/* SECTION 5: TARGET AUDIENCE & SCIENTIFIC RIGOR & FINAL CTA */}
-        <section className="reveal w-full py-20 lg:py-28 px-gutter-sm lg:px-gutter max-w-7xl mx-auto relative z-10">
+        <section className="reveal w-full pt-6 pb-20 lg:pt-8 lg:pb-28 px-gutter-sm lg:px-gutter max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="font-label-sm uppercase tracking-widest text-text-muted font-semibold">
               Target Audience
@@ -2257,99 +2258,7 @@ export function LandingView() {
       </main>
 
       {/* FOOTER */}
-      <footer className="w-full bg-[#F4F2EB] py-16 lg:py-20 border-t border-stone-200/80">
-        <div className="max-w-7xl mx-auto px-gutter-sm lg:px-gutter">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-10 lg:gap-16 pb-12 border-b border-stone-200/80">
-            {/* Column 1: Brand */}
-            <div className="md:col-span-6 flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg bg-[#171714] flex items-center justify-center shadow-xs">
-                  <div className="w-3.5 h-3.5 rounded border border-accent-yellow flex items-center justify-center">
-                    <div className="w-1.5 h-1.5 rounded-full bg-accent-yellow"></div>
-                  </div>
-                </div>
-                <span className="font-headline-sm text-lg font-semibold text-[#171714] tracking-tight">
-                  Isi Stasiun
-                </span>
-              </div>
-              <p className="font-serif italic text-base lg:text-lg text-stone-800 max-w-md leading-snug">
-                Melihat nilai ekonomi di balik pergerakan kota.
-              </p>
-              <p className="text-xs sm:text-sm text-stone-600 max-w-md leading-relaxed">
-                Platform inteligensi spasial berbasis web untuk memetakan
-                potensi komersial, keterjangkauan isochrone transit, dan
-                optimalisasi ruang niaga stasiun perkeretaapian perkotaan.
-              </p>
-            </div>
-
-            {/* Column 2: Navigasi Spasial */}
-            <div className="md:col-span-3 flex flex-col gap-2">
-              <span className="text-[11px] font-mono uppercase tracking-[0.08em] text-stone-500 font-semibold mb-2 block">
-                Navigasi Spasial
-              </span>
-              <div className="flex flex-col space-y-1 text-sm font-normal">
-                <Link
-                  href="/"
-                  className="hover:text-[#171714] hover:translate-x-0.5 transition-all py-1 inline-block"
-                  style={{ color: "#57564F" }}
-                >
-                  Beranda
-                </Link>
-                <Link
-                  href="/peta"
-                  className="hover:text-[#171714] hover:translate-x-0.5 transition-all py-1 inline-block"
-                  style={{ color: "#57564F" }}
-                >
-                  Peta Spasial Transit
-                </Link>
-                <Link
-                  href="/insight"
-                  className="hover:text-[#171714] hover:translate-x-0.5 transition-all py-1 inline-block"
-                  style={{ color: "#57564F" }}
-                >
-                  Katalog Insight Mobilitas
-                </Link>
-                <Link
-                  href="/rekomendasi"
-                  className="hover:text-[#171714] hover:translate-x-0.5 transition-all py-1 inline-block"
-                  style={{ color: "#57564F" }}
-                >
-                  Matriks Rekomendasi Tenan
-                </Link>
-                <Link
-                  href="/metodologi"
-                  className="hover:text-[#171714] hover:translate-x-0.5 transition-all py-1 inline-block"
-                  style={{ color: "#57564F" }}
-                >
-                  Metodologi &amp; Sumber Data
-                </Link>
-              </div>
-            </div>
-
-            {/* Column 3: Kompetisi & Kolaborasi */}
-            <div className="md:col-span-3 flex flex-col gap-3">
-              <span className="text-[11px] font-mono uppercase tracking-[0.08em] text-stone-500 font-semibold mb-2 block">
-                Kompetisi &amp; Kolaborasi
-              </span>
-              <p className="text-sm text-stone-700 font-medium leading-normal">
-                Built for MAPID WebGIS Competition 2026
-              </p>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-800 text-xs font-mono font-medium border border-emerald-500/20 w-fit">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                <span>Transit Analytics Track</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Sub-footer */}
-          <div className="pt-8">
-            <p className="text-xs text-stone-500 font-normal">
-              © 2026 Isi Stasiun. All rights reserved. Data spasial dan estimasi
-              pergerakan penumpang dikembangkan untuk studi kelayakan komersial.
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

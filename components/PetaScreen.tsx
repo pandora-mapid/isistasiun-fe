@@ -157,15 +157,10 @@ const LAYER_ROWS: LayerRow[] = [
     dot: "#047857",
     tint: "rgba(4,120,87,.08)",
   },
-  {
-    key: "event",
-    label: "Event & aktivasi",
-    dot: "var(--ink-faint)",
-    tint: "rgba(22,19,15,.06)",
-  },
 ];
 
 const DEFAULT_ACTIVE_LAYERS = ["gap", "kepercayaan", "retail", "rental"];
+const MAPID_BASEMAPS = new Set<BasemapName>(["satellite", "building", "mapid"]);
 
 /** Warna titik kategori pada chip — murni hiasan, sepadan dengan legenda. */
 const CATEGORY_DOT: Record<string, string> = {
@@ -386,9 +381,11 @@ export function PetaScreen({
   const [activeBasemap, setActiveBasemap] = useState<BasemapName>(() => {
     if (typeof window !== "undefined") {
       const param = new URLSearchParams(window.location.search).get("basemap");
-      if (param && namaBasemapDikenali(param)) return param;
+      if (param && namaBasemapDikenali(param) && MAPID_BASEMAPS.has(param)) {
+        return param;
+      }
     }
-    return "liberty";
+    return "mapid";
   });
 
   const handleSelectBasemap = useCallback((newBasemap: BasemapName) => {
@@ -526,7 +523,9 @@ export function PetaScreen({
         }
         setCqTurns((prev) =>
           prev.map((t) =>
-            t.id === id ? { ...t, answer: ans, appliedCategory, appliedSlot } : t,
+            t.id === id
+              ? { ...t, answer: ans, appliedCategory, appliedSlot }
+              : t,
           ),
         );
       } catch {
@@ -966,22 +965,46 @@ export function PetaScreen({
                   style={{
                     display: "inline-flex",
                     alignItems: "center",
-                    gap: 6,
-                    padding: "6px 13px",
-                    fontSize: 12,
-                    fontWeight: isSelected ? 600 : 500,
+                    gap: 7,
+                    padding: "7px 15px",
+                    fontSize: 12.5,
+                    fontWeight: isSelected ? 650 : 500,
                     background: isSelected
-                      ? "#0f172a"
-                      : "rgba(255, 255, 255, 0.92)",
-                    color: isSelected ? "#ffffff" : "#0f172a",
-                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)",
-                    border: `1px solid ${isSelected ? "#0f172a" : "#cbd5e1"}`,
+                      ? "#1E1B4B"
+                      : "rgba(255, 255, 255, 0.94)",
+                    color: isSelected ? "#ffffff" : "#1e293b",
+                    boxShadow: isSelected
+                      ? "0 4px 16px rgba(67,56,202,0.35), 0 0 0 1px #4338CA"
+                      : "0 2px 10px rgba(0, 0, 0, 0.1)",
+                    border: `1px solid ${isSelected ? "transparent" : "#e2e8f0"}`,
                     cursor: "pointer",
-                    backdropFilter: "blur(8px)",
-                    transition: "all 0.15s ease",
+                    backdropFilter: "blur(12px)",
+                    transition: "all 0.18s cubic-bezier(.22,1,.36,1)",
                   }}
                 >
-                  <span style={{ fontSize: 13 }}>🚆</span>
+                  {/* Live pulse dot — hanya tampil saat stasiun aktif */}
+                  <span style={{ position: "relative", display: "inline-flex", width: 7, height: 7, flex: "none" }}>
+                    <span
+                      className={isSelected ? "station-pulse-active" : undefined}
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        borderRadius: 999,
+                        background: isSelected ? "#4ADE80" : "#94a3b8",
+                        opacity: isSelected ? 0.6 : 0,
+                      }}
+                    />
+                    <span
+                      style={{
+                        position: "relative",
+                        width: 7,
+                        height: 7,
+                        borderRadius: 999,
+                        background: isSelected ? "#22C55E" : "#94a3b8",
+                        flex: "none",
+                      }}
+                    />
+                  </span>
                   <span>Stasiun {s.name}</span>
                 </button>
               );
@@ -1058,12 +1081,13 @@ export function PetaScreen({
               bottom: 18,
               maxWidth: "calc(100% - 480px)",
               zIndex: 15,
-              padding: "8px 14px 10px",
-              borderRadius: 14,
-              background: "rgba(255, 255, 255, 0.94)",
-              backdropFilter: "blur(14px)",
-              border: "1px solid #cbd5e1",
-              boxShadow: "0 6px 24px rgba(15, 23, 42, 0.12)",
+              padding: "10px 16px 12px",
+              borderRadius: 16,
+              background: "rgba(255, 255, 255, 0.85)",
+              backdropFilter: "blur(20px) saturate(180%)",
+              border: "1px solid rgba(255, 255, 255, 0.6)",
+              boxShadow:
+                "0 8px 32px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(255,255,255,0.4) inset",
               display: "flex",
               flexDirection: "column",
               gap: 6,
@@ -1198,13 +1222,17 @@ export function PetaScreen({
                       style={{
                         all: "unset",
                         cursor: "pointer",
-                        padding: "6px 14px",
-                        background: active ? "var(--ink)" : "var(--paper-2)",
-                        color: active ? "var(--surface)" : "var(--ink-2)",
-                        font: `${active ? 600 : 500} 11.5px/1 var(--font-inter)`,
-                        boxShadow: active ? "var(--shadow-soft)" : "none",
+                        padding: "7px 16px",
+                        background: active
+                          ? "linear-gradient(135deg, #4338CA 0%, #6366F1 100%)"
+                          : "rgba(248, 250, 252, 0.7)",
+                        color: active ? "#ffffff" : "var(--ink-2)",
+                        font: `${active ? 650 : 500} 11.5px/1 var(--font-inter)`,
+                        boxShadow: active
+                          ? "0 2px 8px rgba(99,102,241,0.4)"
+                          : "none",
                         borderRadius: 999,
-                        transition: "all 0.12s ease",
+                        transition: "all 0.15s cubic-bezier(.22,1,.36,1)",
                       }}
                     >
                       {slot.label}
@@ -1290,28 +1318,25 @@ export function PetaScreen({
                       {categoryLabel(activeCategory)}
                     </span>
                     <span className="row" style={{ gap: 8 }}>
-                      <span className="row" style={{ gap: 3 }}>
-                        {legend.map((stop, i) => {
-                          const d =
-                            LEGEND_DOT.min +
-                            ((LEGEND_DOT.max - LEGEND_DOT.min) * i) /
-                              (legend.length - 1);
-                          return (
-                            <span
-                              key={stop.color}
-                              title={`kesenjangan ≥ ${rupiah(Math.round(stop.at))}`}
-                              style={{
-                                width: d,
-                                height: d,
-                                borderRadius: 999,
-                                background: stop.color,
-                                boxShadow: "0 0 0 1px var(--rule)",
-                                flex: "none",
-                              }}
-                            />
-                          );
-                        })}
-                      </span>
+                      {/* Gradient bar SVG — lebih smooth dari dots terpisah */}
+                      <svg
+                        width={120}
+                        height={10}
+                        style={{ flex: "none", borderRadius: 5, overflow: "hidden" }}
+                      >
+                        <defs>
+                          <linearGradient id="gap-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                            {legend.map((stop, i) => (
+                              <stop
+                                key={stop.color}
+                                offset={`${(i / (legend.length - 1)) * 100}%`}
+                                stopColor={stop.color}
+                              />
+                            ))}
+                          </linearGradient>
+                        </defs>
+                        <rect width={120} height={10} rx={5} fill="url(#gap-gradient)" />
+                      </svg>
                       <span
                         className="fig"
                         style={{
@@ -2546,7 +2571,8 @@ export function PetaScreen({
                         >
                           {turn.error ? (
                             <div style={{ fontSize: 13.5, lineHeight: 1.55 }}>
-                              Gagal menghubungi layanan data. Coba lagi sebentar.
+                              Gagal menghubungi layanan data. Coba lagi
+                              sebentar.
                             </div>
                           ) : turn.answer ? (
                             <>
@@ -2556,7 +2582,8 @@ export function PetaScreen({
                               >
                                 {turn.answer.answer}
                               </div>
-                              {((turn.answer.suggested_layers?.length ?? 0) > 0 ||
+                              {((turn.answer.suggested_layers?.length ?? 0) >
+                                0 ||
                                 turn.appliedCategory ||
                                 turn.appliedSlot) && (
                                 <div
@@ -3136,20 +3163,19 @@ export function PetaScreen({
               >
                 Ringkasan &amp; Bandingkan Simpul
               </button>
-              <button
-                type="button"
-                className="b bp"
-                onClick={() => setShowBrief(true)}
-              >
-                Brief PDF
-              </button>
             </div>
           }
         />
       </div>
 
       {showBandingSimpul && (
-        <BandingSimpulOverlay onClose={() => setShowBandingSimpul(false)} />
+        <BandingSimpulOverlay
+          onClose={() => setShowBandingSimpul(false)}
+          onOpenBrief={() => {
+            setShowBandingSimpul(false);
+            setShowBrief(true);
+          }}
+        />
       )}
 
       {showTabel && analytics && entrances && (

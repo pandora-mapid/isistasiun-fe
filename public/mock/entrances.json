@@ -5,70 +5,42 @@
       "id": 11,
       "station_id": 1,
       "station_name": "Manggarai",
-      "point_label": "Pintu Utama",
+      "point_label": "Pintu Bawah",
       "type": "entrance"
     },
     {
       "id": 12,
       "station_id": 1,
       "station_name": "Manggarai",
-      "point_label": "Koridor Transit Utara",
-      "type": "transit_corridor"
+      "point_label": "Pintu Bawah Manggarai",
+      "type": "entrance"
     },
     {
       "id": 13,
       "station_id": 1,
       "station_name": "Manggarai",
-      "point_label": "Koridor Transit Selatan",
-      "type": "transit_corridor"
+      "point_label": "Pintu Atas",
+      "type": "entrance"
     },
     {
       "id": 21,
       "station_id": 2,
       "station_name": "Sudirman",
-      "point_label": "Pintu 1",
+      "point_label": "Pintu Bawah Utama",
       "type": "entrance"
     },
     {
       "id": 22,
       "station_id": 2,
       "station_name": "Sudirman",
-      "point_label": "Pintu 2",
+      "point_label": "Pintu Atas",
       "type": "entrance"
     },
     {
       "id": 23,
       "station_id": 2,
       "station_name": "Sudirman",
-      "point_label": "Pintu 3",
-      "type": "entrance"
-    },
-    {
-      "id": 24,
-      "station_id": 2,
-      "station_name": "Sudirman",
-      "point_label": "Pintu 4",
-      "type": "entrance"
-    },
-    {
-      "id": 31,
-      "station_id": 3,
-      "station_name": "Stasiun C (belum ditentukan)",
-      "point_label": "Pintu 1",
-      "type": "entrance"
-    },
-    {
-      "id": 32,
-      "station_id": 3,
-      "station_name": "Stasiun C (belum ditentukan)",
-      "point_label": "Pintu 2",
-      "type": "entrance"
-    },
-    {
-      "id": 33,
-      "station_id": 3,
-      "station_name": "Stasiun C (belum ditentukan)",
-      "point_label": "Pintu 3",
+      "point_label": "Pintu Bawah Belakang",
       "type": "entrance"
     }
   ],

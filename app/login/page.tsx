@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { LoginForm } from "@/components/auth/LoginForm";
 import { NavBar } from "@/components/NavBar";
+import { Footer } from "@/components/Footer";
 
 function safeNext(value: string | string[] | undefined): string {
   const path = Array.isArray(value) ? value[0] : value;
@@ -47,6 +48,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
           <LoginForm nextPath={nextPath} />
         </div>
       </section>
+      <Footer />
     </main>
   );
 }

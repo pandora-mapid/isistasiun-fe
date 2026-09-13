@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useAuth } from "@/components/auth/AuthProvider";
 import { NavBar } from "@/components/NavBar";
+import { Footer } from "@/components/Footer";
 import type {
   BackendStation,
   DeepAnalysis,
@@ -460,6 +461,7 @@ export function PremiumDashboard() {
           </div>
         </div>
       )}
+      <Footer />
     </main>
   );
 }

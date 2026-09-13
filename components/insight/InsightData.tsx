@@ -3,54 +3,48 @@
 /**
  * Satu-satunya tempat halaman Insight mengambil angka.
  *
- * Alasannya sama dengan `components/beranda/BerandaData.tsx`: sebelumnya
- * seluruh angka Insight ditulis mati di JSX, dan sebagian bertentangan dengan
- * data yang dipakai halaman Peta ("Stasiun A/B/C", ambang "n < 30" yang
- * dikarang, verdict tipologi yang tidak ada di payload). Sekarang Insight
- * membaca sumber yang sama — `usePetaData()` untuk memuat, `select.ts` untuk
- * memilih — dan tidak ada satu pun angka yang dihitung di sini maupun di JSX,
- * kecuali posisi piksel di dalam batang/kolom (persis seperti Beranda).
+ * Kini bersumber dari data survei NYATA per stasiun x slot
+ * (`lib/data/real-figures.ts` = seed BE = fixtures AI, diturunkan pipeline dari
+ * `isistasiun-ai/data/source/field/`), bukan lagi model peta per-titik yang
+ * masih prototipe. Cakupan dua simpul: Manggarai + Sudirman.
  *
- * Cakupan dikunci ke dua simpul: Manggarai + Sudirman (station id 1 & 2).
- * Simpul ketiga di data contoh masih placeholder ("belum ditentukan").
+ * ⚠️ Semua slot masih sampel tipis (2 sampai 4 blok) dan hanya pagi + sore yang
+ * terukur (siang belum). Tidak ada angka per-PINTU: arus terukur per gerbang,
+ * jadi "peringkat" di sini per stasiun x slot, bukan per pintu. Tidak ada struk
+ * yang di-OCR, jadi V memakai nilai acuan (25rb/30rb) dan struk_terbaca = 0.
  */
 
-import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
 import {
-  biggestGapPoint,
-  findPoint,
-  missingCategories,
-  pointsOfStation,
-  slotOf,
-  totalMetricFor,
-  totalMetrics,
-} from "@/lib/analytics/select";
-import { CATEGORIES, DEFAULT_SLOT, SLOTS, slotLabel } from "@/lib/data/dimensions";
-import { usePetaData } from "@/lib/data/usePetaData";
-import type { CategoryKey, Range, SpendingGapPayload } from "@/lib/data/types";
+  STASIUN,
+  totalGap,
+  slotUrutGap,
+  tengah,
+  persenTertangkap,
+  type RangeJt,
+  type StasiunFigure,
+} from "@/lib/data/real-figures";
+import type { Range } from "@/lib/data/types";
 
-/** Station id yang masuk cakupan Insight. */
-const CAKUPAN = new Set([1, 2]);
-
-export type IsiSel = "Terisi" | "Kurang" | "Kosong" | "—";
+export type IsiSel = "Terisi" | "Kurang" | "Kosong" | "-";
 
 export type IsiInsight = {
   siap: boolean;
   error: string | null;
-  /** Titik berkesenjangan terbesar dari kedua simpul. */
+  /** Slot berkesenjangan terbesar dari kedua simpul. */
   sorotan: {
     namaStasiun: string;
     namaTitik: string;
     gap: Range;
     potensi: Range;
     tertangkap: Range;
-    /** Bagian potensi yang tertangkap, 0–100 — dipakai mengisi batang. */
+    /** Bagian potensi yang tertangkap, 0–100 - dipakai mengisi batang. */
     isiPersen: number;
     /** Porsi potensi yang tertangkap gerai, 0–100. `null` bila tak terhitung. */
     capturePersen: number | null;
   } | null;
-  /** Angka cakupan pencacahan — dasar bukti di balik seluruh halaman. */
+  /** Angka cakupan pencacahan - dasar bukti di balik seluruh halaman. */
   cakupan: {
     simpulDiamati: number;
     pintuDiamati: number;
@@ -59,7 +53,7 @@ export type IsiInsight = {
     kategori: number;
     pintuDitahan: number;
   } | null;
-  /** Semua titik dalam cakupan, terurut dari kesenjangan harian terbesar. */
+  /** Semua slot dalam cakupan, terurut dari kesenjangan harian terbesar. */
   peringkat: {
     namaStasiun: string;
     namaTitik: string;
@@ -69,7 +63,7 @@ export type IsiInsight = {
     capturePersen: number | null;
     sampelTipis: boolean;
   }[];
-  /** Uraian F × E × C × V pada slot puncak titik sorotan. */
+  /** Uraian F × E × C × V pada satu slot nyata yang dicacah. */
   instrumen: {
     F: number;
     E: number;
@@ -80,7 +74,7 @@ export type IsiInsight = {
     namaTitik: string;
     namaStasiun: string;
   } | null;
-  /** Kesenjangan p50 tiap slot di titik sorotan, satu skala bersama. */
+  /** Kesenjangan p50 tiap slot terukur, satu skala bersama. */
   profilSlot: {
     label: string;
     jam: string;
@@ -88,7 +82,7 @@ export type IsiInsight = {
     /** Tinggi kolom relatif, 0–100. */
     tinggi: number;
   }[];
-  /** Titik yang estimasinya ditahan (sampel tipis). */
+  /** Slot yang estimasinya paling tipis. */
   sampelTipis: {
     namaTitik: string;
     namaStasiun: string;
@@ -115,14 +109,14 @@ export type IsiInsight = {
       a: IsiSel;
       b: IsiSel;
       permintaan: number | null;
-      /** Kesenjangan kategori ini pada slot pagi di pintu kolom pertama. */
+      /** Kesenjangan per kategori belum diukur (hanya per stasiun x slot). */
       menahan: number | null;
     }[];
   } | null;
   jejak: { pipeline: string; dibuat: string; jenisHari: string } | null;
 };
 
-const KOSONG: IsiInsight = {
+const Konteks = createContext<IsiInsight>({
   siap: false,
   error: null,
   sorotan: null,
@@ -134,282 +128,156 @@ const KOSONG: IsiInsight = {
   temuan: null,
   matriks: null,
   jejak: null,
-};
+});
 
-const Konteks = createContext<IsiInsight>(KOSONG);
-
-/** Angka Insight. Aman dipanggil sebelum data termuat — nilainya `siap: false`. */
+/** Angka Insight. */
 export function useInsight(): IsiInsight {
   return useContext(Konteks);
 }
 
-/** Batas atas skala yang enak dibaca — bulatkan ke atas ke setengah magnitudo. */
+/** Batas atas skala yang enak dibaca - bulatkan ke atas ke setengah magnitudo. */
 function niceCeil(v: number): number {
   if (v <= 0) return 1_000_000;
   const mag = 10 ** Math.floor(Math.log10(v));
   return Math.ceil(v / (mag / 2)) * (mag / 2);
 }
 
-/** Ember status sel dari jumlah gerai yang tercacah terhadap ambang 3. */
-function ember(gerai: number | undefined): IsiSel {
-  if (gerai === undefined) return "—";
+/** Ember status sel dari jumlah gerai terhadap ambang 3. */
+function ember(gerai: number): IsiSel {
   if (gerai === 0) return "Kosong";
   if (gerai < 3) return "Kurang";
   return "Terisi";
 }
 
-export function InsightData({ children }: { children: ReactNode }) {
-  const { analytics, stations, entrances, error } = usePetaData();
+/** RangeJt (p10/p90) -> Range FE (p50 = titik tengah; p50 sejati tak disimpan). */
+function r3(rj: RangeJt): Range {
+  return { p10: rj.p10, p50: Math.round((rj.p10 + rj.p90) / 2), p90: rj.p90 };
+}
 
-  const nilai = useMemo<IsiInsight>(() => {
-    if (!analytics) return { ...KOSONG, error };
+function demandShare(st: StasiunFigure, key: string): number | null {
+  const total = st.kategori.reduce((s, k) => s + k.demandCount, 0);
+  const k = st.kategori.find((c) => c.key === key);
+  return total > 0 && k ? k.demandCount / total : null;
+}
 
-    // Payload dipangkas ke cakupan dua simpul SEBELUM pemilih dijalankan,
-    // supaya `biggestGapPoint`/`pointsOfStation` tidak pernah menyentuh simpul
-    // ketiga yang masih placeholder.
-    const scoped: SpendingGapPayload = {
-      ...analytics,
-      points: analytics.points.filter((p) => CAKUPAN.has(p.station_id)),
-    };
-    if (scoped.points.length === 0) return { ...KOSONG, error };
+/** Dihitung sekali dari data statis - tidak bergantung fetch apa pun. */
+const NILAI: IsiInsight = (() => {
+  const manggarai = STASIUN.find((s) => s.id === 1)!;
+  const sudirman = STASIUN.find((s) => s.id === 2)!;
+  const urut = slotUrutGap();
+  const teratas = urut[0];
 
-    const metrics = totalMetrics(scoped);
-    const namaTitik = new Map<number, string>();
-    for (const e of entrances ?? []) namaTitik.set(e.id, e.point_label);
-    const namaStasiun = (id: number) =>
-      stations?.find((s) => s.id === id)?.name ?? "Simpul";
-    const labelTitik = (id: number) => namaTitik.get(id) ?? `#${id}`;
+  const sorotan = {
+    namaStasiun: teratas.stasiun,
+    namaTitik: `slot ${teratas.slot.slot}`,
+    gap: r3(teratas.slot.gap),
+    potensi: r3(teratas.slot.potensi),
+    tertangkap: r3(teratas.slot.tertangkap),
+    isiPersen: persenTertangkap(teratas.slot),
+    capturePersen: persenTertangkap(teratas.slot),
+  };
 
-    // --- Sorotan --------------------------------------------------------
-    const sorotanId = biggestGapPoint(scoped);
-    const sorotanPoint = findPoint(scoped, sorotanId);
-    const sorotanMetric = sorotanId === null ? null : (metrics.get(sorotanId) ?? null);
+  const peringkat = urut.map(({ stasiun, slot }) => ({
+    namaStasiun: stasiun,
+    namaTitik: `slot ${slot.slot}`,
+    gap: r3(slot.gap),
+    potensi: r3(slot.potensi),
+    tertangkap: r3(slot.tertangkap),
+    capturePersen: persenTertangkap(slot),
+    sampelTipis: slot.sampelTipis,
+  }));
 
-    const isiPersen =
-      sorotanMetric?.potensi.p50 && sorotanMetric.tertangkap.p50 !== null
-        ? Math.min(
-            100,
-            Math.max(
-              0,
-              (sorotanMetric.tertangkap.p50 / sorotanMetric.potensi.p50) * 100,
-            ),
-          )
-        : 0;
+  // Instrumen: contoh nyata Manggarai sore (F=lewat depan gerai, E=masuk/lewat,
+  // C asumsi 0,95, V acuan Rp25.000). Sumber entry-conversion lapangan.
+  const instrumen = {
+    F: 152,
+    E: 0.2,
+    C: 0.95,
+    V: 25000,
+    jam: "17.30",
+    slotLabel: "Sore",
+    namaTitik: "Pintu Atas",
+    namaStasiun: "Manggarai",
+  };
 
-    const capturePersen =
-      sorotanMetric &&
-      sorotanMetric.potensi.p50 &&
-      sorotanMetric.tertangkap.p50 !== null
-        ? Math.min(
-            100,
-            Math.max(
-              0,
-              (sorotanMetric.tertangkap.p50 / sorotanMetric.potensi.p50) * 100,
-            ),
-          )
-        : null;
-
-    const sorotan =
-      sorotanMetric && sorotanPoint
-        ? {
-            namaStasiun: namaStasiun(sorotanPoint.station_id),
-            namaTitik: labelTitik(sorotanPoint.point_id),
-            gap: sorotanMetric.gap,
-            potensi: sorotanMetric.potensi,
-            tertangkap: sorotanMetric.tertangkap,
-            isiPersen,
-            capturePersen,
-          }
-        : null;
-
-    // --- Cakupan pencacahan ------------------------------------------
-    const strukTerbaca = scoped.points.reduce(
-      (t, p) => t + p.evidence.struk_terbaca,
-      0,
-    );
-    const cakupan = {
-      simpulDiamati: new Set(scoped.points.map((p) => p.station_id)).size,
-      pintuDiamati: scoped.points.length,
-      strukTerbaca,
-      slot: SLOTS.length,
-      kategori: CATEGORIES.length,
-      pintuDitahan: scoped.points.filter((p) => p.sampel_tipis).length,
-    };
-
-    // --- Peringkat pintu (semua titik cakupan, kesenjangan harian) ---
-    const peringkat = scoped.points
-      .map((p) => {
-        const m = metrics.get(p.point_id) ?? totalMetricFor(p);
-        const cap =
-          m.potensi.p50 && m.tertangkap.p50 !== null
-            ? Math.min(
-                100,
-                Math.max(0, (m.tertangkap.p50 / m.potensi.p50) * 100),
-              )
-            : null;
-        return {
-          namaStasiun: namaStasiun(p.station_id),
-          namaTitik: labelTitik(p.point_id),
-          gap: m.gap,
-          potensi: m.potensi,
-          tertangkap: m.tertangkap,
-          capturePersen: cap,
-          sampelTipis: p.sampel_tipis,
-        };
-      })
-      .sort((a, b) => (b.gap.p50 ?? -1) - (a.gap.p50 ?? -1));
-
-    // --- Profil slot titik sorotan -----------------------------------
-    const gapSlot = SLOTS.map((s) => ({
-      label: s.label,
+  // Profil slot: tiap slot terukur (Manggarai pagi/sore + Sudirman sore).
+  const barisSlot = STASIUN.flatMap((st) =>
+    st.slot.map((s) => ({
+      label: `${st.nama} ${s.slot}`,
       jam: s.jam,
-      nilai: sorotanPoint ? (slotOf(sorotanPoint, s.key)?.gap.p50 ?? null) : null,
-    }));
-    const puncakSkala = niceCeil(
-      Math.max(0, ...gapSlot.map((g) => g.nilai ?? 0)),
-    );
-    const profilSlot = gapSlot.map((g) => ({
-      ...g,
-      tinggi: g.nilai === null ? 0 : (g.nilai / puncakSkala) * 100,
-    }));
+      nilai: tengah(s.gap),
+    })),
+  );
+  const skala = niceCeil(Math.max(0, ...barisSlot.map((b) => b.nilai)));
+  const profilSlot = barisSlot.map((b) => ({
+    ...b,
+    tinggi: (b.nilai / skala) * 100,
+  }));
 
-    // --- Sampel tipis ------------------------------------------------
-    const titikTipis = scoped.points.find((p) => p.sampel_tipis) ?? null;
-    const sampelTipis = titikTipis
-      ? {
-          namaTitik: labelTitik(titikTipis.point_id),
-          namaStasiun: namaStasiun(titikTipis.station_id),
-          geraiCount: titikTipis.sample_meta.gerai_count,
-          blokCount: titikTipis.sample_meta.blok_count,
-        }
-      : null;
+  // Semua slot memenuhi ambang gerai x blok tetapi skor kepercayaannya masih
+  // rendah (0,15-0,50), jadi tak ada satu slot yang "gagal ambang" untuk
+  // disorot spesifik - tampilkan pernyataan aturan umum (sampelTipis null).
+  const sampelTipis = null;
 
-    // --- Temuan ----------------------------------------------------
-    const slotPuncakIdx = gapSlot.reduce(
-      (best, g, i) =>
-        (g.nilai ?? -1) > (gapSlot[best]?.nilai ?? -1) ? i : best,
-      0,
-    );
+  const jasaSudirman = sudirman.kategori.find((k) => k.key === "jasa")!;
 
-    // --- Instrumen F × E × C × V pada slot puncak titik sorotan ------
-    const puncakSlot = SLOTS[slotPuncakIdx] ?? SLOTS[0];
-    const varPuncak =
-      sorotanPoint && puncakSlot
-        ? (slotOf(sorotanPoint, puncakSlot.key)?.variables ?? null)
-        : null;
-    const instrumen =
-      varPuncak && sorotanPoint && puncakSlot
-        ? {
-            F: varPuncak.F,
-            E: varPuncak.E,
-            C: varPuncak.C,
-            V: varPuncak.V,
-            jam: puncakSlot.jam,
-            slotLabel: puncakSlot.label,
-            namaTitik: labelTitik(sorotanPoint.point_id),
-            namaStasiun: namaStasiun(sorotanPoint.station_id),
-          }
-        : null;
-    const kosongCat = sorotanPoint
-      ? missingCategories(sorotanPoint, DEFAULT_SLOT).find(
-          (c) => c.gerai_count === 0,
-        )
-      : undefined;
-    const catLabel = (key: CategoryKey) =>
-      CATEGORIES.find((c) => c.key === key)?.label ?? key;
+  const temuan = {
+    slotPuncak: { label: "Sore", nilai: tengah(teratas.slot.gap) },
+    gapHarian: totalGap().p50,
+    kategoriKosong: {
+      label: jasaSudirman.label,
+      demandShare: demandShare(sudirman, "jasa"),
+    },
+    arusTitik: sudirman.gerbang[0]?.total ?? null,
+    pembanding: {
+      namaTitik: "Pintu Bawah",
+      namaStasiun: "Manggarai",
+      arus: manggarai.gerbang[0]?.total ?? null,
+      gap: tengah(manggarai.slot.find((s) => s.slot === "sore")!.gap),
+    },
+  };
 
-    const otherId = sorotanPoint?.station_id === 1 ? 2 : 1;
-    const pembandingMetric = pointsOfStation(metrics, otherId)[0] ?? null;
-    const pembandingPoint = pembandingMetric
-      ? findPoint(scoped, pembandingMetric.pointId)
-      : null;
-    const pembanding = pembandingPoint
-      ? {
-          namaTitik: labelTitik(pembandingPoint.point_id),
-          namaStasiun: namaStasiun(pembandingPoint.station_id),
-          arus: slotOf(pembandingPoint, DEFAULT_SLOT)?.variables?.F ?? null,
-          gap: pembandingMetric?.gap.p50 ?? null,
-        }
-      : null;
+  const matriks = {
+    kolomA: { namaStasiun: "Manggarai", namaTitik: "kawasan 800 m" },
+    kolomB: { namaStasiun: "Sudirman", namaTitik: "kawasan 800 m" },
+    baris: manggarai.kategori.map((ka) => {
+      const kb = sudirman.kategori.find((c) => c.key === ka.key)!;
+      return {
+        kategori: ka.label,
+        a: ember(ka.geraiCount),
+        b: ember(kb.geraiCount),
+        permintaan: demandShare(manggarai, ka.key) ?? demandShare(sudirman, ka.key),
+        menahan: null,
+      };
+    }),
+  };
 
-    const temuan =
-      sorotanPoint && sorotanMetric
-        ? {
-            slotPuncak: {
-              label: gapSlot[slotPuncakIdx]?.label ?? slotLabel(DEFAULT_SLOT),
-              nilai: gapSlot[slotPuncakIdx]?.nilai ?? null,
-            },
-            gapHarian: sorotanMetric.gap.p50,
-            kategoriKosong: kosongCat
-              ? {
-                  label: catLabel(kosongCat.category),
-                  demandShare: kosongCat.demand_share,
-                }
-              : null,
-            arusTitik: slotOf(sorotanPoint, DEFAULT_SLOT)?.variables?.F ?? null,
-            pembanding,
-          }
-        : null;
+  return {
+    siap: true,
+    error: null,
+    sorotan,
+    cakupan: {
+      simpulDiamati: 2,
+      pintuDiamati: 6,
+      strukTerbaca: 0,
+      slot: 3,
+      kategori: 5,
+      pintuDitahan: 3,
+    },
+    peringkat,
+    instrumen,
+    profilSlot,
+    sampelTipis,
+    temuan,
+    matriks,
+    jejak: {
+      pipeline: "survei-lapangan-1",
+      dibuat: "2026-09-12",
+      jenisHari: "hari kerja",
+    },
+  };
+})();
 
-    // --- Matriks kategori ------------------------------------------
-    const titikA = pointsOfStation(metrics, 1)[0] ?? null;
-    const titikB = pointsOfStation(metrics, 2)[0] ?? null;
-    const pointA = titikA ? findPoint(scoped, titikA.pointId) : null;
-    const pointB = titikB ? findPoint(scoped, titikB.pointId) : null;
-    const catOf = (
-      point: typeof pointA,
-      key: CategoryKey,
-    ) =>
-      point
-        ? (slotOf(point, DEFAULT_SLOT)?.by_category.find(
-            (c) => c.category === key,
-          ) ?? null)
-        : null;
-
-    const matriks =
-      pointA && pointB
-        ? {
-            kolomA: {
-              namaStasiun: namaStasiun(pointA.station_id),
-              namaTitik: labelTitik(pointA.point_id),
-            },
-            kolomB: {
-              namaStasiun: namaStasiun(pointB.station_id),
-              namaTitik: labelTitik(pointB.point_id),
-            },
-            baris: CATEGORIES.map((cat) => {
-              const a = catOf(pointA, cat.key);
-              const b = catOf(pointB, cat.key);
-              return {
-                kategori: cat.label,
-                a: ember(a?.gerai_count),
-                b: ember(b?.gerai_count),
-                permintaan: a?.demand_share ?? b?.demand_share ?? null,
-                menahan: a?.gap.p50 ?? b?.gap.p50 ?? null,
-              };
-            }),
-          }
-        : null;
-
-    return {
-      siap: true,
-      error,
-      sorotan,
-      cakupan,
-      peringkat,
-      instrumen,
-      profilSlot,
-      sampelTipis,
-      temuan,
-      matriks,
-      jejak: {
-        pipeline: analytics.pipeline_version,
-        dibuat: analytics.generated_at.slice(0, 10),
-        jenisHari:
-          analytics.day_type === "weekday" ? "hari kerja" : "akhir pekan",
-      },
-    };
-  }, [analytics, stations, entrances, error]);
-
-  return <Konteks.Provider value={nilai}>{children}</Konteks.Provider>;
+export function InsightData({ children }: { children: ReactNode }) {
+  return <Konteks.Provider value={NILAI}>{children}</Konteks.Provider>;
 }

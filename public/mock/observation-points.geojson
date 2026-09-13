@@ -7,15 +7,15 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.85005,
-          -6.2147
+          106.85021581782942,
+          -6.209898745923517
         ]
       },
       "properties": {
         "id": 11,
         "station_id": 1,
         "station_name": "Manggarai",
-        "point_label": "Pintu Utama",
+        "point_label": "Pintu Bawah",
         "type": "entrance"
       }
     },
@@ -25,16 +25,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.85048,
-          -6.21452
+          106.85021581782942,
+          -6.209898745923517
         ]
       },
       "properties": {
         "id": 12,
         "station_id": 1,
         "station_name": "Manggarai",
-        "point_label": "Koridor Transit Utara",
-        "type": "transit_corridor"
+        "point_label": "Pintu Bawah Manggarai",
+        "type": "entrance"
       }
     },
     {
@@ -43,16 +43,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.85052,
-          -6.21532
+          106.8492864593219,
+          -6.210112908837247
         ]
       },
       "properties": {
         "id": 13,
         "station_id": 1,
         "station_name": "Manggarai",
-        "point_label": "Koridor Transit Selatan",
-        "type": "transit_corridor"
+        "point_label": "Pintu Atas",
+        "type": "entrance"
       }
     },
     {
@@ -61,15 +61,15 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.8224,
-          -6.202
+          106.82318166742444,
+          -6.202267977330985
         ]
       },
       "properties": {
         "id": 21,
         "station_id": 2,
         "station_name": "Sudirman",
-        "point_label": "Pintu 1",
+        "point_label": "Pintu Bawah Utama",
         "type": "entrance"
       }
     },
@@ -79,15 +79,15 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.82292,
-          -6.20216
+          106.82357353948973,
+          -6.202413019184441
         ]
       },
       "properties": {
         "id": 22,
         "station_id": 2,
         "station_name": "Sudirman",
-        "point_label": "Pintu 2",
+        "point_label": "Pintu Atas",
         "type": "entrance"
       }
     },
@@ -97,87 +97,15 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          106.82248,
-          -6.20264
+          106.8246451141926,
+          -6.20262664463407
         ]
       },
       "properties": {
         "id": 23,
         "station_id": 2,
         "station_name": "Sudirman",
-        "point_label": "Pintu 3",
-        "type": "entrance"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": 24,
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          106.82312,
-          -6.20252
-        ]
-      },
-      "properties": {
-        "id": 24,
-        "station_id": 2,
-        "station_name": "Sudirman",
-        "point_label": "Pintu 4",
-        "type": "entrance"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": 31,
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          106.8582,
-          -6.226
-        ]
-      },
-      "properties": {
-        "id": 31,
-        "station_id": 3,
-        "station_name": "Stasiun C (belum ditentukan)",
-        "point_label": "Pintu 1",
-        "type": "entrance"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": 32,
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          106.85868,
-          -6.22622
-        ]
-      },
-      "properties": {
-        "id": 32,
-        "station_id": 3,
-        "station_name": "Stasiun C (belum ditentukan)",
-        "point_label": "Pintu 2",
-        "type": "entrance"
-      }
-    },
-    {
-      "type": "Feature",
-      "id": 33,
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          106.85835,
-          -6.2266
-        ]
-      },
-      "properties": {
-        "id": 33,
-        "station_id": 3,
-        "station_name": "Stasiun C (belum ditentukan)",
-        "point_label": "Pintu 3",
+        "point_label": "Pintu Bawah Belakang",
         "type": "entrance"
       }
     }

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Tiga angka yang melatarbelakangi proyek ini — SATU angka raksasa + dua
+ * Tiga angka yang melatarbelakangi proyek ini - SATU angka raksasa + dua
  * catatan tepi.
  *
  * Riwayat rupa: rel hairline (1–4) → kartu putih seragam (5) → baris 3 ubin
@@ -15,11 +15,11 @@
  * Argumen jadi terlihat tanpa satu kata pun: yang kami ukur mendominasi yang
  * cuma dikutip.
  *
- * Dipecah dua ekspor — `RelStatistikAngka` (kolom kiri) & `RelStatistikKutipan`
- * (kolom kanan, di bawah `KepalaBab`) — supaya `page.tsx` bisa menata keduanya
+ * Dipecah dua ekspor - `RelStatistikAngka` (kolom kiri) & `RelStatistikKutipan`
+ * (kolom kanan, di bawah `KepalaBab`) - supaya `page.tsx` bisa menata keduanya
  * di sisi berlawanan tanpa satu kolom melompong kosong.
  *
- * Pembeda "milik kami" lewat UKURAN, bukan warna — angka kutipan tetap tinta,
+ * Pembeda "milik kami" lewat UKURAN, bukan warna - angka kutipan tetap tinta,
  * bukan biru (pelajaran lama: satu angka biru di antara angka tinta terbaca
  * sebagai galat visual & mengencerkan biru yang dicadangkan untuk data peta).
  *
@@ -27,7 +27,7 @@
  */
 
 import { rupiahRingkas } from "@/lib/format";
-import { useBeranda } from "./BerandaData";
+import { totalGap } from "@/lib/data/real-figures";
 
 type Kutipan = { nilai: string; keterangan: string; sumber: string };
 
@@ -46,42 +46,33 @@ const KUTIPAN: Kutipan[] = [
   },
 ];
 
-/** Kolom kiri Section 1 — angka yang KAMI ukur, raksasa, berdiri sendiri.
+/** Kolom kiri Section 1 - angka yang KAMI ukur, raksasa, berdiri sendiri.
  *
  * Seluruh isi duduk di satu kotak `width: max-content` yang lebarnya DIIKAT ke
  * angka raksasa (`nowrap`). Semua elemen lain lebih pendek dari itu, jadi
- * mereka pas di dalamnya — kecuali keterangan, yang dibungkus `width: 0;
+ * mereka pas di dalamnya - kecuali keterangan, yang dibungkus `width: 0;
  * min-width: 100%` supaya mengalir selebar angka TANPA memaksa kotak melebar
  * mengikuti teksnya sendiri.
  *
- * Angka mentah tidak berkepala/berkaki apa pun tadinya — terasa kosong. Kini
+ * Angka mentah tidak berkepala/berkaki apa pun tadinya - terasa kosong. Kini
  * dibingkai: label + garis-rambut di ATAS (menamai apa angkanya), dan batang
  * rentang P10–P90 dengan penanda median di posisi sebenarnya di BAWAH
  * (memvisualkan "rentang P10–P90" yang dulu cuma ditulis di eyebrow). Kalau
  * sampel tipis dan rentangnya tak terbaca, batang jatuh ke garis-rambut polos.
  */
 export function RelStatistikAngka() {
-  const { sorotan } = useBeranda();
-
-  const gap = sorotan?.metric.gap ?? null;
-  const angka = gap ? rupiahRingkas(gap.p50) : "—";
-  const keterangan = sorotan
-    ? `median kesenjangan belanja harian di ${sorotan.namaTitik}, ${sorotan.namaStasiun}. Pintu terbesar yang kami cacah`
-    : "median kesenjangan belanja harian pada pintu terbesar yang kami cacah";
+  const gap = totalGap();
+  const angka = rupiahRingkas(gap.p50);
+  const keterangan =
+    "median kesenjangan belanja harian dua simpul yang kami cacah, Manggarai dan Sudirman, dijumlah atas slot terukur. Angkanya masih estimasi awal karena sampel tipis";
 
   const posisi =
-    gap &&
-      gap.p10 !== null &&
-      gap.p50 !== null &&
-      gap.p90 !== null &&
-      gap.p90 > gap.p10
-      ? (gap.p50 - gap.p10) / (gap.p90 - gap.p10)
-      : null;
+    gap.p90 > gap.p10 ? (gap.p50 - gap.p10) / (gap.p90 - gap.p10) : null;
 
   return (
     <div style={{ width: "max-content", maxWidth: "100%" }}>
-      {/* Hiasan ATAS — label kicker + garis-rambut mengisi sisa lebar angka.
-          Jarak ke angka sengaja lega (`--s4`) — angka setinggi ~116px butuh
+      {/* Hiasan ATAS - label kicker + garis-rambut mengisi sisa lebar angka.
+          Jarak ke angka sengaja lega (`--s4`) - angka setinggi ~116px butuh
           ruang napas, bukan garis yang menempel. */}
       <div
         style={{
@@ -109,7 +100,7 @@ export function RelStatistikAngka() {
         {angka}
       </div>
 
-      {/* Hiasan BAWAH — batang rentang P10–P90, penanda median di posisi asli.
+      {/* Hiasan BAWAH - batang rentang P10–P90, penanda median di posisi asli.
           Jarak ke angka selega hiasan atas (`--s4`). */}
       {posisi !== null && gap ? (
         <div
@@ -170,7 +161,7 @@ export function RelStatistikAngka() {
         />
       )}
 
-      {/* `width: 0; min-width: 100%` — <p> mengalir selebar kotak (= lebar
+      {/* `width: 0; min-width: 100%` - <p> mengalir selebar kotak (= lebar
           angka) tanpa ikut memaksa kotak melebar. */}
       <div style={{ width: 0, minWidth: "100%" }}>
         <p
@@ -196,7 +187,7 @@ export function RelStatistikAngka() {
   );
 }
 
-/** Kolom kanan Section 1 — dua fakta KAI yang cuma DIKUTIP, kecil, di bawah
+/** Kolom kanan Section 1 - dua fakta KAI yang cuma DIKUTIP, kecil, di bawah
  *  judul. */
 export function RelStatistikKutipan() {
   return (
@@ -206,7 +197,7 @@ export function RelStatistikKutipan() {
         // rambutnya untuk menjauhkan isi section. Di sini garis-rambut itu
         // SEKALIGUS batas atas baris kutipan pertama (lihat `borderTop:
         // undefined` di bawah), jadi jaraknya ke teks harus sama dengan
-        // antar-baris — `var(--s3)` saja, bukan `var(--s4)` + `var(--s3)`.
+        // antar-baris - `var(--s3)` saja, bukan `var(--s4)` + `var(--s3)`.
         // Tarik balik marginnya.
         marginTop: "calc(var(--s4) * -1)",
       }}
