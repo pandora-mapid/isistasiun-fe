@@ -3,7 +3,6 @@ import Link from "next/link";
 
 import { NavBar } from "@/components/NavBar";
 import { RequireLogin } from "@/components/auth/RequireLogin";
-import { ImagePlaceholder } from "@/components/ImagePlaceholder";
 import { Kepala } from "@/components/paper/Kepala";
 import { Lencana } from "@/components/paper/Lencana";
 
@@ -301,148 +300,81 @@ export default function MetodologiPage() {
           judul="Dari foto struk ke satu angka."
           catatan="Contoh metode pembacaan struk. Pada survei ini V masih memakai nilai acuan (Rp25.000 makanan-minuman, Rp30.000 ritel) karena pengumpulan struk adalah langkah berikutnya; panel ini menunjukkan bagaimana tiap V akan dapat dibuka sampai foto aslinya."
         />
-        <div
-          className="runtuh-1"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 320px) minmax(0, 1fr)",
-            gap: "var(--s2)",
-            alignItems: "start",
-          }}
-        >
-          {/* KIRI — foto + kontak sheet */}
-          <div>
+        <div style={{ maxWidth: 640 }}>
+          {/* Contoh pemetaan satu struk ke nilai V — ilustrasi metode, bukan
+              data terkumpul (struk belum dicacah pada survei ini). */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              background: "var(--rule)",
+              border: "1px solid var(--rule)",
+              borderRadius: "var(--r-md)",
+              overflow: "hidden",
+            }}
+          >
+            <BarisAtribut label="Kategori (dinormalisasi)">
+              <span style={{ fontWeight: 600, color: "var(--ink)" }}>
+                F&amp;B siap saji
+              </span>
+            </BarisAtribut>
+            <BarisAtribut label="Subtotal sebelum pajak">
+              <span style={{ color: "var(--ink-faint)" }}>
+                Rp 47.500 · tidak dipakai
+              </span>
+            </BarisAtribut>
+            <BarisAtribut label="Waktu transaksi">
+              <span className="fig">07.42 · slot 06–09</span>
+            </BarisAtribut>
             <div
-              className="kartu"
               style={{
-                overflow: "hidden",
-                height: 320,
-                background: "var(--surface)",
+                display: "flex",
+                justifyContent: "space-between",
+                gap: "var(--s2)",
+                padding: "var(--s2) var(--s3)",
+                background: "var(--data-wash)",
+                fontSize: "var(--t-small)",
               }}
             >
-              <ImagePlaceholder
-                label="Foto struk (identitas diredaksi)"
-                style={{ color: "var(--ink-faint)" }}
-              />
-            </div>
-            <div style={{ display: "flex", gap: 7, marginTop: 10 }}>
-              {[0, 1, 2].map((i) => (
-                <div
-                  key={i}
-                  style={{
-                    width: 44,
-                    height: 44,
-                    borderRadius: "var(--r-sm)",
-                    background: "var(--paper-2)",
-                    boxShadow: i === 0 ? "0 0 0 2px var(--data)" : undefined,
-                  }}
-                />
-              ))}
-              <div
+              <span style={{ fontWeight: 600, color: "var(--ink)" }}>
+                Jumlah dibayarkan → V
+              </span>
+              <span
                 className="fig"
-                style={{
-                  width: 44,
-                  height: 44,
-                  borderRadius: "var(--r-sm)",
-                  border: "1.5px dashed var(--rule-strong)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontSize: 10.5,
-                  color: "var(--ink-faint)",
-                }}
+                style={{ fontWeight: 700, color: "var(--data)" }}
               >
-                +18
-              </div>
+                Rp 42.000
+              </span>
             </div>
           </div>
 
-          {/* KANAN — hasil baca AI */}
-          <div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 1,
-                background: "var(--rule)",
-                border: "1px solid var(--rule)",
-                borderRadius: "var(--r-md)",
-                overflow: "hidden",
-              }}
-            >
-              <BarisAtribut label="Kategori (dinormalisasi)">
-                <span style={{ fontWeight: 600, color: "var(--ink)" }}>
-                  F&amp;B siap saji
-                </span>
-              </BarisAtribut>
-              <BarisAtribut label="Subtotal sebelum pajak">
-                <span style={{ color: "var(--ink-faint)" }}>
-                  Rp 47.500 — tidak dipakai
-                </span>
-              </BarisAtribut>
-              <BarisAtribut label="Waktu transaksi">
-                <span className="fig">07.42 · slot 06–09</span>
-              </BarisAtribut>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: "var(--s2)",
-                  padding: "var(--s2) var(--s3)",
-                  background: "var(--data-wash)",
-                  fontSize: "var(--t-small)",
-                }}
-              >
-                <span style={{ fontWeight: 600, color: "var(--ink)" }}>
-                  Jumlah dibayarkan → V
-                </span>
-                <span
-                  className="fig"
-                  style={{ fontWeight: 700, color: "var(--data)" }}
-                >
-                  Rp 42.000
-                </span>
-              </div>
-            </div>
-
-            <div
-              className="runtuh-2"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                gap: "var(--s2)",
-                marginTop: "var(--s2)",
-              }}
-            >
-              <KartuStat label="Keyakinan bacaan" nilai="0,91" isi={84} />
-              <KartuStat label="Cakupan" nilai="182 / 196" catatan="struk terbaca" />
-              <KartuStat label="Dibuang" nilai="4" catatan="bacaan ambigu" />
-            </div>
-
-            <div
-              style={{
-                display: "flex",
-                gap: "var(--s2)",
-                alignItems: "flex-start",
-                marginTop: "var(--s2)",
-                borderRadius: "var(--r-md)",
-                background: "var(--field-wash)",
-                padding: "var(--s3)",
-                fontSize: "var(--t-small)",
-                lineHeight: 1.55,
-                color: "var(--ink-2)",
-              }}
-            >
-              <span
-                className="dot"
-                style={{ background: "var(--field)", marginTop: 7 }}
-              />
-              <span>
-                Bila sampel satu kategori terlalu tipis, nilai V{" "}
-                <b>dialihkan</b> dari kawasan sejenis dan simpul itu ditandai
-                pada lapisan kepercayaan data — bukan diisi diam-diam.
-              </span>
-            </div>
+          <div
+            style={{
+              display: "flex",
+              gap: "var(--s2)",
+              alignItems: "flex-start",
+              marginTop: "var(--s2)",
+              borderRadius: "var(--r-md)",
+              background: "var(--field-wash)",
+              padding: "var(--s3)",
+              fontSize: "var(--t-small)",
+              lineHeight: 1.55,
+              color: "var(--ink-2)",
+            }}
+          >
+            <span
+              className="dot"
+              style={{ background: "var(--field)", marginTop: 7 }}
+            />
+            <span>
+              Contoh di atas menggambarkan cara satu struk dipetakan ke nilai V.
+              Struk belum dikumpulkan pada survei ini, jadi V memakai nilai acuan
+              per kategori; saat struk masuk, tiap V dapat dibuka sampai foto
+              aslinya. Bila sampel satu kategori terlalu tipis, nilai V{" "}
+              <b>dialihkan</b> dari kawasan sejenis dan simpulnya ditandai pada
+              lapisan kepercayaan data, bukan diisi diam-diam.
+            </span>
           </div>
         </div>
       </section>
@@ -782,66 +714,3 @@ function BarisAtribut({
   );
 }
 
-function KartuStat({
-  label,
-  nilai,
-  isi,
-  catatan,
-}: {
-  label: string;
-  nilai: string;
-  isi?: number;
-  catatan?: string;
-}) {
-  return (
-    <div
-      style={{
-        borderRadius: "var(--r-md)",
-        background: "var(--surface)",
-        border: "1px solid var(--rule)",
-        padding: "var(--s2) var(--s3)",
-      }}
-    >
-      <div className="eyebrow" style={{ fontSize: 9, marginBottom: 8 }}>
-        {label}
-      </div>
-      <div className="fig" style={{ fontSize: 19, color: "var(--ink)" }}>
-        {nilai}
-      </div>
-      {isi !== undefined && (
-        <span
-          className="pill"
-          style={{
-            display: "block",
-            height: 5,
-            marginTop: 8,
-            background: "var(--rule)",
-            overflow: "hidden",
-          }}
-        >
-          <span
-            className="pill"
-            style={{
-              display: "block",
-              width: `${isi}%`,
-              height: 5,
-              background: "var(--data)",
-            }}
-          />
-        </span>
-      )}
-      {catatan && (
-        <div
-          style={{
-            fontSize: 10.5,
-            lineHeight: 1.4,
-            color: "var(--ink-muted)",
-            marginTop: 7,
-          }}
-        >
-          {catatan}
-        </div>
-      )}
-    </div>
-  );
-}
