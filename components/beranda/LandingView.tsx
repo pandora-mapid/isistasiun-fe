@@ -6,15 +6,7 @@ import { HeroPeta } from "./HeroPeta";
 import { Icon } from "./Icon";
 import { Footer } from "@/components/Footer";
 
-type ProductTabKey =
-  | "spending-gap"
-  | "missing-category"
-  | "pedestrian-flow"
-  | "rent-flow"
-  | "confidence";
-
 export function LandingView() {
-  const [activeTab, setActiveTab] = useState<ProductTabKey>("spending-gap");
   const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [activeBuffer, setActiveBuffer] = useState<"3" | "5" | "10">("3");
 
@@ -83,10 +75,6 @@ export function LandingView() {
 
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const handleTabChange = (tab: ProductTabKey) => {
-    setActiveTab(tab);
-  };
 
   return (
     <div className="bg-canvas-warm text-on-surface font-body-md antialiased min-h-screen relative selection:bg-accent-yellow/30">
@@ -1200,35 +1188,6 @@ export function LandingView() {
               memperbarui insight spasial secara kontekstual berbasis data
               pergerakan aktual.
             </p>
-
-            {/* Map Feature Tabs Strip */}
-            <div className="flex flex-wrap items-center justify-center gap-2 mt-8 p-1.5 bg-surface-container-low rounded-full shadow-inner border border-border-subtle">
-              {(
-                [
-                  ["spending-gap", "Spending Gap"],
-                  ["missing-category", "Missing Category"],
-                  ["pedestrian-flow", "Pedestrian Flow"],
-                  ["rent-flow", "Rent–Flow Ratio"],
-                  ["confidence", "Confidence Ledger"],
-                ] as const
-              ).map(([key, label]) => {
-                const isActive = activeTab === key;
-                return (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => handleTabChange(key)}
-                    className={`px-4 py-2 rounded-full font-label-md transition-all ${
-                      isActive
-                        ? "bg-surface-card text-text-primary shadow-xs font-semibold"
-                        : "text-text-secondary hover:text-text-primary hover:bg-surface-card/60"
-                    }`}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
           </div>
 
           {/* Central High-Fidelity WebGIS Mockup */}
@@ -1465,6 +1424,18 @@ export function LandingView() {
                     opacity="0.85"
                     stroke="#4B7FF7"
                     strokeWidth="3.5"
+                  />
+
+                  {/* Station Arrival Ripple Pulse */}
+                  <circle
+                    className="anim-station-pulse"
+                    cx="300"
+                    cy="240"
+                    fill="none"
+                    opacity="0"
+                    r="52"
+                    stroke="#D8A72E"
+                    strokeWidth="2.5"
                   />
 
                   {/* Station Hub Building with Station Logo */}
