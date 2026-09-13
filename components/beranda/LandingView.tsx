@@ -414,9 +414,9 @@ export function LandingView() {
                 </span>
               </div>
 
-              <h1 className="font-headline-lg text-text-primary tracking-tight font-normal">
+              <h1 className="font-headline-lg text-text-primary tracking-tight font-bold">
                 Berapa rupiah yang lewat, berapa yang{" "}
-                <span className="relative inline-block px-2.5 py-0.5 rounded-md bg-accent-yellow/25 text-text-primary font-serif italic">
+                <span className="relative inline-block px-2.5 py-0.5 rounded-md bg-accent-yellow/25 text-text-primary font-serif italic font-bold">
                   tertangkap.
                 </span>
               </h1>
@@ -868,7 +868,7 @@ export function LandingView() {
               <span className="text-[11px] lg:text-[12px] uppercase tracking-[0.08em] text-accent-yellow font-semibold font-mono">
                 What You Can Discover
               </span>
-              <h2 className="font-headline-lg text-3xl sm:text-4xl lg:text-[46px] leading-[1.15] font-normal text-surface-bright tracking-tight max-w-sm">
+              <h2 className="font-headline-lg text-2xl sm:text-4xl lg:text-[46px] leading-[1.15] font-normal text-surface-bright tracking-tight max-w-none whitespace-nowrap">
                 Satu peta. Empat keputusan.
               </h2>
               <p className="text-[16px] lg:text-[17px] text-stone-400 leading-relaxed font-normal">
@@ -1186,7 +1186,7 @@ export function LandingView() {
         </section>
 
         {/* SECTION 4: EXPLORE THE PRODUCT (WebGIS UI Showcase with AI Copilot & Evidence Drawer) */}
-        <section className="reveal w-full py-24 lg:py-32 px-gutter-sm lg:px-gutter max-w-7xl mx-auto relative z-10">
+        <section className="reveal w-full pt-24 pb-10 lg:pt-32 lg:pb-12 px-gutter-sm lg:px-gutter max-w-7xl mx-auto relative z-10">
           <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-12">
             <span className="font-label-sm uppercase tracking-widest text-text-muted font-semibold">
               The Product
@@ -2065,7 +2065,7 @@ export function LandingView() {
             )}
           </div>
 
-          <div className="text-center mt-12">
+          <div className="text-center mt-6">
             <p className="font-headline-md font-serif italic text-text-secondary">
               “Jangan hanya percaya angkanya. Lihat dari mana angka itu
               berasal.”
@@ -2074,7 +2074,7 @@ export function LandingView() {
         </section>
 
         {/* SECTION 5: TARGET AUDIENCE & SCIENTIFIC RIGOR & FINAL CTA */}
-        <section className="reveal w-full py-20 lg:py-28 px-gutter-sm lg:px-gutter max-w-7xl mx-auto relative z-10">
+        <section className="reveal w-full pt-6 pb-20 lg:pt-8 lg:pb-28 px-gutter-sm lg:px-gutter max-w-7xl mx-auto relative z-10">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="font-label-sm uppercase tracking-widest text-text-muted font-semibold">
               Target Audience
