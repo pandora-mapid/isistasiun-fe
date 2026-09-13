@@ -83,13 +83,13 @@
           {
             "category": "fnb",
             "demand_share": 0.24,
-            "gerai_count": 4,
+            "gerai_count": 5,
             "hilang": false
           },
           {
             "category": "ritel",
             "demand_share": 0.16,
-            "gerai_count": 1,
+            "gerai_count": 2,
             "hilang": false
           },
           {
