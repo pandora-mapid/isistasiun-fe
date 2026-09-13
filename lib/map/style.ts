@@ -27,32 +27,30 @@ import { LAYER, SOURCE } from "./config";
  * Lima tingkat warna, sama persis dengan legenda "Kesenjangan / hari" di
  * panel lapisan.
  *
- * Yang tetap hanya warnanya. Nilai batas tiap tingkat dihitung dari data yang
- * sedang ditampilkan — lihat `gapColorStops` — supaya legenda tidak pernah
- * menjanjikan rentang yang tidak ada isinya.
+ * Indigo-violet dipilih karena jauh lebih kontras di atas basemap Liberty
+ * yang keabuan — biru muda (#EFF6FF) hampir tidak terlihat, sementara
+ * indigo pucat (#EEF2FF) tetap terbaca jelas dan makin tua makin mencolok.
  */
 export const GAP_RAMP = [
-  "#EFF6FF",
-  "#93C5FD",
-  "#60A5FA",
-  "#3B82F6",
-  "#1D4ED8",
+  "#EEF2FF",
+  "#A5B4FC",
+  "#818CF8",
+  "#6366F1",
+  "#4338CA",
 ] as const;
 
 /** Ukuran lingkaran (piksel) pada nilai gap terendah dan tertinggi. */
-export const GAP_RADIUS = { min: 7, max: 22 } as const;
+export const GAP_RADIUS = { min: 11, max: 26 } as const;
 
 /**
- * Ukuran halo kepercayaan — selalu sedikit lebih besar dari lingkaran gap.
+ * Ukuran halo kepercayaan — sedikit lebih besar dari lingkaran gap.
  *
- * Ditulis sebagai rentang tersendiri, bukan `["+", radiusGap, 9]`, karena
- * ekspresi gap sudah mengandung `["zoom"]` dan `["zoom"]` hanya sah sebagai
- * masukan `interpolate`/`step` paling luar. Membungkusnya dengan `+` membuat
- * MapLibre menolak seluruh layer — tanpa pesan error.
+ * Dikecilkan selisihnya dari versi lama (+13/+20 → +10/+14) agar halo
+ * tidak menutupi titik tetangga di area yang padat.
  */
 export const CONFIDENCE_RADIUS = {
-  min: GAP_RADIUS.min + 13,
-  max: GAP_RADIUS.max + 20,
+  min: GAP_RADIUS.min + 10,
+  max: GAP_RADIUS.max + 14,
 } as const;
 
 /**
@@ -63,7 +61,7 @@ export const CONFIDENCE_RADIUS = {
  * lingkaran memang membawa arti, bukan hiasan. Kalau `GAP_RADIUS` diubah
  * tanpa menyesuaikan ini, legenda diam-diam berhenti mewakili petanya.
  */
-export const LEGEND_DOT = { min: 6, max: 14 } as const;
+export const LEGEND_DOT = { min: 8, max: 17 } as const;
 
 /** Warna titik yang sampelnya tipis — tidak diestimasi, jadi netral. */
 export const THIN_SAMPLE_COLOR = "#94A3B8";
@@ -86,9 +84,9 @@ export const CONFIDENCE_GRID_RAMP = {
   empty: "#CBD5E1",
 } as const;
 
-/** Warna sorot dan pilih. Sengaja berbeda supaya keduanya tidak tertukar. */
-export const HOVER_COLOR = "#1D4ED8";
-export const SELECTED_COLOR = "#0F172A";
+/** Warna sorot dan pilih — disesuaikan dengan indigo palette. */
+export const HOVER_COLOR = "#4338CA";
+export const SELECTED_COLOR = "#1E1B4B";
 
 /**
  * Font untuk label titik.
@@ -108,11 +106,11 @@ export const SELECTED_COLOR = "#0F172A";
 export const LABEL_FONT = ["Noto Sans Regular"];
 
 /** Warna isochrone, makin dekat makin pekat. */
-export const ISOCHRONE_COLOR = "#2563EB";
+export const ISOCHRONE_COLOR = "#4338CA";
 export const ISOCHRONE_FILL_OPACITY: Record<number, number> = {
-  3: 0.16,
-  5: 0.1,
-  10: 0.055,
+  3: 0.22,
+  5: 0.14,
+  10: 0.08,
 };
 
 /**
@@ -120,12 +118,13 @@ export const ISOCHRONE_FILL_OPACITY: Record<number, number> = {
  *
  * Sengaja terbalik dari nalar biasa: makin RENDAH kepercayaannya, makin
  * terlihat halonya. Yang perlu diperiksa pembaca adalah angka yang lemah,
- * bukan yang kuat.
+ * bukan yang kuat. Kontras lebih tajam dari versi lama supaya perbedaan
+ * mutu data terbaca lebih jelas dari pandangan sekilas.
  */
-export const CONFIDENCE_OPACITY = { lemah: 0.72, kuat: 0.2 } as const;
+export const CONFIDENCE_OPACITY = { lemah: 0.75, kuat: 0.1 } as const;
 
 /** Kepekatan halo untuk titik yang memang tidak diestimasi sama sekali. */
-export const THIN_HALO_OPACITY = 0.82;
+export const THIN_HALO_OPACITY = 0.85;
 
 /**
  * Rentang cadangan sebelum data termuat. Layer harus tetap sah dipasang
@@ -407,7 +406,7 @@ export function pointCircleLayer(
         "#FFFFFF",
         gapColorExpression(domain),
       ] as unknown as string,
-      "circle-opacity": ["case", IS_THIN, 0.5, 0.92] as unknown as number,
+      "circle-opacity": ["case", IS_THIN, 0.45, 0.95] as unknown as number,
       "circle-radius": radiusExpression(
         "gap",
         domain,
@@ -426,12 +425,12 @@ export function pointCircleLayer(
       "circle-stroke-width": [
         "case",
         IS_SELECTED,
-        3.5,
+        4,
         IS_HOVER,
-        3,
+        3.5,
         IS_THIN,
         1.5,
-        2,
+        2.5,
       ] as unknown as number,
     },
   };
@@ -442,12 +441,12 @@ export function pointLabelLayer(): SymbolLayerSpecification {
     id: LAYER.pointLabel,
     type: "symbol",
     source: SOURCE.points,
-    minzoom: 13.5,
+    minzoom: 13,
     layout: {
       "text-field": ["get", "point_label"],
       "text-font": LABEL_FONT,
-      "text-size": 11,
-      "text-offset": [0, 1.6],
+      "text-size": 12.5,
+      "text-offset": [0, 1.8],
       "text-anchor": "top",
       "text-allow-overlap": false,
     },
@@ -456,10 +455,10 @@ export function pointLabelLayer(): SymbolLayerSpecification {
         "case",
         IS_SELECTED,
         SELECTED_COLOR,
-        "#334155",
+        "#1E293B",
       ] as unknown as string,
       "text-halo-color": "#FFFFFF",
-      "text-halo-width": 1.5,
+      "text-halo-width": 2.5,
     },
   };
 }

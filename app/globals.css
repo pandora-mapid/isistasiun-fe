@@ -882,6 +882,33 @@
   animation: ping-subtle 2.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
+/* Animasi ring untuk titik peta yang terpilih (dipakai via CSS overlay jika perlu) */
+@keyframes map-ring-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  60%,
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+/* Glow lembut untuk elemen map overlay yang "hidup" */
+@keyframes map-glow-breathe {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(99, 102, 241, 0);
+  }
+}
+
+.map-dot-live {
+  animation: map-ring-pulse 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
 .font-headline-lg {
   font-family: var(--font-serif), Newsreader, Georgia, serif;
   font-size: clamp(32px, 3.8vw, 48px);
@@ -3338,12 +3365,15 @@ a.kartu:focus-visible {
    sengaja TIDAK ikut — biru gap dikunci ke `--data`, sisanya keputusan tim.
    ========================================================================== */
 .paper-canvas .glass {
-  border-color: var(--rule);
-  /* Permukaan mengambang besar (panel brief, panel slot, kartu legenda) ikut
-     radius ubin/kartu besar sistem ini, bukan `--r-md` — di panel setinggi
-     layar, 18px terbaca nyaris tajam dibanding kartu kecil di dalamnya. */
+  border-color: rgba(255, 255, 255, 0.55);
   border-radius: var(--r-xl);
-  box-shadow: var(--shadow-soft);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  box-shadow:
+    0 10px 40px rgba(15, 23, 42, 0.14),
+    0 2px 8px rgba(15, 23, 42, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.45) inset;
 }
 .paper-canvas .k {
   color: var(--ink-faint);
